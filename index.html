@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ScaleTune">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5eedb" media="(prefers-color-scheme: light)">
+<title>ScaleTune</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111;--bg2:#1a1a1a;--bg3:#222;
+  --border:#2a2a2a;--border2:#3a3a3a;--border3:#444;
+  --text:#eee;--text2:#aaa;--text3:#666;
+  --blue:#3b82f6;--blue-bg:#1e3a5f;
+  --green:#22c55e;--green-bg:#14532d;
+  --yellow:#eab308;--yellow-bg:#3a2a00;
+  --red:#ef4444;--red-bg:#450a0a;
+  /* the mode row is top-level navigation, so it gets a hue of its own that
+     none of the in-panel selections use */
+  --mode:#a78bfa;--mode-bg:#382a5e;
+  --r:8px;
+}
+/* Accent colours are darkened for light mode: the same hue that reads as a
+   highlight on black becomes unreadable as text on a pale tint. */
+/* Warm paper rather than white: easier on the eyes under stage and practice-room
+   lighting, and it stops the page glaring next to a dark instrument. */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f5eedb;--bg2:#fdf8ea;--bg3:#eee5cf;
+  --border:#e5dbc0;--border2:#d5c9a8;--border3:#b6a883;
+  --text:#2b2418;--text2:#5a5140;--text3:#6b6350;
+  --blue:#1d4ed8;--blue-bg:#dde7fa;
+  --green:#116b31;--green-bg:#d9efdf;
+  --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
+  --red:#b91c1c;--red-bg:#f9dedb;
+  --mode:#6d28d9;--mode-bg:#ddcdf8;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;
+  padding:calc(1.5rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right))
+          calc(3rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
+.container{max-width:560px;margin:0 auto}
+/* 34px side columns keep the wordmark optically centred despite the button */
+.header{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:8px;margin-bottom:1.75rem}
+h1{font-size:25px;font-weight:300;text-align:center;color:var(--text);letter-spacing:0.13em;text-transform:uppercase;white-space:nowrap}
+h1 .wm{font-weight:600}
+@media(max-width:340px){h1{font-size:21px;letter-spacing:0.1em}}
+.theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+.mode-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
+.mode-btn{flex:1 1 0;min-width:72px;padding:10px 6px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
+.mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
+
+.panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem}
+
+/* Collapsible sections, built on <details> so the browser handles the state
+   and keyboard behaviour; the open/closed choice is remembered per section. */
+details.sec{border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);
+  margin-bottom:1.25rem;overflow:hidden}
+details.sec>summary{list-style:none;cursor:pointer;padding:0.85rem 1rem;display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);
+  touch-action:manipulation;user-select:none;-webkit-user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'';margin-left:auto;width:7px;height:7px;flex:0 0 auto;
+  border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);
+  transform:rotate(45deg) translate(-2px,-2px);transition:transform 0.15s}
+details.sec[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+details.sec[open]>summary{color:var(--text2);border-bottom:1px solid var(--border)}
+details.sec .sec-body{padding:1rem}
+details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
+  color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.sec[open] .sec-sum{display:none}
+.group-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
+.group-label:first-child{margin-top:0}
+.btn-wrap{display:flex;gap:5px;flex-wrap:wrap}
+.pick-btn{padding:5px 9px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
+.pick-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.pick-btn.disabled{opacity:0.32;cursor:not-allowed}
+/* green marks the item sounding right now as the study list advances */
+.pick-btn.now{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.pick-btn .idx{display:inline-block;min-width:12px;margin-right:5px;font-size:9px;font-weight:700;
+  text-align:center;opacity:0.85;vertical-align:1px}
+.tonic-btn{padding:5px 8px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
+.tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
+.clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);margin-top:10px;touch-action:manipulation}
+.info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
+
+.legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
+.note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
+.note-btn{padding:10px 4px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;position:relative;user-select:none;-webkit-user-select:none;transition:background 0.12s;touch-action:manipulation}
+.note-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.note-btn.start{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.note-name{font-size:14px;font-weight:500}
+.free-grid .note-btn{padding:8px 4px 6px}
+.free-grid .note-name{font-size:13px;margin-bottom:4px}
+.oct-controls{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
+.oct-btn{width:22px;height:22px;border:1px solid var(--border2);border-radius:4px;background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+.oct-val{font-size:11px;color:var(--text3);min-width:30px;text-align:center}
+.note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
+.note-btn.active .oct-val{color:var(--blue)}
+.note-btn.start .oct-btn{border-color:var(--green);color:var(--green)}
+.note-btn.start .oct-val{color:var(--green)}
+.start-badge{position:absolute;top:2px;right:4px;font-size:8px;color:var(--green);font-weight:700}
+
+.control-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.control-row label{font-size:13px;color:var(--text2);min-width:110px}
+.control-row span{font-size:13px;font-weight:500;min-width:52px;text-align:right;color:var(--text)}
+/* touch-action:pan-y lets a vertical swipe scroll the page instead of dragging the slider */
+/* min-width:0 lets the slider shrink as a flex item; without it a range input
+   refuses to go below its intrinsic width and pushes the row off a 320px screen */
+input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-action:pan-y;min-width:0}
+@media(max-width:360px){
+  .control-row{gap:8px}
+  .control-row label{min-width:66px}
+  .control-row span{min-width:42px}
+}
+
+.timbre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.timbre-btn{padding:7px 13px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
+.timbre-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
+.bpm-big{font-size:38px;font-weight:300;text-align:center;color:var(--text);margin-bottom:2px}
+.bpm-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
+.tap-btn{width:100%;margin-top:8px;padding:9px;font-size:13px;cursor:pointer;border:1px solid var(--border2);
+  border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.sig-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.sig-btn{padding:6px 11px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
+.sig-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+
+.beats-row{display:flex;gap:12px;justify-content:center;margin:0.75rem 0 0.5rem;flex-wrap:wrap}
+.beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
+  cursor:pointer;touch-action:manipulation;transition:background 0.05s,border-color 0.05s}
+.beat-dot.acc-low{border-width:2px;border-color:var(--text2)}
+.beat-dot.acc-off{background:transparent;border-style:dashed;opacity:0.45}
+.beat-dot.active-beat{background:var(--yellow);border-color:var(--yellow)}
+.beat-dot.acc-low.active-beat{background:var(--red);border-color:var(--red)}
+.beat-dot.acc-off.active-beat{background:transparent;border-color:var(--text3);opacity:0.8}
+.beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:1.25rem}
+
+.btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
+.play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);transition:all 0.15s;touch-action:manipulation}
+.play-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.metro-btn{flex:0 0 auto;padding:14px 16px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
+.metro-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+
+.current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
+.current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
+</style>
+<script>
+// Runs before first paint so the page never flashes the wrong theme.
+(function(){
+  var t=null;
+  try{t=localStorage.getItem('scaletune-theme');}catch(e){}
+  if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <span></span>
+  <h1>Scale<span class="wm">Tune</span></h1>
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">☀</button>
+</div>
+
+<div class="section-label">Mode</div>
+<div class="mode-row">
+  <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')">Drone</button>
+  <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')">Scale</button>
+  <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')">Arpeggio</button>
+  <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')">Free</button>
+</div>
+
+<!-- ============ DRONE ============ -->
+<div id="drone-section">
+  <div class="section-label">Note</div>
+  <div class="note-grid" id="drone-grid"></div>
+  <div class="section-label">Octave</div>
+  <div class="btn-wrap" id="drone-oct-row" style="margin-bottom:1.25rem"></div>
+</div>
+
+<!-- ============ SCALE / ARPEGGIO ============ -->
+<div id="pitch-section" style="display:none">
+  <div class="panel">
+    <div class="group-label">Root</div>
+    <div class="btn-wrap" id="root-row"></div>
+
+    <div class="group-label">Selection</div>
+    <div class="btn-wrap" id="listmode-row"></div>
+  </div>
+
+  <details class="sec" id="sec-scales" open>
+    <summary><span id="sec-scales-title">Scales</span><span class="sec-sum" id="sum-scales"></span></summary>
+    <div class="sec-body">
+      <div id="scale-lists">
+        <div class="group-label">Modes of the Major Scale</div>
+        <div class="btn-wrap" id="gregorian-btns"></div>
+        <div class="group-label">Melodic Minor Modes</div>
+        <div class="btn-wrap" id="melodic-btns"></div>
+        <div class="group-label">Harmonic Minor Modes</div>
+        <div class="btn-wrap" id="harmonic-btns"></div>
+        <div class="group-label">Harmonic Major Modes</div>
+        <div class="btn-wrap" id="harmonicmajor-btns"></div>
+      </div>
+
+      <div id="arp-lists" style="display:none">
+        <div class="group-label">Triads</div>
+        <div class="btn-wrap" id="triad-btns"></div>
+        <div class="group-label">Seventh Chords</div>
+        <div class="btn-wrap" id="seventh-btns"></div>
+      </div>
+
+      <div class="info-line" id="pitch-info"></div>
+      <button class="clear-btn" onclick="clearPitch()">✕ Clear</button>
+    </div>
+  </details>
+
+  <details class="sec" id="sec-range" open>
+    <summary>Range &amp; Direction<span class="sec-sum" id="sum-range"></span></summary>
+    <div class="sec-body">
+      <div class="group-label">Octaves</div>
+      <div class="btn-wrap" id="span-row"></div>
+      <div class="group-label">Start Octave</div>
+      <div class="btn-wrap" id="rootoct-row"></div>
+      <div class="group-label">Direction</div>
+      <div class="btn-wrap" id="dir-row"></div>
+      <div class="group-label">Start On</div>
+      <div class="btn-wrap" id="startdeg-row"></div>
+    </div>
+  </details>
+
+  <details class="sec" id="sec-progress">
+    <summary>Practice Progressions<span class="sec-sum" id="sum-progress"></span></summary>
+    <div class="sec-body">
+      <div class="group-label">Root Movement</div>
+      <div class="btn-wrap" id="rootmove-row"></div>
+      <div class="group-label">Speed Up · BPM per pass</div>
+      <div class="btn-wrap" id="tempostep-row"></div>
+      <div class="info-line" id="practice-info"></div>
+    </div>
+  </details>
+</div>
+
+<!-- ============ FREE ============ -->
+<div id="free-section" style="display:none">
+  <div class="panel">
+    <div class="group-label">Root</div>
+    <div class="btn-wrap" id="free-root-row"></div>
+  </div>
+  <details class="sec" id="sec-freenotes" open>
+    <summary>Notes<span class="sec-sum" id="sum-freenotes"></span></summary>
+    <div class="sec-body">
+      <div class="legend">
+        <span>tap — toggle note on/off</span>
+        <span>+/− — octave</span>
+      </div>
+      <div class="note-grid free-grid" id="free-grid" style="margin-bottom:0"></div>
+      <button class="clear-btn" onclick="clearFree()">✕ Clear</button>
+    </div>
+  </details>
+  <details class="sec" id="sec-freerange" open>
+    <summary>Range &amp; Direction<span class="sec-sum" id="sum-freerange"></span></summary>
+    <div class="sec-body">
+      <div class="group-label">Octaves</div>
+      <div class="btn-wrap" id="free-span-row"></div>
+      <div class="group-label">Direction</div>
+      <div class="btn-wrap" id="free-dir-row"></div>
+    </div>
+  </details>
+</div>
+
+<hr class="divider" id="metro-divider" style="display:none">
+<details class="sec" id="sec-rhythm" style="display:none" open>
+  <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
+  <div class="sec-body">
+    <div class="group-label">Subdivision</div>
+    <div class="btn-wrap" id="subdivmode-row" style="margin-bottom:6px"></div>
+    <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
+    <div class="btn-wrap" id="subdivdir-row"></div>
+    <div class="group-label">Click</div>
+    <div class="btn-wrap" id="clickmode-row"></div>
+    <div class="group-label">Note Length</div>
+    <div class="btn-wrap" id="notelen-row"></div>
+    <div class="group-label">Phrase Alignment</div>
+    <div class="btn-wrap" id="align-row"></div>
+    <div class="info-line" id="align-info"></div>
+  </div>
+</details>
+
+<details class="sec" id="metro-section" style="display:none" open>
+  <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
+  <div class="sec-body">
+  <div class="two-col">
+    <div>
+      <div class="bpm-big" id="bpm-display">80</div>
+      <div class="bpm-label">BPM</div>
+      <input type="range" id="bpm-slider" min="30" max="240" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
+      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:6px">Time Signature</div>
+      <div class="sig-row">
+        <button class="sig-btn" onclick="setSig(2,this)">2/4</button>
+        <button class="sig-btn" onclick="setSig(3,this)">3/4</button>
+        <button class="sig-btn active" onclick="setSig(4,this)">4/4</button>
+        <button class="sig-btn" onclick="setSig(5,this)">5/4</button>
+        <button class="sig-btn" onclick="setSig(6,this)">6/8</button>
+        <button class="sig-btn" onclick="setSig(7,this)">7/8</button>
+      </div>
+      <div class="section-label" style="margin-bottom:5px;margin-top:10px">Click Volume</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" style="flex:1" oninput="updateClickVol(this.value)">
+        <span style="font-size:12px;font-weight:500;min-width:34px;text-align:right;color:var(--text)" id="click-vol-out">50%</span>
+      </div>
+    </div>
+  </div>
+  <div class="beats-row" id="beats-row"></div>
+  <div class="beats-hint">tap a beat: accent → normal → silent</div>
+  </div>
+</details>
+
+<details class="sec" id="sec-sound" open>
+  <summary>Timbre<span class="sec-sum" id="sum-sound"></span></summary>
+  <div class="sec-body">
+    <div class="timbre-row" id="timbre-row"></div>
+    <div class="control-row" style="margin-top:1rem;margin-bottom:0">
+      <label>Volume</label>
+      <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.7" style="flex:1" oninput="updateVol(this.value)">
+      <span id="vol-out">70%</span>
+    </div>
+  </div>
+</details>
+<div class="status-bar" id="status-bar"></div>
+<div class="btn-row">
+  <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
+  <button class="metro-btn" id="metro-btn" onclick="toggleMetroOnly()" style="display:none">♩ Metro only</button>
+</div>
+
+<div class="current-note" id="current-note">—</div>
+<div class="current-freq" id="current-freq"></div>
+</div>
+
+<!-- Bundled locally: a packaged app must not fetch executable code at runtime
+     (Capacitor's default CSP blocks it and App Store review restricts it). -->
+<script src="vendor/soundfont-player.min.js"></script>
+<script>
+/* ============================================================
+   ScaleTune — reference drone, scales & arpeggios
+   Pitches are handled as absolute semitone numbers throughout:
+   semitone = pitchClassIndex + octave*12   (C4 = 48+... see midi())
+   This is what lets a scale span several octaves; the old
+   pitch-class-keyed map could not represent C3 and C4 at once.
+   ============================================================ */
+
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const OCT_MIN=1,OCT_MAX=6;
+
+/* ---------- enharmonic spelling ----------
+   A 7-note scale must use each letter A-G exactly once; the accidental then
+   follows from the letter. That rule — not a sharp/flat preference — is what
+   makes Db major read "Db Eb F Gb Ab Bb C" instead of the letter-repeating
+   "C# D# F F# G# A# C". Chords stack in thirds, so they step two letters at a
+   time, which is what gives a diminished 7th its double-flat 7.            */
+const LETTERS=['C','D','E','F','G','A','B'];
+const NATURAL=[0,2,4,5,7,9,11];
+
+function accStr(a){return a<0?'b'.repeat(-a):(a>0?'#'.repeat(a):'');}
+// nearest signed distance from a letter's natural pitch, in [-6,5]
+function accOf(pc,letterIdx){return((pc-NATURAL[letterIdx]+18)%12)-6;}
+
+// Returns {names:[...], letters:[...], accs:[...]} spelled from the root.
+// letterStep is 1 for scales (stepwise) and 2 for chords (stacked thirds).
+function spell(rootPc,intervals,letterStep){
+  let best=null;
+  for(let li=0;li<7;li++){
+    const rootAcc=accOf(rootPc,li);
+    if(Math.abs(rootAcc)>2)continue;
+    let cost=0,ok=true;
+    const names=[],letters=[],accs=[];
+    for(let i=0;i<intervals.length;i++){
+      const l=(li+letterStep*i)%7;
+      const a=accOf((rootPc+intervals[i])%12,l);
+      if(Math.abs(a)>2){ok=false;break;}
+      cost+=a*a;                      // squared: double accidentals hurt a lot
+      names.push(LETTERS[l]+accStr(a));letters.push(l);accs.push(a);
+    }
+    if(!ok)continue;
+    const cand={cost,names,letters,accs,rootAccAbs:Math.abs(rootAcc),rootAcc};
+    if(!best
+      ||cand.rootAccAbs<best.rootAccAbs                                   // spell the root plainly first
+      ||(cand.rootAccAbs===best.rootAccAbs&&cand.cost<best.cost)          // then fewest accidentals overall
+      ||(cand.rootAccAbs===best.rootAccAbs&&cand.cost===best.cost&&cand.rootAcc>best.rootAcc)) // dead heats -> sharps (F#, not Gb)
+      best=cand;
+  }
+  return best;
+}
+
+// Octave number follows the LETTER, so Cb4 sits just under C4 even though it
+// sounds as B3.
+function octForSpelled(sem,letterIdx,acc){return(sem-acc-NATURAL[letterIdx])/12;}
+const SPANS=[1,2,3];
+const ROOT_OCTS=[1,2,3,4,5];
+const DIRECTIONS=[{k:'up',label:'Up'},{k:'down',label:'Down'},{k:'updown',label:'Up-Down'}];
+
+const SCALES={
+  gregorian:{
+    'Ionian':[0,2,4,5,7,9,11],
+    'Dorian':[0,2,3,5,7,9,10],
+    'Phrygian':[0,1,3,5,7,8,10],
+    'Lydian':[0,2,4,6,7,9,11],
+    'Mixolydian':[0,2,4,5,7,9,10],
+    'Aeolian':[0,2,3,5,7,8,10],
+    'Locrian':[0,1,3,5,6,8,10],
+  },
+  melodic:{
+    'Melodic Minor':[0,2,3,5,7,9,11],
+    'Dorian b2':[0,1,3,5,7,9,10],
+    'Lydian Augmented':[0,2,4,6,8,9,11],
+    'Lydian Dominant':[0,2,4,6,7,9,10],
+    'Mixolydian b6':[0,2,4,5,7,8,10],
+    'Locrian nat2':[0,2,3,5,6,8,10],
+    'Altered':[0,1,3,4,6,8,10],
+  },
+  harmonic:{
+    'Harmonic Minor':[0,2,3,5,7,8,11],
+    'Locrian nat6':[0,1,3,5,6,9,10],
+    'Ionian Augmented':[0,2,4,5,8,9,11],
+    'Dorian #4':[0,2,3,6,7,9,10],
+    'Phrygian Dominant':[0,1,4,5,7,8,10],
+    'Lydian #2':[0,3,4,6,7,9,11],
+    'Ultra Locrian':[0,1,3,4,6,8,9],
+  },
+  // Modes of the harmonic major, verified as rotations of [0,2,4,5,7,8,11].
+  // Natural Minor was dropped: it is note-for-note the Aeolian already listed.
+  harmonicMajor:{
+    'Harmonic Major':[0,2,4,5,7,8,11],
+    'Dorian b5':[0,2,3,5,6,9,10],
+    'Phrygian b4':[0,1,3,4,7,8,10],
+    'Lydian b3':[0,2,3,6,7,9,11],
+    'Mixolydian b2':[0,1,4,5,7,9,10],
+    'Lydian Aug #2':[0,3,4,6,8,9,11],
+    'Locrian bb7':[0,1,3,5,6,8,9],
+  }
+};
+
+const CHORDS={
+  triad:{
+    'Major':[0,4,7],
+    'Minor':[0,3,7],
+    'Augmented':[0,4,8],
+    'Diminished':[0,3,6],
+  },
+  seventh:{
+    'Major 7':[0,4,7,11],
+    'Minor 7':[0,3,7,10],
+    'Dominant 7':[0,4,7,10],
+    'Minor-Major 7':[0,3,7,11],
+    'Aug Major 7':[0,4,8,11],
+    'Augmented 7':[0,4,8,10],
+    'Diminished 7':[0,3,6,9],
+    'Half-Dim 7':[0,3,6,10],
+  }
+};
+
+// Spelling used only where there is no key to derive one from: the Drone and
+// Free note pickers. Flats by preference, with F# the single exception — that
+// is the one pitch class where the flat spelling wins nothing (F# major and Gb
+// major both carry six accidentals) and players read F#. Scales and arpeggios
+// ignore this entirely and spell themselves from their own key.
+const DEFAULT_SPELL=[
+  {name:'C', letterIdx:0,acc: 0},
+  {name:'Db',letterIdx:1,acc:-1},
+  {name:'D', letterIdx:1,acc: 0},
+  {name:'Eb',letterIdx:2,acc:-1},
+  {name:'E', letterIdx:2,acc: 0},
+  {name:'F', letterIdx:3,acc: 0},
+  {name:'F#',letterIdx:3,acc: 1},
+  {name:'G', letterIdx:4,acc: 0},
+  {name:'Ab',letterIdx:5,acc:-1},
+  {name:'A', letterIdx:5,acc: 0},
+  {name:'Bb',letterIdx:6,acc:-1},
+  {name:'B', letterIdx:6,acc: 0},
+];
+// How a given pitch class reads as the root of whatever is currently selected.
+function rootLabelFor(pc){
+  const degrees=activeDegrees();
+  if(!degrees)return DEFAULT_SPELL[pc].name;
+  const r=spell(pc,degrees,state.mode==='arpeggio'?2:1);
+  return r?r.names[0]:DEFAULT_SPELL[pc].name;
+}
+
+let state={
+  mode:'drone',
+  droneNote:null,droneOct:3,
+  root:'C',rootOct:3,
+  scaleGroup:null,scaleName:null,
+  chordGroup:null,chordName:null,
+  // span/rootOct are what is playing now; the "Wanted" values are what the user
+  // asked for, so a range clamp can be undone once the key allows it again
+  span:1,spanWanted:1,rootOctWanted:3,direction:'up',startDeg:0,
+  freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
+  // remembered separately per mode family: Drone can only use a sustaining
+  // wave, the sequence modes default to the sampled piano
+  timbre:'sine',waveTimbre:'sine',seqTimbre:'piano-real',volume:0.7,
+  // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
+  bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  // Practice progressions: what changes each time the sequence comes round.
+  // useScaleList / useChordList are per mode: turning the study list on for
+  // scales must not blank out the arpeggio selection
+  practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
+            useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0},
+  playing:false,metroOnly:false
+};
+const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
+const TEMPO_STEPS=[{k:0,label:'Off'}].concat(
+  [2,3,4,5,6,7,8,9,10].map(n=>({k:n,label:'+'+n})));
+// Clicks per beat. The beat itself never moves — only how finely it is divided.
+const SUBDIVS=[
+  {k:1,label:'♩ Quarter'},
+  {k:2,label:'♫ Eighths'},
+  {k:3,label:'³ Triplet'},
+  {k:4,label:'♬ Sixteenths'},
+];
+const BPM_MAX=240;
+let studyIdx=0,subdivIdx=0;
+// How long one note of the sequence lasts, expressed against the metronome.
+// 'sub' is the point of the table-of-time exercise: the notes take the figure,
+// so eighths give two notes per beat and sixteenths four.
+const NOTE_LENS=[{k:'sub',label:'Per figure'},{k:'beat',label:'Per beat'},{k:'bar',label:'Per bar'}];
+
+let sequence=[];
+const FREE_DEFAULT_OCT=3;
+let audioCtx=null,masterGain=null;
+let liveNodes=[];          // continuously-sounding drone nodes
+let schedNodes=[];         // nodes scheduled for upcoming beats
+let schedPiano=[];
+let pendingTimeouts=[];
+let metroScheduler=null;
+let nextBeatTime=0,beatIdx=0,seqIdx=0,tickCount=0,subIdx=0,activeSubdiv=1;
+let roundsInFigure=0;
+const lookahead=0.12,schedInterval=25;
+let pianoInstrument=null,pianoLoading=false,pianoReady=false,pianoCallbacks=[];
+
+/* ---------- pitch helpers ---------- */
+function semitone(pc,oct){return NOTES.indexOf(pc)+oct*12;}
+function pcOf(s){return NOTES[((s%12)+12)%12];}
+function octOf(s){return Math.floor(s/12);}
+
+// pitch-class -> {name,letterIdx,acc} for whatever scale/chord is selected
+let spellMap=null;
+
+function nameOf(s){
+  const pc=((s%12)+12)%12;
+  const e=(spellMap&&spellMap[pc])||DEFAULT_SPELL[pc];
+  return e.name+octForSpelled(s,e.letterIdx,e.acc);
+}
+function bareName(pc){return((spellMap&&spellMap[pc])||DEFAULT_SPELL[pc]).name;}
+
+function rebuildSpelling(){
+  spellMap=null;
+  const degrees=activeDegrees();
+  if(!degrees||(state.mode!=='scale'&&state.mode!=='arpeggio'))return;
+  const res=spell(NOTES.indexOf(state.root),degrees,state.mode==='arpeggio'?2:1);
+  if(!res)return;
+  spellMap={};
+  degrees.forEach((d,i)=>{
+    spellMap[(NOTES.indexOf(state.root)+d)%12]={name:res.names[i],letterIdx:res.letters[i],acc:res.accs[i]};
+  });
+}
+function freqOf(s){return 440*Math.pow(2,(s-semitone('A',4))/12);}
+function stdName(s){const map={'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};const pc=pcOf(s);return(map[pc]||pc)+octOf(s);}
+function setStatus(m){document.getElementById('status-bar').textContent=m;}
+
+/* ---------- audio core ---------- */
+// Browsers — and iOS WKWebView, which is what Capacitor runs — can hand back a
+// suspended AudioContext even when it is constructed inside a user gesture.
+// While suspended, currentTime never advances, so the lookahead scheduler sees
+// every beat as "not due yet" and deadlocks after the first click. Always
+// resume, and wait for it before reading the clock.
+function initAudio(){
+  if(!audioCtx){
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    masterGain=audioCtx.createGain();
+    masterGain.gain.value=state.volume*0.4;
+    masterGain.connect(audioCtx.destination);
+    // iOS suspends the context on a phone call or when backgrounded and never
+    // restarts it on its own.
+    audioCtx.onstatechange=()=>{
+      if(audioCtx.state!=='running'&&(state.playing||state.metroOnly))
+        try{audioCtx.resume();}catch(e){}
+    };
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden&&audioCtx&&audioCtx.state!=='running'&&(state.playing||state.metroOnly))
+        try{audioCtx.resume();}catch(e){}
+    });
+  }
+  if(audioCtx.state==='running')return Promise.resolve();
+  let p;
+  try{p=audioCtx.resume();}catch(e){}
+  // Older WebKit returns undefined instead of a Promise.
+  return(p&&typeof p.then==='function')?p.catch(()=>{}):Promise.resolve();
+}
+
+// The sampled piano is quiet next to a raw oscillator: the samples peak well
+// below full scale and carry a natural decay. Measured against a sine at the
+// same volume setting, this brings them to a comparable level.
+const PIANO_GAIN=17;
+
+function pianoAvailable(){return typeof Soundfont!=='undefined';}
+
+function loadPiano(cb){
+  if(pianoReady){cb&&cb();return;}
+  // Queue rather than drop: the piano is the default voice in the sequence
+  // modes, so pressing Start during the load is the common case, not an edge one.
+  if(pianoLoading){if(cb)pianoCallbacks.push(cb);return;}
+  // If the samples file is missing, referencing Soundfont would throw and
+  // leave the UI stuck on "Loading...".
+  if(!pianoAvailable()){
+    setStatus('Piano samples are unavailable — the other timbres still work.');
+    return;
+  }
+  pianoLoading=true;
+  if(cb)pianoCallbacks.push(cb);
+  setStatus('Loading piano samples...');
+  initAudio();
+  const fail=()=>{
+    pianoLoading=false;pianoCallbacks=[];
+    setStatus('Could not load the piano — the other timbres still work.');
+  };
+  try{
+    Soundfont.instrument(audioCtx,'acoustic_grand_piano',{
+      soundfont:'FluidR3_GM',
+      destination:masterGain,          // was going straight to the speakers,
+      nameToUrl:()=>'vendor/acoustic_grand_piano-mp3.js'
+    }).then(inst=>{
+      pianoInstrument=inst;pianoReady=true;pianoLoading=false;
+      setStatus('Piano loaded ✓');
+      setTimeout(()=>setStatus(''),2000);
+      const queued=pianoCallbacks;pianoCallbacks=[];
+      queued.forEach(f=>{try{f();}catch(e){}});
+    }).catch(fail);
+  }catch(e){fail();}
+}
+
+function killNodes(list){
+  list.forEach(n=>{try{n.stop&&n.stop();}catch(e){}try{n.disconnect&&n.disconnect();}catch(e){}});
+  list.length=0;
+}
+function stopAllAudio(){
+  killNodes(liveNodes);killNodes(schedNodes);
+  schedPiano.forEach(n=>{try{n.stop();}catch(e){}});schedPiano=[];
+  pendingTimeouts.forEach(t=>clearTimeout(t));pendingTimeouts=[];
+}
+
+/* ---------- continuous drone (Drone mode) ---------- */
+function startContinuous(s){
+  killNodes(liveNodes);
+  schedPiano.forEach(n=>{try{n.stop();}catch(e){}});schedPiano=[];
+  const freq=freqOf(s),now=audioCtx.currentTime;
+  if(state.timbre==='piano-real'){
+    if(pianoReady){const n=pianoInstrument.play(stdName(s),now,{gain:PIANO_GAIN});if(n)schedPiano.push(n);}
+    return;
+  }
+  if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8);return;}
+  const osc=audioCtx.createOscillator();
+  osc.type=state.timbre;osc.frequency.value=freq;
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0,now);
+  g.gain.linearRampToValueAtTime(1,now+0.02);
+  osc.connect(g);g.connect(masterGain);osc.start(now);
+  liveNodes.push(osc,g);
+}
+
+/* ---------- scheduled note (Scale / Arpeggio / Free) ---------- */
+function buildPianoSynth(freq,when,bucket,decay){
+  const env=audioCtx.createGain();
+  env.connect(masterGain);
+  env.gain.setValueAtTime(0,when);
+  env.gain.linearRampToValueAtTime(1,when+0.005);
+  env.gain.setTargetAtTime(0.35,when+0.005,0.07);
+  env.gain.setTargetAtTime(0,when+0.4,decay);
+  [[1,1],[2,0.55],[3,0.3],[4,0.16],[5,0.09],[6,0.05],[7,0.025],[8,0.01]].forEach(([r,g])=>{
+    const osc=audioCtx.createOscillator();
+    osc.type='sine';osc.frequency.value=freq*r;
+    const gn=audioCtx.createGain();gn.gain.value=g;
+    osc.connect(gn);gn.connect(env);
+    osc.start(when);osc.stop(when+decay*6+1);
+    bucket.push(osc,gn);
+  });
+  bucket.push(env);
+}
+
+function scheduleTone(s,when,dur){
+  const freq=freqOf(s);
+  if(state.timbre==='piano-real'){
+    if(pianoReady){const n=pianoInstrument.play(stdName(s),when,{gain:PIANO_GAIN,duration:dur});if(n)schedPiano.push(n);}
+  } else if(state.timbre==='piano-synth'){
+    buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
+  } else {
+    const osc=audioCtx.createOscillator();
+    osc.type=state.timbre;osc.frequency.value=freq;
+    const g=audioCtx.createGain();
+    const rel=Math.min(0.09,dur*0.18),atk=0.012;
+    g.gain.setValueAtTime(0,when);
+    g.gain.linearRampToValueAtTime(1,when+atk);
+    g.gain.setValueAtTime(1,when+Math.max(atk,dur-rel));
+    g.gain.linearRampToValueAtTime(0,when+dur);
+    osc.connect(g);g.connect(masterGain);
+    osc.start(when);osc.stop(when+dur+0.03);
+    schedNodes.push(osc,g);
+  }
+  scheduleDisplay(s,when);
+}
+
+function scheduleDisplay(s,when){
+  const d=(when-audioCtx.currentTime)*1000;
+  pendingTimeouts.push(setTimeout(()=>{
+    if(!state.playing)return;
+    document.getElementById('current-note').textContent=nameOf(s);
+    document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
+  },Math.max(0,d)));
+}
+
+// Each beat is one of three: 'low' (the accent), 'high', or 'off'.
+const ACCENT_CYCLE=['low','high','off'];
+function accentFor(i){return state.accents[i]||'high';}
+
+// 'sub' is the off-beat tick of a subdivision: same click, clearly subordinate
+// so the beat still reads as the beat.
+const CLICK_TONE={low:{f:760,g:1},high:{f:1250,g:0.72},sub:{f:1050,g:0.34}};
+
+function scheduleClick(time,kind){
+  const tone=CLICK_TONE[kind];
+  if(!tone)return;                       // 'off' — silent beat
+  const buf=audioCtx.createBuffer(1,Math.floor(audioCtx.sampleRate*0.04),audioCtx.sampleRate);
+  const data=buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i]=Math.sin(2*Math.PI*tone.f*i/audioCtx.sampleRate)*Math.exp(-i/(audioCtx.sampleRate*0.01));
+  const src=audioCtx.createBufferSource();
+  const g=audioCtx.createGain();g.gain.value=state.clickVol*tone.g;
+  src.buffer=buf;src.connect(g);g.connect(audioCtx.destination);src.start(time);
+  schedNodes.push(src,g);
+}
+
+// Which subdivision is in force right now — a fixed choice, or the current
+// step of the table-of-time sequence.
+function subdivListOn(){return state.practice.useSubdivList&&state.practice.subdivList.length>0;}
+
+// The order the figures are walked in — the same up / down / up-down choice the
+// notes have, so a table of time can climb and come back down.
+function subdivOrder(){
+  const l=state.practice.subdivList;
+  if(l.length<2)return l.slice();
+  if(state.practice.subdivDir==='down')return l.slice().reverse();
+  // Unlike the notes, the return to the FIRST figure is kept: the point of a
+  // table of time is to come back to where it started before the key moves on.
+  // Eighths, triplets, eighths — and only then the next fourth.
+  if(state.practice.subdivDir==='updown')return l.concat(l.slice(0,-1).reverse());
+  return l.slice();
+}
+function currentSubdiv(){
+  if(subdivListOn()){const o=subdivOrder();return o[subdivIdx%o.length];}
+  return state.subdiv;
+}
+
+/* ---------- sequence building ---------- */
+function activeDegrees(){
+  // in Study list mode an empty list means nothing is selected, even if a
+  // single selection is left over from before
+  if(useListOn()&&!activeList().length)return null;
+  if(state.mode==='scale'&&state.scaleGroup)return SCALES[state.scaleGroup][state.scaleName];
+  if(state.mode==='arpeggio'&&state.chordGroup)return CHORDS[state.chordGroup][state.chordName];
+  return null;
+}
+
+// Walks an ascending, octave-repeating set. A scale and an arpeggio are the
+// same walk — only the interval list is shorter.
+function walk(baseAbs,startIdx,span,appendTop,direction){
+  const n=baseAbs.length;
+  if(!n)return[];
+  const total=n*span+(appendTop?1:0);
+  const up=[];
+  for(let i=0;i<total;i++){
+    const k=startIdx+i;
+    up.push(baseAbs[((k%n)+n)%n]+Math.floor(k/n)*12);
+  }
+  if(direction==='down')return up.slice().reverse();
+  // up-down: the turnaround notes sound once, not twice
+  if(direction==='updown')return up.concat(up.slice(1,-1).reverse());
+  return up;
+}
+
+function buildSequence(){
+  if(state.mode==='free'){
+    const list=Object.keys(state.freeSelected)
+      .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b);
+    if(!list.length)return[];
+    // start on the chosen root when it is one of the picked notes
+    const idx=(state.freeRoot in state.freeSelected)
+      ?list.indexOf(semitone(state.freeRoot,state.freeSelected[state.freeRoot])):0;
+    return walk(list,Math.max(0,idx),state.freeSpan,true,state.freeDirection);
+  }
+  const degrees=activeDegrees();
+  if(!degrees)return[];
+  const rootS=semitone(state.root,state.rootOct);
+  // A single-octave seventh arpeggio is four notes and stops there — adding the
+  // octave on top would make five and blur the inversion. Across two or more
+  // octaves it does land back on the starting note.
+  const seventh=state.mode==='arpeggio'&&state.chordGroup==='seventh';
+  const appendTop=!(seventh&&state.span===1);
+  return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,state.direction);
+}
+
+// C8 is the top of the piano and the top of the sampled range; above it the
+// Real piano goes silent and the pitch stops being a usable reference anyway.
+const MAX_SEM=semitone('C',8);
+
+function seqTopWith(overrides){
+  const saved={span:state.span,rootOct:state.rootOct,freeSpan:state.freeSpan};
+  Object.assign(state,overrides);
+  const seq=buildSequence();
+  Object.assign(state,saved);
+  return seq.length?Math.max.apply(null,seq):0;
+}
+function exceedsRange(overrides){return seqTopWith(overrides)>MAX_SEM;}
+
+// Pull the settings back into range rather than emitting notes that cannot
+// sound — but grow them back toward what the user asked for as soon as the
+// key allows, so the Cycle of 4ths cannot ratchet a 3-octave exercise down to
+// one and leave it there.
+function clampRange(){
+  if(state.mode==='free'){
+    while(state.freeSpan<state.freeSpanWanted&&!exceedsRange({freeSpan:state.freeSpan+1}))state.freeSpan++;
+    while(state.freeSpan>1&&exceedsRange({freeSpan:state.freeSpan}))state.freeSpan--;
+  } else {
+    while(state.rootOct<state.rootOctWanted&&!exceedsRange({rootOct:state.rootOct+1}))state.rootOct++;
+    while(state.span<state.spanWanted&&!exceedsRange({span:state.span+1}))state.span++;
+    while(state.span>1&&exceedsRange({span:state.span}))state.span--;
+    while(state.rootOct>ROOT_OCTS[0]&&exceedsRange({rootOct:state.rootOct}))state.rootOct--;
+  }
+}
+
+function refreshSequence(){
+  rebuildSpelling();
+  clampStartDeg();
+  clampRange();
+  sequence=buildSequence();
+  updateAlignInfo();
+  refreshSectionSummaries();
+}
+
+/* ---------- transport ---------- */
+function startPlayback(){
+  const ready=initAudio();
+  stopAllAudio();
+  ready.then(()=>{
+    if(!state.playing&&!state.metroOnly)return;   // stopped while resuming
+    if(state.mode==='drone'){
+      if(state.droneNote){
+        const s=semitone(state.droneNote,state.droneOct);
+        document.getElementById('current-note').textContent=nameOf(s);
+        document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
+        startContinuous(s);
+      }
+      return;
+    }
+    if(!state.metroOnly){
+      // every run starts at the top of the study list
+      if(listEnabled()){studyIdx=0;applyListItem(activeList()[0]);renderPitchPickers();}
+      refreshSequence();
+    }
+    nextBeatTime=audioCtx.currentTime+0.12;
+    beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;activeSubdiv=currentSubdiv();
+    if(subdivListOn())subdivIdx=0;
+    if(metroScheduler)clearInterval(metroScheduler);
+    metroScheduler=setInterval(schedulerTick,schedInterval);
+    schedulerTick();
+  });
+}
+
+// Subdivision ticks that one note occupies.
+function ticksPerNote(sub){
+  if(state.noteLen==='beat')return sub;
+  if(state.noteLen==='bar')return sub*state.sig;
+  return 1;                       // one note per subdivision tick
+}
+
+function gcd(a,b){while(b){const t=b;b=a%b;a=t;}return a;}
+
+// How many rounds until the pattern's first note falls on the head of a
+// subdivision group again. When the pattern length is not a whole number of
+// groups the phrase precesses against the pulse — and that displacement is
+// the exercise, so the metronome is never resynchronised to it.
+function alignmentRounds(){
+  if(!sequence.length)return 1;
+  const sub=currentSubdiv();
+  const patternTicks=sequence.length*ticksPerNote(sub);
+  return sub/gcd(patternTicks,sub);
+}
+
+// Where inside the subdivision group each successive round begins.
+function alignmentOffsets(){
+  const sub=currentSubdiv(),n=alignmentRounds();
+  const patternTicks=sequence.length*ticksPerNote(sub);
+  const out=[];
+  for(let k=0;k<n;k++)out.push((patternTicks*k)%sub);
+  return out;
+}
+
+function schedulerTick(){
+  // A suspended context has a frozen currentTime: every beat would test as
+  // "not due yet" and the scheduler would deadlock after the first one.
+  if(!audioCtx||audioCtx.state!=='running')return;
+  // If the phone slept or the tab was backgrounded the audio clock jumps far
+  // ahead. Without this the loop would fire a burst of catch-up beats, running
+  // several passes at once and skipping whole keys of the cycle. Resync instead.
+  if(nextBeatTime<audioCtx.currentTime-0.5){
+    nextBeatTime=audioCtx.currentTime+0.05;
+    beatIdx=0;tickCount=0;subIdx=0;
+  }
+  // The loop steps by subdivision, not by beat, so the guard allows up to four
+  // ticks per beat.
+  let guard=0;
+  while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<256){
+    // A figure the player picks by hand takes effect on the next beat, so it
+    // never stretches the beat it lands in.
+    if(subIdx===0)activeSubdiv=currentSubdiv();
+    let note=null;
+    if(!state.metroOnly&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
+      if(seqIdx>=sequence.length){
+        seqIdx=0;
+        // Within a figure the pulse runs on unbroken and the phrase precesses
+        // against it — that is the exercise. When the figure itself changes the
+        // new one starts on this very note, with the pulse re-anchored to it:
+        // the phrase leads and the bar follows, rather than waiting for a bar
+        // line and leaving a hole.
+        if(advancePass()||state.alignPasses){
+          activeSubdiv=currentSubdiv();
+          subIdx=0;beatIdx=0;tickCount=0;
+        }
+      }
+      if(sequence.length){note=sequence[seqIdx];seqIdx++;}
+    }
+    const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb/sub;
+    if(note!==null)scheduleTone(note,nextBeatTime,tickDur*ticksPerNote(sub));
+    if(subIdx===0){
+      scheduleClick(nextBeatTime,accentFor(beatIdx));
+      scheduleFlash(beatIdx,nextBeatTime);
+    } else if(state.clickFollowsFigure&&accentFor(beatIdx)!=='off'){
+      scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
+    }
+    tickCount++;
+    nextBeatTime+=tickDur;
+    subIdx++;
+    if(subIdx>=sub){subIdx=0;beatIdx=(beatIdx+1)%state.sig;}
+  }
+  pruneFinishedNodes();
+}
+
+// These arrays only existed to allow a hard stop. During a long practice run
+// they would otherwise grow by two entries per click forever. The oldest are
+// long finished, so dropping the references is safe and lets them be collected.
+function pruneFinishedNodes(){
+  if(schedNodes.length>500)schedNodes.splice(0,schedNodes.length-250);
+  if(pendingTimeouts.length>500)pendingTimeouts.splice(0,pendingTimeouts.length-250);
+  if(schedPiano.length>80)schedPiano.splice(0,schedPiano.length-40);
+}
+
+function scheduleFlash(i,when){
+  const d=(when-audioCtx.currentTime)*1000;
+  pendingTimeouts.push(setTimeout(()=>flashBeat(i),Math.max(0,d)));
+}
+function flashBeat(i){
+  if(!state.playing&&!state.metroOnly)return;
+  document.querySelectorAll('.beat-dot').forEach((d,idx)=>d.classList.toggle('active-beat',idx===i));
+}
+
+function stopPlayback(){
+  if(metroScheduler){clearInterval(metroScheduler);metroScheduler=null;}
+  stopAllAudio();
+  document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('active-beat'));
+  document.getElementById('current-note').textContent='—';
+  document.getElementById('current-freq').textContent='';
+}
+
+function setPlayUI(on){
+  const b=document.getElementById('play-btn');
+  b.textContent=on?'■ Stop':'▶ Start';
+  b.classList.toggle('playing',on);
+  // clears (or lights) the green "sounding now" marker on the study list
+  if(state.mode==='scale'||state.mode==='arpeggio'){
+    paintSetButtons('[data-scale]','scale','scale');
+    paintSetButtons('[data-chord]','chord','arpeggio');
+  }
+}
+
+function togglePlay(){
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();return;}
+  // Prime the context synchronously inside the gesture — iOS refuses to resume
+  // one later, from the piano-loading callback.
+  initAudio();
+  if(state.mode==='drone'&&!state.droneNote){setStatus('Pick a note first.');return;}
+  if(state.mode!=='drone'){
+    refreshSequence();
+    if(!sequence.length){setStatus(state.mode==='free'?'Select some notes first.':'Pick a scale or chord first.');return;}
+  }
+  if(state.metroOnly){
+    state.metroOnly=false;stopPlayback();
+    const mb=document.getElementById('metro-btn');
+    mb.textContent='♩ Metro only';mb.classList.remove('playing');
+  }
+  if(state.timbre==='piano-real'&&!pianoReady){
+    // a second press while a start is already queued would start twice
+    if(pianoLoading&&pianoCallbacks.length){setStatus('Starting as soon as the piano is ready...');return;}
+    loadPiano(()=>{state.playing=true;setPlayUI(true);startPlayback();});
+    if(pianoLoading)setStatus('Starting as soon as the piano is ready...');
+    return;
+  }
+  state.playing=true;setPlayUI(true);startPlayback();
+}
+
+function toggleMetroOnly(){
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  state.metroOnly=!state.metroOnly;
+  const b=document.getElementById('metro-btn');
+  if(state.metroOnly){
+    b.textContent='■ Stop metro';b.classList.add('playing');
+    startPlayback();
+  } else {
+    b.textContent='♩ Metro only';b.classList.remove('playing');stopPlayback();
+  }
+}
+
+function restartIfPlaying(){
+  // clearing the notes mid-playback should stop, not leave a bare metronome
+  if(state.playing&&state.mode!=='drone'&&!buildSequence().length){
+    state.playing=false;setPlayUI(false);stopPlayback();return;
+  }
+  if(state.playing){stopPlayback();startPlayback();}
+  else if(state.metroOnly){stopPlayback();state.metroOnly=false;toggleMetroOnly();}
+}
+
+/* ---------- simple controls ---------- */
+function updateBPM(v){state.bpm=parseInt(v);document.getElementById('bpm-display').textContent=v;tapTimes=[];refreshSectionSummaries();}
+function updateVol(v){
+  state.volume=parseFloat(v);
+  document.getElementById('vol-out').textContent=Math.round(v*100)+'%';
+  refreshSectionSummaries();
+  if(masterGain)masterGain.gain.setTargetAtTime(state.volume*0.4,audioCtx.currentTime,0.05);
+}
+function updateClickVol(v){state.clickVol=parseFloat(v);document.getElementById('click-vol-out').textContent=Math.round(v*100)+'%';}
+
+function setSig(n,btn){
+  state.sig=n;
+  document.querySelectorAll('.sig-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildBeats();updateAlignInfo();restartIfPlaying();
+}
+
+// A drone has to sustain indefinitely; both piano voices decay to silence
+// within seconds, so they are offered only for the note-sequence modes.
+const TIMBRES=[
+  {k:'piano-real', label:'Real piano',  decays:true},
+  {k:'piano-synth',label:'Piano synth', decays:true},
+  {k:'sine',       label:'Sine',        decays:false},
+  {k:'triangle',   label:'Triangle',    decays:false},
+  {k:'sawtooth',   label:'Sawtooth',    decays:false},
+  {k:'square',     label:'Square',      decays:false},
+];
+const DEFAULT_WAVE='sine';
+
+function availableTimbres(){
+  return state.mode==='drone'?TIMBRES.filter(t=>!t.decays):TIMBRES;
+}
+
+function buildTimbreRow(){
+  const row=document.getElementById('timbre-row');row.innerHTML='';
+  availableTimbres().forEach(t=>{
+    const b=document.createElement('button');
+    b.className='timbre-btn'+(t.k===state.timbre?' active':'');
+    b.textContent=t.label;
+    b.onclick=()=>setTimbre(t.k);
+    row.appendChild(b);
+  });
+}
+
+function setTimbre(t){
+  state.timbre=t;
+  refreshSectionSummaries();
+  // remember the choice so returning to this mode family restores it
+  if(state.mode==='drone')state.waveTimbre=t;else state.seqTimbre=t;
+  buildTimbreRow();
+  if(t==='piano-real'&&!pianoReady&&!pianoLoading)loadPiano();
+  if(state.playing&&state.mode==='drone'&&state.droneNote)startContinuous(semitone(state.droneNote,state.droneOct));
+}
+
+/* ---------- mode switching ---------- */
+function setMode(m){
+  const wasPlaying=state.playing;
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  if(state.metroOnly){
+    state.metroOnly=false;stopPlayback();
+    const mb=document.getElementById('metro-btn');
+    mb.textContent='♩ Metro only';mb.classList.remove('playing');
+  }
+  state.mode=m;
+  const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio');
+  [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],['free','btn-mode-free']]
+    .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
+  document.getElementById('drone-section').style.display=isDrone?'':'none';
+  document.getElementById('pitch-section').style.display=isPitch?'':'none';
+  document.getElementById('free-section').style.display=m==='free'?'':'none';
+  document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
+  document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
+  document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
+  document.getElementById('metro-divider').style.display=isDrone?'none':'';
+  document.getElementById('metro-section').style.display=isDrone?'none':'';
+  document.getElementById('sec-rhythm').style.display=isDrone?'none':'';
+  document.getElementById('metro-btn').style.display=isDrone?'none':'';
+  // Drone restores the last wave; the sequence modes restore the last voice,
+  // which starts out as the sampled piano.
+  state.timbre=isDrone?state.waveTimbre:state.seqTimbre;
+  if(!availableTimbres().some(t=>t.k===state.timbre))state.timbre=DEFAULT_WAVE;
+  buildTimbreRow();
+  if(state.timbre==='piano-real'&&!pianoReady&&!pianoLoading)loadPiano();
+  if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();}
+  if(m==='free')buildFreeGrid();
+  setStatus('');
+  refreshSequence();
+}
+
+/* ---------- drone UI ---------- */
+function buildDroneGrid(){
+  const grid=document.getElementById('drone-grid');grid.innerHTML='';
+  NOTES.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='note-btn'+(n===state.droneNote?' active':'');
+    b.innerHTML='<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>';
+    b.onclick=()=>{
+      state.droneNote=(state.droneNote===n)?null:n;
+      buildDroneGrid();
+      if(state.playing){
+        if(state.droneNote){
+          const s=semitone(state.droneNote,state.droneOct);
+          document.getElementById('current-note').textContent=nameOf(s);
+          document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
+          startContinuous(s);
+        } else {state.playing=false;setPlayUI(false);stopPlayback();}
+      }
+    };
+    grid.appendChild(b);
+  });
+  const row=document.getElementById('drone-oct-row');row.innerHTML='';
+  for(let o=OCT_MIN;o<=OCT_MAX;o++){
+    const b=document.createElement('button');
+    b.className='pick-btn'+(o===state.droneOct?' active':'');
+    b.textContent=o;
+    b.onclick=()=>{
+      state.droneOct=o;buildDroneGrid();
+      if(state.playing&&state.droneNote){
+        const s=semitone(state.droneNote,state.droneOct);
+        document.getElementById('current-note').textContent=nameOf(s);
+        document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
+        startContinuous(s);
+      }
+    };
+    row.appendChild(b);
+  }
+}
+
+/* ---------- scale / arpeggio UI ---------- */
+function buildPitchLists(){
+  const root=document.getElementById('root-row');
+  NOTES.forEach(n=>{
+    const b=document.createElement('button');
+    // label is replaced by renderPitchPickers with the spelling of the key in use
+    b.className='tonic-btn';b.dataset.root=n;b.textContent=DEFAULT_SPELL[NOTES.indexOf(n)].name;
+    b.onclick=()=>{state.root=n;state.startDeg=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
+    root.appendChild(b);
+  });
+  const scaleGroups={gregorian:'gregorian-btns',melodic:'melodic-btns',harmonic:'harmonic-btns',harmonicMajor:'harmonicmajor-btns'};
+  Object.entries(scaleGroups).forEach(([gk,cid])=>{
+    const c=document.getElementById(cid);
+    Object.keys(SCALES[gk]).forEach(sn=>{
+      const b=document.createElement('button');
+      b.className='pick-btn';b.dataset.scale=sn;b.dataset.group=gk;b.textContent=sn;
+      b.onclick=()=>{
+        if(useListOn()){toggleListItem(gk,sn);return;}
+        state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
+        renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
+      };
+      c.appendChild(b);
+    });
+  });
+  const chordGroups={triad:'triad-btns',seventh:'seventh-btns'};
+  Object.entries(chordGroups).forEach(([gk,cid])=>{
+    const c=document.getElementById(cid);
+    Object.keys(CHORDS[gk]).forEach(cn=>{
+      const b=document.createElement('button');
+      b.className='pick-btn';b.dataset.chord=cn;b.dataset.group=gk;b.textContent=cn;
+      b.onclick=()=>{
+        if(useListOn()){toggleListItem(gk,cn);return;}
+        state.chordGroup=gk;state.chordName=cn;state.startDeg=0;
+        renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
+      };
+      c.appendChild(b);
+    });
+  });
+}
+
+/* ---------- practice progressions ---------- */
+function activeList(){
+  if(state.mode==='scale')return state.practice.scaleList;
+  if(state.mode==='arpeggio')return state.practice.chordList;
+  return[];
+}
+function useListOn(){
+  if(state.mode==='scale')return state.practice.useScaleList;
+  if(state.mode==='arpeggio')return state.practice.useChordList;
+  return false;
+}
+function setUseList(v){
+  if(state.mode==='scale')state.practice.useScaleList=v;
+  else if(state.mode==='arpeggio')state.practice.useChordList=v;
+}
+function listEnabled(){return useListOn()&&activeList().length>0;}
+
+// The degree list changes size between scales (7) and chords (3-4), so a
+// "Start On" index from one can point past the end of the other.
+function clampStartDeg(){
+  const d=activeDegrees();
+  if(!d||state.startDeg>=d.length||state.startDeg<0)state.startDeg=0;
+}
+
+function applyListItem(item){
+  if(!item)return;
+  if(state.mode==='scale'){state.scaleGroup=item.group;state.scaleName=item.name;}
+  else{state.chordGroup=item.group;state.chordName=item.name;}
+  clampStartDeg();
+}
+
+function toggleListItem(group,name){
+  const list=activeList();
+  const i=list.findIndex(x=>x.group===group&&x.name===name);
+  if(i>=0)list.splice(i,1);else list.push({group,name});
+  if(list.length){studyIdx=0;applyListItem(list[0]);}
+  renderPitchPickers();refreshSequence();restartIfPlaying();
+}
+
+// Called at the seam between one pass and the next.
+// Returns true if the rhythmic figure changed, which the scheduler uses to
+// hold the next pattern back to a bar line.
+function advancePass(){
+  // The innermost loop is the drift itself: while the phrase is still walking
+  // round against the pulse, nothing else may move — otherwise the figure
+  // changes before the displacement has had time to resolve.
+  roundsInFigure++;
+  const needed=state.alignPasses?1:alignmentRounds();
+  if(roundsInFigure<needed)return false;
+  roundsInFigure=0;
+
+  // Then the outer loops: modes, then the figure, then the key.
+  let wrapped=true,figureChanged=false;
+  // Innermost of the outer loops is the rhythmic figure: one mode is taken
+  // through the whole table of time before the next mode starts, and the key
+  // only moves once every mode has been through every figure.
+  if(subdivListOn()&&subdivOrder().length>1){
+    subdivIdx=(subdivIdx+1)%subdivOrder().length;
+    wrapped=(subdivIdx===0);
+    figureChanged=true;
+    buildSubdivRow();
+  }
+  const list=activeList();
+  if(wrapped&&useListOn()&&list.length>1){
+    studyIdx=(studyIdx+1)%list.length;
+    applyListItem(list[studyIdx]);
+    wrapped=(studyIdx===0);
+  }
+  if(wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
+    state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
+  }
+  if(state.practice.tempoStep>0){
+    const next=Math.min(BPM_MAX,state.bpm+state.practice.tempoStep);
+    if(next!==state.bpm){
+      state.bpm=next;
+      document.getElementById('bpm-slider').value=next;
+      document.getElementById('bpm-display').textContent=next;
+    }
+  }
+  refreshSequence();
+  if(state.mode==='scale'||state.mode==='arpeggio')renderPitchPickers();
+  return figureChanged;
+}
+
+function buildRootMoveRow(){
+  const row=document.getElementById('rootmove-row');row.innerHTML='';
+  ROOT_MOVES.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'');
+    b.textContent=m.label;
+    b.onclick=()=>{state.practice.rootMove=m.k;buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+  updatePracticeInfo();
+}
+
+function buildListModeRow(){
+  const row=document.getElementById('listmode-row');row.innerHTML='';
+  [[false,'Single'],[true,'Study list']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(useListOn()===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      setUseList(v);
+      if(v){const l=activeList();if(l.length){studyIdx=0;applyListItem(l[0]);}}
+      renderPitchPickers();refreshSequence();restartIfPlaying();
+    };
+    row.appendChild(b);
+  });
+}
+
+function buildSubdivModeRow(){
+  const row=document.getElementById('subdivmode-row');row.innerHTML='';
+  [[false,'Single'],[true,'Sequence']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.practice.useSubdivList===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.practice.useSubdivList=v;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
+    row.appendChild(b);
+  });
+}
+
+function buildSubdivRow(){
+  const row=document.getElementById('subdiv-row');row.innerHTML='';
+  const list=state.practice.subdivList;
+  SUBDIVS.forEach(sd=>{
+    const b=document.createElement('button');
+    b.textContent=sd.label;
+    if(state.practice.useSubdivList){
+      const i=list.indexOf(sd.k);
+      const sounding=i>=0&&sd.k===currentSubdiv()&&(state.playing||state.metroOnly);
+      b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
+      if(i>=0)b.innerHTML='<span class="idx">'+(i+1)+'</span>'+sd.label;
+      b.onclick=()=>{
+        const at=list.indexOf(sd.k);
+        if(at>=0)list.splice(at,1);else list.push(sd.k);
+        subdivIdx=0;buildSubdivRow();updatePracticeInfo();
+      };
+    } else {
+      b.className='pick-btn'+(sd.k===state.subdiv?' active':'');
+      b.onclick=()=>{state.subdiv=sd.k;buildSubdivRow();updateAlignInfo();refreshSectionSummaries();};
+    }
+    row.appendChild(b);
+  });
+  buildSubdivModeRow();
+  buildSubdivDirRow();
+}
+
+/* ---------- tap tempo ---------- */
+let tapTimes=[],tapResetTimer=null;
+
+function setBpm(v){
+  state.bpm=Math.max(30,Math.min(BPM_MAX,Math.round(v)));
+  document.getElementById('bpm-slider').value=state.bpm;
+  document.getElementById('bpm-display').textContent=state.bpm;
+  refreshSectionSummaries();
+}
+
+function tapTempo(){
+  const now=performance.now();
+  // a pause longer than two seconds means a new count-in, not a slow tempo
+  if(tapTimes.length&&now-tapTimes[tapTimes.length-1]>2000)tapTimes=[];
+  tapTimes.push(now);
+  if(tapTimes.length>8)tapTimes.shift();
+  const btn=document.getElementById('tap-btn');
+  if(tapTimes.length>=2){
+    // average across the whole window rather than the last gap, so one uneven
+    // tap does not throw the tempo
+    const avg=(tapTimes[tapTimes.length-1]-tapTimes[0])/(tapTimes.length-1);
+    const bpm=60000/avg;
+    if(bpm>=30&&bpm<=BPM_MAX){setBpm(bpm);btn.textContent='Tap tempo · '+state.bpm;}
+    else btn.textContent='Tap tempo · out of range';
+  } else btn.textContent='Tap tempo · keep tapping';
+  btn.classList.add('tapping');
+  clearTimeout(tapResetTimer);
+  tapResetTimer=setTimeout(()=>{
+    btn.classList.remove('tapping');btn.textContent='Tap tempo';tapTimes=[];
+  },2200);
+}
+
+function buildSubdivDirRow(){
+  const row=document.getElementById('subdivdir-row');row.innerHTML='';
+  if(!state.practice.useSubdivList)return;          // only meaningful for a sequence
+  DIRECTIONS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(d.k===state.practice.subdivDir?' active':'');
+    b.textContent=d.label;
+    b.onclick=()=>{state.practice.subdivDir=d.k;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
+    row.appendChild(b);
+  });
+}
+
+function buildClickModeRow(){
+  const row=document.getElementById('clickmode-row');row.innerHTML='';
+  [[true,'Follow figure'],[false,'Beats only']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.clickFollowsFigure===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.clickFollowsFigure=v;buildClickModeRow();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+}
+
+function buildAlignRow(){
+  const row=document.getElementById('align-row');row.innerHTML='';
+  [[false,'Let it drift'],[true,'Restart each round']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.alignPasses===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.alignPasses=v;buildAlignRow();};
+    row.appendChild(b);
+  });
+  updateAlignInfo();
+}
+
+function updateAlignInfo(){
+  const el=document.getElementById('align-info');if(!el)return;
+  if(!sequence.length||state.mode==='drone'){el.textContent='';return;}
+  if(state.alignPasses){
+    el.textContent='Every round restarts on beat 1.';return;
+  }
+  const n=alignmentRounds(),sub=currentSubdiv();
+  const group=sub===1?'beat':sub===2?'eighth pair':sub===3?'triplet':'sixteenth group';
+  el.textContent=n===1
+    ? sequence.length+' notes · lands on the head of every '+group
+    : sequence.length+' notes · '+n+' rounds before note 1 falls on the head of a '+group+' again'
+      +' (offsets '+alignmentOffsets().join(', ')+')';
+}
+
+function buildTempoStepRow(){
+  const row=document.getElementById('tempostep-row');row.innerHTML='';
+  TEMPO_STEPS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(t.k===state.practice.tempoStep?' active':'');
+    b.textContent=t.label;
+    b.onclick=()=>{state.practice.tempoStep=t.k;buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+}
+
+function updatePracticeInfo(){
+  const el=document.getElementById('practice-info');if(!el)return;
+  const bits=[];
+  if(listEnabled())bits.push(activeList().length+' items in rotation');
+  if(state.practice.rootMove==='fourths')bits.push('root up a 4th'+((listEnabled()||subdivListOn())?' after the full cycle':' each pass'));
+  if(subdivListOn()&&state.practice.subdivList.length>1)
+    bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
+  if(state.practice.tempoStep>0)bits.push('+'+state.practice.tempoStep+' BPM per pass (max '+BPM_MAX+')');
+  el.textContent=bits.length?bits.join(' · '):'Repeats unchanged.';
+}
+
+// In Single mode one button is lit; in Study list mode every chosen button is
+// lit and numbered, and the one currently sounding turns green.
+function paintSetButtons(selector,attr,forMode){
+  const mine=state.mode===forMode;
+  const list=activeList();
+  const current=forMode==='scale'?state.scaleName:state.chordName;
+  document.querySelectorAll(selector).forEach(b=>{
+    const name=b.dataset[attr];
+    b.classList.remove('active','now');
+    if(!mine){b.textContent=name;return;}
+    if(useListOn()){
+      const i=list.findIndex(x=>x.name===name);
+      if(i>=0){
+        b.classList.add(i===studyIdx&&state.playing&&!state.metroOnly?'now':'active');
+        b.innerHTML='<span class="idx">'+(i+1)+'</span>'+name;
+      } else b.textContent=name;
+    } else {
+      b.textContent=name;
+      if(name===current)b.classList.add('active');
+    }
+  });
+}
+
+function renderPitchPickers(){
+  document.querySelectorAll('#root-row .tonic-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.root===state.root);
+    b.textContent=rootLabelFor(NOTES.indexOf(b.dataset.root));   // Db, not C#
+  });
+  paintSetButtons('[data-scale]','scale','scale');
+  paintSetButtons('[data-chord]','chord','arpeggio');
+  buildListModeRow();
+
+  const spanRow=document.getElementById('span-row');spanRow.innerHTML='';
+  SPANS.forEach(s=>{
+    const b=document.createElement('button');
+    const off=exceedsRange({span:s});
+    b.className='pick-btn'+(s===state.span?' active':'')+(off?' disabled':'');
+    b.textContent=s===1?'1 octave':s+' octaves';
+    if(off)b.title='Would go above C8 from this start octave';
+    else b.onclick=()=>{state.span=s;state.spanWanted=s;renderPitchPickers();refreshSequence();restartIfPlaying();};
+    spanRow.appendChild(b);
+  });
+
+  const octRow=document.getElementById('rootoct-row');octRow.innerHTML='';
+  ROOT_OCTS.forEach(o=>{
+    const b=document.createElement('button');
+    const off=exceedsRange({rootOct:o});
+    b.className='pick-btn'+(o===state.rootOct?' active':'')+(off?' disabled':'');
+    b.textContent=o;
+    if(off)b.title='Would go above C8 with '+state.span+' octave(s)';
+    else b.onclick=()=>{state.rootOct=o;state.rootOctWanted=o;renderPitchPickers();refreshSequence();restartIfPlaying();};
+    octRow.appendChild(b);
+  });
+
+  const dirRow=document.getElementById('dir-row');dirRow.innerHTML='';
+  DIRECTIONS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(d.k===state.direction?' active':'');
+    b.textContent=d.label;
+    b.onclick=()=>{state.direction=d.k;renderPitchPickers();refreshSequence();restartIfPlaying();};
+    dirRow.appendChild(b);
+  });
+
+  const degRow=document.getElementById('startdeg-row');degRow.innerHTML='';
+  const degrees=activeDegrees();
+  if(degrees){
+    rebuildSpelling();
+    const rootIdx=NOTES.indexOf(state.root);
+    degrees.forEach((d,i)=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(i===state.startDeg?' active':'');
+      b.textContent=bareName((rootIdx+d)%12);
+      b.onclick=()=>{state.startDeg=i;renderPitchPickers();refreshSequence();restartIfPlaying();};
+      degRow.appendChild(b);
+    });
+  }
+  updateInfo();
+  updatePracticeInfo();
+  refreshSectionSummaries();
+}
+
+function updateInfo(){
+  const degrees=activeDegrees();
+  const el=document.getElementById('pitch-info');
+  if(!degrees){el.textContent='';return;}
+  rebuildSpelling();
+  const rootIdx=NOTES.indexOf(state.root);
+  const label=state.mode==='scale'?state.scaleName:state.chordName;
+  el.textContent=bareName(rootIdx)+' '+label+' — '+degrees.map(d=>bareName((rootIdx+d)%12)).join(', ');
+}
+
+function clearPitch(){
+  if(state.mode==='scale'){state.scaleGroup=null;state.scaleName=null;}
+  else{state.chordGroup=null;state.chordName=null;}
+  // clear the study list too, or its buttons stay lit while playback refuses
+  activeList().length=0;
+  studyIdx=0;
+  state.startDeg=0;
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  renderPitchPickers();refreshSequence();
+}
+
+/* ---------- free UI ---------- */
+// The chromatic grid begins on the chosen root, so a pattern in F reads
+// F F# G ... rather than always starting at C.
+function freeOrder(){
+  const i=NOTES.indexOf(state.freeRoot);
+  return[...NOTES.slice(i),...NOTES.slice(0,i)];
+}
+
+function buildFreeGrid(){
+  const rootRow=document.getElementById('free-root-row');rootRow.innerHTML='';
+  NOTES.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='tonic-btn'+(n===state.freeRoot?' active':'');
+    b.textContent=DEFAULT_SPELL[NOTES.indexOf(n)].name;
+    // picking a new root starts a clean slate
+    b.onclick=()=>{state.freeRoot=n;state.freeSelected={};buildFreeGrid();refreshSequence();restartIfPlaying();};
+    rootRow.appendChild(b);
+  });
+  const grid=document.getElementById('free-grid');grid.innerHTML='';
+  const order=freeOrder();
+  order.forEach(n=>{const d=document.createElement('div');d.id='free-'+n.replace('#','s');grid.appendChild(d);});
+  order.forEach(renderFreeNote);
+  buildFreeRangeRows();
+  refreshSectionSummaries();
+}
+
+function buildFreeRangeRows(){
+  const spanRow=document.getElementById('free-span-row');spanRow.innerHTML='';
+  SPANS.forEach(s=>{
+    const b=document.createElement('button');
+    const off=exceedsRange({freeSpan:s});
+    b.className='pick-btn'+(s===state.freeSpan?' active':'')+(off?' disabled':'');
+    b.textContent=s===1?'1 octave':s+' octaves';
+    if(off)b.title='Would go above C8 from these octaves';
+    else b.onclick=()=>{state.freeSpan=s;state.freeSpanWanted=s;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
+    spanRow.appendChild(b);
+  });
+  const dirRow=document.getElementById('free-dir-row');dirRow.innerHTML='';
+  DIRECTIONS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(d.k===state.freeDirection?' active':'');
+    b.textContent=d.label;
+    b.onclick=()=>{state.freeDirection=d.k;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
+    dirRow.appendChild(b);
+  });
+}
+
+function renderFreeNote(n){
+  const div=document.getElementById('free-'+n.replace('#','s'));if(!div)return;
+  const sel=n in state.freeSelected,isRoot=n===state.freeRoot;
+  div.className='note-btn'+(isRoot&&sel?' start':sel?' active':'');
+  // The octave stepper only exists once the note is armed — otherwise nudging
+  // it would silently add a note the user never picked.
+  div.innerHTML=
+    (isRoot?'<span class="start-badge">root</span>':'')+
+    '<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>'+
+    (sel
+      ?'<div class="oct-controls">'+
+         '<button class="oct-btn" data-oct="-1">−</button>'+
+         '<span class="oct-val">Oct '+state.freeSelected[n]+'</span>'+
+         '<button class="oct-btn" data-oct="1">+</button>'+
+       '</div>'
+      :'<div class="oct-controls"><span class="oct-val">—</span></div>');
+  div.querySelectorAll('.oct-btn').forEach(b=>{
+    b.onpointerdown=e=>{
+      e.stopPropagation();e.preventDefault();
+      changeFreeOct(n,parseInt(b.dataset.oct));
+    };
+  });
+  div.onpointerdown=e=>{
+    if(e.target.classList.contains('oct-btn'))return;
+    toggleFree(n);
+  };
+}
+
+function changeFreeOct(n,dir){
+  if(!(n in state.freeSelected))return;   // never enrol a note via the stepper
+  state.freeSelected[n]=Math.max(OCT_MIN,Math.min(OCT_MAX,state.freeSelected[n]+dir));
+  renderFreeNote(n);refreshSequence();restartIfPlaying();
+}
+function clearFree(){
+  state.freeSelected={};
+  buildFreeGrid();refreshSequence();
+  restartIfPlaying();   // stops cleanly: the sequence is now empty
+}
+
+function toggleFree(n){
+  if(n in state.freeSelected)delete state.freeSelected[n];
+  else state.freeSelected[n]=FREE_DEFAULT_OCT;   // a fresh pick always starts at octave 3
+  buildFreeGrid();refreshSequence();restartIfPlaying();
+}
+
+/* ---------- metronome dots ---------- */
+function buildNoteLenRow(){
+  const row=document.getElementById('notelen-row');row.innerHTML='';
+  NOTE_LENS.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(n.k===state.noteLen?' active':'');
+    b.textContent=n.label;
+    b.onclick=()=>{state.noteLen=n.k;buildNoteLenRow();updateAlignInfo();restartIfPlaying();};
+    row.appendChild(b);
+  });
+}
+
+function buildBeats(){
+  // keep whatever the user set for the beats that still exist when the bar
+  // length changes; new beats default to plain high
+  const prev=state.accents||[];
+  state.accents=[];
+  for(let i=0;i<state.sig;i++)state.accents[i]=prev[i]||(i===0?'low':'high');
+  renderBeats();
+}
+
+function renderBeats(){
+  const row=document.getElementById('beats-row');row.innerHTML='';
+  for(let i=0;i<state.sig;i++){
+    const d=document.createElement('div');
+    d.className='beat-dot acc-'+state.accents[i];
+    d.id='beat-'+i;
+    d.title='Tap: accent → normal → silent';
+    d.onclick=()=>{
+      state.accents[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(state.accents[i])+1)%ACCENT_CYCLE.length];
+      renderBeats();
+    };
+    row.appendChild(d);
+  }
+}
+
+/* ---------- collapsible sections ---------- */
+// Closed sections carry a one-line summary of what is set inside them, so
+// folding a section away never hides what it is doing.
+const SECTIONS=[
+  {id:'sec-scales',   sum:'sum-scales',   defaultOpen:true,group:'notes',
+   text:()=>{
+     if(useListOn())return activeList().length?activeList().length+' in rotation':'nothing chosen';
+     const n=state.mode==='scale'?state.scaleName:state.chordName;
+     return n?bareName(NOTES.indexOf(state.root))+' '+n:'nothing chosen';
+   }},
+  {id:'sec-range',    sum:'sum-range',    defaultOpen:true,group:'range',
+   text:()=>state.span+(state.span>1?' octaves':' octave')+' · '+
+        (DIRECTIONS.find(d=>d.k===state.direction)||{}).label+' · from octave '+state.rootOct},
+  // Free's Range section shares a group with the Scale one: folding either
+  // folds both, so the layout does not change under you when switching mode.
+  {id:'sec-freenotes',sum:'sum-freenotes',defaultOpen:true,group:'notes',
+   text:()=>{
+     const n=Object.keys(state.freeSelected).length;
+     if(!n)return 'none chosen';
+     return Object.keys(state.freeSelected)
+       .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b).map(nameOf).join(' ');
+   }},
+  {id:'sec-freerange',sum:'sum-freerange',defaultOpen:true,group:'range',
+   text:()=>state.freeSpan+(state.freeSpan>1?' octaves':' octave')+' · '+
+        (DIRECTIONS.find(d=>d.k===state.freeDirection)||{}).label},
+  {id:'sec-sound',    sum:'sum-sound',    defaultOpen:true,
+   text:()=>{
+     const t=TIMBRES.find(x=>x.k===state.timbre);
+     return (t?t.label:state.timbre)+' · '+Math.round(state.volume*100)+'%';
+   }},
+  {id:'sec-progress', sum:'sum-progress', defaultOpen:false,
+   text:()=>{
+     const b=[];
+     if(state.practice.rootMove==='fourths')b.push('cycle of 4ths');
+     if(state.practice.tempoStep>0)b.push('+'+state.practice.tempoStep+' BPM/pass');
+     return b.length?b.join(' · '):'off';
+   }},
+  {id:'metro-section',sum:'sum-metro',    defaultOpen:true,
+   text:()=>state.bpm+' BPM · '+state.sig+'/'+(state.sig===6||state.sig===7?'8':'4')},
+  {id:'sec-rhythm',   sum:'sum-rhythm',   defaultOpen:true,
+   text:()=>{
+     const nm={1:'quarters',2:'eighths',3:'triplets',4:'sixteenths'};
+     const fig=subdivListOn()&&subdivOrder().length>1
+       ? subdivOrder().length+' figures'
+       : nm[currentSubdiv()];
+     return fig+' · '+(state.clickFollowsFigure?'click follows':'click on beats');
+   }},
+];
+
+function sectionKey(s){return 'scaletune-sec-'+(s.group||s.id);}
+
+function refreshSectionSummaries(){
+  SECTIONS.forEach(s=>{
+    const el=document.getElementById(s.sum);
+    if(el)try{el.textContent='· '+s.text();}catch(e){el.textContent='';}
+  });
+}
+
+function initSections(){
+  SECTIONS.forEach(s=>{
+    const d=document.getElementById(s.id);
+    if(!d)return;
+    let saved=null;
+    try{saved=localStorage.getItem(sectionKey(s));}catch(e){}
+    d.open=saved===null?s.defaultOpen:saved==='1';
+    d.addEventListener('toggle',()=>{
+      try{localStorage.setItem(sectionKey(s),d.open?'1':'0');}catch(e){}
+      // mirror onto the other sections in the same group
+      if(s.group)SECTIONS.forEach(o=>{
+        if(o.group!==s.group||o.id===s.id)return;
+        const e=document.getElementById(o.id);
+        if(e&&e.open!==d.open)e.open=d.open;
+      });
+      refreshSectionSummaries();
+    });
+  });
+  refreshSectionSummaries();
+}
+
+/* ---------- theme ---------- */
+function currentTheme(){return document.documentElement.getAttribute('data-theme')||'dark';}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  const b=document.getElementById('theme-btn');
+  b.textContent=t==='dark'?'☀':'☾';
+  b.setAttribute('aria-label',t==='dark'?'Switch to light theme':'Switch to dark theme');
+}
+function toggleTheme(){
+  const t=currentTheme()==='dark'?'light':'dark';
+  applyTheme(t);
+  try{localStorage.setItem('scaletune-theme',t);}catch(e){}
+}
+
+/* ---------- init ---------- */
+applyTheme(currentTheme());
+initSections();
+buildTimbreRow();
+buildPitchLists();
+buildDroneGrid();
+buildFreeGrid();
+buildBeats();
+buildNoteLenRow();
+buildSubdivRow();
+buildClickModeRow();
+buildAlignRow();
+buildTempoStepRow();
+buildRootMoveRow();
+renderPitchPickers();
+// A wheel over a range input silently changes its value — that once moved
+// the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
+document.querySelectorAll('input[type=range]').forEach(el=>{
+  el.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
+});
+
+// Only registers on a secure origin; over plain http on a LAN address the
+// browser refuses and the app simply runs without the offline cache.
+// Skipped on localhost so a development reload always shows the current code —
+// a stale cached build silently wasted a lot of debugging time.
+if('serviceWorker' in navigator){
+  const dev=/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  window.addEventListener('load',()=>{
+    if(dev){
+      navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
+      if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{});
+      return;
+    }
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
