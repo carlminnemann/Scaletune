@@ -393,7 +393,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
   </div>
   <div class="beats-row" id="beats-row"></div>
-  <div class="beats-hint">tap a beat: accent → normal → silent</div>
+  <div class="beats-hint">tap a beat: accent it, then silence it</div>
   </div>
 </details>
 
@@ -918,7 +918,7 @@ function scheduleDisplay(s,when){
 }
 
 // Each beat is one of three: 'low' (the accent), 'high', or 'off'.
-const ACCENT_CYCLE=['low','high','off'];
+const ACCENT_CYCLE=['high','low','off'];   // plain -> accent -> silent
 function accentFor(i){return state.accents[i]||'high';}
 
 // 'sub' is the off-beat tick of a subdivision: same click, clearly subordinate
@@ -1261,7 +1261,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15c';
+const APP_VERSION='2026-08-15d';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2032,11 +2032,12 @@ function buildNoteLenRow(){
 }
 
 function buildBeats(){
-  // keep whatever the user set for the beats that still exist when the bar
-  // length changes; new beats default to plain high
+  // Every beat is plain by default: an accent imposes a bar on someone who may
+  // not want one. Tapping a beat is how you ask for it.
+  // Whatever was already set survives a change of bar length.
   const prev=state.accents||[];
   state.accents=[];
-  for(let i=0;i<state.sig;i++)state.accents[i]=prev[i]||(i===0?'low':'high');
+  for(let i=0;i<state.sig;i++)state.accents[i]=prev[i]||'high';
   renderBeats();
 }
 
