@@ -625,7 +625,7 @@ let schedPiano=[];
 let pendingTimeouts=[];
 let metroScheduler=null;
 let nextBeatTime=0,beatIdx=0,seqIdx=0,tickCount=0,subIdx=0,activeSubdiv=1;
-let roundsInFigure=0;
+let roundsInFigure=0,pendingNoteLenChange=false;
 const lookahead=0.12,schedInterval=25;
 
 
@@ -1060,7 +1060,7 @@ function startPlayback(){
       refreshSequence();
     }
     nextBeatTime=audioCtx.currentTime+0.12;
-    beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;activeSubdiv=currentSubdiv();
+    beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     if(subdivListOn())subdivIdx=0;
     if(metroScheduler)clearInterval(metroScheduler);
     metroScheduler=setInterval(schedulerTick,schedInterval);
@@ -1115,6 +1115,7 @@ function schedulerTick(){
     // A figure the player picks by hand takes effect on the next beat, so it
     // never stretches the beat it lands in.
     if(subIdx===0)activeSubdiv=currentSubdiv();
+    if(pendingNoteLenChange){pendingNoteLenChange=false;tickCount=0;}
     let note=null;
     if(!state.metroOnly&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
       if(seqIdx>=sequence.length){
@@ -1260,7 +1261,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15b';
+const APP_VERSION='2026-08-15c';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2017,7 +2018,15 @@ function buildNoteLenRow(){
     const b=document.createElement('button');
     b.className='pick-btn'+(n.k===state.noteLen?' active':'');
     b.textContent=n.label;
-    b.onclick=()=>{state.noteLen=n.k;buildNoteLenRow();updateAlignInfo();restartIfPlaying();};
+    b.onclick=()=>{
+      state.noteLen=n.k;buildNoteLenRow();updateAlignInfo();refreshSectionSummaries();
+      // Take effect where the exercise already is rather than restarting it.
+      // The note grid has to be realigned, or the next note would not fall due
+      // until the counter happened to reach a multiple of the new length and
+      // the drone would simply go quiet in the meantime.
+      if(state.playing||state.metroOnly)pendingNoteLenChange=true;
+      else restartIfPlaying();
+    };
     row.appendChild(b);
   });
 }
