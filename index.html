@@ -24,6 +24,7 @@
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
   --mode:#a78bfa;--mode-bg:#382a5e;
+  --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
@@ -40,6 +41,7 @@
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
   --mode:#6d28d9;--mode-bg:#ddcdf8;
+  --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;
@@ -51,7 +53,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 /* Lowercase runs smaller so the two capitals carry the name. */
 h1.wordmark{font-size:22px;font-weight:400;text-align:center;color:var(--text);
   letter-spacing:0.01em;line-height:1;white-space:nowrap}
-h1.wordmark .cap{font-size:36px}
+h1.wordmark .cap{font-size:36px;color:var(--brand)}
 @media(max-width:340px){h1.wordmark{font-size:19px}h1.wordmark .cap{font-size:31px}}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
@@ -1263,7 +1265,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15f';
+const APP_VERSION='2026-08-15g';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
