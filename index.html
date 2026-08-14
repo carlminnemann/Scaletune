@@ -103,6 +103,8 @@ details.fam[open] .fam-sum{display:none}
 /* What is sounding and what comes next. With the family boxes closed there is
    otherwise no way to see where you are in a rotation. */
 .rot-panel{padding:0.85rem 1rem}
+.rot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.rot-clear{margin-top:0;flex:0 0 auto}
 .rot-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .rot-chip{padding:4px 9px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg3);color:var(--text3);white-space:nowrap}
@@ -408,7 +410,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </details>
 <div class="status-bar" id="status-bar"></div>
 <div class="panel rot-panel" id="rotation-panel" style="display:none">
-  <div class="group-label">Rotation</div>
+  <div class="rot-head">
+    <span class="group-label" style="margin:0">Rotation</span>
+    <button class="clear-btn rot-clear" id="rot-clear" onclick="clearStudyList()">✕ Clear list</button>
+  </div>
   <div class="rot-chips" id="rot-chips"></div>
   <div class="rot-line" id="rot-now"></div>
   <div class="rot-line rot-next" id="rot-next"></div>
@@ -1255,7 +1260,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15a';
+const APP_VERSION='2026-08-15b';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -1553,6 +1558,17 @@ function rotationPreview(){
   };
 }
 
+// Emptying the rotation in one go. Removing a dozen items by tapping each one
+// off, inside boxes that have to be opened first, is not a reasonable ask.
+function clearStudyList(){
+  const list=activeList();
+  if(!list.length)return;
+  list.length=0;
+  studyIdx=0;
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  renderPitchPickers();refreshSequence();
+}
+
 function updateRotationPanelSoon(){setTimeout(updateRotationPanel,0);}
 
 function updateRotationPanel(){
@@ -1562,6 +1578,7 @@ function updateRotationPanel(){
   panel.style.display=progressing?'':'none';
   if(!progressing)return;
   const p=rotationPreview();
+  document.getElementById('rot-clear').style.display=(useListOn()&&p.items.length)?'':'none';
   const chips=document.getElementById('rot-chips');chips.innerHTML='';
   p.items.forEach((it,i)=>{
     const d=document.createElement('span');
