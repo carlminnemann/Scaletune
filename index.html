@@ -197,6 +197,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 .current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
 .current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
+.build-stamp{text-align:center;font-size:10px;color:var(--text3);opacity:0.5;margin-top:1.5rem;letter-spacing:0.05em}
 </style>
 <script>
 // Runs before first paint so the page never flashes the wrong theme.
@@ -420,6 +421,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <div class="current-note" id="current-note">—</div>
 <div class="current-freq" id="current-freq"></div>
+<div class="build-stamp" id="build-stamp"></div>
 </div>
 
 <!-- Bundled locally: a packaged app must not fetch executable code at runtime
@@ -1253,6 +1255,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
+const APP_VERSION='2026-08-15a';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2213,9 +2216,25 @@ if('serviceWorker' in navigator){
       if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{});
       return;
     }
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    // Reload once when a new worker takes over. Without this the page that is
+    // already on screen keeps showing whatever the previous worker served, so
+    // an update appears to do nothing however many times the app is reopened.
+    let reloading=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(reloading)return;
+      reloading=true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.update().catch(()=>{});                 // check on every launch
+      setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
+    }).catch(()=>{});
   });
 }
+
+// A visible build stamp, so it is possible to tell at a glance which version a
+// device is actually running instead of guessing.
+document.getElementById('build-stamp').textContent='build '+APP_VERSION;
 </script>
 </body>
 </html>
