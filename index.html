@@ -100,6 +100,17 @@ details.fam>.btn-wrap{padding:0 12px 12px}
 .fam-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic;
   color:var(--mode);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 details.fam[open] .fam-sum{display:none}
+/* What is sounding and what comes next. With the family boxes closed there is
+   otherwise no way to see where you are in a rotation. */
+.rot-panel{padding:0.85rem 1rem}
+.rot-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.rot-chip{padding:4px 9px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
+  background:var(--bg3);color:var(--text3);white-space:nowrap}
+.rot-chip.now{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600}
+.rot-chip.next{border-color:var(--mode);color:var(--mode)}
+.rot-line{font-size:12px;color:var(--text2);line-height:1.6}
+.rot-line b{color:var(--text);font-weight:600}
+.rot-next{color:var(--text3)}
 .step-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .step-lead{font-size:14px;color:var(--text2)}
 .step-unit{font-size:12px;color:var(--text3)}
@@ -395,6 +406,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 </details>
 <div class="status-bar" id="status-bar"></div>
+<div class="panel rot-panel" id="rotation-panel" style="display:none">
+  <div class="group-label">Rotation</div>
+  <div class="rot-chips" id="rot-chips"></div>
+  <div class="rot-line" id="rot-now"></div>
+  <div class="rot-line rot-next" id="rot-next"></div>
+</div>
+
 <div class="btn-row">
   <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
   <button class="metro-btn" id="metro-btn" onclick="toggleMetroOnly()" style="display:none">♩ Metro only</button>
@@ -1149,6 +1167,7 @@ function stopPlayback(){
 }
 
 function setPlayUI(on){
+  updateRotationPanelSoon();
   const b=document.getElementById('play-btn');
   b.textContent=on?'■ Stop':'▶ Start';
   b.classList.toggle('playing',on);
@@ -1496,7 +1515,64 @@ function advancePass(){
   }
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
+  updateRotationPanel();
   return figureChanged;
+}
+
+/* Works out what the next pass will be, mirroring the nesting in advancePass
+   above: the drift cycle has to finish before anything moves, then the figure,
+   then the mode, and the key only once those have come round.
+   Kept next to advancePass deliberately - if one changes the other must. */
+function rotationPreview(){
+  const list=activeList();
+  const figs=subdivListOn()?subdivOrder():null;
+  const needed=state.alignPasses?1:alignmentRounds();
+  const roundsLeft=Math.max(0,needed-roundsInFigure);
+  let sIdx=studyIdx,dIdx=subdivIdx,root=state.root,moved=false;
+  if(roundsLeft<=1){                 // this pass finishes the drift, so things move
+    let wrapped=true;moved=true;
+    if(figs&&figs.length>1){dIdx=(dIdx+1)%figs.length;wrapped=(dIdx===0);}
+    if(wrapped&&useListOn()&&list.length>1){sIdx=(sIdx+1)%list.length;wrapped=(sIdx===0);}
+    if(wrapped&&state.practice.rootMove==='fourths')root=NOTES[(NOTES.indexOf(root)+5)%12];
+  }
+  const figName=v=>({1:'quarters',2:'eighths',3:'triplets',4:'sixteenths'})[v]||'';
+  const describe=(item,fig,rt)=>{
+    const bits=[];
+    bits.push(bareName(NOTES.indexOf(rt))+' '+(item?item.name:(state.mode==='scale'?state.scaleName:state.chordName)||'—'));
+    if(figs||state.subdiv!==1)bits.push(figName(fig));
+    return bits.filter(Boolean).join(' · ');
+  };
+  return {
+    now:describe(list[studyIdx],figs?figs[subdivIdx%figs.length]:state.subdiv,state.root),
+    next:describe(list[sIdx],figs?figs[dIdx%figs.length]:state.subdiv,root),
+    roundsLeft, needed, moved,
+    items:list, currentIdx:studyIdx, nextIdx:sIdx
+  };
+}
+
+function updateRotationPanelSoon(){setTimeout(updateRotationPanel,0);}
+
+function updateRotationPanel(){
+  const panel=document.getElementById('rotation-panel');if(!panel)return;
+  const isPitch=state.mode==='scale'||state.mode==='arpeggio';
+  const progressing=isPitch&&(listEnabled()||subdivListOn()||state.practice.rootMove==='fourths');
+  panel.style.display=progressing?'':'none';
+  if(!progressing)return;
+  const p=rotationPreview();
+  const chips=document.getElementById('rot-chips');chips.innerHTML='';
+  p.items.forEach((it,i)=>{
+    const d=document.createElement('span');
+    d.className='rot-chip'+(i===p.currentIdx?' now':(i===p.nextIdx&&p.moved?' next':''));
+    d.textContent=(i+1)+'. '+it.name;
+    chips.appendChild(d);
+  });
+  const playing=state.playing&&!state.metroOnly;
+  document.getElementById('rot-now').innerHTML=
+    (playing?'Now: ':'Starts on: ')+'<b>'+p.now+'</b>'+
+    (p.needed>1?'  · round '+Math.min(p.needed,roundsInFigure+1)+' of '+p.needed:'');
+  document.getElementById('rot-next').textContent=
+    p.moved?'Next: '+p.next
+           :'Next: same, '+(p.roundsLeft-1)+' more round'+(p.roundsLeft-1===1?'':'s')+' before it moves on';
 }
 
 function buildRootMoveRow(){
@@ -1749,6 +1825,7 @@ function renderPitchPickers(){
   paintSetButtons('[data-chord]','chord','arpeggio');
   buildListModeRow();
   refreshFamilySummaries();
+  updateRotationPanel();
 
   const spanRow=document.getElementById('span-row');spanRow.innerHTML='';
   SPANS.forEach(s=>{
@@ -1797,6 +1874,7 @@ function renderPitchPickers(){
   updateInfo();
   updatePracticeInfo();
   refreshSectionSummaries();
+  updateRotationPanel();
 }
 
 function updateInfo(){
