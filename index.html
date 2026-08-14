@@ -84,6 +84,15 @@ details.sec[open] .sec-sum{display:none}
 .pick-btn{padding:5px 9px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
 .pick-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .pick-btn.disabled{opacity:0.32;cursor:not-allowed}
+.step-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.step-lead{font-size:14px;color:var(--text2)}
+.step-unit{font-size:12px;color:var(--text3)}
+.step-input{width:62px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:center;
+  border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);
+  -moz-appearance:textfield}
+.step-input::-webkit-outer-spin-button,.step-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.step-input.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.step-input:focus{outline:none;border-color:var(--blue)}
 /* green marks the item sounding right now as the study list advances */
 .pick-btn.now{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .pick-btn .idx{display:inline-block;min-width:12px;margin-right:5px;font-size:9px;font-weight:700;
@@ -255,8 +264,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="sec-body">
       <div class="group-label">Root Movement</div>
       <div class="btn-wrap" id="rootmove-row"></div>
-      <div class="group-label">Speed Up · BPM per pass</div>
-      <div class="btn-wrap" id="tempostep-row"></div>
+      <div class="group-label">Speed Up</div>
+      <div class="step-row">
+        <button class="pick-btn" id="tempostep-off">Off</button>
+        <span class="step-lead">+</span>
+        <input class="step-input" id="tempostep-input" type="number" inputmode="numeric"
+               min="1" max="60" step="1" value="5" aria-label="BPM added each pass">
+        <span class="step-unit">BPM per pass</span>
+      </div>
       <div class="info-line" id="practice-info"></div>
     </div>
   </details>
@@ -533,8 +548,7 @@ let state={
   playing:false,metroOnly:false
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
-const TEMPO_STEPS=[{k:0,label:'Off'}].concat(
-  [2,3,4,5,6,7,8,9,10].map(n=>({k:n,label:'+'+n})));
+const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
 // Clicks per beat. The beat itself never moves — only how finely it is divided.
 const SUBDIVS=[
   {k:1,label:'♩ Quarter'},
@@ -1602,15 +1616,22 @@ function updateAlignInfo(){
       +' (offsets '+alignmentOffsets().join(', ')+')';
 }
 
+// The step is typed rather than picked from a list: any whole number of BPM is
+// a legitimate ramp, and a fixed list of ten buttons both crowded the panel and
+// still left out whatever the player actually wanted.
 function buildTempoStepRow(){
-  const row=document.getElementById('tempostep-row');row.innerHTML='';
-  TEMPO_STEPS.forEach(t=>{
-    const b=document.createElement('button');
-    b.className='pick-btn'+(t.k===state.practice.tempoStep?' active':'');
-    b.textContent=t.label;
-    b.onclick=()=>{state.practice.tempoStep=t.k;buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();};
-    row.appendChild(b);
-  });
+  const off=document.getElementById('tempostep-off');
+  const inp=document.getElementById('tempostep-input');
+  if(!off||!inp)return;
+  const on=state.practice.tempoStep>0;
+  off.classList.toggle('active',!on);
+  inp.classList.toggle('active',on);
+  if(on)inp.value=state.practice.tempoStep;
+}
+
+function setTempoStep(n){
+  state.practice.tempoStep=Math.max(0,Math.min(TEMPO_STEP_MAX,Math.round(n)||0));
+  buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
 }
 
 function updatePracticeInfo(){
@@ -1986,6 +2007,33 @@ document.querySelectorAll('input[type=range]').forEach(el=>{
   el.addEventListener('blur',settle);
   el.addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();settle();el.blur();}
+  });
+})();
+
+/* Speed Up: typing a number turns the ramp on, the Off button turns it off.
+   Like the tempo field, the value is clamped on blur so a half-typed number is
+   not rewritten under the player's fingers. */
+(function(){
+  const off=document.getElementById('tempostep-off');
+  const inp=document.getElementById('tempostep-input');
+  off.onclick=()=>{setTempoStep(0);inp.blur();};
+  inp.addEventListener('input',()=>{
+    const v=parseInt(inp.value,10);
+    if(!isNaN(v)&&v>=1&&v<=TEMPO_STEP_MAX){
+      state.practice.tempoStep=v;
+      buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
+    }
+  });
+  const settle=()=>{
+    let v=parseInt(inp.value,10);
+    if(isNaN(v)||v<1){inp.value=state.practice.tempoStep||5;return;}
+    setTempoStep(v);
+  };
+  inp.addEventListener('blur',settle);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();settle();inp.blur();}});
+  inp.addEventListener('focus',()=>{
+    // focusing the field is itself the way to switch the ramp on
+    if(!state.practice.tempoStep)setTempoStep(parseInt(inp.value,10)||5);
   });
 })();
 
