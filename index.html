@@ -129,7 +129,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
 
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
-.bpm-big{font-size:38px;font-weight:300;text-align:center;color:var(--text);margin-bottom:2px}
+/* the tempo is an input so it can be typed, but styled as the big readout */
+.bpm-big{font-size:38px;font-weight:300;text-align:center;color:var(--text);margin-bottom:2px;
+  width:100%;background:transparent;border:1px solid transparent;border-radius:var(--r);
+  font-family:inherit;padding:0;-moz-appearance:textfield}
+.bpm-big::-webkit-outer-spin-button,.bpm-big::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bpm-big:focus{outline:none;border-color:var(--blue);background:var(--bg3)}
 .bpm-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
 .tap-btn{width:100%;margin-top:8px;padding:9px;font-size:13px;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
@@ -185,10 +190,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <!-- ============ DRONE ============ -->
 <div id="drone-section">
-  <div class="section-label">Note</div>
-  <div class="note-grid" id="drone-grid"></div>
-  <div class="section-label">Octave</div>
-  <div class="btn-wrap" id="drone-oct-row" style="margin-bottom:1.25rem"></div>
+  <div class="section-label">Notes</div>
+  <div class="legend">
+    <span>tap — add or remove a note</span>
+    <span>+/− — octave</span>
+    <span>several notes sound together</span>
+  </div>
+  <div class="note-grid free-grid" id="drone-grid"></div>
+  <button class="clear-btn" onclick="clearDrone()" style="margin-bottom:1.25rem">✕ Clear</button>
 </div>
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
@@ -304,7 +313,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="sec-body">
   <div class="two-col">
     <div>
-      <div class="bpm-big" id="bpm-display">80</div>
+      <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="30" max="240" step="1" value="80" aria-label="Beats per minute">
       <div class="bpm-label">BPM</div>
       <input type="range" id="bpm-slider" min="30" max="240" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
       <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
@@ -503,7 +512,7 @@ function rootLabelFor(pc){
 
 let state={
   mode:'drone',
-  droneNote:null,droneOct:3,
+  droneSelected:{},          // pitch class -> octave; a drone may be a chord
   root:'C',rootOct:3,
   scaleGroup:null,scaleName:null,
   chordGroup:null,chordName:null,
@@ -541,7 +550,7 @@ let studyIdx=0,subdivIdx=0;
 const NOTE_LENS=[{k:'sub',label:'Per figure'},{k:'beat',label:'Per beat'},{k:'bar',label:'Per bar'}];
 
 let sequence=[];
-const FREE_DEFAULT_OCT=3;
+const FREE_DEFAULT_OCT=3,DRONE_DEFAULT_OCT=3;
 let audioCtx=null,masterGain=null;
 let liveNodes=[];          // continuously-sounding drone nodes
 let schedNodes=[];         // nodes scheduled for upcoming beats
@@ -551,7 +560,7 @@ let metroScheduler=null;
 let nextBeatTime=0,beatIdx=0,seqIdx=0,tickCount=0,subIdx=0,activeSubdiv=1;
 let roundsInFigure=0;
 const lookahead=0.12,schedInterval=25;
-let pianoInstrument=null,pianoLoading=false,pianoReady=false,pianoCallbacks=[];
+
 
 /* ---------- pitch helpers ---------- */
 function semitone(pc,oct){return NOTES.indexOf(pc)+oct*12;}
@@ -616,39 +625,57 @@ function initAudio(){
 // The sampled piano is quiet next to a raw oscillator: the samples peak well
 // below full scale and carry a natural decay. Measured against a sine at the
 // same volume setting, this brings them to a comparable level.
-const PIANO_GAIN=17;
+/* ---------- sampled instruments ----------
+   Both voices come from the same MIT-licensed FluidR3_GM set that is bundled
+   in vendor/. Gains are measured against a sine at the same volume, since raw
+   samples peak well below full scale. The cello is looped: its sample runs dry
+   after about three seconds, which is fine for a sequence note but useless for
+   a drone that has to hold indefinitely.                                     */
+const SAMPLED={
+  'piano-real':{sf:'acoustic_grand_piano',file:'vendor/acoustic_grand_piano-mp3.js',
+                gain:17,label:'piano',loopForDrone:false},
+  'cello':     {sf:'cello',file:'vendor/cello-mp3.js',
+                gain:13,label:'cello',loopForDrone:true},
+};
+const samplers={};   // timbre key -> {inst,ready,loading,queue}
 
-function pianoAvailable(){return typeof Soundfont!=='undefined';}
+function samplerFor(k){
+  if(!samplers[k])samplers[k]={inst:null,ready:false,loading:false,queue:[]};
+  return samplers[k];
+}
+function isSampled(k){return !!SAMPLED[k];}
+function samplerReady(k){return isSampled(k)&&samplerFor(k).ready;}
+function soundfontAvailable(){return typeof Soundfont!=='undefined';}
 
-function loadPiano(cb){
-  if(pianoReady){cb&&cb();return;}
-  // Queue rather than drop: the piano is the default voice in the sequence
-  // modes, so pressing Start during the load is the common case, not an edge one.
-  if(pianoLoading){if(cb)pianoCallbacks.push(cb);return;}
-  // If the samples file is missing, referencing Soundfont would throw and
-  // leave the UI stuck on "Loading...".
-  if(!pianoAvailable()){
-    setStatus('Piano samples are unavailable — the other timbres still work.');
+function loadSampler(k,cb){
+  const spec=SAMPLED[k];if(!spec)return;
+  const S=samplerFor(k);
+  if(S.ready){cb&&cb();return;}
+  // Queue rather than drop: these are default voices, so pressing Start during
+  // the load is the common case, not an edge one.
+  if(S.loading){if(cb)S.queue.push(cb);return;}
+  if(!soundfontAvailable()){
+    setStatus('Samples are unavailable — the other timbres still work.');
     return;
   }
-  pianoLoading=true;
-  if(cb)pianoCallbacks.push(cb);
-  setStatus('Loading piano samples...');
+  S.loading=true;
+  if(cb)S.queue.push(cb);
+  setStatus('Loading '+spec.label+' samples...');
   initAudio();
   const fail=()=>{
-    pianoLoading=false;pianoCallbacks=[];
-    setStatus('Could not load the piano — the other timbres still work.');
+    S.loading=false;S.queue=[];
+    setStatus('Could not load the '+spec.label+' — the other timbres still work.');
   };
   try{
-    Soundfont.instrument(audioCtx,'acoustic_grand_piano',{
+    Soundfont.instrument(audioCtx,spec.sf,{
       soundfont:'FluidR3_GM',
-      destination:masterGain,          // was going straight to the speakers,
-      nameToUrl:()=>'vendor/acoustic_grand_piano-mp3.js'
+      destination:masterGain,          // so one volume control governs everything
+      nameToUrl:()=>spec.file
     }).then(inst=>{
-      pianoInstrument=inst;pianoReady=true;pianoLoading=false;
-      setStatus('Piano loaded ✓');
+      S.inst=inst;S.ready=true;S.loading=false;
+      setStatus(spec.label.charAt(0).toUpperCase()+spec.label.slice(1)+' loaded ✓');
       setTimeout(()=>setStatus(''),2000);
-      const queued=pianoCallbacks;pianoCallbacks=[];
+      const queued=S.queue;S.queue=[];
       queued.forEach(f=>{try{f();}catch(e){}});
     }).catch(fail);
   }catch(e){fail();}
@@ -665,31 +692,50 @@ function stopAllAudio(){
 }
 
 /* ---------- continuous drone (Drone mode) ---------- */
-function startContinuous(s){
+// Sounds every selected drone note at once, so the drone can be a chord.
+// Level is divided across the notes: four oscillators at full gain would clip.
+function startContinuous(){
   killNodes(liveNodes);
   schedPiano.forEach(n=>{try{n.stop();}catch(e){}});schedPiano=[];
-  const freq=freqOf(s),now=audioCtx.currentTime;
-  if(state.timbre==='piano-real'){
-    if(pianoReady){const n=pianoInstrument.play(stdName(s),now,{gain:PIANO_GAIN});if(n)schedPiano.push(n);}
-    return;
-  }
-  if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8);return;}
-  const osc=audioCtx.createOscillator();
-  osc.type=state.timbre;osc.frequency.value=freq;
-  const g=audioCtx.createGain();
-  g.gain.setValueAtTime(0,now);
-  g.gain.linearRampToValueAtTime(1,now+0.02);
-  osc.connect(g);g.connect(masterGain);osc.start(now);
-  liveNodes.push(osc,g);
+  const list=droneSemitones();
+  if(!list.length)return;
+  const now=audioCtx.currentTime;
+  const share=1/Math.sqrt(list.length);   // equal-power, not equal-amplitude
+  list.forEach(s=>{
+    const freq=freqOf(s);
+    if(isSampled(state.timbre)){
+      const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
+      if(S.ready){
+        const n=S.inst.play(stdName(s),now,{gain:spec.gain*share,loop:spec.loopForDrone});
+        if(n)schedPiano.push(n);
+      }
+      return;
+    }
+    if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8,share);return;}
+    const osc=audioCtx.createOscillator();
+    osc.type=state.timbre;osc.frequency.value=freq;
+    const g=audioCtx.createGain();
+    g.gain.setValueAtTime(0,now);
+    g.gain.linearRampToValueAtTime(share,now+0.02);
+    osc.connect(g);g.connect(masterGain);osc.start(now);
+    liveNodes.push(osc,g);
+  });
+}
+
+// Selected drone notes as absolute semitones, low to high.
+function droneSemitones(){
+  return Object.keys(state.droneSelected)
+    .map(pc=>semitone(pc,state.droneSelected[pc])).sort((a,b)=>a-b);
 }
 
 /* ---------- scheduled note (Scale / Arpeggio / Free) ---------- */
-function buildPianoSynth(freq,when,bucket,decay){
+function buildPianoSynth(freq,when,bucket,decay,share){
+  const lvl=share===undefined?1:share;
   const env=audioCtx.createGain();
   env.connect(masterGain);
   env.gain.setValueAtTime(0,when);
-  env.gain.linearRampToValueAtTime(1,when+0.005);
-  env.gain.setTargetAtTime(0.35,when+0.005,0.07);
+  env.gain.linearRampToValueAtTime(lvl,when+0.005);
+  env.gain.setTargetAtTime(0.35*lvl,when+0.005,0.07);
   env.gain.setTargetAtTime(0,when+0.4,decay);
   [[1,1],[2,0.55],[3,0.3],[4,0.16],[5,0.09],[6,0.05],[7,0.025],[8,0.01]].forEach(([r,g])=>{
     const osc=audioCtx.createOscillator();
@@ -705,7 +751,11 @@ function buildPianoSynth(freq,when,bucket,decay){
 function scheduleTone(s,when,dur){
   const freq=freqOf(s);
   if(state.timbre==='piano-real'){
-    if(pianoReady){const n=pianoInstrument.play(stdName(s),when,{gain:PIANO_GAIN,duration:dur});if(n)schedPiano.push(n);}
+    const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
+    if(S.ready){
+      const n=S.inst.play(stdName(s),when,{gain:spec.gain,duration:dur});
+      if(n)schedPiano.push(n);
+    }
   } else if(state.timbre==='piano-synth'){
     buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
   } else {
@@ -867,12 +917,7 @@ function startPlayback(){
   ready.then(()=>{
     if(!state.playing&&!state.metroOnly)return;   // stopped while resuming
     if(state.mode==='drone'){
-      if(state.droneNote){
-        const s=semitone(state.droneNote,state.droneOct);
-        document.getElementById('current-note').textContent=nameOf(s);
-        document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
-        startContinuous(s);
-      }
+      if(droneSemitones().length){startContinuous();updateDroneReadout();}
       return;
     }
     if(!state.metroOnly){
@@ -1010,7 +1055,7 @@ function togglePlay(){
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
   initAudio();
-  if(state.mode==='drone'&&!state.droneNote){setStatus('Pick a note first.');return;}
+  if(state.mode==='drone'&&!droneSemitones().length){setStatus('Pick at least one note first.');return;}
   if(state.mode!=='drone'){
     refreshSequence();
     if(!sequence.length){setStatus(state.mode==='free'?'Select some notes first.':'Pick a scale or chord first.');return;}
@@ -1020,11 +1065,12 @@ function togglePlay(){
     const mb=document.getElementById('metro-btn');
     mb.textContent='♩ Metro only';mb.classList.remove('playing');
   }
-  if(state.timbre==='piano-real'&&!pianoReady){
+  if(isSampled(state.timbre)&&!samplerReady(state.timbre)){
+    const S=samplerFor(state.timbre);
     // a second press while a start is already queued would start twice
-    if(pianoLoading&&pianoCallbacks.length){setStatus('Starting as soon as the piano is ready...');return;}
-    loadPiano(()=>{state.playing=true;setPlayUI(true);startPlayback();});
-    if(pianoLoading)setStatus('Starting as soon as the piano is ready...');
+    if(S.loading&&S.queue.length){setStatus('Starting as soon as the samples are ready...');return;}
+    loadSampler(state.timbre,()=>{state.playing=true;setPlayUI(true);startPlayback();});
+    if(samplerFor(state.timbre).loading)setStatus('Starting as soon as the samples are ready...');
     return;
   }
   state.playing=true;setPlayUI(true);startPlayback();
@@ -1052,7 +1098,7 @@ function restartIfPlaying(){
 }
 
 /* ---------- simple controls ---------- */
-function updateBPM(v){state.bpm=parseInt(v);document.getElementById('bpm-display').textContent=v;tapTimes=[];refreshSectionSummaries();}
+function updateBPM(v){state.bpm=parseInt(v);document.getElementById('bpm-display').value=v;tapTimes=[];refreshSectionSummaries();}
 function updateVol(v){
   state.volume=parseFloat(v);
   document.getElementById('vol-out').textContent=Math.round(v*100)+'%';
@@ -1072,6 +1118,7 @@ function setSig(n,btn){
 // within seconds, so they are offered only for the note-sequence modes.
 const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
+  {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
   {k:'triangle',   label:'Triangle',    decays:false},
@@ -1101,8 +1148,8 @@ function setTimbre(t){
   // remember the choice so returning to this mode family restores it
   if(state.mode==='drone')state.waveTimbre=t;else state.seqTimbre=t;
   buildTimbreRow();
-  if(t==='piano-real'&&!pianoReady&&!pianoLoading)loadPiano();
-  if(state.playing&&state.mode==='drone'&&state.droneNote)startContinuous(semitone(state.droneNote,state.droneOct));
+  if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading)loadSampler(t);
+  if(state.playing&&state.mode==='drone')startContinuous();
 }
 
 /* ---------- mode switching ---------- */
@@ -1133,7 +1180,7 @@ function setMode(m){
   state.timbre=isDrone?state.waveTimbre:state.seqTimbre;
   if(!availableTimbres().some(t=>t.k===state.timbre))state.timbre=DEFAULT_WAVE;
   buildTimbreRow();
-  if(state.timbre==='piano-real'&&!pianoReady&&!pianoLoading)loadPiano();
+  if(isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading)loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();}
   if(m==='free')buildFreeGrid();
   setStatus('');
@@ -1144,39 +1191,75 @@ function setMode(m){
 function buildDroneGrid(){
   const grid=document.getElementById('drone-grid');grid.innerHTML='';
   NOTES.forEach(n=>{
-    const b=document.createElement('button');
-    b.className='note-btn'+(n===state.droneNote?' active':'');
-    b.innerHTML='<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>';
-    b.onclick=()=>{
-      state.droneNote=(state.droneNote===n)?null:n;
-      buildDroneGrid();
-      if(state.playing){
-        if(state.droneNote){
-          const s=semitone(state.droneNote,state.droneOct);
-          document.getElementById('current-note').textContent=nameOf(s);
-          document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
-          startContinuous(s);
-        } else {state.playing=false;setPlayUI(false);stopPlayback();}
-      }
-    };
-    grid.appendChild(b);
+    const d=document.createElement('div');
+    d.id='drone-'+n.replace('#','s');
+    grid.appendChild(d);
   });
-  const row=document.getElementById('drone-oct-row');row.innerHTML='';
-  for(let o=OCT_MIN;o<=OCT_MAX;o++){
-    const b=document.createElement('button');
-    b.className='pick-btn'+(o===state.droneOct?' active':'');
-    b.textContent=o;
-    b.onclick=()=>{
-      state.droneOct=o;buildDroneGrid();
-      if(state.playing&&state.droneNote){
-        const s=semitone(state.droneNote,state.droneOct);
-        document.getElementById('current-note').textContent=nameOf(s);
-        document.getElementById('current-freq').textContent=freqOf(s).toFixed(2)+' Hz';
-        startContinuous(s);
-      }
+  NOTES.forEach(renderDroneNote);
+  updateDroneReadout();
+}
+
+function renderDroneNote(n){
+  const div=document.getElementById('drone-'+n.replace('#','s'));if(!div)return;
+  const sel=n in state.droneSelected;
+  div.className='note-btn'+(sel?' active':'');
+  // the octave stepper only exists once the note is armed, so nudging it can
+  // never add a note that was not chosen
+  div.innerHTML=
+    '<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>'+
+    (sel
+      ?'<div class="oct-controls">'+
+         '<button class="oct-btn" data-oct="-1">−</button>'+
+         '<span class="oct-val">Oct '+state.droneSelected[n]+'</span>'+
+         '<button class="oct-btn" data-oct="1">+</button>'+
+       '</div>'
+      :'<div class="oct-controls"><span class="oct-val">—</span></div>');
+  div.querySelectorAll('.oct-btn').forEach(b=>{
+    b.onpointerdown=e=>{
+      e.stopPropagation();e.preventDefault();
+      changeDroneOct(n,parseInt(b.dataset.oct));
     };
-    row.appendChild(b);
-  }
+  });
+  div.onpointerdown=e=>{
+    if(e.target.classList.contains('oct-btn'))return;
+    toggleDrone(n);
+  };
+}
+
+function toggleDrone(n){
+  if(n in state.droneSelected)delete state.droneSelected[n];
+  else state.droneSelected[n]=DRONE_DEFAULT_OCT;
+  buildDroneGrid();
+  refreshDrone();
+}
+
+function changeDroneOct(n,dir){
+  if(!(n in state.droneSelected))return;
+  state.droneSelected[n]=Math.max(OCT_MIN,Math.min(OCT_MAX,state.droneSelected[n]+dir));
+  buildDroneGrid();
+  refreshDrone();
+}
+
+function clearDrone(){
+  state.droneSelected={};
+  buildDroneGrid();
+  refreshDrone();
+}
+
+// Re-voice a sounding drone, or stop cleanly once nothing is left selected.
+function refreshDrone(){
+  if(!state.playing)return;
+  if(!droneSemitones().length){state.playing=false;setPlayUI(false);stopPlayback();return;}
+  startContinuous();
+}
+
+function updateDroneReadout(){
+  const list=droneSemitones();
+  const note=document.getElementById('current-note'),freq=document.getElementById('current-freq');
+  if(state.mode!=='drone'||!state.playing)return;
+  note.textContent=list.map(nameOf).join(' ');
+  freq.textContent=list.length===1?freqOf(list[0]).toFixed(2)+' Hz'
+                  :list.length+' notes sounding';
 }
 
 /* ---------- scale / arpeggio UI ---------- */
@@ -1295,7 +1378,7 @@ function advancePass(){
     if(next!==state.bpm){
       state.bpm=next;
       document.getElementById('bpm-slider').value=next;
-      document.getElementById('bpm-display').textContent=next;
+      document.getElementById('bpm-display').value=next;
     }
   }
   refreshSequence();
@@ -1373,7 +1456,7 @@ let tapTimes=[],tapResetTimer=null;
 function setBpm(v){
   state.bpm=Math.max(30,Math.min(BPM_MAX,Math.round(v)));
   document.getElementById('bpm-slider').value=state.bpm;
-  document.getElementById('bpm-display').textContent=state.bpm;
+  document.getElementById('bpm-display').value=state.bpm;
   refreshSectionSummaries();
 }
 
@@ -1812,6 +1895,39 @@ renderPitchPickers();
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{
   el.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
+});
+
+/* Typed tempo. The value is applied as it is typed but only clamped on blur or
+   Enter — clamping mid-keystroke would rewrite "1" into "30" before the second
+   digit of "120" could be typed. */
+(function(){
+  const el=document.getElementById('bpm-display');
+  el.addEventListener('input',()=>{
+    const v=parseInt(el.value,10);
+    if(!isNaN(v)&&v>=30&&v<=BPM_MAX){state.bpm=v;tapTimes=[];refreshSectionSummaries();}
+  });
+  const settle=()=>{
+    let v=parseInt(el.value,10);
+    if(isNaN(v))v=state.bpm;
+    setBpm(v);
+    document.getElementById('bpm-slider').value=state.bpm;
+  };
+  el.addEventListener('blur',settle);
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();settle();el.blur();}
+  });
+})();
+
+/* Space starts and stops, for desktop use. Ignored while typing, and while a
+   button has focus, where the browser already treats Space as a press. */
+document.addEventListener('keydown',e=>{
+  if(e.code!=='Space'&&e.key!==' ')return;
+  const t=e.target;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||
+         t.tagName==='BUTTON'||t.tagName==='SUMMARY'||t.isContentEditable))return;
+  if(e.repeat)return;
+  e.preventDefault();
+  togglePlay();
 });
 
 // Only registers on a secure origin; over plain http on a LAN address the

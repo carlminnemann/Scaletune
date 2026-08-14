@@ -14,9 +14,14 @@ Copyright (c) 2015 Daniel Gómez Blasco (danigb)
 License: MIT
 Source: https://github.com/danigb/soundfont-player
 
-## FluidR3 GM — acoustic grand piano samples
-`vendor/acoustic_grand_piano-mp3.js` — 2.5 MB, 52 samples (A0–C8, natural
-notes only; the player transposes for the accidentals)
+## FluidR3 GM — instrument samples
+`vendor/acoustic_grand_piano-mp3.js` — 2.5 MB, 52 samples
+`vendor/cello-mp3.js` — 2.9 MB, 52 samples
+
+Both cover A0–C8, natural notes only; the player transposes for the
+accidentals. The cello is played looped in Drone mode: its sample runs dry
+after roughly three seconds, which suits a sequence note but not a drone that
+has to hold indefinitely.
 
 FluidR3 GM soundfont by Frank Wen.
 MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.

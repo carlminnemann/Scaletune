@@ -8,13 +8,14 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v2';
+const CACHE = 'scaletune-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './vendor/soundfont-player.min.js',
   './vendor/acoustic_grand_piano-mp3.js',
+  './vendor/cello-mp3.js',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
