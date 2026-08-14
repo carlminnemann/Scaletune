@@ -193,6 +193,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beat-dot.active-beat{background:var(--yellow);border-color:var(--yellow)}
 .beat-dot.acc-low.active-beat{background:var(--red);border-color:var(--red)}
 .beat-dot.acc-off.active-beat{background:transparent;border-color:var(--text3);opacity:0.8}
+/* the cross-rhythm dots are smaller and squared off, so the two rows never
+   read as one grid */
+.beat-dot.poly{width:22px;height:22px;border-radius:6px}
+.beat-dot.poly.active-beat{background:var(--brand);border-color:var(--brand)}
+.beat-dot.poly.acc-low.active-beat{background:var(--mode);border-color:var(--mode)}
 .beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:1.25rem}
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
@@ -398,6 +403,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
   <div class="beats-row" id="beats-row"></div>
   <div class="beats-hint">tap a beat: accent it, then silence it</div>
+  <div class="section-label">Cross-rhythm</div>
+  <div class="step-row" style="margin-bottom:6px">
+    <button class="pick-btn" id="poly-off">Off</button>
+    <input class="step-input" id="poly-input" type="number" inputmode="numeric"
+           min="2" max="16" step="1" value="5" aria-label="Pulses across the bar">
+    <span class="step-unit" id="poly-label">across the bar</span>
+  </div>
+  <div class="beats-row" id="poly-row"></div>
+  <div class="beats-hint" id="poly-hint" style="display:none">the second layer, spread evenly over the same bar</div>
   </div>
 </details>
 
@@ -597,6 +611,8 @@ let state={
   timbre:'sine',waveTimbre:'sine',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
   bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  // second metronome layer: poly pulses spread evenly across the same bar
+  poly:0,polyAccents:[],polyVol:0.9,
   // Practice progressions: what changes each time the sequence comes round.
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
@@ -928,18 +944,38 @@ function accentFor(i){return state.accents[i]||'high';}
 // 'sub' is the off-beat tick of a subdivision: same click, clearly subordinate
 // so the beat still reads as the beat.
 const CLICK_TONE={low:{f:760,g:1},high:{f:1250,g:0.72},sub:{f:1050,g:0.34}};
+// The cross-rhythm sits below the main click and rings a little longer, so the
+// two layers separate by ear even when they land together on the downbeat.
+const POLY_TONE={low:{f:440,g:0.95,d:0.022},high:{f:620,g:0.62,d:0.018}};
+
+function clickBuffer(f,decay){
+  const sr=audioCtx.sampleRate;
+  const buf=audioCtx.createBuffer(1,Math.floor(sr*Math.max(0.04,decay*3)),sr);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.sin(2*Math.PI*f*i/sr)*Math.exp(-i/(sr*decay));
+  return buf;
+}
+
+function playClickBuffer(buf,time,gain){
+  const src=audioCtx.createBufferSource();
+  const g=audioCtx.createGain();g.gain.value=gain;
+  src.buffer=buf;src.connect(g);g.connect(audioCtx.destination);src.start(time);
+  schedNodes.push(src,g);
+}
 
 function scheduleClick(time,kind){
   const tone=CLICK_TONE[kind];
   if(!tone)return;                       // 'off' — silent beat
-  const buf=audioCtx.createBuffer(1,Math.floor(audioCtx.sampleRate*0.04),audioCtx.sampleRate);
-  const data=buf.getChannelData(0);
-  for(let i=0;i<data.length;i++) data[i]=Math.sin(2*Math.PI*tone.f*i/audioCtx.sampleRate)*Math.exp(-i/(audioCtx.sampleRate*0.01));
-  const src=audioCtx.createBufferSource();
-  const g=audioCtx.createGain();g.gain.value=state.clickVol*tone.g;
-  src.buffer=buf;src.connect(g);g.connect(audioCtx.destination);src.start(time);
-  schedNodes.push(src,g);
+  playClickBuffer(clickBuffer(tone.f,0.01),time,state.clickVol*tone.g);
 }
+
+function schedulePolyClick(time,kind){
+  const tone=POLY_TONE[kind];
+  if(!tone)return;
+  playClickBuffer(clickBuffer(tone.f,tone.d),time,state.clickVol*tone.g*state.polyVol);
+}
+
+function polyAccentFor(i){return state.polyAccents[i]||'high';}
 
 // Which subdivision is in force right now — a fixed choice, or the current
 // step of the table-of-time sequence.
@@ -1141,6 +1177,17 @@ function schedulerTick(){
     if(subIdx===0){
       scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
+      // At the top of a bar, lay out the cross-rhythm across that bar. Its
+      // pulses do not line up with the subdivision grid, so they are placed
+      // by time rather than counted in ticks.
+      if(beatIdx===0&&state.poly>1){
+        const barLen=spb*state.sig;
+        for(let k=0;k<state.poly;k++){
+          const t=nextBeatTime+barLen*k/state.poly;
+          schedulePolyClick(t,polyAccentFor(k));
+          schedulePolyFlash(k,t);
+        }
+      }
     } else if(state.clickFollowsFigure&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
@@ -1251,7 +1298,7 @@ function setSig(n,btn){
   state.sig=n;
   document.querySelectorAll('.sig-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  buildBeats();updateAlignInfo();restartIfPlaying();
+  buildBeats();renderPolyBeats();updateAlignInfo();restartIfPlaying();
 }
 
 // A drone has to sustain indefinitely; both piano voices decay to silence
@@ -1265,7 +1312,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15g';
+const APP_VERSION='2026-08-15h';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2035,6 +2082,50 @@ function buildNoteLenRow(){
   });
 }
 
+function buildPolyBeats(){
+  const prev=state.polyAccents||[];
+  state.polyAccents=[];
+  for(let i=0;i<state.poly;i++)state.polyAccents[i]=prev[i]||'high';
+  renderPolyBeats();
+}
+
+function renderPolyBeats(){
+  const row=document.getElementById('poly-row');if(!row)return;
+  row.innerHTML='';
+  const on=state.poly>1;
+  document.getElementById('poly-hint').style.display=on?'':'none';
+  document.getElementById('poly-off').classList.toggle('active',!on);
+  document.getElementById('poly-input').classList.toggle('active',on);
+  document.getElementById('poly-label').textContent=on
+    ? state.poly+' against '+state.sig : 'across the bar';
+  if(!on)return;
+  for(let i=0;i<state.poly;i++){
+    const d=document.createElement('div');
+    d.className='beat-dot poly acc-'+state.polyAccents[i];
+    d.id='poly-'+i;
+    d.title='Tap: accent it, then silence it';
+    d.onclick=()=>{
+      state.polyAccents[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(state.polyAccents[i])+1)%ACCENT_CYCLE.length];
+      renderPolyBeats();
+    };
+    row.appendChild(d);
+  }
+}
+
+function setPoly(n){
+  state.poly=(!n||n<2)?0:Math.min(16,Math.round(n));
+  buildPolyBeats();
+  refreshSectionSummaries();
+}
+
+function schedulePolyFlash(i,when){
+  const d=(when-audioCtx.currentTime)*1000;
+  pendingTimeouts.push(setTimeout(()=>{
+    if(!state.playing&&!state.metroOnly)return;
+    document.querySelectorAll('.beat-dot.poly').forEach((el,idx)=>el.classList.toggle('active-beat',idx===i));
+  },Math.max(0,d)));
+}
+
 function buildBeats(){
   // Every beat is plain by default: an accent imposes a bar on someone who may
   // not want one. Tapping a beat is how you ask for it.
@@ -2162,6 +2253,7 @@ buildPitchLists();
 buildDroneGrid();
 buildFreeGrid();
 buildBeats();
+buildPolyBeats();
 buildNoteLenRow();
 buildSubdivRow();
 buildClickModeRow();
@@ -2221,6 +2313,25 @@ document.querySelectorAll('input[type=range]').forEach(el=>{
     // focusing the field is itself the way to switch the ramp on
     if(!state.practice.tempoStep)setTempoStep(parseInt(inp.value,10)||5);
   });
+})();
+
+/* Cross-rhythm: typing a number switches it on, Off switches it off. */
+(function(){
+  const off=document.getElementById('poly-off');
+  const inp=document.getElementById('poly-input');
+  off.onclick=()=>{setPoly(0);inp.blur();};
+  inp.addEventListener('input',()=>{
+    const v=parseInt(inp.value,10);
+    if(!isNaN(v)&&v>=2&&v<=16)setPoly(v);
+  });
+  const settle=()=>{
+    let v=parseInt(inp.value,10);
+    if(isNaN(v)||v<2){inp.value=state.poly>1?state.poly:5;return;}
+    setPoly(v);inp.value=state.poly;
+  };
+  inp.addEventListener('blur',settle);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();settle();inp.blur();}});
+  inp.addEventListener('focus',()=>{if(!state.poly)setPoly(parseInt(inp.value,10)||5);});
 })();
 
 /* Space starts and stops, for desktop use. Ignored while typing, and while a
