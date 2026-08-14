@@ -681,6 +681,73 @@ function loadSampler(k,cb){
   }catch(e){fail();}
 }
 
+/* ---------- seamless sustain loops ----------
+   The cello sample is a 3-second bow stroke that crescendos from silence to
+   its loudest point and then simply stops. Looping it whole means the level
+   climbs for three seconds and then drops sevenfold — an audible swell and
+   thump, not a held note.
+
+   So a purpose-built loop buffer is made once per note: take the steady later
+   half, find the end point whose waveform best matches the start (which
+   tolerates the vibrato and pitch drift of a real player), and crossfade the
+   tail into the material just before the start so the join is continuous by
+   construction. Measured across the whole range, the resulting seam is always
+   smaller than the largest ordinary sample-to-sample step, so nothing clicks. */
+const loopBufferCache={};
+
+function sustainLoopBuffer(midi){
+  if(midi in loopBufferCache)return loopBufferCache[midi];
+  let result=null;
+  try{
+    const S=samplerFor('cello');
+    const buf=S.inst&&S.inst.buffers&&S.inst.buffers[midi];
+    if(buf){
+      const d=buf.getChannelData(0),sr=buf.sampleRate;
+      const period=sr/freqOf(midi-12);
+      let A=Math.floor(buf.length*0.5);
+      while(A<buf.length-1&&!(d[A]<=0&&d[A+1]>0))A++;      // upward zero crossing
+      const W=Math.max(256,Math.floor(period*2));
+      const target=buf.length-Math.floor(sr*0.02)-W;
+      const lo=Math.max(A+Math.floor(sr*0.3),Math.floor(target-period*3));
+      if(target>lo){
+        const score=e=>{let err=0;for(let i=0;i<W;i++){const x=d[e+i]-d[A+i];err+=x*x;}return err;};
+        let best=target,bestErr=score(target);
+        for(let e=lo;e<=target;e++){const v=score(e);if(v<bestErr){bestErr=v;best=e;}}
+        const M=best-A,F=Math.min(Math.floor(sr*0.12),Math.floor(M*0.25),A);
+        const out=audioCtx.createBuffer(1,M,sr);
+        const o=out.getChannelData(0);
+        for(let i=0;i<M;i++)o[i]=d[A+i];
+        // linear, because the ends are already phase-matched: an equal-power
+        // fade would bump the level where a linear one holds it
+        for(let i=0;i<F;i++){const t=i/F;o[M-F+i]=d[A+M-F+i]*(1-t)+d[A-F+i]*t;}
+        result=out;
+      }
+    }
+  }catch(e){}
+  loopBufferCache[midi]=result;
+  return result;
+}
+
+// A held, seamlessly looping voice. Falls back to the library's own looping if
+// the buffer could not be prepared.
+function startLoopedVoice(sem,gain){
+  const midi=sem+12;
+  const lb=sustainLoopBuffer(midi);
+  if(!lb){
+    const S=samplerFor('cello');
+    if(S.ready){const n=S.inst.play(stdName(sem),audioCtx.currentTime,{gain:gain,loop:true});if(n)schedPiano.push(n);}
+    return;
+  }
+  const now=audioCtx.currentTime;
+  const src=audioCtx.createBufferSource();
+  src.buffer=lb;src.loop=true;
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0,now);
+  g.gain.linearRampToValueAtTime(gain,now+0.15);   // the loop starts mid-bow, so ease it in
+  src.connect(g);g.connect(masterGain);src.start(now);
+  liveNodes.push(src,g);
+}
+
 function killNodes(list){
   list.forEach(n=>{try{n.stop&&n.stop();}catch(e){}try{n.disconnect&&n.disconnect();}catch(e){}});
   list.length=0;
@@ -705,15 +772,15 @@ function startContinuous(){
     const freq=freqOf(s);
     if(isSampled(state.timbre)){
       const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
-      if(S.ready){
-        const n=S.inst.play(stdName(s),now,{gain:spec.gain*share,loop:spec.loopForDrone});
-        if(n)schedPiano.push(n);
-      }
+      if(!S.ready)return;
+      if(spec.loopForDrone){startLoopedVoice(s,spec.gain*share);return;}
+      const n=S.inst.play(stdName(s),now,{gain:spec.gain*share});
+      if(n)schedPiano.push(n);
       return;
     }
     if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8,share);return;}
     const osc=audioCtx.createOscillator();
-    osc.type=state.timbre;osc.frequency.value=freq;
+    osc.type=oscType();osc.frequency.value=freq;
     const g=audioCtx.createGain();
     g.gain.setValueAtTime(0,now);
     g.gain.linearRampToValueAtTime(share,now+0.02);
@@ -750,7 +817,7 @@ function buildPianoSynth(freq,when,bucket,decay,share){
 
 function scheduleTone(s,when,dur){
   const freq=freqOf(s);
-  if(state.timbre==='piano-real'){
+  if(isSampled(state.timbre)){
     const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
     if(S.ready){
       const n=S.inst.play(stdName(s),when,{gain:spec.gain,duration:dur});
@@ -760,7 +827,7 @@ function scheduleTone(s,when,dur){
     buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
   } else {
     const osc=audioCtx.createOscillator();
-    osc.type=state.timbre;osc.frequency.value=freq;
+    osc.type=oscType();osc.frequency.value=freq;
     const g=audioCtx.createGain();
     const rel=Math.min(0.09,dur*0.18),atk=0.012;
     g.gain.setValueAtTime(0,when);
@@ -1126,6 +1193,10 @@ const TIMBRES=[
   {k:'square',     label:'Square',      decays:false},
 ];
 const DEFAULT_WAVE='sine';
+const WAVE_TYPES=['sine','triangle','sawtooth','square'];
+// Assigning an unknown type to an oscillator throws, which would wedge the
+// scheduler mid-tick; fall back rather than let one bad value stop the audio.
+function oscType(){return WAVE_TYPES.indexOf(state.timbre)>=0?state.timbre:DEFAULT_WAVE;}
 
 function availableTimbres(){
   return state.mode==='drone'?TIMBRES.filter(t=>!t.decays):TIMBRES;
