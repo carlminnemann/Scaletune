@@ -443,8 +443,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="beats-row" id="poly-row-a"></div>
     <div class="beats-row" id="poly-row-b"></div>
     <div class="beats-hint">tap a pulse: accent it, then silence it</div>
+    <div id="polynotes-block">
     <div class="section-label">Notes follow</div>
     <div class="btn-wrap" id="polynotes-row"></div>
+    </div>
   </div>
   </div>
 </details>
@@ -644,11 +646,11 @@ let state={
   // wave, the sequence modes default to the sampled piano
   timbre:'sine',waveTimbre:'sine',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
-  bpm:80,sig:4,sigDen:4,clickVol:0.5,noteLen:'sub',accents:[],subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  bpm:80,sig:4,sigDen:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,alignPasses:false,clickFollowsFigure:true,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
-  poly:{on:false,a:4,b:5,notesFollow:'a',accA:[],accB:[]},polyVol:0.9,
+  poly:{on:false,a:4,b:5,notesFollow:'a',accA:[],accB:[],touched:false},polyVol:0.9,
   // Practice progressions: what changes each time the sequence comes round.
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
@@ -1351,6 +1353,7 @@ function togglePlay(){
 function toggleMetroOnly(){
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   state.metroOnly=!state.metroOnly;
+  buildBeats();buildPolyNotesRow();
   const b=document.getElementById('metro-btn');
   if(state.metroOnly){
     b.textContent='■ Stop metro';b.classList.add('playing');
@@ -1410,7 +1413,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15x';
+const APP_VERSION='2026-08-15y';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -1478,6 +1481,7 @@ function setMode(m){
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
+  buildBeats();renderPolyBeats();
   setStatus('');
   refreshSequence();
 }
@@ -2187,7 +2191,9 @@ function buildNoteLenRow(){
 
 function buildPolyBeats(){
   const P=state.poly;
-  const fit=(arr,n)=>{const out=[];for(let i=0;i<n;i++)out[i]=arr[i]||'high';return out;};
+  // Both layers start on the accent: the cross-rhythm only reads if you can
+  // hear where each cycle begins and how the two pull apart from there.
+  const fit=(arr,n)=>{const out=[];for(let i=0;i<n;i++)out[i]=(P.touched&&arr[i])||(i===0?'low':'high');return out;};
   P.accA=fit(P.accA||[],P.a);
   P.accB=fit(P.accB||[],P.b);
   renderPolyBeats();
@@ -2213,6 +2219,7 @@ function renderPolyBeats(){
       d.title='Tap: accent it, then silence it';
       d.onclick=()=>{
         acc[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(acc[i])+1)%ACCENT_CYCLE.length];
+        P.touched=true;
         renderPolyBeats();
       };
       row.appendChild(d);
@@ -2238,6 +2245,9 @@ function buildPolyModeRow(){
 
 function buildPolyNotesRow(){
   const row=document.getElementById('polynotes-row');if(!row)return;
+  // Nothing follows either layer when the metronome plays alone.
+  const block=document.getElementById('polynotes-block');
+  if(block)block.style.display=notesSilent()?'none':'';
   row.innerHTML='';
   [['a','the '+state.poly.a],['b','the '+state.poly.b]].forEach(([k,label])=>{
     const b=document.createElement('button');
@@ -2269,13 +2279,18 @@ function updateSupersededControls(){
   if(hint)hint.style.display=on?'none':'';
 }
 
+/* With notes playing, every beat is plain: an accent imposes a bar on someone
+   who may not want one, and tapping a beat is how you ask for it. The metronome
+   on its own has nothing to show but the bar, so there the chosen bar length has
+   to be audible — its first beat carries the accent until you silence it. */
+function defaultAccent(i){return (i===0&&notesSilent())?'low':'high';}
+
 function buildBeats(){
-  // Every beat is plain by default: an accent imposes a bar on someone who may
-  // not want one. Tapping a beat is how you ask for it.
-  // Whatever was already set survives a change of bar length.
-  const prev=state.accents||[];
+  // Whatever you set survives a change of bar length; what you never touched
+  // follows the default, so switching to Metro brings its downbeat with it.
+  const prev=state.accentsTouched?(state.accents||[]):[];
   state.accents=[];
-  for(let i=0;i<state.sig;i++)state.accents[i]=prev[i]||'high';
+  for(let i=0;i<state.sig;i++)state.accents[i]=prev[i]||defaultAccent(i);
   renderBeats();
 }
 
@@ -2288,6 +2303,7 @@ function renderBeats(){
     d.title='Tap: accent → normal → silent';
     d.onclick=()=>{
       state.accents[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(state.accents[i])+1)%ACCENT_CYCLE.length];
+      state.accentsTouched=true;
       renderBeats();
     };
     row.appendChild(d);
