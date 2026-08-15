@@ -170,7 +170,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 .timbre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .timbre-btn{padding:7px 13px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
-.timbre-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
 
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
@@ -187,7 +187,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .sig-fields{display:flex;gap:14px;align-items:center;margin-bottom:1rem}
 .sig-field{display:inline-flex;align-items:center;gap:3px}
 .sig-den{font-size:15px;color:var(--text2)}
-.sig-field .step-input{width:48px;font-size:15px}
+.sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
+  cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
+  background:var(--bg2);color:var(--text2);touch-action:manipulation}
+.sig-select.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode);font-weight:600}
+/* the browser's own focus ring is blue, which is the one colour not in the app */
+.sig-select:focus-visible{outline:2px solid var(--mode);outline-offset:1px}
+.sig-select:focus{outline-color:var(--mode)}
 
 .beats-row{display:flex;gap:12px;justify-content:center;margin:0.75rem 0 0.5rem;flex-wrap:wrap}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
@@ -395,11 +401,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="section-label" style="margin-bottom:6px">Time Signature</div>
       <div class="sig-fields">
         <span class="sig-field">
-          <input class="step-input" id="sig-4" type="number" inputmode="numeric" min="1" max="16" step="1" value="4" aria-label="Beats per bar, quarter-note beat">
+          <select class="sig-select" id="sig-4" aria-label="Beats per bar, quarter-note beat"></select>
           <span class="sig-den">/4</span>
         </span>
         <span class="sig-field">
-          <input class="step-input" id="sig-8" type="number" inputmode="numeric" min="1" max="16" step="1" value="" aria-label="Beats per bar, eighth-note beat">
+          <select class="sig-select" id="sig-8" aria-label="Beats per bar, eighth-note beat"></select>
           <span class="sig-den">/8</span>
         </span>
       </div>
@@ -1373,7 +1379,7 @@ function updateClickVol(v){state.clickVol=parseFloat(v);document.getElementById(
    holds a value: the denominator says what a beat is, and a bar cannot be
    counted in two different beats at once, so typing in one clears the other. */
 function setSig(n,den){
-  state.sig=Math.max(1,Math.min(16,Math.round(n)||1));
+  state.sig=Math.max(1,Math.min(SIG_MAX,Math.round(n)||1));
   state.sigDen=den===8?8:4;
   renderSigFields();
   buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
@@ -1381,10 +1387,10 @@ function setSig(n,den){
 
 function renderSigFields(){
   const q=document.getElementById('sig-4'), e=document.getElementById('sig-8');
-  if(!q||!e)return;
+  if(!q||!e||!q.options.length)return;
   const onEight=state.sigDen===8;
-  q.value=onEight?'':state.sig;
-  e.value=onEight?state.sig:'';
+  q.value=onEight?'':String(state.sig);
+  e.value=onEight?String(state.sig):'';
   q.classList.toggle('active',!onEight);
   e.classList.toggle('active',onEight);
 }
@@ -1400,7 +1406,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15v';
+const APP_VERSION='2026-08-15w';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2462,26 +2468,20 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   });
 })();
 
-/* Time signature: typing in one field takes the beat, and clears the other. */
+/* Time signature: a picker rather than a typed number, so a bar length is one
+   tap on a phone. Only one side can hold a value — a bar cannot be counted in
+   two different beats at once — so choosing on one clears the other. */
+const SIG_MAX=30;
 (function(){
   [['sig-4',4],['sig-8',8]].forEach(([id,den])=>{
-    const inp=document.getElementById(id);
-    inp.addEventListener('input',()=>{
-      const v=parseInt(inp.value,10);
-      if(!isNaN(v)&&v>=1&&v<=16)setSig(v,den);
-    });
-    const settle=()=>{
-      const v=parseInt(inp.value,10);
-      if(isNaN(v)||v<1){renderSigFields();return;}
+    const sel=document.getElementById(id);
+    sel.appendChild(new Option('—',''));
+    for(let i=1;i<=SIG_MAX;i++)sel.appendChild(new Option(i,i));
+    sel.addEventListener('change',()=>{
+      const v=parseInt(sel.value,10);
+      // picking the dash means "not this beat": hand the bar to the other side
+      if(isNaN(v)){setSig(state.sig,den===4?8:4);return;}
       setSig(v,den);
-    };
-    inp.addEventListener('blur',settle);
-    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();settle();inp.blur();}});
-    // Clicking the other field moves the beat to that denominator, carrying the
-    // count over. Select it so the first keystroke replaces rather than appends.
-    inp.addEventListener('focus',()=>{
-      if(state.sigDen!==den)setSig(state.sig,den);
-      setTimeout(()=>{try{inp.select();}catch(e){}},0);
     });
   });
   renderSigFields();
