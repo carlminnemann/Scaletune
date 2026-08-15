@@ -17,13 +17,13 @@
   --bg:#111;--bg2:#1a1a1a;--bg3:#222;
   --border:#2a2a2a;--border2:#3a3a3a;--border3:#444;
   --text:#eee;--text2:#aaa;--text3:#666;
-  --blue:#3b82f6;--blue-bg:#1e3a5f;
+  --blue:#f0f0f3;--blue-bg:#42424a;   /* selections inside panels: grey, not blue */
   --green:#22c55e;--green-bg:#14532d;
   --yellow:#eab308;--yellow-bg:#3a2a00;
   --red:#ef4444;--red-bg:#450a0a;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
-  --mode:#a78bfa;--mode-bg:#382a5e;
+  --mode:#ff6b6b;--mode-bg:#5c0d0d;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
 }
@@ -36,11 +36,11 @@
   --bg:#f5eedb;--bg2:#fdf8ea;--bg3:#eee5cf;
   --border:#e5dbc0;--border2:#d5c9a8;--border3:#b6a883;
   --text:#2b2418;--text2:#5a5140;--text3:#6b6350;
-  --blue:#1d4ed8;--blue-bg:#dde7fa;
+  --blue:#2b2418;--blue-bg:#ddd5c0;   /* the paper equivalent of the same idea */
   --green:#116b31;--green-bg:#d9efdf;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
-  --mode:#6d28d9;--mode-bg:#ddcdf8;
+  --mode:#a11212;--mode-bg:#fad6d6;
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -1375,7 +1375,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15i';
+const APP_VERSION='2026-08-15k';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
