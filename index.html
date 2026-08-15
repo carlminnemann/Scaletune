@@ -190,10 +190,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
   cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg2);color:var(--text2);touch-action:manipulation}
-.sig-select.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode);font-weight:600}
+.sig-select.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
+/* A select renders its own text on some platforms and ignores the parent
+   colour, so state the colour on the options too or the number goes blank. */
+.sig-select option{background:var(--bg2);color:var(--text)}
+.sig-select.active option{color:var(--text)}
 /* the browser's own focus ring is blue, which is the one colour not in the app */
-.sig-select:focus-visible{outline:2px solid var(--mode);outline-offset:1px}
-.sig-select:focus{outline-color:var(--mode)}
+.sig-select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.sig-select:focus{outline-color:var(--blue)}
 
 .beats-row{display:flex;gap:12px;justify-content:center;margin:0.75rem 0 0.5rem;flex-wrap:wrap}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
@@ -1406,7 +1410,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15w';
+const APP_VERSION='2026-08-15x';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
