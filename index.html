@@ -1384,7 +1384,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15s';
+const APP_VERSION='2026-08-15t';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2458,13 +2458,25 @@ document.querySelectorAll('input[type=range]').forEach(el=>{
   });
 })();
 
-/* Space starts and stops, for desktop use. Ignored while typing, and while a
-   button has focus, where the browser already treats Space as a press. */
+/* Space starts and stops, for desktop use. It has to stand down where Space
+   already means something: inside a field being typed into, and on a button or
+   a section header, where the browser treats it as a press.
+
+   Sliders are not one of those places. Nothing is typed into them, but they
+   keep focus after a drag, so blocking every input meant Space stopped working
+   until you clicked elsewhere. */
+const TYPING_TYPES=['text','number','search','tel','email','password','url'];
+function swallowsSpace(t){
+  if(!t)return false;
+  if(t.isContentEditable)return true;
+  const tag=t.tagName;
+  if(tag==='TEXTAREA'||tag==='SELECT'||tag==='BUTTON'||tag==='SUMMARY')return true;
+  if(tag==='INPUT')return TYPING_TYPES.indexOf((t.type||'text').toLowerCase())>=0;
+  return false;
+}
 document.addEventListener('keydown',e=>{
   if(e.code!=='Space'&&e.key!==' ')return;
-  const t=e.target;
-  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||
-         t.tagName==='BUTTON'||t.tagName==='SUMMARY'||t.isContentEditable))return;
+  if(swallowsSpace(e.target))return;
   if(e.repeat)return;
   e.preventDefault();
   togglePlay();
