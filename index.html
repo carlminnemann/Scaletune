@@ -63,7 +63,7 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
 .mode-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
-.mode-btn{flex:1 1 0;min-width:72px;padding:10px 6px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
+.mode-btn{flex:1 1 0;min-width:60px;padding:10px 6px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
 .mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
 
 .panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem}
@@ -242,6 +242,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')">Scale</button>
   <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')">Arpeggio</button>
   <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')">Free</button>
+  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')">♩ Metro</button>
 </div>
 
 <!-- ============ DRONE ============ -->
@@ -368,14 +369,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <details class="sec" id="sec-rhythm" style="display:none" open>
   <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body">
-    <div id="subdiv-block">
-    <div class="group-label">Subdivision</div>
-    <div class="btn-wrap" id="subdivmode-row" style="margin-bottom:6px"></div>
-    <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
-    <div class="btn-wrap" id="subdivdir-row"></div>
-    </div>
-    <div class="group-label">Click</div>
-    <div class="btn-wrap" id="clickmode-row"></div>
     <div id="notelen-block">
     <div class="group-label">Note Length</div>
     <div class="btn-wrap" id="notelen-row"></div>
@@ -417,6 +410,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
   <div class="beats-row" id="beats-row"></div>
   <div class="beats-hint">tap a beat: accent it, then silence it</div>
+  <div id="subdiv-block">
+    <div class="section-label">Subdivision</div>
+    <div class="btn-wrap" id="subdivmode-row" style="margin-bottom:6px"></div>
+    <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
+    <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
+    <div class="section-label">Click</div>
+    <div class="btn-wrap" id="clickmode-row" style="margin-bottom:12px"></div>
+  </div>
   <div class="section-label">Polyrhythm</div>
   <div class="btn-wrap" id="polymode-row" style="margin-bottom:8px"></div>
   <div id="poly-controls" style="display:none">
@@ -1124,7 +1125,7 @@ function startPlayback(){
       if(droneSemitones().length){startContinuous();updateDroneReadout();}
       return;
     }
-    if(!state.metroOnly){
+    if(!notesSilent()){
       // every run starts at the top of the study list
       if(listEnabled()){studyIdx=0;applyListItem(activeList()[0]);renderPitchPickers();}
       refreshSequence();
@@ -1138,6 +1139,10 @@ function startPlayback(){
     schedulerTick();
   });
 }
+
+// Metro mode is the metronome on its own, so notes stay silent there for the
+// same reason they do under Metro only.
+function notesSilent(){return state.metroOnly||state.mode==='metro';}
 
 // Subdivision ticks that one note occupies.
 function ticksPerNote(sub){
@@ -1191,7 +1196,7 @@ function schedulePolyCycle(t0){
     schedulePolyClick(t,polyAccFor('b',i),'b');
     schedulePolyFlash('b',i,t);
   }
-  if(state.metroOnly||!sequence.length)return;
+  if(notesSilent()||!sequence.length)return;
   const n=P.notesFollow==='a'?P.a:P.b, dur=len/n;
   for(let i=0;i<n;i++){
     if(seqIdx>=sequence.length){seqIdx=0;advancePass();}
@@ -1234,7 +1239,7 @@ function schedulerTick(){
     if(subIdx===0)activeSubdiv=currentSubdiv();
     if(pendingNoteLenChange){pendingNoteLenChange=false;tickCount=0;}
     let note=null;
-    if(!state.metroOnly&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
+    if(!notesSilent()&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
       if(seqIdx>=sequence.length){
         seqIdx=0;
         // Within a figure the pulse runs on unbroken and the phrase precesses
@@ -1309,7 +1314,7 @@ function togglePlay(){
   // one later, from the piano-loading callback.
   initAudio();
   if(state.mode==='drone'&&!droneSemitones().length){setStatus('Pick at least one note first.');return;}
-  if(state.mode!=='drone'){
+  if(state.mode!=='drone'&&state.mode!=='metro'){
     refreshSequence();
     if(!sequence.length){setStatus(state.mode==='free'?'Select some notes first.':'Pick a scale or chord first.');return;}
   }
@@ -1318,7 +1323,8 @@ function togglePlay(){
     const mb=document.getElementById('metro-btn');
     mb.textContent='♩ Metro only';mb.classList.remove('playing');
   }
-  if(isSampled(state.timbre)&&!samplerReady(state.timbre)){
+  // Metro plays no notes, so it must not wait on an instrument to load
+  if(state.mode!=='metro'&&isSampled(state.timbre)&&!samplerReady(state.timbre)){
     const S=samplerFor(state.timbre);
     // a second press while a start is already queued would start twice
     if(S.loading&&S.queue.length){setStatus('Starting as soon as the samples are ready...');return;}
@@ -1378,7 +1384,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15p';
+const APP_VERSION='2026-08-15s';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -1420,8 +1426,9 @@ function setMode(m){
     mb.textContent='♩ Metro only';mb.classList.remove('playing');
   }
   state.mode=m;
-  const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio');
-  [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],['free','btn-mode-free']]
+  const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro';
+  [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
+   ['free','btn-mode-free'],['metro','btn-mode-metro']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
@@ -1431,14 +1438,18 @@ function setMode(m){
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   document.getElementById('metro-divider').style.display=isDrone?'none':'';
   document.getElementById('metro-section').style.display=isDrone?'none':'';
-  document.getElementById('sec-rhythm').style.display=isDrone?'none':'';
-  document.getElementById('metro-btn').style.display=isDrone?'none':'';
+  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro)?'none':'';
+  // Metro is the metronome on its own, so the voice that would play notes and
+  // the button that silences them both have nothing to do here.
+  document.getElementById('metro-btn').style.display=(isDrone||isMetro)?'none':'';
+  document.getElementById('sec-sound').style.display=isMetro?'none':'';
   // Drone restores the last wave; the sequence modes restore the last voice,
   // which starts out as the sampled piano.
   state.timbre=isDrone?state.waveTimbre:state.seqTimbre;
   if(!availableTimbres().some(t=>t.k===state.timbre))state.timbre=DEFAULT_WAVE;
   buildTimbreRow();
-  if(isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading)loadSampler(state.timbre);
+  if(!isMetro&&isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading)
+    loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
   setStatus('');
@@ -2295,14 +2306,21 @@ const SECTIONS=[
      return b.length?b.join(' · '):'off';
    }},
   {id:'metro-section',sum:'sum-metro',    defaultOpen:true,
-   text:()=>state.bpm+' BPM · '+state.sig+'/'+(state.sig===6||state.sig===7?'8':'4')},
-  {id:'sec-rhythm',   sum:'sum-rhythm',   defaultOpen:true,
    text:()=>{
      const nm={1:'quarters',2:'eighths',3:'triplets',4:'sixteenths'};
-     const fig=subdivListOn()&&subdivOrder().length>1
-       ? subdivOrder().length+' figures'
-       : nm[currentSubdiv()];
-     return fig+' · '+(state.clickFollowsFigure?'click follows':'click on beats');
+     const bits=[state.bpm+' BPM'];
+     if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
+     else{
+       bits.push(state.sig+'/'+(state.sig===6||state.sig===7?'8':'4'));
+       bits.push(subdivListOn()&&subdivOrder().length>1
+         ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
+     }
+     return bits.join(' · ');
+   }},
+  {id:'sec-rhythm',   sum:'sum-rhythm',   defaultOpen:true,
+   text:()=>{
+     const nl={sub:'per figure',beat:'per beat',bar:'per bar'}[state.noteLen]||'';
+     return nl+(state.alignPasses?' · restarts each round':' · drifts');
    }},
 ];
 
