@@ -184,9 +184,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .tap-btn{width:100%;margin-top:8px;padding:9px;font-size:13px;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
-.sig-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
-.sig-btn{padding:6px 11px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
-.sig-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.sig-fields{display:flex;gap:14px;align-items:center;margin-bottom:1rem}
+.sig-field{display:inline-flex;align-items:center;gap:3px}
+.sig-den{font-size:15px;color:var(--text2)}
+.sig-field .step-input{width:48px;font-size:15px}
 
 .beats-row{display:flex;gap:12px;justify-content:center;margin:0.75rem 0 0.5rem;flex-wrap:wrap}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
@@ -392,13 +393,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div>
       <div id="sig-block">
       <div class="section-label" style="margin-bottom:6px">Time Signature</div>
-      <div class="sig-row">
-        <button class="sig-btn" onclick="setSig(2,this)">2/4</button>
-        <button class="sig-btn" onclick="setSig(3,this)">3/4</button>
-        <button class="sig-btn active" onclick="setSig(4,this)">4/4</button>
-        <button class="sig-btn" onclick="setSig(5,this)">5/4</button>
-        <button class="sig-btn" onclick="setSig(6,this)">6/8</button>
-        <button class="sig-btn" onclick="setSig(7,this)">7/8</button>
+      <div class="sig-fields">
+        <span class="sig-field">
+          <input class="step-input" id="sig-4" type="number" inputmode="numeric" min="1" max="16" step="1" value="4" aria-label="Beats per bar, quarter-note beat">
+          <span class="sig-den">/4</span>
+        </span>
+        <span class="sig-field">
+          <input class="step-input" id="sig-8" type="number" inputmode="numeric" min="1" max="16" step="1" value="" aria-label="Beats per bar, eighth-note beat">
+          <span class="sig-den">/8</span>
+        </span>
       </div>
       </div>
       <div class="section-label" style="margin-bottom:5px;margin-top:10px">Click Volume</div>
@@ -631,7 +634,7 @@ let state={
   // wave, the sequence modes default to the sampled piano
   timbre:'sine',waveTimbre:'sine',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
-  bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  bpm:80,sig:4,sigDen:4,clickVol:0.5,noteLen:'sub',accents:[],subdiv:1,alignPasses:false,clickFollowsFigure:true,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
@@ -1366,11 +1369,24 @@ function updateVol(v){
 }
 function updateClickVol(v){state.clickVol=parseFloat(v);document.getElementById('click-vol-out').textContent=Math.round(v*100)+'%';}
 
-function setSig(n,btn){
-  state.sig=n;
-  document.querySelectorAll('.sig-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  buildBeats();renderPolyBeats();updateAlignInfo();restartIfPlaying();
+/* Two fields rather than a fixed list, so any bar length is reachable. Only one
+   holds a value: the denominator says what a beat is, and a bar cannot be
+   counted in two different beats at once, so typing in one clears the other. */
+function setSig(n,den){
+  state.sig=Math.max(1,Math.min(16,Math.round(n)||1));
+  state.sigDen=den===8?8:4;
+  renderSigFields();
+  buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
+}
+
+function renderSigFields(){
+  const q=document.getElementById('sig-4'), e=document.getElementById('sig-8');
+  if(!q||!e)return;
+  const onEight=state.sigDen===8;
+  q.value=onEight?'':state.sig;
+  e.value=onEight?state.sig:'';
+  q.classList.toggle('active',!onEight);
+  e.classList.toggle('active',onEight);
 }
 
 // A drone has to sustain indefinitely; both piano voices decay to silence
@@ -1384,7 +1400,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15u';
+const APP_VERSION='2026-08-15v';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2311,7 +2327,7 @@ const SECTIONS=[
      const bits=[state.bpm+' BPM'];
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else{
-       bits.push(state.sig+'/'+(state.sig===6||state.sig===7?'8':'4'));
+       bits.push(state.sig+'/'+state.sigDen);
        bits.push(subdivListOn()&&subdivOrder().length>1
          ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
      }
@@ -2391,6 +2407,12 @@ renderPitchPickers();
 document.querySelectorAll('input[type=range]').forEach(el=>{
   el.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
 });
+// Same trap on a number field, but only while it holds focus: scrolling the
+// page just after typing a bar length would quietly count it up. Drop focus and
+// let the page scroll — the field keeps what was typed.
+document.querySelectorAll('input[type=number]').forEach(el=>{
+  el.addEventListener('wheel',()=>{ if(document.activeElement===el)el.blur(); },{passive:true});
+});
 
 /* Typed tempo. The value is applied as it is typed but only clamped on blur or
    Enter — clamping mid-keystroke would rewrite "1" into "30" before the second
@@ -2438,6 +2460,31 @@ document.querySelectorAll('input[type=range]').forEach(el=>{
     // focusing the field is itself the way to switch the ramp on
     if(!state.practice.tempoStep)setTempoStep(parseInt(inp.value,10)||5);
   });
+})();
+
+/* Time signature: typing in one field takes the beat, and clears the other. */
+(function(){
+  [['sig-4',4],['sig-8',8]].forEach(([id,den])=>{
+    const inp=document.getElementById(id);
+    inp.addEventListener('input',()=>{
+      const v=parseInt(inp.value,10);
+      if(!isNaN(v)&&v>=1&&v<=16)setSig(v,den);
+    });
+    const settle=()=>{
+      const v=parseInt(inp.value,10);
+      if(isNaN(v)||v<1){renderSigFields();return;}
+      setSig(v,den);
+    };
+    inp.addEventListener('blur',settle);
+    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();settle();inp.blur();}});
+    // Clicking the other field moves the beat to that denominator, carrying the
+    // count over. Select it so the first keystroke replaces rather than appends.
+    inp.addEventListener('focus',()=>{
+      if(state.sigDen!==den)setSig(state.sig,den);
+      setTimeout(()=>{try{inp.select();}catch(e){}},0);
+    });
+  });
+  renderSigFields();
 })();
 
 /* The two polyrhythm counts, typed. Clamped on blur like every other field. */
