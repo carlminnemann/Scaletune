@@ -979,14 +979,17 @@ function scheduleDisplay(s,when){
 const ACCENT_CYCLE=['high','low','off'];   // plain -> accent -> silent
 function accentFor(i){return state.accents[i]||'high';}
 
-// 'sub' is the off-beat tick of a subdivision: same click, clearly subordinate
-// so the beat still reads as the beat.
-const CLICK_TONE={low:{f:760,g:1},high:{f:1250,g:0.72},sub:{f:1050,g:0.34}};
+/* Pitch runs with weight: the accent is the highest click, the plain beat sits
+   under it, and 'sub' — the off-beat tick of a subdivision — is lower still, so
+   the beat still reads as the beat. ('low' and 'high' name the accent level,
+   not the pitch: 'low' is the accented beat, and it is the high click.) */
+const CLICK_TONE={low:{f:1400,g:1},high:{f:950,g:0.72},sub:{f:700,g:0.34}};
 // The cross-rhythm sits below the main click and rings a little longer, so the
-// two layers separate by ear even when they land together on the downbeat.
+// two layers separate by ear even when they land together on the downbeat. Each
+// layer keeps the accent above its own plain pulse.
 const POLY_TONE={
-  a:{low:{f:760,g:1,d:0.011},   high:{f:1250,g:0.72,d:0.010}},   // the reference layer
-  b:{low:{f:440,g:0.95,d:0.022},high:{f:620,g:0.62,d:0.018}},    // lower and longer
+  a:{low:{f:1400,g:1,d:0.011},  high:{f:950,g:0.72,d:0.010}},    // the reference layer
+  b:{low:{f:660,g:0.95,d:0.022},high:{f:470,g:0.62,d:0.018}},    // lower and longer
 };
 
 function clickBuffer(f,decay){
@@ -1413,7 +1416,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15y';
+const APP_VERSION='2026-08-15z';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
