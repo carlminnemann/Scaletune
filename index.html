@@ -1384,7 +1384,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15t';
+const APP_VERSION='2026-08-15u';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
@@ -2474,6 +2474,15 @@ function swallowsSpace(t){
   if(tag==='INPUT')return TYPING_TYPES.indexOf((t.type||'text').toLowerCase())>=0;
   return false;
 }
+/* A button keeps focus after a pointer click, and Space on a focused button
+   presses it again — so after tapping the tempo, Space added another tap
+   instead of starting. Drop focus after pointer clicks only: a click driven
+   from the keyboard reports detail 0, and those keep focus where it was. */
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('button');
+  if(b&&e.detail>0)b.blur();
+},true);
+
 document.addEventListener('keydown',e=>{
   if(e.code!=='Space'&&e.key!==' ')return;
   if(swallowsSpace(e.target))return;
