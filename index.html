@@ -428,8 +428,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="btn-wrap" id="subdivmode-row" style="margin-bottom:6px"></div>
     <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
     <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
+    <div id="click-block">
     <div class="section-label">Click</div>
     <div class="btn-wrap" id="clickmode-row" style="margin-bottom:12px"></div>
+    </div>
   </div>
   <div class="section-label">Polyrhythm</div>
   <div class="btn-wrap" id="polymode-row" style="margin-bottom:8px"></div>
@@ -661,12 +663,21 @@ let state={
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
 // Clicks per beat. The beat itself never moves — only how finely it is divided.
+/* A figure is normally an even division of the beat, and its key is simply how
+   many ticks it has. Swung eighths are the exception: still two ticks, but the
+   first holds two thirds of the beat and the second the last third — the
+   triplet feel a written pair of eighths is actually played with. So a figure
+   is described by how many ticks it has and what share of the beat each takes. */
 const SUBDIVS=[
-  {k:1,label:'♩ Quarter'},
-  {k:2,label:'♫ Eighths'},
-  {k:3,label:'³ Triplet'},
-  {k:4,label:'♬ Sixteenths'},
+  {k:1,   label:'♩ Quarter'},
+  {k:2,   label:'♫ Eighths'},
+  {k:'2s',label:'♫ Swing'},
+  {k:3,   label:'³ Triplet'},
+  {k:4,   label:'♬ Sixteenths'},
 ];
+const SWING_SHARES=[2/3,1/3];
+function subTicks(k){return k==='2s'?2:k;}
+function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MAX=240;
 let studyIdx=0,subdivIdx=0;
 // How long one note of the sequence lasts, expressed against the metronome.
@@ -1092,7 +1103,15 @@ function polyCycleLen(){return state.poly.a*(60/state.bpm);}
 
 // Which subdivision is in force right now — a fixed choice, or the current
 // step of the table-of-time sequence.
-function subdivListOn(){return state.practice.useSubdivList&&state.practice.subdivList.length>0;}
+function subdivListOn(){
+  // A figure list steps once per pass of the notes, so with no notes it would
+  // never move: the metronome gets the single-figure picker instead.
+  return !notesSilent()&&state.practice.useSubdivList&&state.practice.subdivList.length>0;
+}
+
+// Silencing the off-beats would leave the figure buttons doing nothing at all
+// when the metronome plays alone, so there the click always follows the figure.
+function clickFollowsFigure(){return state.clickFollowsFigure||notesSilent();}
 
 // The order the figures are walked in — the same up / down / up-down choice the
 // notes have, so a table of time can climb and come back down.
@@ -1228,9 +1247,18 @@ function notesSilent(){return state.metroOnly||state.mode==='metro';}
 
 // Subdivision ticks that one note occupies.
 function ticksPerNote(sub){
-  if(state.noteLen==='beat')return sub;
-  if(state.noteLen==='bar')return sub*state.sig;
+  if(state.noteLen==='beat')return subTicks(sub);
+  if(state.noteLen==='bar')return subTicks(sub)*state.sig;
   return 1;                       // one note per subdivision tick
+}
+
+// Ticks are uneven under swing, so a note's length is taken from the beat
+// rather than counted in ticks.
+function noteDuration(sub,tickDur){
+  const spb=60/state.bpm;
+  if(state.noteLen==='beat')return spb;
+  if(state.noteLen==='bar')return spb*state.sig;
+  return tickDur;
 }
 
 function gcd(a,b){while(b){const t=b;b=a%b;a=t;}return a;}
@@ -1241,17 +1269,17 @@ function gcd(a,b){while(b){const t=b;b=a%b;a=t;}return a;}
 // the exercise, so the metronome is never resynchronised to it.
 function alignmentRounds(){
   if(!sequence.length)return 1;
-  const sub=currentSubdiv();
-  const patternTicks=sequence.length*ticksPerNote(sub);
-  return sub/gcd(patternTicks,sub);
+  const t=subTicks(currentSubdiv());
+  const patternTicks=sequence.length*ticksPerNote(currentSubdiv());
+  return t/gcd(patternTicks,t);
 }
 
 // Where inside the subdivision group each successive round begins.
 function alignmentOffsets(){
-  const sub=currentSubdiv(),n=alignmentRounds();
+  const sub=currentSubdiv(),n=alignmentRounds(),t=subTicks(sub);
   const patternTicks=sequence.length*ticksPerNote(sub);
   const out=[];
-  for(let k=0;k<n;k++)out.push((patternTicks*k)%sub);
+  for(let k=0;k<n;k++)out.push((patternTicks*k)%t);
   return out;
 }
 
@@ -1336,18 +1364,18 @@ function schedulerTick(){
       }
       if(sequence.length){note=sequence[seqIdx];seqIdx++;}
     }
-    const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb/sub;
-    if(note!==null)scheduleTone(note,nextBeatTime,tickDur*ticksPerNote(sub));
+    const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb*tickShare(sub,subIdx);
+    if(note!==null)scheduleTone(note,nextBeatTime,noteDuration(sub,tickDur));
     if(subIdx===0){
       scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(state.clickFollowsFigure&&accentFor(beatIdx)!=='off'){
+    } else if(clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
     nextBeatTime+=tickDur;
     subIdx++;
-    if(subIdx>=sub){subIdx=0;beatIdx=(beatIdx+1)%state.sig;}
+    if(subIdx>=subTicks(sub)){subIdx=0;beatIdx=(beatIdx+1)%state.sig;}
   }
   pruneFinishedNodes();
 }
@@ -1420,7 +1448,7 @@ function togglePlay(){
 function toggleMetroOnly(){
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   state.metroOnly=!state.metroOnly;
-  buildBeats();buildPolyNotesRow();
+  buildBeats();buildPolyNotesRow();buildSubdivRow();
   const b=document.getElementById('metro-btn');
   if(state.metroOnly){
     b.textContent='■ Stop metro';b.classList.add('playing');
@@ -1480,7 +1508,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16b';
+const APP_VERSION='2026-08-16c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1553,7 +1581,7 @@ function setMode(m){
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
-  buildBeats();renderPolyBeats();
+  buildBeats();renderPolyBeats();buildSubdivRow();
   setStatus('');
   refreshSequence();
 }
@@ -1774,7 +1802,7 @@ function rotationPreview(){
     if(wrapped&&useListOn()&&list.length>1){sIdx=(sIdx+1)%list.length;wrapped=(sIdx===0);}
     if(wrapped&&state.practice.rootMove==='fourths')root=NOTES[(NOTES.indexOf(root)+5)%12];
   }
-  const figName=v=>({1:'quarters',2:'eighths',3:'triplets',4:'sixteenths'})[v]||'';
+  const figName=v=>({1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'})[v]||'';
   const describe=(item,fig,rt)=>{
     const bits=[];
     bits.push(bareName(NOTES.indexOf(rt))+' '+(item?item.name:(state.mode==='scale'?state.scaleName:state.chordName)||'—'));
@@ -1870,7 +1898,7 @@ function buildSubdivRow(){
   SUBDIVS.forEach(sd=>{
     const b=document.createElement('button');
     b.textContent=sd.label;
-    if(state.practice.useSubdivList){
+    if(!notesSilent()&&state.practice.useSubdivList){
       const i=list.indexOf(sd.k);
       const sounding=i>=0&&sd.k===currentSubdiv()&&(state.playing||state.metroOnly);
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
@@ -1888,6 +1916,15 @@ function buildSubdivRow(){
   });
   buildSubdivModeRow();
   buildSubdivDirRow();
+  // Sequencing figures and silencing the off-beats both need notes to mean
+  // anything, so with the metronome alone only the figure choice is left.
+  const bare=notesSilent();
+  const mr=document.getElementById('subdivmode-row');
+  const dr=document.getElementById('subdivdir-row');
+  const cb=document.getElementById('click-block');
+  if(mr)mr.style.display=bare?'none':'';
+  if(dr)dr.style.display=bare?'none':'';
+  if(cb)cb.style.display=bare?'none':'';
 }
 
 /* ---------- tap tempo ---------- */
@@ -1964,7 +2001,7 @@ function updateAlignInfo(){
     el.textContent='Every round restarts on beat 1.';return;
   }
   const n=alignmentRounds(),sub=currentSubdiv();
-  const group=sub===1?'beat':sub===2?'eighth pair':sub===3?'triplet':'sixteenth group';
+  const group=sub===1?'beat':sub===2?'eighth pair':sub==='2s'?'swung pair':sub===3?'triplet':'sixteenth group';
   el.textContent=n===1
     ? sequence.length+' notes · lands on the head of every '+group
     : sequence.length+' notes · '+n+' rounds before note 1 falls on the head of a '+group+' again'
@@ -2421,7 +2458,7 @@ const SECTIONS=[
    }},
   {id:'metro-section',sum:'sum-metro',    defaultOpen:true,
    text:()=>{
-     const nm={1:'quarters',2:'eighths',3:'triplets',4:'sixteenths'};
+     const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[state.bpm+' BPM'];
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else{
