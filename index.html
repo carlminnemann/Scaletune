@@ -644,7 +644,7 @@ let state={
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   // remembered separately per mode family: Drone can only use a sustaining
   // wave, the sequence modes default to the sampled piano
-  timbre:'sine',waveTimbre:'sine',seqTimbre:'piano-real',volume:0.7,
+  timbre:'cello',droneTimbre:'cello',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
   bpm:80,sig:4,sigDen:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,alignPasses:false,clickFollowsFigure:true,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
@@ -1480,8 +1480,12 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16a';
+const APP_VERSION='2026-08-16b';
 const DEFAULT_WAVE='sine';
+// A drone is a held tone to tune against, so it opens on the voice that sounds
+// like an instrument rather than a test tone. The sequence modes open on the
+// piano for the same reason: it is what you would play the line on.
+const DEFAULT_DRONE='cello';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
 // scheduler mid-tick; fall back rather than let one bad value stop the audio.
@@ -1506,7 +1510,7 @@ function setTimbre(t){
   state.timbre=t;
   refreshSectionSummaries();
   // remember the choice so returning to this mode family restores it
-  if(state.mode==='drone')state.waveTimbre=t;else state.seqTimbre=t;
+  if(state.mode==='drone')state.droneTimbre=t;else state.seqTimbre=t;
   buildTimbreRow();
   if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading)loadSampler(t);
   if(state.playing&&state.mode==='drone')startContinuous();
@@ -1539,10 +1543,11 @@ function setMode(m){
   // the button that silences them both have nothing to do here.
   document.getElementById('metro-btn').style.display=(isDrone||isMetro)?'none':'';
   document.getElementById('sec-sound').style.display=isMetro?'none':'';
-  // Drone restores the last wave; the sequence modes restore the last voice,
-  // which starts out as the sampled piano.
-  state.timbre=isDrone?state.waveTimbre:state.seqTimbre;
-  if(!availableTimbres().some(t=>t.k===state.timbre))state.timbre=DEFAULT_WAVE;
+  // Each side restores the last voice you chose there: the drone starts out on
+  // the cello, the sequence modes on the sampled piano.
+  state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
+  if(!availableTimbres().some(t=>t.k===state.timbre))
+    state.timbre=isDrone?DEFAULT_DRONE:DEFAULT_WAVE;
   buildTimbreRow();
   if(!isMetro&&isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading)
     loadSampler(state.timbre);
