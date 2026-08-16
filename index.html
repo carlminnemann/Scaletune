@@ -1526,7 +1526,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16f';
+const APP_VERSION='2026-08-16g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1785,7 +1785,12 @@ function passUnit(){
   if(!notesSilent())return 'pass';
   return state.poly.on?'cycle':state.practice.passUnit;
 }
-function passCount(){return notesSilent()?Math.max(1,state.practice.passCount|0):1;}
+/* One cycle is already the polyrhythm's own pass — it is the point at which the
+   two layers come back together — so there is nothing to choose there. */
+function passCount(){
+  if(!notesSilent()||state.poly.on)return 1;
+  return Math.max(1,state.practice.passCount|0);
+}
 function passLabel(){
   const u=passUnit(),n=passCount();
   if(u==='pass')return 'pass';
@@ -1973,9 +1978,7 @@ function buildSubdivRow(){
   // its place, since without notes nothing else says when to move on.
   const bare=notesSilent();
   const cb=document.getElementById('click-block');
-  const pb=document.getElementById('pass-block');
   if(cb)cb.style.display=bare?'none':'';
-  if(pb)pb.style.display=bare?'':'none';
 }
 
 /* ---------- tap tempo ---------- */
@@ -2082,7 +2085,10 @@ const PASS_MAX=32;
 function buildPassRow(){
   const sel=document.getElementById('pass-count');
   const row=document.getElementById('pass-unit-row');
+  const block=document.getElementById('pass-block');
   if(!sel||!row)return;
+  // only the bare metronome needs to be told what a pass is
+  if(block)block.style.display=(notesSilent()&&!state.poly.on)?'':'none';
   if(!sel.options.length){
     for(let i=1;i<=PASS_MAX;i++)sel.appendChild(new Option(i,i));
     sel.addEventListener('change',()=>{
@@ -2093,13 +2099,6 @@ function buildPassRow(){
   sel.value=String(passCount());
   sel.classList.add('active');
   row.innerHTML='';
-  // bars mean nothing under a polyrhythm, which has no bar to speak of
-  if(state.poly.on){
-    const span=document.createElement('span');
-    span.className='step-unit';span.textContent='cycles';
-    row.appendChild(span);
-    return;
-  }
   [['bar','Bars'],['beat','Beats']].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.practice.passUnit===k?' active':'');
