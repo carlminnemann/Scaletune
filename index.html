@@ -33,6 +33,11 @@
   --mode:#ff6b6b;--mode-bg:#5c0d0d;--mode-fg:#ffecec;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
+  /* One spacing scale and one control height. There were fifteen different
+     vertical gaps and eleven different control heights before this; that is
+     what made the panels read as careless rather than calm. */
+  --s1:4px;--s2:8px;--s3:12px;--s4:18px;--s5:24px;
+  --h:36px;
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
    highlight on black becomes unreadable as text on a pale tint. */
@@ -88,8 +93,8 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
-.mode-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
-.mode-btn{flex:1 1 0;min-width:60px;padding:10px 6px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
+.mode-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s1);margin-bottom:var(--s5)}
+.mode-btn{min-width:0;height:44px;padding:0 4px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
 .mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 
 .panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem}
@@ -121,8 +126,39 @@ details.sec[open] .sec-sum{display:none}
    div lower down is still a new group and needs the space above it */
 .sec-body>.group-label:first-child,
 .sec-body>div:first-child>.group-label:first-child{margin-top:0}
-.btn-wrap{display:flex;gap:5px;flex-wrap:wrap}
-.pick-btn{padding:5px 9px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
+/* A row of choices is a grid, not a wrapped flex line: with equal columns every
+   row starts and ends on the same two edges, and a short last row leaves an
+   empty cell instead of a ragged tail. The column count is set from the number
+   of items by gridify(). */
+/* A label line: what the group is on the left, and on the right the switch that
+   says HOW you choose within it. A modifier given the same size as the things it
+   modifies reads as one of them; this is the fix for that, in one rule. */
+.head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  min-height:26px;margin-bottom:var(--s3)}
+/* A group inside a panel, fenced by a hairline rather than by nothing. */
+.metro-body{padding:0}
+.mgroup{padding:var(--s4)}
+.mgroup+.mgroup{border-top:1px solid var(--border)}
+.mgroup>.head:last-child,.mgroup>*:last-child{margin-bottom:0}
+.bpm-row{display:flex;align-items:baseline;gap:var(--s2)}
+.bpm-row .bpm-big{width:auto;text-align:left}
+.bpm-row .bpm-label{margin:0}
+.sig-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.val{font-size:12px;font-weight:500;color:var(--text)}
+.head .group-label,.head .section-label{margin:0}
+/* .seg has to out-rank .btn-wrap, which the builders also put on these rows:
+   a switch is a switch whatever produced it, and must not stretch. */
+.btn-wrap.seg,.seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px;
+  gap:2px;flex:0 0 auto;width:auto}
+.seg>button{height:26px;min-height:0;font-size:10px;padding:0 9px;border-radius:6px;
+  color:var(--text3);background:none;border:1px solid transparent;cursor:pointer;
+  white-space:nowrap;font-family:inherit;touch-action:manipulation;
+  display:flex;align-items:center;justify-content:center}
+.seg>button.active{background:var(--blue-bg);border-color:transparent;color:var(--blue)}
+.seg>button.now{background:var(--green-bg);color:var(--green)}
+.btn-wrap{display:grid;gap:var(--s1);grid-template-columns:repeat(var(--cols,4),1fr)}
+.btn-wrap>*{min-width:0}
+.pick-btn{height:var(--h);padding:0 8px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
 .pick-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .pick-btn.disabled{opacity:0.32;cursor:not-allowed}
 /* One box per scale family. Showing all twenty-eight modes at once was more
@@ -167,7 +203,7 @@ details.fam[open] .fam-sum{display:none}
 .pick-btn.now{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .pick-btn .idx{display:inline-block;min-width:12px;margin-right:5px;font-size:9px;font-weight:700;
   text-align:center;opacity:0.85;vertical-align:1px}
-.tonic-btn{padding:5px 8px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
+.tonic-btn{height:var(--h);padding:0 6px;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
 .tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
@@ -203,7 +239,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 }
 
 .timbre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
-.timbre-btn{padding:7px 13px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
+.timbre-btn{height:var(--h);padding:0 8px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
 .timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
 
@@ -215,7 +251,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .bpm-big::-webkit-outer-spin-button,.bpm-big::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bpm-big:focus{outline:none;border-color:var(--blue);background:var(--bg3)}
 .bpm-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
-.tap-btn{width:100%;margin-top:8px;padding:9px;font-size:13px;cursor:pointer;border:1px solid var(--border2);
+.tap-btn{width:auto;margin:0;height:26px;padding:0 12px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .sig-fields{display:flex;gap:14px;align-items:center;margin-bottom:1rem}
@@ -231,7 +267,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .sig-select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .sig-select:focus{outline-color:var(--blue)}
 
-.beats-row{display:flex;gap:12px;justify-content:center;margin:0.75rem 0 0.5rem;flex-wrap:wrap}
+/* the circles keep their shape; only the alignment changes, to the same left
+   edge as everything else in the panel */
+.beats-row{display:flex;gap:var(--s2);justify-content:flex-start;margin:0 0 var(--s2);flex-wrap:wrap}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
   cursor:pointer;touch-action:manipulation;transition:background 0.05s,border-color 0.05s}
 .beat-dot.acc-low{border-width:2px;border-color:var(--text2)}
@@ -311,11 +349,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <!-- ============ SCALE / ARPEGGIO ============ -->
 <div id="pitch-section" style="display:none">
   <div class="panel">
-    <div class="group-label">Root</div>
+    <div class="head"><span class="group-label">Root</span>
+      <span class="btn-wrap seg" id="listmode-row" data-cols="fixed"></span></div>
     <div class="btn-wrap" id="root-row"></div>
 
-    <div class="group-label">Selection</div>
-    <div class="btn-wrap" id="listmode-row"></div>
   </div>
 
   <details class="sec" id="sec-scales">
@@ -359,12 +396,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <details class="sec" id="sec-range">
     <summary>Range &amp; Direction<span class="sec-sum" id="sum-range"></span></summary>
     <div class="sec-body">
-      <div class="group-label">Octaves</div>
+      <div class="head"><span class="group-label">Octaves</span>
+        <span class="btn-wrap seg" id="dir-row" data-cols="fixed"></span></div>
       <div class="btn-wrap" id="span-row"></div>
       <div class="group-label">Start Octave</div>
       <div class="btn-wrap" id="rootoct-row"></div>
-      <div class="group-label">Direction</div>
-      <div class="btn-wrap" id="dir-row"></div>
       <div class="group-label">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
     </div>
@@ -374,8 +410,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <summary>Practice Progressions<span class="sec-sum" id="sum-progress"></span></summary>
     <div class="sec-body">
       <div id="rootmove-block">
-      <div class="group-label">Root Movement</div>
-      <div class="btn-wrap" id="rootmove-row"></div>
+      <div class="head"><span class="group-label">Root Movement</span>
+        <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
       </div>
       <div class="group-label">Speed Up</div>
       <div class="step-row">
@@ -421,49 +457,56 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <hr class="divider" id="metro-divider" style="display:none">
 <details class="sec" id="metro-section" style="display:none">
   <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
-  <div class="sec-body">
-  <div class="two-col">
-    <div>
+  <div class="sec-body metro-body">
+  <!-- Five named groups instead of one undivided box. The tempo, the bar and the
+       figure were sharing a single space with nothing between them, which is what
+       made the panel hard to read. -->
+  <div class="mgroup">
+    <div class="head"><span class="section-label">Tempo</span>
+      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button></div>
+    <div class="bpm-row">
       <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="30" max="240" step="1" value="80" aria-label="Beats per minute">
-      <div class="bpm-label">BPM</div>
-      <input type="range" id="bpm-slider" min="30" max="240" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
-      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
+      <span class="bpm-label">BPM</span>
     </div>
-    <div>
-      <div id="sig-block">
-      <div class="section-label" style="margin-bottom:6px">Beats per Bar</div>
-      <div class="sig-fields">
-        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
-      </div>
-      </div>
-      <div class="section-label" style="margin-bottom:5px;margin-top:10px">Click Volume</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" style="flex:1" oninput="updateClickVol(this.value)">
-        <span style="font-size:12px;font-weight:500;min-width:34px;text-align:right;color:var(--text)" id="click-vol-out">50%</span>
-      </div>
-    </div>
+    <input type="range" id="bpm-slider" min="30" max="240" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
   </div>
-  <div class="beats-row" id="beats-row"></div>
-  <div class="beats-hint">tap a beat: accent it, then silence it</div>
-  <div id="subdiv-block">
-    <div class="section-label">Subdivision</div>
-    <div class="btn-wrap" id="subdivmode-row" style="margin-bottom:6px"></div>
+
+  <div class="mgroup" id="sig-block">
+    <div class="head"><span class="section-label">Bar</span>
+      <span class="sig-fields">
+        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
+        <span class="sig-unit">beats</span>
+      </span></div>
+    <div class="beats-row" id="beats-row"></div>
+    <div class="beats-hint">tap a beat: accent it, then silence it</div>
+  </div>
+
+  <div class="mgroup" id="subdiv-block">
+    <div class="head"><span class="section-label">Subdivision</span>
+      <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
     <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
     <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
     <div id="click-block">
-    <div class="section-label">Click</div>
-    <div class="btn-wrap" id="clickmode-row" style="margin-bottom:12px"></div>
+    <div class="head"><span class="section-label">Click</span>
+      <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
     </div>
   </div>
-  <div id="pass-block" style="display:none">
+
+  <div class="mgroup">
+    <div class="head"><span class="section-label">Click Volume</span>
+      <span class="val" id="click-vol-out">50%</span></div>
+    <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" style="width:100%" oninput="updateClickVol(this.value)">
+  </div>
+  <div class="mgroup" id="pass-block" style="display:none">
     <div class="section-label">Advance Every</div>
     <div class="sig-fields" style="margin-bottom:12px">
       <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
       <span class="btn-wrap" id="pass-unit-row"></span>
     </div>
   </div>
-  <div class="section-label">Polyrhythm</div>
-  <div class="btn-wrap" id="polymode-row" style="margin-bottom:8px"></div>
+  <div class="mgroup">
+  <div class="head"><span class="section-label">Polyrhythm</span>
+    <span class="btn-wrap seg" id="polymode-row" data-cols="fixed"></span></div>
   <div id="poly-controls" style="display:none">
     <div class="step-row" style="margin-bottom:4px">
       <select class="sig-select active" id="poly-a" aria-label="Pulses in layer A"></select>
@@ -474,6 +517,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="beats-row" id="poly-row-a"></div>
     <div class="beats-row" id="poly-row-b"></div>
     <div class="beats-hint">tap a pulse: accent it, then silence it</div>
+  </div>
   </div>
   </div>
 </details>
@@ -487,11 +531,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <summary>Phrasing<span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body">
     <div id="notelen-block">
-    <div class="group-label">Note Length</div>
-    <div class="btn-wrap" id="notelen-row"></div>
+    <div class="head"><span class="group-label">Note Length</span>
+      <span class="btn-wrap seg" id="notelen-row" data-cols="fixed"></span></div>
     </div>
-    <div class="group-label">Phrase Alignment</div>
-    <div class="btn-wrap" id="align-row"></div>
+    <div class="head"><span class="group-label">Phrase Alignment</span>
+      <span class="btn-wrap seg" id="align-row" data-cols="fixed"></span></div>
     <div class="info-line" id="align-info"></div>
     <div id="polynotes-block">
     <div class="group-label">Notes Follow</div>
@@ -1643,7 +1687,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17e';
+const APP_VERSION='2026-08-17h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2702,6 +2746,34 @@ function refreshSectionSummaries(){
     if(el)try{el.textContent='· '+s.text();}catch(e){el.textContent='';}
   });
 }
+
+/* How many columns a row of choices gets. Up to five items keep one row each,
+   because five is what the mode row has and the eye already knows that width.
+   Beyond that they fold: twelve roots to six across, seven modes to four. The
+   leftover cells stay empty rather than stretching the last row, which is the
+   whole point — every row ends on the same edge. */
+function colsFor(n){
+  if(n<=5)return n||1;
+  if(n===6)return 3;
+  if(n===7||n===8)return 4;
+  if(n===9)return 3;
+  return 6;
+}
+function gridify(row){
+  if(!row||row.dataset.cols==='fixed')return;
+  const n=[...row.children].filter(c=>c.nodeType===1).length;
+  row.style.setProperty('--cols',colsFor(n));
+}
+function gridifyAll(){document.querySelectorAll('.btn-wrap').forEach(gridify);}
+/* The rows are rebuilt by a dozen different functions as the app runs, so rather
+   than teaching each one, watch for children changing and re-measure. */
+(function(){
+  const obs=new MutationObserver(ms=>ms.forEach(m=>{
+    if(m.target.classList&&m.target.classList.contains('btn-wrap'))gridify(m.target);
+  }));
+  document.querySelectorAll('.btn-wrap').forEach(r=>obs.observe(r,{childList:true}));
+  gridifyAll();
+})();
 
 /* pointer-events keeps a mouse or a finger off it, but not a keyboard, and not
    script. While it is pinned the panel simply refuses to close, however it is
