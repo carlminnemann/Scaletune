@@ -276,7 +276,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="btn-wrap" id="listmode-row"></div>
   </div>
 
-  <details class="sec" id="sec-scales" open>
+  <details class="sec" id="sec-scales">
     <summary><span id="sec-scales-title">Scales</span><span class="sec-sum" id="sum-scales"></span></summary>
     <div class="sec-body">
       <div id="scale-lists">
@@ -314,7 +314,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
   </details>
 
-  <details class="sec" id="sec-range" open>
+  <details class="sec" id="sec-range">
     <summary>Range &amp; Direction<span class="sec-sum" id="sum-range"></span></summary>
     <div class="sec-body">
       <div class="group-label">Octaves</div>
@@ -354,7 +354,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="group-label">Root</div>
     <div class="btn-wrap" id="free-root-row"></div>
   </div>
-  <details class="sec" id="sec-freenotes" open>
+  <details class="sec" id="sec-freenotes">
     <summary>Notes<span class="sec-sum" id="sum-freenotes"></span></summary>
     <div class="sec-body">
       <div class="legend">
@@ -365,7 +365,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <button class="clear-btn" onclick="clearFree()">✕ Clear</button>
     </div>
   </details>
-  <details class="sec" id="sec-freerange" open>
+  <details class="sec" id="sec-freerange">
     <summary>Range &amp; Direction<span class="sec-sum" id="sum-freerange"></span></summary>
     <div class="sec-body">
       <div class="group-label">Octaves</div>
@@ -377,7 +377,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </div>
 
 <hr class="divider" id="metro-divider" style="display:none">
-<details class="sec" id="sec-rhythm" style="display:none" open>
+<details class="sec" id="sec-rhythm" style="display:none">
   <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body">
     <div id="notelen-block">
@@ -390,7 +390,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 </details>
 
-<details class="sec" id="metro-section" style="display:none" open>
+<details class="sec" id="metro-section" style="display:none">
   <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body">
   <div class="two-col">
@@ -453,7 +453,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 </details>
 
-<details class="sec" id="sec-sound" open>
+<details class="sec" id="sec-sound">
   <summary>Timbre<span class="sec-sum" id="sum-sound"></span></summary>
   <div class="sec-body">
     <div class="timbre-row" id="timbre-row"></div>
@@ -1615,7 +1615,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16m';
+const APP_VERSION='2026-08-16n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2602,40 +2602,40 @@ function renderBeats(){
 // Closed sections carry a one-line summary of what is set inside them, so
 // folding a section away never hides what it is doing.
 const SECTIONS=[
-  {id:'sec-scales',   sum:'sum-scales',   defaultOpen:true,group:'notes',
+  {id:'sec-scales',   sum:'sum-scales',group:'notes',
    text:()=>{
      if(useListOn())return activeList().length?activeList().length+' in rotation':'nothing chosen';
      const n=state.mode==='scale'?state.scaleName:state.chordName;
      return n?bareName(NOTES.indexOf(state.root))+' '+n:'nothing chosen';
    }},
-  {id:'sec-range',    sum:'sum-range',    defaultOpen:true,group:'range',
+  {id:'sec-range',    sum:'sum-range',group:'range',
    text:()=>state.span+(state.span>1?' octaves':' octave')+' · '+
         (DIRECTIONS.find(d=>d.k===state.direction)||{}).label+' · from octave '+state.rootOct},
   // Free's Range section shares a group with the Scale one: folding either
   // folds both, so the layout does not change under you when switching mode.
-  {id:'sec-freenotes',sum:'sum-freenotes',defaultOpen:true,group:'notes',
+  {id:'sec-freenotes',sum:'sum-freenotes',group:'notes',
    text:()=>{
      const n=Object.keys(state.freeSelected).length;
      if(!n)return 'none chosen';
      return Object.keys(state.freeSelected)
        .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b).map(nameOf).join(' ');
    }},
-  {id:'sec-freerange',sum:'sum-freerange',defaultOpen:true,group:'range',
+  {id:'sec-freerange',sum:'sum-freerange',group:'range',
    text:()=>state.freeSpan+(state.freeSpan>1?' octaves':' octave')+' · '+
         (DIRECTIONS.find(d=>d.k===state.freeDirection)||{}).label},
-  {id:'sec-sound',    sum:'sum-sound',    defaultOpen:true,
+  {id:'sec-sound',    sum:'sum-sound',
    text:()=>{
      const t=TIMBRES.find(x=>x.k===state.timbre);
      return (t?t.label:state.timbre)+' · '+Math.round(state.volume*100)+'%';
    }},
-  {id:'sec-progress', sum:'sum-progress', defaultOpen:false,
+  {id:'sec-progress', sum:'sum-progress',
    text:()=>{
      const b=[];
      if(state.practice.rootMove==='fourths')b.push('cycle of 4ths');
      if(state.practice.tempoStep>0)b.push('+'+state.practice.tempoStep+' BPM/'+passLabel());
      return b.length?b.join(' · '):'off';
    }},
-  {id:'metro-section',sum:'sum-metro',    defaultOpen:true,
+  {id:'metro-section',sum:'sum-metro',
    text:()=>{
      const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[state.bpm+' BPM'];
@@ -2647,14 +2647,17 @@ const SECTIONS=[
      }
      return bits.join(' · ');
    }},
-  {id:'sec-rhythm',   sum:'sum-rhythm',   defaultOpen:true,
+  {id:'sec-rhythm',   sum:'sum-rhythm',
    text:()=>{
      const nl={sub:'per figure',beat:'per beat',bar:'per bar'}[state.noteLen]||'';
      return nl+(state.alignPasses?' · restarts each round':' · drifts');
    }},
 ];
 
-function sectionKey(s){return 'scaletune-sec-'+(s.group||s.id);}
+/* Every section starts closed, every time the app opens. On a phone that puts
+   the modes and Start on the first screen with nothing to scroll past, and it
+   is the same screen every time — a panel left open days ago is not something
+   you remember doing. Within a session the sections stay as you set them. */
 
 function refreshSectionSummaries(){
   SECTIONS.forEach(s=>{
@@ -2664,14 +2667,21 @@ function refreshSectionSummaries(){
 }
 
 function initSections(){
+  // earlier versions remembered this across launches; clear what they left
+  // behind rather than leave dead keys sitting in storage forever
+  try{
+    const stale=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.indexOf('scaletune-sec-')===0)stale.push(k);
+    }
+    stale.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
   SECTIONS.forEach(s=>{
     const d=document.getElementById(s.id);
     if(!d)return;
-    let saved=null;
-    try{saved=localStorage.getItem(sectionKey(s));}catch(e){}
-    d.open=saved===null?s.defaultOpen:saved==='1';
+    d.open=false;
     d.addEventListener('toggle',()=>{
-      try{localStorage.setItem(sectionKey(s),d.open?'1':'0');}catch(e){}
       // mirror onto the other sections in the same group
       if(s.group)SECTIONS.forEach(o=>{
         if(o.group!==s.group||o.id===s.id)return;
