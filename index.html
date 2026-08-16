@@ -23,7 +23,10 @@
   --red:#ef4444;--red-bg:#450a0a;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
-  --mode:#ff6b6b;--mode-bg:#5c0d0d;
+  /* --mode is the red itself: borders, and text that sits on a panel. --mode-fg
+     is the text that sits ON that red, which has to be near-white to be read —
+     red on dark red measured 4.98:1, near-white on it measures 12.67:1. */
+  --mode:#ff6b6b;--mode-bg:#5c0d0d;--mode-fg:#ffecec;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
 }
@@ -40,7 +43,7 @@
   --green:#116b31;--green-bg:#d9efdf;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
-  --mode:#fff2f2;--mode-bg:#b81414;   /* solid red chip: a pale tint read as salmon */
+  --mode:#b81414;--mode-bg:#b81414;--mode-fg:#fff2f2;   /* solid red chip: a pale tint read as salmon */
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -72,7 +75,7 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 
 .mode-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
 .mode-btn{flex:1 1 0;min-width:60px;padding:10px 6px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
-.mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
+.mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 
 .panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem}
 
@@ -145,7 +148,7 @@ details.fam[open] .fam-sum{display:none}
 .pick-btn .idx{display:inline-block;min-width:12px;margin-right:5px;font-size:9px;font-weight:700;
   text-align:center;opacity:0.85;vertical-align:1px}
 .tonic-btn{padding:5px 8px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
-.tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
+.tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
 
@@ -181,7 +184,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 .timbre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .timbre-btn{padding:7px 13px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
-.timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode)}
+.timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
 
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
@@ -1641,7 +1644,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16t';
+const APP_VERSION='2026-08-17a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
