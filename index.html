@@ -52,12 +52,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 @supports(height:100dvh){body{min-height:100dvh}}
 .container{max-width:560px;margin:0 auto}
 
-/* ---------- the same layout at every size ----------
-
-   One column, portrait or landscape, phone or tablet or desktop — the
-   arrangement never changes. What changes on a large screen is the scale: the
-   column used to sit in the middle with the screen empty around it, and rather
-   than re-arranging anything it is grown to fill. See fitToScreen().        */
+/* One column, at every size and in both orientations. Two columns were tried on
+   a wide screen and read as lopsided; scaling the column up to fill read as
+   oversized. The column stays the size it was designed at.                  */
 
 /* 34px side columns keep the wordmark optically centred despite the button */
 .header{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:8px;margin-bottom:1.75rem}
@@ -279,9 +276,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </div>
 
 <!-- ============ DRONE ============ -->
-<!-- Two halves: what you play, and how you play it. On a phone the wrappers
-     are display:contents and everything flows in one column exactly as before;
-     on a wide screen they become two columns side by side. -->
 <div id="drone-section">
   <div class="section-label">Notes</div>
   <div class="legend">
@@ -1647,7 +1641,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16s';
+const APP_VERSION='2026-08-16t';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2762,32 +2756,6 @@ buildAlignRow();
 buildTempoStepRow();
 buildRootMoveRow();
 renderPitchPickers();
-/* On a large screen the column used to sit in the middle with the display empty
-   around it. The arrangement is deliberately the same everywhere — one column,
-   portrait or landscape — so instead of re-arranging anything on a desktop, it
-   is scaled up until it fills the screen. Everything grows together, which on a
-   laptop set on a music stand is the difference between reading it and not.
-
-   Only above 900px, and only where there is height to spare: a phone on its
-   side is wide and short, and scaling there would push the controls off the
-   bottom. Below that it is untouched, at 1:1.
-
-   CSS cannot do this on its own — zoom takes a number, and a number cannot be
-   computed from the viewport in a stylesheet. A browser without zoom support
-   simply keeps the app at 1:1, which is what it did before.                  */
-const FILL_TARGET=600;   // the design column plus its margins
-const FILL_MAX=3.2;      // a 4K screen would otherwise fill to 4x, a poster
-function fitToScreen(){
-  const el=document.querySelector('.container');
-  if(!el)return;
-  const w=window.innerWidth,h=window.innerHeight;
-  const z=(w>=900&&h>=600)?Math.min(FILL_MAX,Math.max(1,(w-32)/FILL_TARGET)):1;
-  el.style.zoom=z===1?'':z;
-}
-window.addEventListener('resize',fitToScreen);
-window.addEventListener('orientationchange',fitToScreen);
-fitToScreen();
-
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{
