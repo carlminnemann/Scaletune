@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="ScaleTune">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f5eedb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#ddd3b7" media="(prefers-color-scheme: light)">
 <title>ScaleTune</title>
 <style>
 :root{
@@ -36,14 +36,25 @@
    lighting, and it stops the page glaring next to a dark instrument. */
 :root[data-theme="light"]{
   color-scheme:light;
-  --bg:#f5eedb;--bg2:#fdf8ea;--bg3:#eee5cf;
-  --border:#e5dbc0;--border2:#d5c9a8;--border3:#b6a883;
-  --text:#2b2418;--text2:#5a5140;--text3:#6b6350;
+  /* Paper, not a sheet of white: 65% brightness, so coming from the dark theme
+     is a change of light and not a flash. The panels and the borders come down
+     with it — a bright panel on a dimmed page gives the glare back inverted. */
+  --bg:#ddd3b7;--bg2:#e8dfc6;--bg3:#d1c5a6;
+  --border:#c9bc99;--border2:#b8a983;--border3:#9c8d68;
+  /* The greys come down with the paper. On the old near-white they cleared the
+     readable minimum; on this tone the muted grey fell to 3.5:1, so it is
+     darkened until it clears again — the paper stays the tone chosen, the text
+     stops paying for it. */
+  --text:#2b2418;--text2:#4a4232;--text3:#57503f;
   --blue:#f7f3e8;--blue-bg:#5f5a4c;   /* inverted: on paper the selected chip goes dark */
   --green:#116b31;--green-bg:#d9efdf;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
-  --mode:#b81414;--mode-bg:#b81414;--mode-fg:#fff2f2;   /* solid red chip: a pale tint read as salmon */
+  /* --mode also writes the italic line beside a closed family, which sits on the
+     darkest paper: the chip red read 3.9:1 there, so the ink is a shade deeper
+     than the fill. On the chip itself that shade is only the border, invisible
+     against it. */
+  --mode:#a41111;--mode-bg:#b81414;--mode-fg:#fff2f2;   /* solid red chip: a pale tint read as salmon */
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -1650,7 +1661,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17b';
+const APP_VERSION='2026-08-17c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
