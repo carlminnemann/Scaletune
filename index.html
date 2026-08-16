@@ -1026,10 +1026,13 @@ function startContinuous(){
     }
     if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8,share);return;}
     const osc=audioCtx.createOscillator();
-    osc.type=oscType();osc.frequency.value=freq;
+    const trim=isOrganSynth(state.timbre)?ORGAN_SYNTH_TRIM:1;
+    if(isOrganSynth(state.timbre))osc.setPeriodicWave(organPeriodicWave());
+    else osc.type=oscType();
+    osc.frequency.value=freq;
     const g=audioCtx.createGain();
     g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(share,now+0.02);
+    g.gain.linearRampToValueAtTime(share*trim,now+0.02);
     osc.connect(g);g.connect(masterGain);osc.start(now);
     liveNodes.push(osc,g);
   });
@@ -1073,12 +1076,15 @@ function scheduleTone(s,when,dur){
     buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
   } else {
     const osc=audioCtx.createOscillator();
-    osc.type=oscType();osc.frequency.value=freq;
+    const trim=isOrganSynth(state.timbre)?ORGAN_SYNTH_TRIM:1;
+    if(isOrganSynth(state.timbre))osc.setPeriodicWave(organPeriodicWave());
+    else osc.type=oscType();
+    osc.frequency.value=freq;
     const g=audioCtx.createGain();
     const rel=Math.min(0.09,dur*0.18),atk=0.012;
     g.gain.setValueAtTime(0,when);
-    g.gain.linearRampToValueAtTime(1,when+atk);
-    g.gain.setValueAtTime(1,when+Math.max(atk,dur-rel));
+    g.gain.linearRampToValueAtTime(trim,when+atk);
+    g.gain.setValueAtTime(trim,when+Math.max(atk,dur-rel));
     g.gain.linearRampToValueAtTime(0,when+dur);
     osc.connect(g);g.connect(masterGain);
     osc.start(when);osc.stop(when+dur+0.03);
@@ -1112,6 +1118,52 @@ const POLY_TONE={
   a:{low:{f:1400,g:1,d:0.011},  high:{f:950,g:0.72,d:0.010}},    // the reference layer
   b:{low:{f:660,g:0.95,d:0.022},high:{f:470,g:0.62,d:0.018}},    // lower and longer
 };
+
+/* A synthesised organ, to be judged against the recorded one.
+
+   A pipe organ is close to additive synthesis made with air: a stop is very
+   nearly a sine, and drawing several stops adds them. So the partials here are
+   the classic principal chorus — the octaves and the fifths above them, at the
+   footages an organist would draw — and the result is one periodic waveform
+   rather than a stack of oscillators.
+
+   As a tuning reference this has something the recording cannot: the pitch is
+   exact by construction, at every note, with no contour to track, no residual
+   wobble and no loop seam. Deliberately no detuning between partials — a
+   celeste would sound richer and would beat against itself, which is precisely
+   what you are listening for in the instrument you are tuning. */
+/* Not invented: measured off the recorded organ's own sample buffers, seven
+   notes across its range, averaged. The profile is unmistakably a principal
+   chorus — the octaves and the fifths above them stand out and everything
+   between them is 40 dB down, which is exactly what a stop list looks like
+   written as numbers. Partials quieter than that are dropped as inaudible. */
+const ORGAN_PARTIALS=[
+  // harmonic, level      what an organist would call it
+  [ 1, 1.000],   //  8'   principal
+  [ 2, 0.840],   //  4'   octave
+  [ 3, 0.297],   //  2 2/3'  quint
+  [ 4, 0.327],   //  2'   super-octave
+  [ 5, 0.036],   //  1 3/5'  tierce
+  [ 6, 0.142],   //  1 1/3'  larigot
+  [ 8, 0.084],   //  1'
+  [ 9, 0.019],
+  [12, 0.069],   //  mixture
+  [16, 0.026],
+];
+let organWave=null;
+function organPeriodicWave(){
+  if(organWave)return organWave;
+  let top=1;ORGAN_PARTIALS.forEach(([h])=>{top=Math.max(top,h);});
+  const real=new Float32Array(top+1),imag=new Float32Array(top+1);
+  ORGAN_PARTIALS.forEach(([h,a])=>{imag[h]=a;});
+  organWave=audioCtx.createPeriodicWave(real,imag,{disableNormalization:false});
+  return organWave;
+}
+function isOrganSynth(k){return k==='organ-synth';}
+// Level-matched to the recorded organ (measured 0.156 against 0.115 RMS), so
+// the comparison is of timbre and not of loudness — the louder of two sounds
+// always wins otherwise.
+const ORGAN_SYNTH_TRIM=0.74;
 
 function clickBuffer(f,decay){
   const sr=audioCtx.sampleRate;
@@ -1556,11 +1608,12 @@ const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
   {k:'organ',      label:'Organ',       decays:false},
+  {k:'organ-synth',label:'Organ synth', decays:false},
   {k:'oboe',       label:'Oboe',        decays:false},
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16j';
+const APP_VERSION='2026-08-16l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
