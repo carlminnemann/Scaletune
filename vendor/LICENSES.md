@@ -15,14 +15,23 @@ License: MIT
 Source: https://github.com/danigb/soundfont-player
 
 ## FluidR3 GM — instrument samples
-`vendor/acoustic_grand_piano-mp3.js` — 2.5 MB, 52 samples
-`vendor/cello-mp3.js` — 2.9 MB, 52 samples
+`vendor/acoustic_grand_piano-mp3.js` — 2.5 MB
+`vendor/cello-mp3.js` — 2.9 MB
+`vendor/church_organ-mp3.js` — 2.7 MB
+`vendor/oboe-mp3.js` — 2.7 MB
 
-Both cover A0–C8, natural notes only; the player transposes for the
-accidentals. The cello is played looped in Drone mode: its sample runs dry
-after roughly three seconds, which suits a sequence note but not a drone that
-has to hold indefinitely. The drone loop is also pitch-flattened — the sample
-is a real player with a 4–5 Hz vibrato, which a tuning reference must not have.
+All cover A0–C8. The cello, organ and oboe are played looped in Drone mode:
+their samples run dry after roughly three seconds, which suits a sequence note
+but not a drone that has to hold indefinitely.
+
+Those loops are also pitch-corrected. Two separate faults are fixed. The cello
+and oboe are real players with a 4–5 Hz vibrato, which a tuning reference must
+not have; and the organ sits 4 to 9 cents sharp throughout, which matters more.
+So the sustain is tracked and read back at a corrected rate — point by point
+where that measurably steadies the pitch, at one fixed rate otherwise (a church
+organ stop is several pipes at once, and near the top of its range there is no
+single period to track). Measured across the range, every loop lands within a
+cent of the note.
 
 FluidR3 GM soundfont by Frank Wen.
 MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.

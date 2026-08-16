@@ -775,6 +775,10 @@ const SAMPLED={
                 gain:17,label:'piano',loopForDrone:false},
   'cello':     {sf:'cello',file:'vendor/cello-mp3.js',
                 gain:13,label:'cello',loopForDrone:true},
+  'organ':     {sf:'church_organ',file:'vendor/church_organ-mp3.js',
+                gain:13,label:'organ',loopForDrone:true},
+  'oboe':      {sf:'oboe',file:'vendor/oboe-mp3.js',
+                gain:13,label:'oboe',loopForDrone:true},
 };
 const samplers={};   // timbre key -> {inst,ready,loading,queue}
 
@@ -866,6 +870,21 @@ function pitchContour(d,sr,s0,s1,fNom){
   return pts;
 }
 
+/* How far a contour swings either side of centre, in cents. The outer 5% is
+   dropped so one bad reading does not stand for the whole. */
+function contourSwing(pts,fNom){
+  const c=pts.filter(p=>p.q>0.8).map(p=>1200*Math.log2(p.f/fNom)).sort((a,b)=>a-b);
+  if(c.length<6)return null;
+  const q=f=>c[Math.min(c.length-1,Math.floor(c.length*f))];
+  return (q(0.95)-q(0.05))/2;
+}
+
+// The centre of a contour: robust to a few bad readings in a way a mean is not.
+function contourCentre(pts){
+  const c=pts.filter(p=>p.q>0.8).map(p=>p.f).sort((a,b)=>a-b);
+  return c.length?c[c.length>>1]:null;
+}
+
 /* Read the sustain back at fNom/f(t): where the player was sharp we read slower,
    where flat, faster. Returns null when the sample is too breathy to track,
    which leaves the caller on the un-flattened path rather than mangling it. */
@@ -881,21 +900,45 @@ function flattenPitch(d,sr,s0,s1,fNom){
     const a=pts[i-1],b=pts[i],t=(pos-a.at)/(b.at-a.at);
     return a.f+(b.f-a.f)*t;
   };
-  const out=new Float32Array(Math.ceil((s1-s0)*1.1)+4);
-  let n=0,pos=s0;
-  while(pos<s1-2&&n<out.length){
-    const i=Math.floor(pos),fr=pos-i;
-    out[n++]=d[i]*(1-fr)+d[i+1]*fr;
-    pos+=fNom/fAt(pos);   // sharp here means read slower, which pulls it down
-  }
-  return out.subarray(0,n);
+  // read the sustain back at a rate given per sample, or at one fixed rate
+  const resample=rateAt=>{
+    const out=new Float32Array(Math.ceil((s1-s0)*1.2)+4);
+    let n=0,pos=s0;
+    while(pos<s1-2&&n<out.length){
+      const i=Math.floor(pos),fr=pos-i;
+      out[n++]=d[i]*(1-fr)+d[i+1]*fr;
+      pos+=rateAt(pos);   // sharp here means read slower, which pulls it down
+    }
+    return out.subarray(0,n);
+  };
+
+  /* Two separate faults, and they need separating. One is the wobble; the other
+     is that the sample is simply off the note — the church organ runs 4 to 9
+     cents sharp all the way up, which in a tuning app is the worse of the two.
+
+     A church organ stop is several pipes sounding at once, so towards the top of
+     its range there is no single period to track: point-by-point flattening
+     chases noise there and measured worse than leaving it alone. But the median
+     of the contour is still a sound estimate of where the note sits, so the
+     tuning can be corrected with one fixed rate even where the wobble cannot.
+     Take the flattened copy only when it measurably steadies the pitch; either
+     way, come back in tune. */
+  const centre=contourCentre(pts);
+  if(!centre)return null;
+  const centred=resample(()=>fNom/centre);   // sits sharp, so read it slower
+  const flat=resample(pos=>fNom/fAt(pos));
+  const a=contourSwing(pitchContour(centred,sr,0,centred.length,fNom),fNom);
+  const b=contourSwing(pitchContour(flat,sr,0,flat.length,fNom),fNom);
+  if(a===null||b===null)return centred;
+  return b<a?flat:centred;
 }
 
-function sustainLoopBuffer(midi){
-  if(midi in loopBufferCache)return loopBufferCache[midi];
+function sustainLoopBuffer(kind,midi){
+  const key=kind+':'+midi;
+  if(key in loopBufferCache)return loopBufferCache[key];
   let result=null;
   try{
-    const S=samplerFor('cello');
+    const S=samplerFor(kind);
     const buf=S.inst&&S.inst.buffers&&S.inst.buffers[midi];
     if(buf){
       const raw=buf.getChannelData(0),sr=buf.sampleRate;
@@ -927,17 +970,17 @@ function sustainLoopBuffer(midi){
       }
     }
   }catch(e){}
-  loopBufferCache[midi]=result;
+  loopBufferCache[key]=result;
   return result;
 }
 
 // A held, seamlessly looping voice. Falls back to the library's own looping if
 // the buffer could not be prepared.
-function startLoopedVoice(sem,gain){
+function startLoopedVoice(kind,sem,gain){
   const midi=sem+12;
-  const lb=sustainLoopBuffer(midi);
+  const lb=sustainLoopBuffer(kind,midi);
   if(!lb){
-    const S=samplerFor('cello');
+    const S=samplerFor(kind);
     if(S.ready){const n=S.inst.play(stdName(sem),audioCtx.currentTime,{gain:gain,loop:true});if(n)schedPiano.push(n);}
     return;
   }
@@ -946,7 +989,7 @@ function startLoopedVoice(sem,gain){
   src.buffer=lb;src.loop=true;
   const g=audioCtx.createGain();
   g.gain.setValueAtTime(0,now);
-  g.gain.linearRampToValueAtTime(gain,now+0.15);   // the loop starts mid-bow, so ease it in
+  g.gain.linearRampToValueAtTime(gain,now+0.15);   // the loop starts mid-note, so ease it in
   src.connect(g);g.connect(masterGain);src.start(now);
   liveNodes.push(src,g);
 }
@@ -976,7 +1019,7 @@ function startContinuous(){
     if(isSampled(state.timbre)){
       const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
       if(!S.ready)return;
-      if(spec.loopForDrone){startLoopedVoice(s,spec.gain*share);return;}
+      if(spec.loopForDrone){startLoopedVoice(state.timbre,s,spec.gain*share);return;}
       const n=S.inst.play(stdName(s),now,{gain:spec.gain*share});
       if(n)schedPiano.push(n);
       return;
@@ -1504,22 +1547,26 @@ function renderSigFields(){
 
 // A drone has to sustain indefinitely; both piano voices decay to silence
 // within seconds, so they are offered only for the note-sequence modes.
+/* The sampled voices are the ones worth tuning against: they have partials, and
+   it is the partials you hear beating. A sine has none, which makes it useless
+   for anything but a unison or an octave — but it is a clean reference for
+   exactly those, so it stays. The other waves were dropped: nobody tunes
+   against a sawtooth. */
 const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
+  {k:'organ',      label:'Organ',       decays:false},
+  {k:'oboe',       label:'Oboe',        decays:false},
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
-  {k:'triangle',   label:'Triangle',    decays:false},
-  {k:'sawtooth',   label:'Sawtooth',    decays:false},
-  {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16h';
+const APP_VERSION='2026-08-16j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
 // piano for the same reason: it is what you would play the line on.
 const DEFAULT_DRONE='cello';
-const WAVE_TYPES=['sine','triangle','sawtooth','square'];
+const WAVE_TYPES=['sine'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
 // scheduler mid-tick; fall back rather than let one bad value stop the audio.
 function oscType(){return WAVE_TYPES.indexOf(state.timbre)>=0?state.timbre:DEFAULT_WAVE;}
