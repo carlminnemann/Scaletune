@@ -254,8 +254,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
 .play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);transition:all 0.15s;touch-action:manipulation}
 .play-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
-.metro-btn{flex:0 0 auto;padding:14px 16px;font-size:13px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
-.metro-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
 
 .current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
 .current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
@@ -526,7 +524,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <div class="btn-row">
   <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
-  <button class="metro-btn" id="metro-btn" onclick="toggleMetroOnly()" style="display:none">♩ Metro only</button>
 </div>
 
 <div class="current-note" id="current-note">—</div>
@@ -708,7 +705,7 @@ let state={
   practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0,
             passCount:4,passUnit:'bar'},
-  playing:false,metroOnly:false
+  playing:false
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
@@ -796,11 +793,11 @@ function initAudio(){
     // iOS suspends the context on a phone call or when backgrounded and never
     // restarts it on its own.
     audioCtx.onstatechange=()=>{
-      if(audioCtx.state!=='running'&&(state.playing||state.metroOnly))
+      if(audioCtx.state!=='running'&&state.playing)
         try{audioCtx.resume();}catch(e){}
     };
     document.addEventListener('visibilitychange',()=>{
-      if(!document.hidden&&audioCtx&&audioCtx.state!=='running'&&(state.playing||state.metroOnly))
+      if(!document.hidden&&audioCtx&&audioCtx.state!=='running'&&state.playing)
         try{audioCtx.resume();}catch(e){}
     });
   }
@@ -1368,7 +1365,7 @@ function startPlayback(){
   const ready=initAudio();
   stopAllAudio();
   ready.then(()=>{
-    if(!state.playing&&!state.metroOnly)return;   // stopped while resuming
+    if(!state.playing)return;   // stopped while resuming
     if(state.mode==='drone'){
       if(droneSemitones().length){startContinuous();updateDroneReadout();}
       return;
@@ -1391,7 +1388,7 @@ function startPlayback(){
 
 // Metro mode is the metronome on its own, so notes stay silent there for the
 // same reason they do under Metro only.
-function notesSilent(){return state.metroOnly||state.mode==='metro';}
+function notesSilent(){return state.mode==='metro';}
 
 // Subdivision ticks that one note occupies.
 function ticksPerNote(sub){
@@ -1434,7 +1431,7 @@ function alignmentOffsets(){
 function schedulePolyFlash(layer,i,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>{
-    if(!state.playing&&!state.metroOnly)return;
+    if(!state.playing)return;
     document.querySelectorAll('#poly-row-'+layer+' .beat-dot')
       .forEach((el,idx)=>el.classList.toggle('active-beat',idx===i));
   },Math.max(0,d)));
@@ -1551,7 +1548,7 @@ function scheduleFlash(i,when){
   pendingTimeouts.push(setTimeout(()=>flashBeat(i),Math.max(0,d)));
 }
 function flashBeat(i){
-  if(!state.playing&&!state.metroOnly)return;
+  if(!state.playing)return;
   document.querySelectorAll('.beat-dot').forEach((d,idx)=>d.classList.toggle('active-beat',idx===i));
 }
 
@@ -1585,11 +1582,6 @@ function togglePlay(){
     refreshSequence();
     if(!sequence.length){setStatus(state.mode==='free'?'Select some notes first.':'Pick a scale or chord first.');return;}
   }
-  if(state.metroOnly){
-    state.metroOnly=false;stopPlayback();
-    const mb=document.getElementById('metro-btn');
-    mb.textContent='♩ Metro only';mb.classList.remove('playing');
-  }
   // Metro plays no notes, so it must not wait on an instrument to load
   if(state.mode!=='metro'&&isSampled(state.timbre)&&!samplerReady(state.timbre)){
     const S=samplerFor(state.timbre);
@@ -1602,26 +1594,12 @@ function togglePlay(){
   state.playing=true;setPlayUI(true);startPlayback();
 }
 
-function toggleMetroOnly(){
-  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
-  state.metroOnly=!state.metroOnly;
-  buildBeats();buildPolyNotesRow();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
-  const b=document.getElementById('metro-btn');
-  if(state.metroOnly){
-    b.textContent='■ Stop metro';b.classList.add('playing');
-    startPlayback();
-  } else {
-    b.textContent='♩ Metro only';b.classList.remove('playing');stopPlayback();
-  }
-}
-
 function restartIfPlaying(){
   // clearing the notes mid-playback should stop, not leave a bare metronome
   if(state.playing&&state.mode!=='drone'&&!buildSequence().length){
     state.playing=false;setPlayUI(false);stopPlayback();return;
   }
   if(state.playing){stopPlayback();startPlayback();}
-  else if(state.metroOnly){stopPlayback();state.metroOnly=false;toggleMetroOnly();}
 }
 
 /* ---------- simple controls ---------- */
@@ -1665,7 +1643,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17d';
+const APP_VERSION='2026-08-17e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1705,11 +1683,6 @@ function setTimbre(t){
 function setMode(m){
   const wasPlaying=state.playing;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
-  if(state.metroOnly){
-    state.metroOnly=false;stopPlayback();
-    const mb=document.getElementById('metro-btn');
-    mb.textContent='♩ Metro only';mb.classList.remove('playing');
-  }
   state.mode=m;
   const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro';
   [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
@@ -1733,9 +1706,6 @@ function setMode(m){
     ms.classList.remove('pinned');ms.open=metroWasOpen;
   }
   document.getElementById('sec-rhythm').style.display=(isDrone||isMetro)?'none':'';
-  // Metro is the metronome on its own, so the voice that would play notes and
-  // the button that silences them both have nothing to do here.
-  document.getElementById('metro-btn').style.display=(isDrone||isMetro)?'none':'';
   document.getElementById('sec-sound').style.display=isMetro?'none':'';
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
@@ -2049,7 +2019,7 @@ function updateRotationPanel(){
     d.textContent=(i+1)+'. '+it.name;
     chips.appendChild(d);
   });
-  const playing=state.playing&&!state.metroOnly;
+  const playing=state.playing;
   document.getElementById('rot-now').innerHTML=
     (playing?'Now: ':'Starts on: ')+'<b>'+p.now+'</b>'+
     (p.needed>1?'  · round '+Math.min(p.needed,roundsInFigure+1)+' of '+p.needed:'');
@@ -2104,7 +2074,7 @@ function buildSubdivRow(){
     b.textContent=sd.label;
     if(state.practice.useSubdivList){
       const i=list.indexOf(sd.k);
-      const sounding=i>=0&&sd.k===currentSubdiv()&&(state.playing||state.metroOnly);
+      const sounding=i>=0&&sd.k===currentSubdiv()&&state.playing;
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
       if(i>=0)b.innerHTML='<span class="idx">'+(i+1)+'</span>'+sd.label;
       b.onclick=()=>{
@@ -2329,7 +2299,7 @@ function paintSetButtons(selector,attr,forMode){
     if(useListOn()){
       const i=list.findIndex(x=>x.name===name);
       if(i>=0){
-        b.classList.add(i===studyIdx&&state.playing&&!state.metroOnly?'now':'active');
+        b.classList.add(i===studyIdx&&state.playing?'now':'active');
         b.innerHTML='<span class="idx">'+(i+1)+'</span>'+name;
       } else b.textContent=name;
     } else {
@@ -2526,7 +2496,7 @@ function buildNoteLenRow(){
       // The note grid has to be realigned, or the next note would not fall due
       // until the counter happened to reach a multiple of the new length and
       // the drone would simply go quiet in the meantime.
-      if(state.playing||state.metroOnly)pendingNoteLenChange=true;
+      if(state.playing)pendingNoteLenChange=true;
       else restartIfPlaying();
     };
     row.appendChild(b);
@@ -2631,7 +2601,11 @@ function updateSupersededControls(){
 /* With notes playing, every beat is plain: an accent imposes a bar on someone
    who may not want one, and tapping a beat is how you ask for it. The metronome
    on its own has nothing to show but the bar, so there the chosen bar length has
-   to be audible — its first beat carries the accent until you silence it. */
+   to be audible — its first beat carries the accent until you silence it.
+
+   "The metronome on its own" used to be two things: Metro mode, and a Metro only
+   button that muted the notes in the other modes. The button is gone — Metro
+   mode is that, and better — so this is now simply the mode. */
 function defaultAccent(i){return (i===0&&notesSilent())?'low':'high';}
 
 function buildBeats(){
