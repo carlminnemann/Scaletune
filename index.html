@@ -775,8 +775,6 @@ const SAMPLED={
                 gain:17,label:'piano',loopForDrone:false},
   'cello':     {sf:'cello',file:'vendor/cello-mp3.js',
                 gain:13,label:'cello',loopForDrone:true},
-  'organ':     {sf:'church_organ',file:'vendor/church_organ-mp3.js',
-                gain:13,label:'organ',loopForDrone:true},
   'oboe':      {sf:'oboe',file:'vendor/oboe-mp3.js',
                 gain:13,label:'oboe',loopForDrone:true},
 };
@@ -913,16 +911,16 @@ function flattenPitch(d,sr,s0,s1,fNom){
   };
 
   /* Two separate faults, and they need separating. One is the wobble; the other
-     is that the sample is simply off the note — the church organ runs 4 to 9
-     cents sharp all the way up, which in a tuning app is the worse of the two.
+     is that the sample sits off the note to begin with, which in a tuning app is
+     the worse of the two.
 
-     A church organ stop is several pipes sounding at once, so towards the top of
-     its range there is no single period to track: point-by-point flattening
-     chases noise there and measured worse than leaving it alone. But the median
-     of the contour is still a sound estimate of where the note sits, so the
-     tuning can be corrected with one fixed rate even where the wobble cannot.
-     Take the flattened copy only when it measurably steadies the pitch; either
-     way, come back in tune. */
+     Near the extremes of a sample set there is often no clean period to track —
+     the top notes are stretched and breathy — and point-by-point flattening
+     chases noise there, measuring worse than leaving it alone. But the median of
+     the contour is still a sound estimate of where the note sits, so the tuning
+     can be corrected with one fixed rate even where the wobble cannot. Take the
+     flattened copy only when it measurably steadies the pitch; either way, come
+     back in tune. */
   const centre=contourCentre(pts);
   if(!centre)return null;
   const centred=resample(()=>fNom/centre);   // sits sharp, so read it slower
@@ -1026,8 +1024,8 @@ function startContinuous(){
     }
     if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8,share);return;}
     const osc=audioCtx.createOscillator();
-    const trim=isOrganSynth(state.timbre)?ORGAN_SYNTH_TRIM:1;
-    if(isOrganSynth(state.timbre))osc.setPeriodicWave(organPeriodicWave());
+    const trim=isOrgan(state.timbre)?ORGAN_SYNTH_TRIM:1;
+    if(isOrgan(state.timbre))osc.setPeriodicWave(organPeriodicWave());
     else osc.type=oscType();
     osc.frequency.value=freq;
     const g=audioCtx.createGain();
@@ -1076,8 +1074,8 @@ function scheduleTone(s,when,dur){
     buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
   } else {
     const osc=audioCtx.createOscillator();
-    const trim=isOrganSynth(state.timbre)?ORGAN_SYNTH_TRIM:1;
-    if(isOrganSynth(state.timbre))osc.setPeriodicWave(organPeriodicWave());
+    const trim=isOrgan(state.timbre)?ORGAN_SYNTH_TRIM:1;
+    if(isOrgan(state.timbre))osc.setPeriodicWave(organPeriodicWave());
     else osc.type=oscType();
     osc.frequency.value=freq;
     const g=audioCtx.createGain();
@@ -1119,24 +1117,30 @@ const POLY_TONE={
   b:{low:{f:660,g:0.95,d:0.022},high:{f:470,g:0.62,d:0.018}},    // lower and longer
 };
 
-/* A synthesised organ, to be judged against the recorded one.
+/* The organ is synthesised rather than sampled — the only voice here that is.
 
    A pipe organ is close to additive synthesis made with air: a stop is very
-   nearly a sine, and drawing several stops adds them. So the partials here are
-   the classic principal chorus — the octaves and the fifths above them, at the
-   footages an organist would draw — and the result is one periodic waveform
-   rather than a stack of oscillators.
+   nearly a sine, and drawing several stops adds them. So it is one periodic
+   waveform rather than a recording, and as a tuning reference that wins on
+   every count that can be measured: the pitch is exact by construction at every
+   note, with no contour to track, no residual wobble and no loop seam. The
+   recording it replaced was weakest exactly where that matters, at the top of
+   its range, where the pitch correction had to be refused.
 
-   As a tuning reference this has something the recording cannot: the pitch is
-   exact by construction, at every note, with no contour to track, no residual
-   wobble and no loop seam. Deliberately no detuning between partials — a
-   celeste would sound richer and would beat against itself, which is precisely
-   what you are listening for in the instrument you are tuning. */
-/* Not invented: measured off the recorded organ's own sample buffers, seven
-   notes across its range, averaged. The profile is unmistakably a principal
-   chorus — the octaves and the fifths above them stand out and everything
-   between them is 40 dB down, which is exactly what a stop list looks like
-   written as numbers. Partials quieter than that are dropped as inaudible. */
+   Deliberately no detuning between partials — a celeste would sound richer and
+   would beat against itself, which is precisely what you are listening for in
+   the instrument you are tuning.
+
+   What it cannot do: a real organ's spectrum changes from note to note, as the
+   mixture ranks break back at different points across the compass. One fixed
+   waveform does not follow that. Judged by ear against the recording, it was
+   the one kept. */
+/* Not invented: measured off a recorded church organ, seven notes across its
+   range, by Goertzel at each exact harmonic, then averaged. The profile is
+   unmistakably a principal chorus — the octaves and the fifths above them stand
+   out and everything between them is 40 dB down, which is exactly what a stop
+   list looks like written as numbers. Partials quieter than that are dropped as
+   inaudible. The recording itself is gone; this is what was kept of it. */
 const ORGAN_PARTIALS=[
   // harmonic, level      what an organist would call it
   [ 1, 1.000],   //  8'   principal
@@ -1159,10 +1163,9 @@ function organPeriodicWave(){
   organWave=audioCtx.createPeriodicWave(real,imag,{disableNormalization:false});
   return organWave;
 }
-function isOrganSynth(k){return k==='organ-synth';}
-// Level-matched to the recorded organ (measured 0.156 against 0.115 RMS), so
-// the comparison is of timbre and not of loudness — the louder of two sounds
-// always wins otherwise.
+function isOrgan(k){return k==='organ';}
+// Level-matched to the recording it replaced, so switching voices does not
+// change how loud the drone is.
 const ORGAN_SYNTH_TRIM=0.74;
 
 function clickBuffer(f,decay){
@@ -1608,12 +1611,11 @@ const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
   {k:'organ',      label:'Organ',       decays:false},
-  {k:'organ-synth',label:'Organ synth', decays:false},
   {k:'oboe',       label:'Oboe',        decays:false},
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16l';
+const APP_VERSION='2026-08-16m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
