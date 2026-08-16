@@ -812,13 +812,70 @@ function loadSampler(k,cb){
    climbs for three seconds and then drops sevenfold — an audible swell and
    thump, not a held note.
 
-   So a purpose-built loop buffer is made once per note: take the steady later
-   half, find the end point whose waveform best matches the start (which
-   tolerates the vibrato and pitch drift of a real player), and crossfade the
-   tail into the material just before the start so the join is continuous by
-   construction. Measured across the whole range, the resulting seam is always
-   smaller than the largest ordinary sample-to-sample step, so nothing clicks. */
+   It is also a real player, and a real player vibrates: measured across the
+   range, the pitch swings 5 to 10 cents either side of centre at 4 to 5 Hz.
+   That is expressive on a note and useless as a tuning reference, where the
+   whole point is a pitch that does not move — you cannot hear yourself beat
+   against something that is already beating.
+
+   So the loop is built from a flattened copy of the sustain: track the sample's
+   own pitch, then read it back at a rate that cancels the swing and lands on
+   the note exactly. The bow noise and the timbre survive; only the wobble goes.
+   Then take the steady later part, find the end point whose waveform best
+   matches the start, and crossfade the tail into the material just before it,
+   so the join is continuous by construction. */
 const loopBufferCache={};
+
+/* The pitch contour of the sustain, one reading every 20 ms. The lag search is
+   held within 6% of the nominal frequency, which is far wider than any vibrato
+   and far too narrow for the octave errors autocorrelation is prone to. */
+function pitchContour(d,sr,s0,s1,fNom){
+  const per=sr/fNom;
+  const win=Math.max(256,Math.round(per*3));
+  const hop=Math.max(64,Math.round(sr*0.02));
+  const pmin=Math.max(2,Math.floor(per*0.94)),pmax=Math.ceil(per*1.06);
+  const pts=[];
+  for(let s=s0;s+win+pmax<s1;s+=hop){
+    const c=[];let best=-2,bp=pmin;
+    for(let p=pmin;p<=pmax;p++){
+      let num=0,na=0,nb=0;
+      for(let i=0;i<win;i++){const a=d[s+i],b=d[s+i+p];num+=a*b;na+=a*a;nb+=b*b;}
+      const v=num/Math.sqrt(na*nb+1e-12);c.push(v);
+      if(v>best){best=v;bp=p;}
+    }
+    // the true peak sits between lags; a parabola through its neighbours finds it
+    const i=bp-pmin,y0=c[i-1],y1=c[i],y2=c[i+1];
+    let adj=0;
+    if(y0!==undefined&&y2!==undefined){const den=y0-2*y1+y2;if(den)adj=0.5*(y0-y2)/den;}
+    pts.push({at:s+win/2,f:sr/(bp+adj),q:best});
+  }
+  return pts;
+}
+
+/* Read the sustain back at fNom/f(t): where the player was sharp we read slower,
+   where flat, faster. Returns null when the sample is too breathy to track,
+   which leaves the caller on the un-flattened path rather than mangling it. */
+function flattenPitch(d,sr,s0,s1,fNom){
+  const pts=pitchContour(d,sr,s0,s1,fNom);
+  if(pts.length<4)return null;
+  const qs=pts.map(p=>p.q).sort((a,b)=>a-b);
+  if(qs[qs.length>>1]<0.7)return null;
+  const fAt=pos=>{
+    if(pos<=pts[0].at)return pts[0].f;
+    if(pos>=pts[pts.length-1].at)return pts[pts.length-1].f;
+    let i=1;while(i<pts.length-1&&pts[i].at<pos)i++;
+    const a=pts[i-1],b=pts[i],t=(pos-a.at)/(b.at-a.at);
+    return a.f+(b.f-a.f)*t;
+  };
+  const out=new Float32Array(Math.ceil((s1-s0)*1.1)+4);
+  let n=0,pos=s0;
+  while(pos<s1-2&&n<out.length){
+    const i=Math.floor(pos),fr=pos-i;
+    out[n++]=d[i]*(1-fr)+d[i+1]*fr;
+    pos+=fNom/fAt(pos);   // sharp here means read slower, which pulls it down
+  }
+  return out.subarray(0,n);
+}
 
 function sustainLoopBuffer(midi){
   if(midi in loopBufferCache)return loopBufferCache[midi];
@@ -827,12 +884,19 @@ function sustainLoopBuffer(midi){
     const S=samplerFor('cello');
     const buf=S.inst&&S.inst.buffers&&S.inst.buffers[midi];
     if(buf){
-      const d=buf.getChannelData(0),sr=buf.sampleRate;
-      const period=sr/freqOf(midi-12);
-      let A=Math.floor(buf.length*0.5);
-      while(A<buf.length-1&&!(d[A]<=0&&d[A+1]>0))A++;      // upward zero crossing
+      const raw=buf.getChannelData(0),sr=buf.sampleRate;
+      const fNom=freqOf(midi-12);
+      const period=sr/fNom;
+      // the first half is the crescendo; the last 20 ms is the release
+      const flat=flattenPitch(raw,sr,Math.floor(buf.length*0.45),
+                              buf.length-Math.floor(sr*0.02),fNom);
+      const d=flat||raw;
+      const end=flat?flat.length:buf.length-Math.floor(sr*0.02);
+      // start far enough in that there is material before A to crossfade into
+      let A=flat?Math.floor(sr*0.15):Math.floor(buf.length*0.5);
+      while(A<end-1&&!(d[A]<=0&&d[A+1]>0))A++;             // upward zero crossing
       const W=Math.max(256,Math.floor(period*2));
-      const target=buf.length-Math.floor(sr*0.02)-W;
+      const target=end-W;
       const lo=Math.max(A+Math.floor(sr*0.3),Math.floor(target-period*3));
       if(target>lo){
         const score=e=>{let err=0;for(let i=0;i<W;i++){const x=d[e+i]-d[A+i];err+=x*x;}return err;};
@@ -1416,7 +1480,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-15z';
+const APP_VERSION='2026-08-16a';
 const DEFAULT_WAVE='sine';
 const WAVE_TYPES=['sine','triangle','sawtooth','square'];
 // Assigning an unknown type to an oscillator throws, which would wedge the

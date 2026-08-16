@@ -21,7 +21,8 @@ Source: https://github.com/danigb/soundfont-player
 Both cover A0–C8, natural notes only; the player transposes for the
 accidentals. The cello is played looped in Drone mode: its sample runs dry
 after roughly three seconds, which suits a sequence note but not a drone that
-has to hold indefinitely.
+has to hold indefinitely. The drone loop is also pitch-flattened — the sample
+is a real player with a 4–5 Hz vibrato, which a tuning reference must not have.
 
 FluidR3 GM soundfont by Frank Wen.
 MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.
