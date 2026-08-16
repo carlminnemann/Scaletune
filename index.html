@@ -446,9 +446,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="btn-wrap" id="polymode-row" style="margin-bottom:8px"></div>
   <div id="poly-controls" style="display:none">
     <div class="step-row" style="margin-bottom:4px">
-      <input class="step-input active" id="poly-a" type="number" inputmode="numeric" min="2" max="16" step="1" value="4" aria-label="Pulses in layer A">
+      <select class="sig-select active" id="poly-a" aria-label="Pulses in layer A"></select>
       <span class="step-unit">against</span>
-      <input class="step-input active" id="poly-b" type="number" inputmode="numeric" min="2" max="16" step="1" value="5" aria-label="Pulses in layer B">
+      <select class="sig-select active" id="poly-b" aria-label="Pulses in layer B"></select>
       <span class="step-unit" id="poly-label"></span>
     </div>
     <div class="beats-row" id="poly-row-a"></div>
@@ -1526,7 +1526,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16e';
+const APP_VERSION='2026-08-16f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2401,15 +2401,16 @@ function renderPolyBeats(){
   document.getElementById('poly-controls').style.display=P.on?'':'none';
   buildPolyModeRow();
   if(!P.on)return;
-  document.getElementById('poly-a').value=P.a;
-  document.getElementById('poly-b').value=P.b;
+  const pa=document.getElementById('poly-a'),pb=document.getElementById('poly-b');
+  if(pa.options.length)pa.value=String(P.a);
+  if(pb.options.length)pb.value=String(P.b);
   const cyc=polyCycleLen();
   document.getElementById('poly-label').textContent=
     '· cycle '+cyc.toFixed(2)+'s';
   [['a',P.a,P.accA],['b',P.b,P.accB]].forEach(([layer,n,acc])=>{
     const row=document.getElementById('poly-row-'+layer);
     row.innerHTML='';
-    row.classList.toggle('carries',P.notesFollow===layer);
+    row.classList.toggle('carries',!notesSilent()&&P.notesFollow===layer);
     for(let i=0;i<n;i++){
       const d=document.createElement('div');
       d.className='beat-dot'+(layer==='b'?' poly':'')+' acc-'+acc[i];
@@ -2423,6 +2424,7 @@ function renderPolyBeats(){
     }
   });
   buildPolyNotesRow();
+  buildPassRow();
 }
 
 function buildPolyModeRow(){
@@ -2455,8 +2457,9 @@ function buildPolyNotesRow(){
   });
 }
 
+const POLY_MIN=2,POLY_MAX=16;
 function setPolyCount(which,n){
-  const v=Math.max(2,Math.min(16,Math.round(n)||2));
+  const v=Math.max(POLY_MIN,Math.min(POLY_MAX,Math.round(n)||POLY_MIN));
   state.poly[which]=v;
   buildPolyBeats();refreshSectionSummaries();
 }
@@ -2704,21 +2707,13 @@ const SIG_MAX=30;
   renderSigFields();
 })();
 
-/* The two polyrhythm counts, typed. Clamped on blur like every other field. */
+/* The two polyrhythm counts, picked rather than typed: one tap beats three. */
 (function(){
   [['poly-a','a'],['poly-b','b']].forEach(([id,which])=>{
-    const inp=document.getElementById(id);
-    inp.addEventListener('input',()=>{
-      const v=parseInt(inp.value,10);
-      if(!isNaN(v)&&v>=2&&v<=16)setPolyCount(which,v);
-    });
-    const settle=()=>{
-      const v=parseInt(inp.value,10);
-      if(isNaN(v)||v<2){inp.value=state.poly[which];return;}
-      setPolyCount(which,v);inp.value=state.poly[which];
-    };
-    inp.addEventListener('blur',settle);
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();settle();inp.blur();}});
+    const sel=document.getElementById(id);
+    for(let i=POLY_MIN;i<=POLY_MAX;i++)sel.appendChild(new Option(i,i));
+    sel.value=String(state.poly[which]);
+    sel.addEventListener('change',()=>setPolyCount(which,parseInt(sel.value,10)));
   });
 })();
 
