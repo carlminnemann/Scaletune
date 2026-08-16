@@ -333,15 +333,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <details class="sec" id="sec-progress">
     <summary>Practice Progressions<span class="sec-sum" id="sum-progress"></span></summary>
     <div class="sec-body">
+      <div id="rootmove-block">
       <div class="group-label">Root Movement</div>
       <div class="btn-wrap" id="rootmove-row"></div>
+      </div>
       <div class="group-label">Speed Up</div>
       <div class="step-row">
         <button class="pick-btn" id="tempostep-off">Off</button>
         <span class="step-lead">+</span>
         <input class="step-input" id="tempostep-input" type="number" inputmode="numeric"
                min="1" max="60" step="1" value="5" aria-label="BPM added each pass">
-        <span class="step-unit">BPM per pass</span>
+        <span class="step-unit" id="tempostep-unit">BPM per pass</span>
       </div>
       <div class="info-line" id="practice-info"></div>
     </div>
@@ -431,6 +433,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div id="click-block">
     <div class="section-label">Click</div>
     <div class="btn-wrap" id="clickmode-row" style="margin-bottom:12px"></div>
+    </div>
+  </div>
+  <div id="pass-block" style="display:none">
+    <div class="section-label">Advance Every</div>
+    <div class="sig-fields" style="margin-bottom:12px">
+      <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
+      <span class="btn-wrap" id="pass-unit-row"></span>
     </div>
   </div>
   <div class="section-label">Polyrhythm</div>
@@ -657,7 +666,8 @@ let state={
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
   practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
-            useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0},
+            useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0,
+            passCount:4,passUnit:'bar'},
   playing:false,metroOnly:false
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
@@ -680,6 +690,8 @@ function subTicks(k){return k==='2s'?2:k;}
 function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MAX=240;
 let studyIdx=0,subdivIdx=0;
+// how far into the current pass the metronome is, when nothing else marks one
+let metroBars=0,metroBeats=0,metroCycles=0;
 // How long one note of the sequence lasts, expressed against the metronome.
 // 'sub' is the point of the table-of-time exercise: the notes take the figure,
 // so eighths give two notes per beat and sixteenths four.
@@ -1103,11 +1115,7 @@ function polyCycleLen(){return state.poly.a*(60/state.bpm);}
 
 // Which subdivision is in force right now — a fixed choice, or the current
 // step of the table-of-time sequence.
-function subdivListOn(){
-  // A figure list steps once per pass of the notes, so with no notes it would
-  // never move: the metronome gets the single-figure picker instead.
-  return !notesSilent()&&state.practice.useSubdivList&&state.practice.subdivList.length>0;
-}
+function subdivListOn(){return state.practice.useSubdivList&&state.practice.subdivList.length>0;}
 
 // Silencing the off-beats would leave the figure buttons doing nothing at all
 // when the metronome plays alone, so there the click always follows the figure.
@@ -1233,6 +1241,7 @@ function startPlayback(){
     }
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
+    metroBars=0;metroBeats=0;metroCycles=0;
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
     if(metroScheduler)clearInterval(metroScheduler);
@@ -1324,6 +1333,7 @@ function polySchedulerTick(){
     const len=polyCycleLen();
     schedulePolyCycle(nextBeatTime);
     nextBeatTime+=len;
+    if(notesSilent()&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
   }
   pruneFinishedNodes();
 }
@@ -1375,7 +1385,15 @@ function schedulerTick(){
     tickCount++;
     nextBeatTime+=tickDur;
     subIdx++;
-    if(subIdx>=subTicks(sub)){subIdx=0;beatIdx=(beatIdx+1)%state.sig;}
+    if(subIdx>=subTicks(sub)){
+      subIdx=0;beatIdx=(beatIdx+1)%state.sig;
+      if(notesSilent()){
+        metroBeats++;
+        if(beatIdx===0)metroBars++;
+        const done=state.practice.passUnit==='beat'?metroBeats:metroBars;
+        if(done>=passCount()){metroBeats=0;metroBars=0;metroPass();}
+      }
+    }
   }
   pruneFinishedNodes();
 }
@@ -1448,7 +1466,7 @@ function togglePlay(){
 function toggleMetroOnly(){
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   state.metroOnly=!state.metroOnly;
-  buildBeats();buildPolyNotesRow();buildSubdivRow();
+  buildBeats();buildPolyNotesRow();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
   const b=document.getElementById('metro-btn');
   if(state.metroOnly){
     b.textContent='■ Stop metro';b.classList.add('playing');
@@ -1508,7 +1526,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16c';
+const APP_VERSION='2026-08-16e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1581,7 +1599,7 @@ function setMode(m){
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
-  buildBeats();renderPolyBeats();buildSubdivRow();
+  buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
   setStatus('');
   refreshSequence();
 }
@@ -1743,6 +1761,46 @@ function toggleListItem(group,name){
 // Called at the seam between one pass and the next.
 // Returns true if the rhythmic figure changed, which the scheduler uses to
 // hold the next pattern back to a bar line.
+/* One notch of the ramp. A "pass" is whatever comes round: the note sequence
+   where there are notes, the polyrhythm cycle where the two layers realign, and
+   the bar where the metronome plays alone. Without this last case the Speed Up
+   box sat there in Metro doing nothing, since no sequence ever wrapped. */
+function stepTempo(){
+  if(!(state.practice.tempoStep>0))return;
+  const next=Math.min(BPM_MAX,state.bpm+state.practice.tempoStep);
+  if(next===state.bpm)return;
+  state.bpm=next;
+  document.getElementById('bpm-slider').value=next;
+  document.getElementById('bpm-display').value=next;
+  refreshSectionSummaries();
+}
+
+/* What a pass is, in the layout now on screen. With notes, it is one round of
+   the sequence. With the metronome alone there is nothing that comes round on
+   its own, so the player says: every so many bars, or so many beats — or, under
+   a polyrhythm, so many cycles, since bars do not apply there. This is what
+   makes the figure list usable on its own, for practising four bars of eighths
+   then four of triplets with nothing else playing. */
+function passUnit(){
+  if(!notesSilent())return 'pass';
+  return state.poly.on?'cycle':state.practice.passUnit;
+}
+function passCount(){return notesSilent()?Math.max(1,state.practice.passCount|0):1;}
+function passLabel(){
+  const u=passUnit(),n=passCount();
+  if(u==='pass')return 'pass';
+  return n===1?u:(n+' '+u+'s');
+}
+
+// One pass of the metronome on its own: the figure moves on, then the tempo.
+function metroPass(){
+  if(subdivListOn()&&subdivOrder().length>1){
+    subdivIdx=(subdivIdx+1)%subdivOrder().length;
+    buildSubdivRow();
+  }
+  stepTempo();
+}
+
 function advancePass(){
   // The innermost loop is the drift itself: while the phrase is still walking
   // round against the pulse, nothing else may move — otherwise the figure
@@ -1772,14 +1830,7 @@ function advancePass(){
   if(wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
     state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
   }
-  if(state.practice.tempoStep>0){
-    const next=Math.min(BPM_MAX,state.bpm+state.practice.tempoStep);
-    if(next!==state.bpm){
-      state.bpm=next;
-      document.getElementById('bpm-slider').value=next;
-      document.getElementById('bpm-display').value=next;
-    }
-  }
+  stepTempo();
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
   updateRotationPanel();
@@ -1898,7 +1949,7 @@ function buildSubdivRow(){
   SUBDIVS.forEach(sd=>{
     const b=document.createElement('button');
     b.textContent=sd.label;
-    if(!notesSilent()&&state.practice.useSubdivList){
+    if(state.practice.useSubdivList){
       const i=list.indexOf(sd.k);
       const sounding=i>=0&&sd.k===currentSubdiv()&&(state.playing||state.metroOnly);
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
@@ -1916,15 +1967,15 @@ function buildSubdivRow(){
   });
   buildSubdivModeRow();
   buildSubdivDirRow();
-  // Sequencing figures and silencing the off-beats both need notes to mean
-  // anything, so with the metronome alone only the figure choice is left.
+  buildPassRow();
+  // Silencing the off-beats would leave the figure buttons doing nothing when
+  // the metronome plays alone, so that choice goes; how long a pass lasts takes
+  // its place, since without notes nothing else says when to move on.
   const bare=notesSilent();
-  const mr=document.getElementById('subdivmode-row');
-  const dr=document.getElementById('subdivdir-row');
   const cb=document.getElementById('click-block');
-  if(mr)mr.style.display=bare?'none':'';
-  if(dr)dr.style.display=bare?'none':'';
+  const pb=document.getElementById('pass-block');
   if(cb)cb.style.display=bare?'none':'';
+  if(pb)pb.style.display=bare?'':'none';
 }
 
 /* ---------- tap tempo ---------- */
@@ -2019,6 +2070,43 @@ function buildTempoStepRow(){
   off.classList.toggle('active',!on);
   inp.classList.toggle('active',on);
   if(on)inp.value=state.practice.tempoStep;
+  // say what it is waiting for, since that is not the same in every mode
+  const u=document.getElementById('tempostep-unit');
+  if(u)u.textContent='BPM per '+passLabel();
+  // there is no root to move when the metronome plays alone
+  const rb=document.getElementById('rootmove-block');
+  if(rb)rb.style.display=notesSilent()?'none':'';
+}
+
+const PASS_MAX=32;
+function buildPassRow(){
+  const sel=document.getElementById('pass-count');
+  const row=document.getElementById('pass-unit-row');
+  if(!sel||!row)return;
+  if(!sel.options.length){
+    for(let i=1;i<=PASS_MAX;i++)sel.appendChild(new Option(i,i));
+    sel.addEventListener('change',()=>{
+      state.practice.passCount=parseInt(sel.value,10)||1;
+      buildPassRow();updatePracticeInfo();refreshSectionSummaries();
+    });
+  }
+  sel.value=String(passCount());
+  sel.classList.add('active');
+  row.innerHTML='';
+  // bars mean nothing under a polyrhythm, which has no bar to speak of
+  if(state.poly.on){
+    const span=document.createElement('span');
+    span.className='step-unit';span.textContent='cycles';
+    row.appendChild(span);
+    return;
+  }
+  [['bar','Bars'],['beat','Beats']].forEach(([k,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.practice.passUnit===k?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.practice.passUnit=k;buildPassRow();updatePracticeInfo();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
 }
 
 function setTempoStep(n){
@@ -2033,7 +2121,7 @@ function updatePracticeInfo(){
   if(state.practice.rootMove==='fourths')bits.push('root up a 4th'+((listEnabled()||subdivListOn())?' after the full cycle':' each pass'));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
-  if(state.practice.tempoStep>0)bits.push('+'+state.practice.tempoStep+' BPM per pass (max '+BPM_MAX+')');
+  if(state.practice.tempoStep>0)bits.push('+'+state.practice.tempoStep+' BPM per '+passLabel()+' (max '+BPM_MAX+')');
   el.textContent=bits.length?bits.join(' · '):'Repeats unchanged.';
 }
 
@@ -2346,7 +2434,7 @@ function buildPolyModeRow(){
     b.textContent=label;
     b.onclick=()=>{
       state.poly.on=v;
-      buildPolyBeats();updateSupersededControls();refreshSectionSummaries();restartIfPlaying();
+      buildPolyBeats();updateSupersededControls();buildPassRow();buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
     };
     row.appendChild(b);
   });
@@ -2453,7 +2541,7 @@ const SECTIONS=[
    text:()=>{
      const b=[];
      if(state.practice.rootMove==='fourths')b.push('cycle of 4ths');
-     if(state.practice.tempoStep>0)b.push('+'+state.practice.tempoStep+' BPM/pass');
+     if(state.practice.tempoStep>0)b.push('+'+state.practice.tempoStep+' BPM/'+passLabel());
      return b.length?b.join(' · '):'off';
    }},
   {id:'metro-section',sum:'sum-metro',    defaultOpen:true,
