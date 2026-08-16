@@ -92,6 +92,11 @@ details.sec>summary::after{content:'';margin-left:auto;width:7px;height:7px;flex
   transform:rotate(45deg) translate(-2px,-2px);transition:transform 0.15s}
 details.sec[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
 details.sec[open]>summary{color:var(--text2);border-bottom:1px solid var(--border)}
+/* In Metro the metronome is the only panel on screen, so folding it away would
+   leave nothing at all. It is held open there and its summary stops being a
+   control: no chevron, no pointer, nothing to press. */
+details.sec.pinned>summary{cursor:default;pointer-events:none}
+details.sec.pinned>summary::after{display:none}
 details.sec .sec-body{padding:1rem}
 details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
   color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -710,6 +715,7 @@ function subTicks(k){return k==='2s'?2:k;}
 function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MAX=240;
 let studyIdx=0,subdivIdx=0;
+let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 // how far into the current pass the metronome is, when nothing else marks one
 let metroBars=0,metroBeats=0,metroCycles=0;
 // How long one note of the sequence lasts, expressed against the metronome.
@@ -1644,7 +1650,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17a';
+const APP_VERSION='2026-08-17b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1701,7 +1707,16 @@ function setMode(m){
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   document.getElementById('metro-divider').style.display=isDrone?'none':'';
-  document.getElementById('metro-section').style.display=isDrone?'none':'';
+  const ms=document.getElementById('metro-section');
+  ms.style.display=isDrone?'none':'';
+  // Metro is nothing but the metronome, so the metronome is not foldable there.
+  // What it was before is remembered, so leaving Metro gives it back.
+  if(isMetro){
+    if(!ms.classList.contains('pinned')){metroWasOpen=ms.open;ms.classList.add('pinned');}
+    ms.open=true;
+  } else if(ms.classList.contains('pinned')){
+    ms.classList.remove('pinned');ms.open=metroWasOpen;
+  }
   document.getElementById('sec-rhythm').style.display=(isDrone||isMetro)?'none':'';
   // Metro is the metronome on its own, so the voice that would play notes and
   // the button that silences them both have nothing to do here.
@@ -2698,6 +2713,14 @@ function refreshSectionSummaries(){
     if(el)try{el.textContent='· '+s.text();}catch(e){el.textContent='';}
   });
 }
+
+/* pointer-events keeps a mouse or a finger off it, but not a keyboard, and not
+   script. While it is pinned the panel simply refuses to close, however it is
+   asked. */
+(function(){
+  const ms=document.getElementById('metro-section');
+  if(ms)ms.addEventListener('toggle',()=>{if(ms.classList.contains('pinned')&&!ms.open)ms.open=true;});
+})();
 
 function initSections(){
   // earlier versions remembered this across launches; clear what they left
