@@ -185,8 +185,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .sig-fields{display:flex;gap:14px;align-items:center;margin-bottom:1rem}
-.sig-field{display:inline-flex;align-items:center;gap:3px}
-.sig-den{font-size:15px;color:var(--text2)}
 .sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
   cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg2);color:var(--text2);touch-action:manipulation}
@@ -404,16 +402,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
     <div>
       <div id="sig-block">
-      <div class="section-label" style="margin-bottom:6px">Time Signature</div>
+      <div class="section-label" style="margin-bottom:6px">Beats per Bar</div>
       <div class="sig-fields">
-        <span class="sig-field">
-          <select class="sig-select" id="sig-4" aria-label="Beats per bar, quarter-note beat"></select>
-          <span class="sig-den">/4</span>
-        </span>
-        <span class="sig-field">
-          <select class="sig-select" id="sig-8" aria-label="Beats per bar, eighth-note beat"></select>
-          <span class="sig-den">/8</span>
-        </span>
+        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
       </div>
       </div>
       <div class="section-label" style="margin-bottom:5px;margin-top:10px">Click Volume</div>
@@ -657,7 +648,7 @@ let state={
   // wave, the sequence modes default to the sampled piano
   timbre:'cello',droneTimbre:'cello',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
-  bpm:80,sig:4,sigDen:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,alignPasses:false,clickFollowsFigure:true,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
@@ -1495,24 +1486,20 @@ function updateVol(v){
 }
 function updateClickVol(v){state.clickVol=parseFloat(v);document.getElementById('click-vol-out').textContent=Math.round(v*100)+'%';}
 
-/* Two fields rather than a fixed list, so any bar length is reachable. Only one
-   holds a value: the denominator says what a beat is, and a bar cannot be
-   counted in two different beats at once, so typing in one clears the other. */
-function setSig(n,den){
+/* Beats per bar, not a time signature. The denominator would be decoration
+   here: the BPM sets the pulse and a bar is so many of them, so 7/8 and 7/4
+   produce exactly the same clicks. Offering a choice that changes only a label
+   is worse than not offering it. */
+function setSig(n){
   state.sig=Math.max(1,Math.min(SIG_MAX,Math.round(n)||1));
-  state.sigDen=den===8?8:4;
   renderSigFields();
   buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
 }
 
 function renderSigFields(){
-  const q=document.getElementById('sig-4'), e=document.getElementById('sig-8');
-  if(!q||!e||!q.options.length)return;
-  const onEight=state.sigDen===8;
-  q.value=onEight?'':String(state.sig);
-  e.value=onEight?String(state.sig):'';
-  q.classList.toggle('active',!onEight);
-  e.classList.toggle('active',onEight);
+  const q=document.getElementById('sig-4');
+  if(!q||!q.options.length)return;
+  q.value=String(state.sig);
 }
 
 // A drone has to sustain indefinitely; both piano voices decay to silence
@@ -1526,7 +1513,7 @@ const TIMBRES=[
   {k:'sawtooth',   label:'Sawtooth',    decays:false},
   {k:'square',     label:'Square',      decays:false},
 ];
-const APP_VERSION='2026-08-16g';
+const APP_VERSION='2026-08-16h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2552,7 +2539,7 @@ const SECTIONS=[
      const bits=[state.bpm+' BPM'];
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else{
-       bits.push(state.sig+'/'+state.sigDen);
+       bits.push(state.sig+(state.sig===1?' beat':' beats')+' per bar');
        bits.push(subdivListOn()&&subdivOrder().length>1
          ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
      }
@@ -2687,22 +2674,12 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   });
 })();
 
-/* Time signature: a picker rather than a typed number, so a bar length is one
-   tap on a phone. Only one side can hold a value — a bar cannot be counted in
-   two different beats at once — so choosing on one clears the other. */
+/* Bar length: a picker rather than a typed number, so it is one tap on a phone. */
 const SIG_MAX=30;
 (function(){
-  [['sig-4',4],['sig-8',8]].forEach(([id,den])=>{
-    const sel=document.getElementById(id);
-    sel.appendChild(new Option('—',''));
-    for(let i=1;i<=SIG_MAX;i++)sel.appendChild(new Option(i,i));
-    sel.addEventListener('change',()=>{
-      const v=parseInt(sel.value,10);
-      // picking the dash means "not this beat": hand the bar to the other side
-      if(isNaN(v)){setSig(state.sig,den===4?8:4);return;}
-      setSig(v,den);
-    });
-  });
+  const sel=document.getElementById('sig-4');
+  for(let i=1;i<=SIG_MAX;i++)sel.appendChild(new Option(i,i));
+  sel.addEventListener('change',()=>setSig(parseInt(sel.value,10)));
   renderSigFields();
 })();
 
