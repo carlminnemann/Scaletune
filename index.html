@@ -254,7 +254,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .tap-btn{width:auto;margin:0;height:26px;padding:0 12px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
-.sig-fields{display:flex;gap:14px;align-items:center;margin-bottom:1rem}
+/* it sits on a label line now, so it carries no margin of its own */
+.sig-fields{display:flex;gap:var(--s2);align-items:center}
 .sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
   cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg2);color:var(--text2);touch-action:manipulation}
@@ -498,11 +499,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" style="width:100%" oninput="updateClickVol(this.value)">
   </div>
   <div class="mgroup" id="pass-block" style="display:none">
-    <div class="section-label">Advance Every</div>
-    <div class="sig-fields" style="margin-bottom:12px">
-      <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
-      <span class="btn-wrap" id="pass-unit-row"></span>
-    </div>
+    <div class="head" style="margin-bottom:0"><span class="section-label">Advance Every</span>
+      <span class="sig-fields">
+        <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
+        <span class="btn-wrap seg" id="pass-unit-row" data-cols="fixed"></span>
+      </span></div>
   </div>
   <div class="mgroup">
   <div class="head"><span class="section-label">Polyrhythm</span>
@@ -1687,7 +1688,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17h';
+const APP_VERSION='2026-08-17i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2255,7 +2256,7 @@ function buildPassRow(){
     for(let i=1;i<=PASS_MAX;i++)sel.appendChild(new Option(i,i));
     sel.addEventListener('change',()=>{
       state.practice.passCount=parseInt(sel.value,10)||1;
-      buildPassRow();updatePracticeInfo();refreshSectionSummaries();
+      buildPassRow();buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
     });
   }
   sel.value=String(passCount());
@@ -2265,7 +2266,7 @@ function buildPassRow(){
     const b=document.createElement('button');
     b.className='pick-btn'+(state.practice.passUnit===k?' active':'');
     b.textContent=label;
-    b.onclick=()=>{state.practice.passUnit=k;buildPassRow();updatePracticeInfo();refreshSectionSummaries();};
+    b.onclick=()=>{state.practice.passUnit=k;buildPassRow();buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();};
     row.appendChild(b);
   });
 }
