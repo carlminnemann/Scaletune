@@ -86,7 +86,10 @@ details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-
   color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 details.sec[open] .sec-sum{display:none}
 .group-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
-.group-label:first-child{margin-top:0}
+/* only the label that opens a panel loses its top margin — one inside a wrapper
+   div lower down is still a new group and needs the space above it */
+.sec-body>.group-label:first-child,
+.sec-body>div:first-child>.group-label:first-child{margin-top:0}
 .btn-wrap{display:flex;gap:5px;flex-wrap:wrap}
 .pick-btn{padding:5px 9px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
 .pick-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
@@ -432,16 +435,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="beats-row" id="poly-row-a"></div>
     <div class="beats-row" id="poly-row-b"></div>
     <div class="beats-hint">tap a pulse: accent it, then silence it</div>
-    <div id="polynotes-block">
-    <div class="section-label">Notes follow</div>
-    <div class="btn-wrap" id="polynotes-row"></div>
-    </div>
   </div>
   </div>
 </details>
 
+<!-- Everything the notes do against the pulse: what figure they take, whether
+     they are let to walk round against it, and under a polyrhythm which of the
+     two layers they follow. The Metronome above is everything you hear as a
+     click; this is everything the phrase does over it — which is why the whole
+     panel goes away in Metro, where there is no phrase. -->
 <details class="sec" id="sec-rhythm" style="display:none">
-  <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
+  <summary>Phrasing<span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body">
     <div id="notelen-block">
     <div class="group-label">Note Length</div>
@@ -450,6 +454,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="group-label">Phrase Alignment</div>
     <div class="btn-wrap" id="align-row"></div>
     <div class="info-line" id="align-info"></div>
+    <div id="polynotes-block">
+    <div class="group-label">Notes Follow</div>
+    <div class="btn-wrap" id="polynotes-row"></div>
+    </div>
   </div>
 </details>
 
@@ -1615,7 +1623,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16o';
+const APP_VERSION='2026-08-16q';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2488,6 +2496,9 @@ function renderPolyBeats(){
   const P=state.poly;
   document.getElementById('poly-controls').style.display=P.on?'':'none';
   buildPolyModeRow();
+  // these two decide their own visibility from the polyrhythm being on or off,
+  // so they have to run either way — not only on the way in
+  buildPolyNotesRow();buildPassRow();
   if(!P.on)return;
   const pa=document.getElementById('poly-a'),pb=document.getElementById('poly-b');
   if(pa.options.length)pa.value=String(P.a);
@@ -2511,8 +2522,6 @@ function renderPolyBeats(){
       row.appendChild(d);
     }
   });
-  buildPolyNotesRow();
-  buildPassRow();
 }
 
 function buildPolyModeRow(){
@@ -2532,9 +2541,10 @@ function buildPolyModeRow(){
 
 function buildPolyNotesRow(){
   const row=document.getElementById('polynotes-row');if(!row)return;
-  // Nothing follows either layer when the metronome plays alone.
+  // There are only two layers to choose between under a polyrhythm, and nothing
+  // to follow either of them when the metronome plays alone.
   const block=document.getElementById('polynotes-block');
-  if(block)block.style.display=notesSilent()?'none':'';
+  if(block)block.style.display=(state.poly.on&&!notesSilent())?'':'none';
   row.innerHTML='';
   [['a','the '+state.poly.a],['b','the '+state.poly.b]].forEach(([k,label])=>{
     const b=document.createElement('button');
@@ -2650,7 +2660,9 @@ const SECTIONS=[
   {id:'sec-rhythm',   sum:'sum-rhythm',
    text:()=>{
      const nl={sub:'per figure',beat:'per beat',bar:'per bar'}[state.noteLen]||'';
-     return nl+(state.alignPasses?' · restarts each round':' · drifts');
+     const bits=[nl,state.alignPasses?'restarts each round':'drifts'];
+     if(state.poly.on)bits.push('following the '+state.poly[state.poly.notesFollow]);
+     return bits.join(' · ');
    }},
 ];
 
