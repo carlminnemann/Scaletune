@@ -377,19 +377,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </div>
 
 <hr class="divider" id="metro-divider" style="display:none">
-<details class="sec" id="sec-rhythm" style="display:none">
-  <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
-  <div class="sec-body">
-    <div id="notelen-block">
-    <div class="group-label">Note Length</div>
-    <div class="btn-wrap" id="notelen-row"></div>
-    </div>
-    <div class="group-label">Phrase Alignment</div>
-    <div class="btn-wrap" id="align-row"></div>
-    <div class="info-line" id="align-info"></div>
-  </div>
-</details>
-
 <details class="sec" id="metro-section" style="display:none">
   <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body">
@@ -450,6 +437,19 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="btn-wrap" id="polynotes-row"></div>
     </div>
   </div>
+  </div>
+</details>
+
+<details class="sec" id="sec-rhythm" style="display:none">
+  <summary>Rhythm &amp; Figures<span class="sec-sum" id="sum-rhythm"></span></summary>
+  <div class="sec-body">
+    <div id="notelen-block">
+    <div class="group-label">Note Length</div>
+    <div class="btn-wrap" id="notelen-row"></div>
+    </div>
+    <div class="group-label">Phrase Alignment</div>
+    <div class="btn-wrap" id="align-row"></div>
+    <div class="info-line" id="align-info"></div>
   </div>
 </details>
 
@@ -1615,7 +1615,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-16n';
+const APP_VERSION='2026-08-16o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
