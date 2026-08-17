@@ -1923,7 +1923,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18a';
+const APP_VERSION='2026-08-18b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3046,6 +3046,8 @@ const TUNE_DECIM=6;          // 48 kHz -> 8 kHz, plenty for a 2 kHz fundamental
 const TUNE_WIN=8192;         // 170 ms at 48 kHz
 const TUNE_FMIN=27.5;        // A0, below the lowest string anyone tunes
 const TUNE_FMAX=1400;
+let TUNE_GATE=0.0004;        // near the floor; clarity does the real deciding
+let TUNE_CLARITY=0.25;    // measured: no false note in 50 looks at pink noise up to -24 dB
 let micStream=null,micNode=null,micAnalyser=null,micRaf=0;
 let tuneBuf=null,tuneDown=null,tuneNsdf=null;
 let strobePhase=0,strobeLast=0;
@@ -3075,7 +3077,12 @@ function detectPitch(){
     tuneDown[i]=v;sum2+=v*v;
   }
   const rms=Math.sqrt(sum2/n);
-  if(rms<0.004)return null;                       // silence, or a room
+  /* The measurement itself does not care how loud you are — the normalisation is
+     the whole point of the method — so this gate exists only to keep the room's
+     own noise from being answered. It was set at 0.004, which threw away a note
+     twenty decibels above the noise floor for no reason. What decides whether
+     there is a note is the clarity below, not the volume. */
+  if(rms<TUNE_GATE)return null;
   // remove the mean: a DC offset makes every lag look correlated
   let mean=0;for(let i=0;i<n;i++)mean+=tuneDown[i];
   mean/=n;for(let i=0;i<n;i++)tuneDown[i]-=mean;
@@ -3095,7 +3102,7 @@ function detectPitch(){
     tuneNsdf[tau]=v;
     if(v>best)best=v;
   }
-  if(best<0.35)return null;                       // nothing periodic enough
+  if(best<TUNE_CLARITY)return null;                // nothing periodic enough
   // the first peak that clears nine tenths of the best: this is the step that
   // stops it answering with the octave below
   const thresh=best*0.9;
@@ -3149,8 +3156,13 @@ function refineLag(d,n,lag0,band){
 async function startTuner(){
   try{
     initAudio();
+    /* Noise suppression and echo cancellation are refused: both reshape the
+       spectrum, and a sustained note is exactly what they are built to treat as
+       something to remove. Automatic gain is allowed, and was not before — it
+       only scales, and this measurement does not care how loud you are, so it
+       can lift a quiet instrument without touching the answer. */
     micStream=await navigator.mediaDevices.getUserMedia({audio:{
-      echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      echoCancellation:false,noiseSuppression:false,autoGainControl:true}});
   }catch(e){
     setStatus('The tuner needs the microphone. Allow it and press Listen again.');
     return false;
