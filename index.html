@@ -268,9 +268,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .sig-select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .sig-select:focus{outline-color:var(--blue)}
 
-/* the circles keep their shape; only the alignment changes, to the same left
-   edge as everything else in the panel */
-.beats-row{display:flex;gap:var(--s2);justify-content:flex-start;margin:0 0 var(--s2);flex-wrap:wrap}
+/* The circles sit centred: they are a picture of the bar, not a row of controls
+   to line up with the rest. The polyrhythm shows two of them, one above the
+   other, so they are given room to read as two separate layers. */
+.beats-row{display:flex;gap:var(--s3);justify-content:center;margin:0 0 var(--s2);flex-wrap:wrap}
+#poly-row-a,#poly-row-b{gap:var(--s4);margin-bottom:var(--s3)}
+#poly-row-a .beat-dot,#poly-row-b .beat-dot{width:34px;height:34px}
+#poly-row-b{margin-bottom:var(--s2)}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
   cursor:pointer;touch-action:manipulation;transition:background 0.05s,border-color 0.05s}
 .beat-dot.acc-low{border-width:2px;border-color:var(--text2)}
@@ -466,10 +470,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="head"><span class="section-label">Tempo</span>
       <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button></div>
     <div class="bpm-row">
-      <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="30" max="240" step="1" value="80" aria-label="Beats per minute">
+      <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" aria-label="Beats per minute">
       <span class="bpm-label">BPM</span>
     </div>
-    <input type="range" id="bpm-slider" min="30" max="240" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
+    <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
   </div>
 
   <div class="mgroup" id="sig-block">
@@ -770,7 +774,7 @@ const SUBDIVS=[
 const SWING_SHARES=[2/3,1/3];
 function subTicks(k){return k==='2s'?2:k;}
 function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
-const BPM_MAX=240;
+const BPM_MIN=10,BPM_MAX=300;   // 10 is slow enough to place a bow, 300 fast enough for a roll
 let studyIdx=0,subdivIdx=0;
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 // how far into the current pass the metronome is, when nothing else marks one
@@ -1688,7 +1692,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17i';
+const APP_VERSION='2026-08-17k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1728,8 +1732,16 @@ function setTimbre(t){
 function setMode(m){
   const wasPlaying=state.playing;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  const modeChanged=state.mode!==m;
   state.mode=m;
   const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro';
+  /* Each mode is a different exercise, so it starts from the same clean screen:
+     the panels you opened while working on scales are not the ones you want
+     waiting for you in Metro. Within a mode they stay exactly as you leave them;
+     it is only crossing between modes that closes them. Without this a panel
+     opened once stayed open in every mode for the rest of the session, since
+     they are the same elements shown and hidden. */
+  if(modeChanged)document.querySelectorAll('details.sec').forEach(d=>d.open=false);
   [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
    ['free','btn-mode-free'],['metro','btn-mode-metro']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
@@ -2148,7 +2160,7 @@ function buildSubdivRow(){
 let tapTimes=[],tapResetTimer=null;
 
 function setBpm(v){
-  state.bpm=Math.max(30,Math.min(BPM_MAX,Math.round(v)));
+  state.bpm=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(v)));
   document.getElementById('bpm-slider').value=state.bpm;
   document.getElementById('bpm-display').value=state.bpm;
   refreshSectionSummaries();
@@ -2166,7 +2178,7 @@ function tapTempo(){
     // tap does not throw the tempo
     const avg=(tapTimes[tapTimes.length-1]-tapTimes[0])/(tapTimes.length-1);
     const bpm=60000/avg;
-    if(bpm>=30&&bpm<=BPM_MAX){setBpm(bpm);btn.textContent='Tap tempo · '+state.bpm;}
+    if(bpm>=BPM_MIN&&bpm<=BPM_MAX){setBpm(bpm);btn.textContent='Tap tempo · '+state.bpm;}
     else btn.textContent='Tap tempo · out of range';
   } else btn.textContent='Tap tempo · keep tapping';
   btn.classList.add('tapping');
@@ -2856,6 +2868,13 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   el.addEventListener('wheel',()=>{ if(document.activeElement===el)el.blur(); },{passive:true});
 });
 
+/* Selecting the whole field on focus, so a tempo is typed over rather than
+   backspaced away first. */
+(function(){
+  const b=document.getElementById('bpm-display');
+  if(b)b.addEventListener('focus',()=>setTimeout(()=>{try{b.select();}catch(e){}},0));
+})();
+
 /* Typed tempo. The value is applied as it is typed but only clamped on blur or
    Enter — clamping mid-keystroke would rewrite "1" into "30" before the second
    digit of "120" could be typed. */
@@ -2863,7 +2882,7 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   const el=document.getElementById('bpm-display');
   el.addEventListener('input',()=>{
     const v=parseInt(el.value,10);
-    if(!isNaN(v)&&v>=30&&v<=BPM_MAX){state.bpm=v;tapTimes=[];refreshSectionSummaries();}
+    if(!isNaN(v)&&v>=BPM_MIN&&v<=BPM_MAX){state.bpm=v;tapTimes=[];refreshSectionSummaries();}
   });
   const settle=()=>{
     let v=parseInt(el.value,10);
