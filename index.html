@@ -251,9 +251,14 @@ details.fam[open] .fam-sum{display:none}
 .rot-panel{padding:0.85rem 1rem}
 .rot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .rot-clear{margin-top:0;flex:0 0 auto}
-.rot-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
-.rot-chip{padding:4px 9px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
-  background:var(--bg3);color:var(--text3);white-space:nowrap}
+/* The one row of choices that was left as a wrapped flex line, and it showed:
+   ending wherever the names ended, exactly as the rest of the app used to. */
+.rot-chips{display:grid;gap:var(--s1);margin-bottom:var(--s2);
+  grid-template-columns:repeat(var(--cols,3),1fr)}
+.rot-chip{min-height:30px;display:flex;align-items:center;justify-content:center;
+  padding:4px 7px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
+  background:var(--bg3);color:var(--text3);text-align:center;line-height:1.2;
+  white-space:normal;overflow-wrap:break-word;min-width:0}
 /* Chosen is filled; sounding now is ringed and brighter. With a single green
    doing both, a difference of shade was not enough — in the dark theme the two
    ended up on the same fill. A ring against the panel is a difference of kind. */
@@ -354,9 +359,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
    to line up with the rest. The polyrhythm shows two of them, one above the
    other, so they are given room to read as two separate layers. */
 .beats-row{display:flex;gap:var(--s3);justify-content:center;margin:0 0 var(--s2);flex-wrap:wrap}
-#poly-row-a,#poly-row-b{gap:var(--s4);margin-bottom:var(--s3)}
-#poly-row-a .beat-dot,#poly-row-b .beat-dot{width:34px;height:34px}
-#poly-row-b{margin-bottom:var(--s2)}
+/* They were 34px and crowded up against the two pickers. Back to the size of
+   the bar's own circles, with room above so the pulses read as their own thing
+   and not as part of the row that chose them. */
+#poly-row-a{margin-top:var(--s4)}
+#poly-row-a,#poly-row-b{gap:var(--s3);margin-bottom:var(--s2)}
+#poly-row-a .beat-dot,#poly-row-b .beat-dot{width:28px;height:28px}
 .beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
   cursor:pointer;touch-action:manipulation;transition:background 0.05s,border-color 0.05s}
 .beat-dot.acc-low{border-width:2px;border-color:var(--text2)}
@@ -426,8 +434,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')">Scale</button>
   <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')">Arpeggio</button>
   <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')">Free</button>
-  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')">♩ Metro</button>
   <button class="mode-btn" id="btn-mode-tuner" onclick="setMode('tuner')">Tuner</button>
+  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')">♩ Metro</button>
 </div>
 
 <!-- ============ DRONE ============ -->
@@ -1957,7 +1965,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18g';
+const APP_VERSION='2026-08-18h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3047,16 +3055,20 @@ function colsFor(n){
 function gridify(row){
   if(!row||row.dataset.cols==='fixed')return;
   const n=[...row.children].filter(c=>c.nodeType===1).length;
-  row.style.setProperty('--cols',colsFor(n));
+  // The rotation holds whole names, and can hold thirty of them, so it keeps to
+  // three across however long it gets.
+  const cols=row.classList.contains('rot-chips')?Math.min(3,n||1):colsFor(n);
+  row.style.setProperty('--cols',cols);
 }
-function gridifyAll(){document.querySelectorAll('.btn-wrap').forEach(gridify);}
+function gridifyAll(){document.querySelectorAll('.btn-wrap,.rot-chips').forEach(gridify);}
 /* The rows are rebuilt by a dozen different functions as the app runs, so rather
    than teaching each one, watch for children changing and re-measure. */
 (function(){
   const obs=new MutationObserver(ms=>ms.forEach(m=>{
-    if(m.target.classList&&m.target.classList.contains('btn-wrap'))gridify(m.target);
+    if(m.target.classList&&(m.target.classList.contains('btn-wrap')||
+       m.target.classList.contains('rot-chips')))gridify(m.target);
   }));
-  document.querySelectorAll('.btn-wrap').forEach(r=>obs.observe(r,{childList:true}));
+  document.querySelectorAll('.btn-wrap,.rot-chips').forEach(r=>obs.observe(r,{childList:true}));
   gridifyAll();
 })();
 
