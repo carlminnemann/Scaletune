@@ -93,7 +93,7 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
-.mode-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s1);margin-bottom:var(--s5)}
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1);margin-bottom:var(--s5)}
 .mode-btn{min-width:0;height:44px;padding:0 4px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
 .mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 
@@ -141,6 +141,33 @@ details.sec[open] .sec-sum{display:none}
    already saying what is set inside it and needs nothing more; open, the one
    or two panels you are working in each carry one. That way the mark is
    available everywhere without the screen being peppered with them. */
+/* ---------- tuner ---------- */
+.tuner-panel{padding:var(--s4);text-align:center}
+.tuner-read{min-height:96px;display:flex;flex-direction:column;justify-content:center}
+.tuner-note{font-size:64px;font-weight:200;line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.tuner-note .oct{font-size:26px;color:var(--text3);margin-left:2px}
+.tuner-note.in-tune{color:var(--green)}
+.tuner-cents{font-size:13px;color:var(--text3);margin-top:6px;font-variant-numeric:tabular-nums}
+/* the bar: fifty cents either side, with the in-tune zone marked */
+.tuner-bar{position:relative;height:34px;margin-top:var(--s3);border-radius:var(--r);
+  background:var(--bg3);overflow:hidden}
+.tuner-zone{position:absolute;left:48%;width:4%;top:0;bottom:0;background:var(--green-bg);opacity:.55}
+.tuner-ticks{position:absolute;inset:0;
+  background:repeating-linear-gradient(to right,var(--border2) 0 1px,transparent 1px 10%)}
+.tuner-needle{position:absolute;top:3px;bottom:3px;width:3px;border-radius:2px;
+  background:var(--text);left:50%;transform:translateX(-50%);
+  transition:left 90ms linear,background-color 120ms}
+.tuner-needle.in-tune{background:var(--green)}
+.tuner-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);
+  margin-top:4px;letter-spacing:.06em}
+/* the strobe: stripes that stand still when the pitch is right, and drift in the
+   direction of the error. Reads finer than any needle, and needs no numbers. */
+.tuner-strobe{display:block;width:100%;height:46px;margin-top:var(--s3);
+  border-radius:var(--r);background:var(--bg3)}
+.tuner-hz{font-size:12px;color:var(--text3);margin-top:var(--s2);
+  font-variant-numeric:tabular-nums;min-height:18px}
+
 .help-dot{border:none;background:none;color:var(--text3);font-size:13px;cursor:pointer;
   padding:0 2px;line-height:1;font-family:inherit;opacity:.55;margin-left:auto;margin-right:10px}
 .help-dot:hover{opacity:1}
@@ -381,9 +408,41 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')">Arpeggio</button>
   <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')">Free</button>
   <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')">♩ Metro</button>
+  <button class="mode-btn" id="btn-mode-tuner" onclick="setMode('tuner')">Tuner</button>
 </div>
 
 <!-- ============ DRONE ============ -->
+<!-- The tuner. Its own mode because it is the only thing that listens rather
+     than sounds: the microphone would hear the app itself, so nothing else may
+     be playing while it is open. -->
+<div id="tuner-section" style="display:none">
+  <div class="panel tuner-panel">
+    <div class="tuner-read">
+      <div class="tuner-note" id="tuner-note">—</div>
+      <div class="tuner-cents" id="tuner-cents"></div>
+    </div>
+    <div class="tuner-bar" id="tuner-bar">
+      <div class="tuner-ticks"></div>
+      <div class="tuner-zone"></div>
+      <div class="tuner-needle" id="tuner-needle"></div>
+    </div>
+    <div class="tuner-scale"><span>−50</span><span>−25</span><span>0</span><span>+25</span><span>+50</span></div>
+    <canvas class="tuner-strobe" id="tuner-strobe" height="46"></canvas>
+    <div class="tuner-hz" id="tuner-hz">listening for a note</div>
+  </div>
+
+  <div class="panel">
+    <div class="head"><span class="group-label">Target</span>
+      <span class="btn-wrap seg" id="tuner-mode-row" data-cols="fixed"></span></div>
+    <div class="btn-wrap" id="tuner-note-row"></div>
+    <div class="head" style="margin-top:var(--s4)"><span class="group-label">Reference A4</span>
+      <span class="sig-fields">
+        <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
+        <span class="sig-unit">Hz</span>
+      </span></div>
+  </div>
+</div>
+
 <div id="drone-section">
   <div class="section-label">Notes</div>
   <div class="legend">
@@ -645,6 +704,25 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Arpeggio</dt><dd>The same, built from a chord instead of a scale.</dd>
     <dt>Free</dt><dd>You pick the notes yourself, each with its own octave, and they play in that order.</dd>
     <dt>Metro</dt><dd>The metronome on its own, with no notes at all.</dd>
+    <dt>Tuner</dt><dd>Listens instead of sounding. Nothing else plays while it is open —
+    the microphone would hear the app itself.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-tuner"><h3>Tuner</h3><dl>
+    <dt>What it reads</dt><dd>The note, how many cents away you are, and both frequencies —
+    the one you are playing and the one you want. Under two cents it turns green.</dd>
+    <dt>The strobe</dt><dd>The band of stripes drifts at the difference between the two
+    pitches: still means right, and it drifts the way you are wrong. It shows a quarter of
+    a cent, which no needle can — at A4 that is a tenth of a hertz, one slow crawl every
+    ten seconds. A long way out it blurs, which is what the number above is for.</dd>
+    <dt>Auto and Lock</dt><dd>Auto names the nearest note. Lock holds it to one string, so
+    it will not jump to the neighbour when you are half a semitone below — which is exactly
+    when you need it to hold still.</dd>
+    <dt>Reference A4</dt><dd>415 to 466, moving every note with it. 415 for baroque pitch,
+    442 or 443 where the orchestra sits high.</dd>
+    <dt>Low strings</dt><dd>It reads down to 27.5 Hz, below the lowest string on a
+    five-string bass. Down there it answers more slowly: a pitch that low needs a fifth of
+    a second of sound before there is anything to measure.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-root"><h3>Root</h3><dl>
@@ -897,7 +975,7 @@ let state={
   practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0,
             passCount:4,passUnit:'bar'},
-  playing:false
+  playing:false,tunerA4:440
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
@@ -1757,7 +1835,7 @@ function stopPlayback(){
 function setPlayUI(on){
   updateRotationPanelSoon();
   const b=document.getElementById('play-btn');
-  b.textContent=on?'■ Stop':'▶ Start';
+  b.textContent=state.mode==='tuner'?(on?'■ Stop listening':'● Listen'):(on?'■ Stop':'▶ Start');
   b.classList.toggle('playing',on);
   // clears (or lights) the green "sounding now" marker on the study list
   if(state.mode==='scale'||state.mode==='arpeggio'){
@@ -1767,6 +1845,14 @@ function setPlayUI(on){
 }
 
 function togglePlay(){
+  // In the tuner the button starts and stops the microphone; there is nothing
+  // to play, and anything playing would be heard by it.
+  if(state.mode==='tuner'){
+    if(micStream){stopTuner();setPlayUI(false);return;}
+    setPlayUI(true);
+    startTuner().then(ok=>{if(!ok)setPlayUI(false);});
+    return;
+  }
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();return;}
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
@@ -1837,7 +1923,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17o';
+const APP_VERSION='2026-08-18a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -1879,7 +1965,10 @@ function setMode(m){
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   const modeChanged=state.mode!==m;
   state.mode=m;
-  const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro';
+  const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro',
+        isTuner=m==='tuner';
+  // the tuner listens, so it must not be listening to us
+  if(!isTuner)stopTuner();
   /* Each mode is a different exercise, so it starts from the same clean screen:
      the panels you opened while working on scales are not the ones you want
      waiting for you in Metro. Within a mode they stay exactly as you leave them;
@@ -1888,17 +1977,18 @@ function setMode(m){
      they are the same elements shown and hidden. */
   if(modeChanged)document.querySelectorAll('details.sec').forEach(d=>d.open=false);
   [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
-   ['free','btn-mode-free'],['metro','btn-mode-metro']]
+   ['free','btn-mode-free'],['metro','btn-mode-metro'],['tuner','btn-mode-tuner']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
+  document.getElementById('tuner-section').style.display=isTuner?'':'none';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
   document.getElementById('free-section').style.display=m==='free'?'':'none';
   document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
-  document.getElementById('metro-divider').style.display=isDrone?'none':'';
+  document.getElementById('metro-divider').style.display=(isDrone||isTuner)?'none':'';
   const ms=document.getElementById('metro-section');
-  ms.style.display=isDrone?'none':'';
+  ms.style.display=(isDrone||isTuner)?'none':'';
   // Metro is nothing but the metronome, so the metronome is not foldable there.
   // What it was before is remembered, so leaving Metro gives it back.
   if(isMetro){
@@ -1907,8 +1997,9 @@ function setMode(m){
   } else if(ms.classList.contains('pinned')){
     ms.classList.remove('pinned');ms.open=metroWasOpen;
   }
-  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro)?'none':'';
-  document.getElementById('sec-sound').style.display=isMetro?'none':'';
+  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner)?'none':'';
+  document.getElementById('sec-sound').style.display=(isMetro||isTuner)?'none':'';
+  document.getElementById('sec-progress').style.display=isTuner?'none':'';
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
   state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
@@ -1920,6 +2011,7 @@ function setMode(m){
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
   buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
+  if(isTuner)buildTunerControls();
   setStatus('');
   refreshSequence();
 }
@@ -2933,6 +3025,272 @@ function gridifyAll(){document.querySelectorAll('.btn-wrap').forEach(gridify);}
   document.querySelectorAll('.btn-wrap').forEach(r=>obs.observe(r,{childList:true}));
   gridifyAll();
 })();
+
+/* ---------- the tuner ----------
+
+   Pitch is found by the McLeod method: the normalised square difference of the
+   signal against itself at every plausible lag, then the first peak that clears
+   nine tenths of the best one, refined by a parabola through its neighbours.
+   The first-peak rule is what keeps it off the octave below, which is the way
+   autocorrelation fails.
+
+   The signal is filtered and decimated before any of that. A double bass low E
+   is 41 Hz and a five-string B is 31, so the window has to be long enough to
+   hold three periods of 31 Hz — about 200 ms. At 48 kHz that is 9600 samples
+   against 1500 lags, which is 14 million multiply-adds a frame and far too slow.
+   Filtered to 1.6 kHz and decimated by six it becomes 1600 samples against 250
+   lags: the same measurement for a fortieth of the work. Nothing above 1.6 kHz
+   matters here — a fundamental that high is not what anyone tunes.            */
+
+const TUNE_DECIM=6;          // 48 kHz -> 8 kHz, plenty for a 2 kHz fundamental
+const TUNE_WIN=8192;         // 170 ms at 48 kHz
+const TUNE_FMIN=27.5;        // A0, below the lowest string anyone tunes
+const TUNE_FMAX=1400;
+let micStream=null,micNode=null,micAnalyser=null,micRaf=0;
+let tuneBuf=null,tuneDown=null,tuneNsdf=null;
+let strobePhase=0,strobeLast=0;
+let tuneHist=[];             // recent readings, for a median that ignores a stray
+let tuneSmooth=null;         // the needle's own position, eased
+let state_tunerTarget=null;  // null = follow whatever it hears
+
+function a4(){return state.tunerA4||440;}
+// midi 69 is A4 by definition, so the reference moves the whole grid with it
+function freqOfMidi(m){return a4()*Math.pow(2,(m-69)/12);}
+function midiOfFreq(f){return 69+12*Math.log2(f/a4());}
+
+/* One frame: returns the fundamental in Hz, or null if there is nothing to hear. */
+function detectPitch(){
+  if(!micAnalyser)return null;
+  if(!tuneBuf)tuneBuf=new Float32Array(TUNE_WIN);
+  micAnalyser.getFloatTimeDomainData(tuneBuf);
+  const sr=audioCtx.sampleRate, dsr=sr/TUNE_DECIM;
+  const n=Math.floor(TUNE_WIN/TUNE_DECIM);
+  if(!tuneDown||tuneDown.length!==n)tuneDown=new Float32Array(n);
+  // decimate by averaging, which is also a crude low-pass on top of the filter
+  let sum2=0;
+  for(let i=0;i<n;i++){
+    let a=0;
+    for(let k=0;k<TUNE_DECIM;k++)a+=tuneBuf[i*TUNE_DECIM+k];
+    const v=a/TUNE_DECIM;
+    tuneDown[i]=v;sum2+=v*v;
+  }
+  const rms=Math.sqrt(sum2/n);
+  if(rms<0.004)return null;                       // silence, or a room
+  // remove the mean: a DC offset makes every lag look correlated
+  let mean=0;for(let i=0;i<n;i++)mean+=tuneDown[i];
+  mean/=n;for(let i=0;i<n;i++)tuneDown[i]-=mean;
+
+  const minLag=Math.max(2,Math.floor(dsr/TUNE_FMAX));
+  const maxLag=Math.min(n-1,Math.ceil(dsr/TUNE_FMIN));
+  if(!tuneNsdf||tuneNsdf.length<maxLag+1)tuneNsdf=new Float32Array(maxLag+1);
+  let best=0;
+  for(let tau=minLag;tau<=maxLag;tau++){
+    let acf=0,div=0;
+    const lim=n-tau;
+    for(let i=0;i<lim;i++){
+      const a=tuneDown[i],b=tuneDown[i+tau];
+      acf+=a*b;div+=a*a+b*b;
+    }
+    const v=div>0?2*acf/div:0;                    // McLeod's normalisation
+    tuneNsdf[tau]=v;
+    if(v>best)best=v;
+  }
+  if(best<0.35)return null;                       // nothing periodic enough
+  // the first peak that clears nine tenths of the best: this is the step that
+  // stops it answering with the octave below
+  const thresh=best*0.9;
+  let pick=-1;
+  for(let tau=minLag+1;tau<maxLag;tau++){
+    if(tuneNsdf[tau]>tuneNsdf[tau-1]&&tuneNsdf[tau]>=tuneNsdf[tau+1]&&tuneNsdf[tau]>=thresh){pick=tau;break;}
+  }
+  if(pick<0)return null;
+  // a parabola through the peak and its neighbours: the true lag is between samples
+  const y0=tuneNsdf[pick-1],y1=tuneNsdf[pick],y2=tuneNsdf[pick+1];
+  const den=y0-2*y1+y2;
+  const adj=den?0.5*(y0-y2)/den:0;
+  const coarse=dsr/(pick+adj);
+  if(!(coarse>=TUNE_FMIN&&coarse<=TUNE_FMAX))return null;
+  /* Decimating to 8 kHz costs resolution at the top: a 587 Hz period is only
+     13 samples there, and a parabola through 13 samples was reading two cents
+     off. So the period found on the cheap signal is used only to say WHERE to
+     look, and the answer is measured again on the untouched 48 kHz buffer over
+     a narrow band of lags around it. Full resolution everywhere, for a search
+     of twenty-odd lags instead of fifteen hundred. */
+  const fine=refineLag(tuneBuf,TUNE_WIN,sr/coarse,TUNE_DECIM+1);
+  const f=fine?sr/fine:coarse;
+  return (f>=TUNE_FMIN&&f<=TUNE_FMAX)?f:coarse;
+}
+
+/* The same normalised difference, at full rate, over a handful of lags. */
+function refineLag(d,n,lag0,band){
+  const lo=Math.max(2,Math.floor(lag0-band)),hi=Math.min(n-2,Math.ceil(lag0+band));
+  if(hi<=lo+1)return 0;
+  let mean=0;for(let i=0;i<n;i++)mean+=d[i];mean/=n;
+  const vals=new Float32Array(hi-lo+1);
+  let best=-2,bestLag=lo;
+  for(let tau=lo;tau<=hi;tau++){
+    let acf=0,div=0;const lim=n-tau;
+    for(let i=0;i<lim;i++){
+      const a=d[i]-mean,b=d[i+tau]-mean;
+      acf+=a*b;div+=a*a+b*b;
+    }
+    const v=div>0?2*acf/div:0;
+    vals[tau-lo]=v;
+    if(v>best){best=v;bestLag=tau;}
+  }
+  const i=bestLag-lo;
+  if(i>0&&i<vals.length-1){
+    const y0=vals[i-1],y1=vals[i],y2=vals[i+1],den=y0-2*y1+y2;
+    if(den)return bestLag+0.5*(y0-y2)/den;
+  }
+  return bestLag;
+}
+
+async function startTuner(){
+  try{
+    initAudio();
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  }catch(e){
+    setStatus('The tuner needs the microphone. Allow it and press Listen again.');
+    return false;
+  }
+  micNode=audioCtx.createMediaStreamSource(micStream);
+  // rumble out, everything above a fundamental out, then measure
+  const hp=audioCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=22;
+  const lp=audioCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;lp.Q.value=0.7;
+  micAnalyser=audioCtx.createAnalyser();micAnalyser.fftSize=TUNE_WIN;
+  micNode.connect(hp);hp.connect(lp);lp.connect(micAnalyser);
+  tuneHist=[];tuneSmooth=null;strobeLast=0;
+  setStatus('');
+  tunerLoop();
+  return true;
+}
+function stopTuner(){
+  if(micRaf)cancelAnimationFrame(micRaf);micRaf=0;
+  if(micStream)micStream.getTracks().forEach(t=>t.stop());
+  micStream=null;micNode=null;micAnalyser=null;
+  renderTuner(null);
+}
+
+function tunerLoop(){
+  micRaf=requestAnimationFrame(tunerLoop);
+  const f=detectPitch();
+  // a median over the last few frames: one bad frame should not move the needle
+  if(f){tuneHist.push(f);if(tuneHist.length>5)tuneHist.shift();}
+  else tuneHist=[];
+  let show=null;
+  if(tuneHist.length>=3){
+    const srt=tuneHist.slice().sort((a,b)=>a-b);
+    show=srt[srt.length>>1];
+  }
+  renderTuner(show);
+}
+
+function renderTuner(f){
+  const noteEl=document.getElementById('tuner-note');
+  const centsEl=document.getElementById('tuner-cents');
+  const hzEl=document.getElementById('tuner-hz');
+  const needle=document.getElementById('tuner-needle');
+  if(!noteEl)return;
+  if(f===null){
+    noteEl.textContent='—';noteEl.classList.remove('in-tune');
+    centsEl.textContent='';
+    hzEl.textContent=micStream?'listening for a note':'press Listen';
+    needle.style.left='50%';needle.classList.remove('in-tune');
+    drawStrobe(0,false);
+    return;
+  }
+  // which note: the nearest, or the one you locked it to
+  const midi=state_tunerTarget!==null?state_tunerTarget:Math.round(midiOfFreq(f));
+  const target=freqOfMidi(midi);
+  const cents=1200*Math.log2(f/target);
+  const clamped=Math.max(-50,Math.min(50,cents));
+  tuneSmooth=tuneSmooth===null?clamped:tuneSmooth+(clamped-tuneSmooth)*0.35;
+  const inTune=Math.abs(cents)<2;
+  noteEl.innerHTML=noteNameOfMidi(midi)+'<span class="oct">'+(Math.floor(midi/12)-1)+'</span>';
+  noteEl.classList.toggle('in-tune',inTune);
+  centsEl.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents'+
+    (Math.abs(cents)>50?'  ·  a long way off':'');
+  hzEl.textContent=f.toFixed(2)+' Hz   ·   '+target.toFixed(2)+' Hz wanted';
+  needle.style.left=(50+tuneSmooth)+'%';
+  needle.classList.toggle('in-tune',inTune);
+  drawStrobe(f-target,inTune);
+}
+
+// Sharps and flats as the rest of the app spells them: flats, and F# for the one
+// the app has always shown sharp.
+const TUNER_NAMES=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+function noteNameOfMidi(m){return TUNER_NAMES[((m%12)+12)%12];}
+
+/* The strobe. Stripes drift at the beat frequency between what is played and
+   what is wanted: still means right, and the direction is the direction of the
+   error. A quarter of a cent at A4 is a tenth of a hertz, which is one turn
+   every ten seconds — visible, where a needle would not have moved. */
+function drawStrobe(errHz,inTune){
+  const c=document.getElementById('tuner-strobe');
+  if(!c)return;
+  const w=c.clientWidth||300,h=c.height;
+  if(c.width!==w)c.width=w;
+  const g=c.getContext('2d');
+  const now=performance.now();
+  const dt=strobeLast?Math.min(0.1,(now-strobeLast)/1000):0;
+  strobeLast=now;
+  strobePhase+=errHz*dt;                    // cycles of drift
+  const cs=getComputedStyle(document.documentElement);
+  g.clearRect(0,0,w,h);
+  const bars=12,bw=w/bars;
+  g.fillStyle=(inTune?cs.getPropertyValue('--green'):cs.getPropertyValue('--text2')).trim();
+  const off=((strobePhase%1)+1)%1;
+  for(let i=0;i<=bars;i++){
+    const x=((i+off)%(bars+1))*bw;
+    g.globalAlpha=inTune?0.85:0.5;
+    g.fillRect(x,6,bw*0.5,h-12);
+  }
+  g.globalAlpha=1;
+}
+
+/* Auto follows whatever it hears; locking to a string stops it jumping to the
+   neighbour when you are half a semitone below, which is exactly when you most
+   need it to hold still. */
+const TUNER_A4=[];for(let h=415;h<=466;h++)TUNER_A4.push(h);
+function buildTunerControls(){
+  const modeRow=document.getElementById('tuner-mode-row');
+  const noteRow=document.getElementById('tuner-note-row');
+  const a4sel=document.getElementById('tuner-a4');
+  if(!modeRow||!noteRow||!a4sel)return;
+  modeRow.innerHTML='';
+  [[null,'Auto'],[1,'Lock']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    const locked=state_tunerTarget!==null;
+    b.className='pick-btn'+(((v===null)!==locked)?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      if(v===null)state_tunerTarget=null;
+      else if(state_tunerTarget===null)state_tunerTarget=45;   // A2, a bass low string
+      buildTunerControls();
+    };
+    modeRow.appendChild(b);
+  });
+  noteRow.style.display=state_tunerTarget===null?'none':'';
+  noteRow.innerHTML='';
+  if(state_tunerTarget!==null){
+    // two octaves either side of the locked note, so any string is one tap away
+    for(let m=state_tunerTarget-6;m<=state_tunerTarget+6;m++){
+      if(m<21||m>96)continue;
+      const b=document.createElement('button');
+      b.className='pick-btn'+(m===state_tunerTarget?' active':'');
+      b.textContent=noteNameOfMidi(m)+(Math.floor(m/12)-1);
+      b.onclick=()=>{state_tunerTarget=m;buildTunerControls();};
+      noteRow.appendChild(b);
+    }
+  }
+  if(!a4sel.options.length){
+    TUNER_A4.forEach(h=>a4sel.appendChild(new Option(h,h)));
+    a4sel.addEventListener('change',()=>{state.tunerA4=parseInt(a4sel.value,10)||440;});
+  }
+  a4sel.value=String(a4());
+}
 
 /* ---------- the guide ----------
    A ? in the header opens it at the top; a ? on an open panel opens it at that
