@@ -22,15 +22,21 @@
      with it so the three levels stay three levels. */
   --text:#eee;--text2:#b0b0b0;--text3:#8a8a8a;
   --blue:#f0f0f3;--blue-bg:#42424a;   /* selections inside panels: grey, not blue */
-  --green:#22c55e;--green-bg:#14532d;
+  /* One green in the app, and it is the wordmark's: what is sounding now, the
+     starting degree, and a tuner sitting on the note all wear it. */
+  --green:#8d9c93;--green-bg:#2e3a34;--green-hi:#c3d0c8;
   --yellow:#eab308;--yellow-bg:#3a2a00;
   --red:#ef4444;--red-bg:#450a0a;
+  /* The transport while it runs: red, but matte — the same muted weight as the
+     green, not the deep blood red it was. Its own tokens, because the bright red
+     still flashes the accented beat and that mark is worth keeping. */
+  --stop:#c98d86;--stop-bg:#6e3b38;--stop-fg:#f9efed;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
-  /* --mode is the red itself: borders, and text that sits on a panel. --mode-fg
-     is the text that sits ON that red, which has to be near-white to be read —
-     red on dark red measured 4.98:1, near-white on it measures 12.67:1. */
-  --mode:#ff6b6b;--mode-bg:#5c0d0d;--mode-fg:#ffecec;
+  /* The selection colour, taken from the wordmark's own grey-green. --mode is
+     the tint itself, for borders and for text on a panel; --mode-fg is the text
+     that sits ON the fill, which has to be near-white to be read. */
+  --mode:#8d9c93;--mode-bg:#2e3a34;--mode-fg:#eef3ef;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
@@ -56,14 +62,16 @@
      stops paying for it. */
   --text:#2b2418;--text2:#4a4232;--text3:#57503f;
   --blue:#f7f3e8;--blue-bg:#5f5a4c;   /* inverted: on paper the selected chip goes dark */
-  --green:#116b31;--green-bg:#d9efdf;
+  --green:#3f5147;--green-bg:#cdd6d0;--green-hi:#2f3f36;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
+  /* On paper a pale tint reads as pink, so it is solid, the way the selected
+     chip is. */
+  --stop:#7d443d;--stop-bg:#9c5a52;--stop-fg:#faf0ee;
   /* --mode also writes the italic line beside a closed family, which sits on the
-     darkest paper: the chip red read 3.9:1 there, so the ink is a shade deeper
-     than the fill. On the chip itself that shade is only the border, invisible
-     against it. */
-  --mode:#a41111;--mode-bg:#b81414;--mode-fg:#fff2f2;   /* solid red chip: a pale tint read as salmon */
+     darkest paper, so the ink is a shade deeper than the fill. On the chip
+     itself that shade is only the border, invisible against it. */
+  --mode:#3f5147;--mode-bg:#5c6f63;--mode-fg:#f3f6f3;
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -147,7 +155,7 @@ details.sec[open] .sec-sum{display:none}
 .tuner-note{font-size:64px;font-weight:200;line-height:1;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums}
 .tuner-note .oct{font-size:26px;color:var(--text3);margin-left:2px}
-.tuner-note.in-tune{color:var(--green)}
+.tuner-note.in-tune{color:var(--green-hi)}
 .tuner-cents{font-size:13px;color:var(--text3);margin-top:6px;font-variant-numeric:tabular-nums}
 /* the bar: fifty cents either side, with the in-tune zone marked */
 .tuner-bar{position:relative;height:34px;margin-top:var(--s3);border-radius:var(--r);
@@ -216,7 +224,7 @@ details.sec:not([open]) .help-dot{display:none}
   white-space:nowrap;font-family:inherit;touch-action:manipulation;
   display:flex;align-items:center;justify-content:center}
 .seg>button.active{background:var(--blue-bg);border-color:transparent;color:var(--blue)}
-.seg>button.now{background:var(--green-bg);color:var(--green)}
+.seg>button.now{background:transparent;color:var(--green-hi);box-shadow:inset 0 0 0 1px var(--green)}
 .btn-wrap{display:grid;gap:var(--s1);grid-template-columns:repeat(var(--cols,4),1fr)}
 .btn-wrap>*{min-width:0}
 .pick-btn{position:relative;min-height:var(--h);padding:4px 7px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;white-space:normal;overflow-wrap:break-word;hyphens:auto;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
@@ -246,7 +254,11 @@ details.fam[open] .fam-sum{display:none}
 .rot-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .rot-chip{padding:4px 9px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg3);color:var(--text3);white-space:nowrap}
-.rot-chip.now{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600}
+/* Chosen is filled; sounding now is ringed and brighter. With a single green
+   doing both, a difference of shade was not enough — in the dark theme the two
+   ended up on the same fill. A ring against the panel is a difference of kind. */
+.rot-chip.now{background:transparent;border-color:var(--green);color:var(--green-hi);
+  font-weight:600;box-shadow:0 0 0 1px var(--green)}
 .rot-chip.next{border-color:var(--mode);color:var(--mode)}
 .rot-line{font-size:12px;color:var(--text2);line-height:1.6}
 .rot-line b{color:var(--text);font-weight:600}
@@ -261,7 +273,8 @@ details.fam[open] .fam-sum{display:none}
 .step-input.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .step-input:focus{outline:none;border-color:var(--blue)}
 /* green marks the item sounding right now as the study list advances */
-.pick-btn.now{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.pick-btn.now{background:transparent;border-color:var(--green);color:var(--green-hi);
+  font-weight:600;box-shadow:0 0 0 1px var(--green)}
 /* The rotation number is taken out of the flow and set above the name. Inline it
    was eating 17px of a cell only 68px wide on a phone, which pushed the longer
    mode names out of their buttons; in a corner it collided with a long first
@@ -278,7 +291,8 @@ details.fam[open] .fam-sum{display:none}
 .note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
 .note-btn{padding:10px 4px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;position:relative;user-select:none;-webkit-user-select:none;transition:background 0.12s;touch-action:manipulation}
 .note-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
-.note-btn.start{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.note-btn.start{background:transparent;border-color:var(--green);color:var(--green-hi);
+  box-shadow:0 0 0 1px var(--green)}
 .note-name{font-size:14px;font-weight:500}
 .free-grid .note-btn{padding:8px 4px 6px}
 .free-grid .note-name{font-size:13px;margin-bottom:4px}
@@ -287,9 +301,9 @@ details.fam[open] .fam-sum{display:none}
 .oct-val{font-size:11px;color:var(--text3);min-width:30px;text-align:center}
 .note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
 .note-btn.active .oct-val{color:var(--blue)}
-.note-btn.start .oct-btn{border-color:var(--green);color:var(--green)}
-.note-btn.start .oct-val{color:var(--green)}
-.start-badge{position:absolute;top:2px;right:4px;font-size:8px;color:var(--green);font-weight:700}
+.note-btn.start .oct-btn{border-color:var(--green);color:var(--green-hi)}
+.note-btn.start .oct-val{color:var(--green-hi)}
+.start-badge{position:absolute;top:2px;right:4px;font-size:8px;color:var(--green-hi);font-weight:700}
 
 .control-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
 .control-row label{font-size:13px;color:var(--text2);min-width:110px}
@@ -363,8 +377,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:1.25rem}
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
-.play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);transition:all 0.15s;touch-action:manipulation}
-.play-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+/* Waiting, it wears the app's green — it is the one thing on the screen you are
+   meant to press. Running, it turns to the matte red. Listen and Stop listening
+   in the tuner are the same button, so they follow without being told. */
+.play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;
+  border:1px solid var(--mode);border-radius:var(--r);
+  background:var(--mode-bg);color:var(--mode-fg);transition:all 0.15s;touch-action:manipulation}
+.play-btn.playing{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 
 .current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
 .current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
@@ -1938,7 +1957,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18d';
+const APP_VERSION='2026-08-18g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
