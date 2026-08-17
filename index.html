@@ -192,7 +192,7 @@ details.sec:not([open]) .help-dot{display:none}
 .seg>button.now{background:var(--green-bg);color:var(--green)}
 .btn-wrap{display:grid;gap:var(--s1);grid-template-columns:repeat(var(--cols,4),1fr)}
 .btn-wrap>*{min-width:0}
-.pick-btn{height:var(--h);padding:0 8px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
+.pick-btn{position:relative;min-height:var(--h);padding:4px 7px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;white-space:normal;overflow-wrap:break-word;hyphens:auto;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
 .pick-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .pick-btn.disabled{opacity:0.32;cursor:not-allowed}
 /* One box per scale family. Showing all twenty-eight modes at once was more
@@ -235,8 +235,13 @@ details.fam[open] .fam-sum{display:none}
 .step-input:focus{outline:none;border-color:var(--blue)}
 /* green marks the item sounding right now as the study list advances */
 .pick-btn.now{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.pick-btn .idx{display:inline-block;min-width:12px;margin-right:5px;font-size:9px;font-weight:700;
-  text-align:center;opacity:0.85;vertical-align:1px}
+/* The rotation number is taken out of the flow and set above the name. Inline it
+   was eating 17px of a cell only 68px wide on a phone, which pushed the longer
+   mode names out of their buttons; in a corner it collided with a long first
+   word. Centred above, with room reserved for it, it can do neither. */
+.pick-btn .idx{position:absolute;top:3px;left:0;right:0;text-align:center;
+  font-size:8px;font-weight:700;line-height:1;opacity:0.7;pointer-events:none}
+.pick-btn.numbered{padding-top:13px}
 .tonic-btn{height:var(--h);padding:0 6px;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
 .tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);margin-top:10px;touch-action:manipulation}
@@ -273,7 +278,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 }
 
 .timbre-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
-.timbre-btn{height:var(--h);padding:0 8px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
+.timbre-btn{min-height:var(--h);padding:4px 7px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;white-space:normal;overflow-wrap:break-word;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
 .timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
 
@@ -907,7 +912,9 @@ const SUBDIVS=[
   {k:2,   label:'♫ Eighths'},
   {k:'2s',label:'♫ Swing'},
   {k:3,   label:'³ Triplet'},
-  {k:4,   label:'♬ Sixteenths'},
+  {k:4,   label:'♬ 16ths'},        // one word with no space to break at, and a
+                                  // phone gives the cell 58px; the abbreviation is
+                                  // what a player would write on the part anyway
 ];
 const SWING_SHARES=[2/3,1/3];
 function subTicks(k){return k==='2s'?2:k;}
@@ -1830,7 +1837,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17n';
+const APP_VERSION='2026-08-17o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2271,7 +2278,7 @@ function buildSubdivRow(){
       const i=list.indexOf(sd.k);
       const sounding=i>=0&&sd.k===currentSubdiv()&&state.playing;
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
-      if(i>=0)b.innerHTML='<span class="idx">'+(i+1)+'</span>'+sd.label;
+      if(i>=0){b.classList.add('numbered');b.innerHTML='<span class="idx">'+(i+1)+'</span>'+sd.label;}
       b.onclick=()=>{
         const at=list.indexOf(sd.k);
         if(at>=0)list.splice(at,1);else list.push(sd.k);
@@ -2495,6 +2502,7 @@ function paintSetButtons(selector,attr,forMode){
       const i=list.findIndex(x=>x.name===name);
       if(i>=0){
         b.classList.add(i===studyIdx&&state.playing?'now':'active');
+        b.classList.add('numbered');
         b.innerHTML='<span class="idx">'+(i+1)+'</span>'+name;
       } else b.textContent=name;
     } else {
