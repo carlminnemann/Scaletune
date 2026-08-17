@@ -135,6 +135,38 @@ details.sec[open] .sec-sum{display:none}
    modifies reads as one of them; this is the fix for that, in one rule. */
 .head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
   min-height:26px;margin-bottom:var(--s3)}
+.head-btns{display:flex;gap:6px;justify-self:end}
+
+/* A panel's ? shows only while the panel is open. Closed, its summary is
+   already saying what is set inside it and needs nothing more; open, the one
+   or two panels you are working in each carry one. That way the mark is
+   available everywhere without the screen being peppered with them. */
+.help-dot{border:none;background:none;color:var(--text3);font-size:13px;cursor:pointer;
+  padding:0 2px;line-height:1;font-family:inherit;opacity:.55;margin-left:auto;margin-right:10px}
+.help-dot:hover{opacity:1}
+details.sec:not([open]) .help-dot{display:none}
+
+/* The guide itself: a sheet over the app, not another panel inside it. */
+.help-overlay{position:fixed;inset:0;z-index:50;background:var(--bg);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right))
+          calc(3rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
+.help-overlay[hidden]{display:none}
+.help-inner{max-width:560px;margin:0 auto}
+/* The close button is fixed to the corner rather than riding a sticky bar: a
+   sticky bar cannot cover the overlay's own safe-area padding, so text slid
+   through the gap above it. */
+.help-top{display:flex;align-items:center;padding:0 0 var(--s4)}
+.help-top h2{font-size:15px;font-weight:600;letter-spacing:.01em}
+.help-close{position:fixed;z-index:2;
+  top:calc(0.75rem + env(safe-area-inset-top));right:calc(0.75rem + env(safe-area-inset-right))}
+.help-sec{margin-bottom:var(--s5);scroll-margin-top:var(--s3)}
+.help-sec>h3{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text2);padding-bottom:6px;border-bottom:1px solid var(--border2);margin-bottom:var(--s3)}
+.help-sec dt{font-size:13px;font-weight:600;color:var(--text);margin-top:var(--s3)}
+.help-sec dt:first-of-type{margin-top:0}
+.help-sec dd{font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:3px}
+.help-lead{font-size:12.5px;color:var(--text3);line-height:1.6;margin-bottom:var(--s5);font-style:italic}
 /* A group inside a panel, fenced by a hairline rather than by nothing. */
 .metro-body{padding:0}
 .mgroup{padding:var(--s4)}
@@ -327,7 +359,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div class="header">
   <span></span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap">T</span>une</h1>
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">☀</button>
+  <span class="head-btns">
+    <button class="theme-btn" id="help-btn" onclick="openHelp()" aria-label="What everything does">?</button>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">☀</button>
+  </span>
 </div>
 
 <div class="section-label">Mode</div>
@@ -579,7 +614,103 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div class="current-freq" id="current-freq"></div>
 <div class="build-stamp" id="build-stamp"></div>
 </div>
+<!-- The guide. Written as the app is laid out, so reading it top to bottom is
+     walking down the screen. Reached from the ? in the header, or from the ?
+     that appears on whichever panel is open, which lands on its entry. -->
+<div class="help-overlay" id="help-overlay" hidden role="dialog" aria-modal="true" aria-label="What everything does">
+ <button class="theme-btn help-close" onclick="closeHelp()" aria-label="Close">✕</button>
+ <div class="help-inner">
+  <div class="help-top">
+    <h2>What everything does</h2>
+  </div>
 
+  <p class="help-lead">ScaleTune is for instruments whose intonation you have to make yourself —
+  strings, winds, voice. Everything here is a reference to play against, not a thing to listen to.</p>
+
+  <div class="help-sec" id="help-modes"><h3>Modes</h3><dl>
+    <dt>Drone</dt><dd>Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord.</dd>
+    <dt>Scale</dt><dd>Plays a scale as a line, in the key, range and direction you choose.</dd>
+    <dt>Arpeggio</dt><dd>The same, built from a chord instead of a scale.</dd>
+    <dt>Free</dt><dd>You pick the notes yourself, each with its own octave, and they play in that order.</dd>
+    <dt>Metro</dt><dd>The metronome on its own, with no notes at all.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-root"><h3>Root</h3><dl>
+    <dt>The twelve notes</dt><dd>The key everything else is built from.</dd>
+    <dt>Single / Study list</dt><dd>Single works on one scale or chord at a time. Study list collects
+    several and takes them in turn, one per pass, so you can work a whole family without stopping.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-scales"><h3>Scales and chords</h3><dl>
+    <dt>The family boxes</dt><dd>One opens at a time and the others fold away. A closed box still says
+    what is chosen inside it, so folding one never hides a selection.</dd>
+    <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
+    way inversions are practised. Over more than one octave it lands on it.</dd>
+    <dt>Clear</dt><dd>Empties the selection, or the whole study list.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-range"><h3>Range &amp; Direction</h3><dl>
+    <dt>Octaves</dt><dd>How far the line reaches. If the top would run past the highest sample, the
+    span is reduced until it fits — and grows back by itself once there is room again.</dd>
+    <dt>Start Octave</dt><dd>Where the line begins.</dd>
+    <dt>Direction</dt><dd>Up, down, or up then back down.</dd>
+    <dt>Start On</dt><dd>Which degree of the scale the line starts from — the way a mode is practised
+    from each of its own notes.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-progress"><h3>Practice Progressions</h3><dl>
+    <dt>Root Movement</dt><dd>Stay in one key, or move up a fourth each time everything else has been
+    round once — the cycle of fourths.</dd>
+    <dt>Speed Up</dt><dd>Adds so many BPM every pass, up to 300.</dd>
+    <dt>What a pass is</dt><dd>One round of the notes. The order is: the rhythmic figure first, then the
+    mode or chord, then the key — so one mode goes through every figure before the next mode starts.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-metro"><h3>Metronome</h3><dl>
+    <dt>Tempo</dt><dd>10 to 300 BPM. Type it, drag it, or tap it in — Tap tempo averages the last few taps.</dd>
+    <dt>Bar</dt><dd>How many beats it counts. Tap a circle to cycle it: accented, plain, silent. With
+    notes playing every beat is plain unless you ask otherwise; with the metronome alone the first
+    beat is accented, so the bar you chose can be heard.</dd>
+    <dt>Subdivision</dt><dd>What each beat is divided into. Swing is two ticks split two to one — the
+    triplet feel a written pair of eighths is actually played with. Single uses one figure; Sequence
+    takes the ones you pick in turn, one per pass.</dd>
+    <dt>Click</dt><dd>Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
+    figure to the notes.</dd>
+    <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
+    pass is: so many bars, or so many beats. The figure list and Speed Up both move on that.</dd>
+    <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
+    meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
+    it is on.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-phrasing"><h3>Phrasing</h3><dl>
+    <dt>Note Length</dt><dd>Per figure gives a note on every subdivision; Per beat one note a beat;
+    Per bar one note a bar. Under swing the notes take the swing too, long then short.</dd>
+    <dt>Phrase Alignment</dt><dd>Let it drift is the exercise: a phrase whose length does not divide the
+    bar walks round against the pulse and only comes back after several rounds, and the metronome is
+    never resynchronised to it. Restart each round puts note one back on beat one every time.</dd>
+    <dt>Notes Follow</dt><dd>Under a polyrhythm, which of the two layers the notes ride.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-timbre"><h3>Timbre</h3><dl>
+    <dt>Why it matters</dt><dd>You tune by the beating between partials, so a voice with partials is
+    worth more than a clean one. A sine has a single partial: excellent for a unison or an octave,
+    useless for anything else.</dd>
+    <dt>Cello and Oboe</dt><dd>Recordings of real players, with the vibrato tracked out — a reference
+    must not wobble — and retuned so every note lands within a cent.</dd>
+    <dt>Organ</dt><dd>Synthesised rather than recorded, from the harmonic profile of a church organ.
+    Its pitch is exact by construction, at every note.</dd>
+    <dt>Real piano, Piano synth</dt><dd>For the note sequences, where a clear attack makes the rhythm
+    of a line easy to hear. Both fade, so they are not offered as drones.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-transport"><h3>Playing</h3><dl>
+    <dt>Start</dt><dd>Or the space bar, which works wherever you are — unless you are typing in a field.</dd>
+    <dt>Offline</dt><dd>Once opened, the app runs with no network at all. Add it to your home screen
+    and it behaves as an app.</dd>
+  </dl></div>
+ </div>
+</div>
 <!-- Bundled locally: a packaged app must not fetch executable code at runtime
      (Capacitor's default CSP blocks it and App Store review restricts it). -->
 <script src="vendor/soundfont-player.min.js"></script>
@@ -1692,7 +1823,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17k';
+const APP_VERSION='2026-08-17l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2788,6 +2919,51 @@ function gridifyAll(){document.querySelectorAll('.btn-wrap').forEach(gridify);}
   gridifyAll();
 })();
 
+/* ---------- the guide ----------
+   A ? in the header opens it at the top; a ? on an open panel opens it at that
+   panel's entry. The panel marks are put in from here rather than written into
+   the markup, so a panel and its entry cannot drift apart: the map below is the
+   only place the two are tied together. */
+const HELP_FOR={
+  'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
+  'sec-freenotes':'help-root','sec-freerange':'help-range',
+  'metro-section':'help-metro','sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
+};
+function openHelp(anchor){
+  const o=document.getElementById('help-overlay');
+  if(!o)return;
+  o.hidden=false;
+  document.body.style.overflow='hidden';
+  const t=anchor&&document.getElementById(anchor);
+  // jump, do not glide: the sheet has only just appeared and there is nothing
+  // to follow with the eye
+  o.scrollTop=0;
+  if(t)t.scrollIntoView({block:'start'});
+}
+function closeHelp(){
+  const o=document.getElementById('help-overlay');
+  if(!o)return;
+  o.hidden=true;
+  document.body.style.overflow='';
+}
+function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o.hidden;}
+(function(){
+  Object.keys(HELP_FOR).forEach(id=>{
+    const d=document.getElementById(id);
+    const sum=d&&d.querySelector('summary');
+    if(!sum)return;
+    const b=document.createElement('button');
+    b.className='help-dot';b.type='button';b.textContent='?';
+    b.setAttribute('aria-label','What this panel does');
+    // a press here must not fold the panel it belongs to
+    b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openHelp(HELP_FOR[id]);});
+    sum.appendChild(b);
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&helpOpen()){e.preventDefault();closeHelp();}
+  });
+})();
+
 /* pointer-events keeps a mouse or a finger off it, but not a keyboard, and not
    script. While it is pinned the panel simply refuses to close, however it is
    asked. */
@@ -2969,6 +3145,7 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('keydown',e=>{
   if(e.code!=='Space'&&e.key!==' ')return;
+  if(helpOpen())return;
   if(swallowsSpace(e.target))return;
   if(e.repeat)return;
   e.preventDefault();
