@@ -440,6 +440,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
         <span class="sig-unit">Hz</span>
       </span></div>
+    <div class="head"><span class="group-label">Temperament</span>
+      <select class="sig-select active" id="tuner-temp" aria-label="Temperament"></select></div>
+    <div class="head" id="tuner-key-line" style="display:none"><span class="group-label">Key</span>
+      <select class="sig-select active" id="tuner-key" aria-label="Key the temperament is built on"></select></div>
+    <div class="info-line" id="tuner-temp-info"></div>
   </div>
 </div>
 
@@ -720,6 +725,16 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     when you need it to hold still.</dd>
     <dt>Reference A4</dt><dd>415 to 466, moving every note with it. 415 for baroque pitch,
     442 or 443 where the orchestra sits high.</dd>
+    <dt>Temperament</dt><dd>Equal, just, Pythagorean, quarter-comma meantone, Werckmeister III.
+    Each is a set of deviations from equal temperament, counted from the key you name, so the
+    key note is the one everything else is made pure against. Just makes the thirds pure and
+    the fifths nearly so; Pythagorean makes the fifths pure and the thirds wide; meantone buys
+    pure thirds by narrowing every fifth; Werckmeister spreads the error so that every key is
+    playable and none is identical.</dd>
+    <dt>What Key does to the reading</dt><dd>In just intonation in C, an A sits about fifteen
+    cents under an equal A — and the tuner will say so. That is not an error to correct; it is
+    what the temperament is. Reference A4 keeps its own job, which is to place the equal grid
+    that the deviations are counted from.</dd>
     <dt>Low strings</dt><dd>It reads down to 27.5 Hz, below the lowest string on a
     five-string bass. Down there it answers more slowly: a pitch that low needs a fifth of
     a second of sound before there is anything to measure.</dd>
@@ -975,7 +990,7 @@ let state={
   practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0,
             passCount:4,passUnit:'bar'},
-  playing:false,tunerA4:440
+  playing:false,tunerA4:440,tunerTemp:'equal',tunerKey:0
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
@@ -1923,7 +1938,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18b';
+const APP_VERSION='2026-08-18d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3057,7 +3072,9 @@ let state_tunerTarget=null;  // null = follow whatever it hears
 
 function a4(){return state.tunerA4||440;}
 // midi 69 is A4 by definition, so the reference moves the whole grid with it
-function freqOfMidi(m){return a4()*Math.pow(2,(m-69)/12);}
+function freqOfMidi(m){return a4()*Math.pow(2,(m-69)/12)*Math.pow(2,tempOffset(m)/1200);}
+// naming the nearest note stays on the even grid: a temperament shifts where a
+// note IS, not which note you are nearest to
 function midiOfFreq(f){return 69+12*Math.log2(f/a4());}
 
 /* One frame: returns the fundamental in Hz, or null if there is nothing to hear. */
@@ -3262,6 +3279,51 @@ function drawStrobe(errHz,inTune){
   g.globalAlpha=1;
 }
 
+/* ---------- temperaments ----------
+
+   Each is twelve deviations from equal temperament, in cents, counted from the
+   key. The first two are computed from their own ratios rather than typed from
+   memory, so they can be checked against the intervals they claim: a just major
+   third must come out 13.69 cents flat of equal, a Pythagorean fifth 1.96 sharp.
+   The last two are historical recipes and are given as their published cents.
+
+   They are anchored on the KEY, not on A. That is what a temperament means: say
+   just intonation in C and the C is the note everything else is made pure
+   against, so an A in the key of C really does sit fifteen cents under an equal
+   A — that is not an error to correct, it is the reading. Reference A4 keeps its
+   own job, which is to place the equal grid the deviations are counted from.
+
+   Anchoring on A instead was tried first, so that 440 would always read 440. It
+   transposes the whole temperament by whatever the key's own A happens to be —
+   fifteen cents, in C — and every interval comes out wrong. */
+const RATIO_JUST=[1,16/15,9/8,6/5,5/4,4/3,45/32,3/2,8/5,5/3,9/5,15/8];
+const RATIO_PYTH=[1,256/243,9/8,32/27,81/64,4/3,729/512,3/2,128/81,27/16,16/9,243/128];
+const centsOfRatios=r=>r.map((x,i)=>1200*Math.log2(x)-100*i);
+const TEMPERAMENTS=[
+  {k:'equal', label:'Equal',        dev:new Array(12).fill(0)},
+  {k:'just',  label:'Just',         dev:centsOfRatios(RATIO_JUST)},
+  {k:'pyth',  label:'Pythagorean',  dev:centsOfRatios(RATIO_PYTH)},
+  // quarter-comma meantone: pure major thirds, the fifth narrowed by a quarter comma
+  {k:'mean',  label:'Meantone',     dev:[0,76.049,193.157,310.265,386.314,503.422,
+                                         579.471,696.579,772.627,889.735,1006.843,1082.892]
+                                        .map((c,i)=>c-100*i)},
+  // Werckmeister III, the best known of the well temperaments
+  {k:'werck', label:'Werckmeister', dev:[0,90.225,192.180,294.135,390.225,498.045,
+                                         588.270,696.090,792.180,888.270,996.090,1092.180]
+                                        .map((c,i)=>c-100*i)},
+];
+function tempTable(){
+  const t=TEMPERAMENTS.find(x=>x.k===(state.tunerTemp||'equal'))||TEMPERAMENTS[0];
+  return t.dev;
+}
+// how far this note sits from its equal-tempered place
+function tempOffset(midi){
+  const dev=tempTable();
+  if(!dev.some(v=>v))return 0;
+  const key=state.tunerKey||0;                       // 0 = C
+  return dev[((((midi%12)+12)%12-key)%12+12)%12];
+}
+
 /* Auto follows whatever it hears; locking to a string stops it jumping to the
    neighbour when you are half a semitone below, which is exactly when you most
    need it to hold still. */
@@ -3302,6 +3364,32 @@ function buildTunerControls(){
     a4sel.addEventListener('change',()=>{state.tunerA4=parseInt(a4sel.value,10)||440;});
   }
   a4sel.value=String(a4());
+
+  const tsel=document.getElementById('tuner-temp');
+  const ksel=document.getElementById('tuner-key');
+  if(tsel&&!tsel.options.length){
+    TEMPERAMENTS.forEach(t=>tsel.appendChild(new Option(t.label,t.k)));
+    tsel.addEventListener('change',()=>{state.tunerTemp=tsel.value;buildTunerControls();});
+    TUNER_NAMES.forEach((n,i)=>ksel.appendChild(new Option(n,i)));
+    ksel.addEventListener('change',()=>{state.tunerKey=parseInt(ksel.value,10)||0;buildTunerControls();});
+  }
+  if(tsel){
+    tsel.value=state.tunerTemp||'equal';
+    ksel.value=String(state.tunerKey||0);
+    // the key means nothing to equal temperament, where every note is the same
+    document.getElementById('tuner-key-line').style.display=(tsel.value==='equal')?'none':'';
+    const info=document.getElementById('tuner-temp-info');
+    if(tsel.value==='equal')info.textContent='';
+    else{
+      // say what it does, in the notes it does it to
+      const parts=[];
+      for(let pc=0;pc<12;pc++){
+        const o=tempOffset(pc);
+        if(Math.abs(o)>=0.5)parts.push(TUNER_NAMES[pc]+' '+(o>0?'+':'')+o.toFixed(0));
+      }
+      info.textContent=parts.length?('cents from equal · '+parts.join('  ')):'';
+    }
+  }
 }
 
 /* ---------- the guide ----------
