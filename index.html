@@ -172,7 +172,9 @@ details.sec:not([open]) .help-dot{display:none}
 .mgroup{padding:var(--s4)}
 .mgroup+.mgroup{border-top:1px solid var(--border)}
 .mgroup>.head:last-child,.mgroup>*:last-child{margin-bottom:0}
-.bpm-row{display:flex;align-items:baseline;gap:var(--s2)}
+.bpm-row{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s3)}
+/* Tap tempo is pushed to the far end of the number's own line, on its baseline. */
+.bpm-row .tap-btn{margin-left:auto;align-self:center}
 .bpm-row .bpm-big{width:auto;text-align:left}
 .bpm-row .bpm-label{margin:0}
 .sig-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
@@ -501,22 +503,25 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <!-- Five named groups instead of one undivided box. The tempo, the bar and the
        figure were sharing a single space with nothing between them, which is what
        made the panel hard to read. -->
-  <div class="mgroup">
+  <div class="mgroup" id="tempo-block">
+    <!-- The bar length rides the label line, where every other group keeps its
+         controls. Tap tempo sits against the number instead: it is a way of
+         setting that number, so it belongs beside it and not up in the title. -->
     <div class="head"><span class="section-label">Tempo</span>
-      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button></div>
+      <span class="sig-fields">
+        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
+        <span class="sig-unit">beats</span>
+      </span></div>
     <div class="bpm-row">
       <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" aria-label="Beats per minute">
       <span class="bpm-label">BPM</span>
+      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
   </div>
 
   <div class="mgroup" id="sig-block">
-    <div class="head"><span class="section-label">Bar</span>
-      <span class="sig-fields">
-        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
-        <span class="sig-unit">beats</span>
-      </span></div>
+    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span></div>
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint">tap a beat: accent it, then silence it</div>
   </div>
@@ -1823,7 +1828,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17l';
+const APP_VERSION='2026-08-17m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
