@@ -355,17 +355,18 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .sig-select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .sig-select:focus{outline-color:var(--blue)}
 
-/* The circles sit centred: they are a picture of the bar, not a row of controls
-   to line up with the rest. The polyrhythm shows two of them, one above the
-   other, so they are given room to read as two separate layers. */
-.beats-row{display:flex;gap:var(--s3);justify-content:center;margin:0 0 var(--s2);flex-wrap:wrap}
+/* The circles are a picture of the bar, so they are centred rather than lined up
+   with the controls — and a cycle should read as one line. Laid out as a grid
+   whose columns are worked out from the width: they shrink to stay on one row,
+   and only take a second when they would otherwise be too small to tap. */
+.beats-row{display:grid;gap:var(--s2);justify-content:center;margin:0 0 var(--s2);
+  grid-template-columns:repeat(var(--cols,4),auto)}
 /* They were 34px and crowded up against the two pickers. Back to the size of
    the bar's own circles, with room above so the pulses read as their own thing
    and not as part of the row that chose them. */
 #poly-row-a{margin-top:var(--s4)}
-#poly-row-a,#poly-row-b{gap:var(--s3);margin-bottom:var(--s2)}
-#poly-row-a .beat-dot,#poly-row-b .beat-dot{width:28px;height:28px}
-.beat-dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
+#poly-row-a,#poly-row-b{margin-bottom:var(--s2)}
+.beat-dot{width:var(--dot,28px);height:var(--dot,28px);border-radius:50%;border:1px solid var(--border2);background:var(--bg3);
   cursor:pointer;touch-action:manipulation;transition:background 0.05s,border-color 0.05s}
 .beat-dot.acc-low{border-width:2px;border-color:var(--text2)}
 .beat-dot.acc-off{background:transparent;border-style:dashed;opacity:0.45}
@@ -376,7 +377,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
    read as one grid */
 /* Layer B's pulses are squared off and smaller, so the two rows never read as
    one grid. The row the notes ride on is outlined. */
-.beat-dot.poly{width:22px;height:22px;border-radius:6px}
+/* the second layer keeps the rounded square that tells it apart, but takes the
+   size the row works out, so the two layers line up */
+.beat-dot.poly{border-radius:6px}
 .beat-dot.poly.active-beat{background:var(--brand);border-color:var(--brand)}
 .beat-dot.poly.acc-low.active-beat{background:var(--mode);border-color:var(--mode)}
 .beats-row.carries{position:relative}
@@ -619,7 +622,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 
   <div class="mgroup" id="sig-block">
-    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span></div>
+    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span>
+      <button class="clear-btn" onclick="clearAccents()">✕ Clear</button></div>
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint">tap a beat: accent it, then silence it</div>
   </div>
@@ -1965,7 +1969,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18h';
+const APP_VERSION='2026-08-18i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2879,6 +2883,7 @@ function renderPolyBeats(){
       };
       row.appendChild(d);
     }
+    layoutBeats(row);
   });
 }
 
@@ -2945,6 +2950,14 @@ function updateSupersededControls(){
    mode is that, and better — so this is now simply the mode. */
 function defaultAccent(i){return (i===0&&notesSilent())?'low':'high';}
 
+/* Every beat back to plain — none accented, none silenced. Marked as chosen, so
+   the metronome's own accented downbeat does not come back and undo it. */
+function clearAccents(){
+  for(let i=0;i<state.accents.length;i++)state.accents[i]='high';
+  state.accentsTouched=true;
+  renderBeats();
+}
+
 function buildBeats(){
   // Whatever you set survives a change of bar length; what you never touched
   // follows the default, so switching to Metro brings its downbeat with it.
@@ -2968,6 +2981,7 @@ function renderBeats(){
     };
     row.appendChild(d);
   }
+  layoutBeats(row);
 }
 
 /* ---------- collapsible sections ---------- */
@@ -3061,6 +3075,30 @@ function gridify(row){
   row.style.setProperty('--cols',cols);
 }
 function gridifyAll(){document.querySelectorAll('.btn-wrap,.rot-chips').forEach(gridify);}
+
+/* How to lay out a row of pulses. One line if the circles can stay big enough to
+   hit; otherwise as few lines as will keep them there, with equal columns so no
+   line ends ragged. Sixteen against sixteen on a phone would put seven on a line
+   and two on the next, which looks like an accident rather than a cycle. */
+/* DOT_MIN is the size below which a row is better split than squeezed. Set at
+   the smallest tappable circle it gave twelve pulses on one line at 18px right
+   beside sixteen on two lines at 28 — the same panel, two different sizes. A
+   comfortable floor keeps the sizes near each other. */
+const DOT_MAX=28,DOT_MIN=20,DOT_GAP=8;
+function layoutBeats(row){
+  if(!row)return;
+  const n=row.children.length;
+  if(!n)return;
+  const w=row.parentElement?row.parentElement.clientWidth:0;
+  if(!w)return;
+  let cols=n,rows=1;
+  while(cols>1&&(w-(cols-1)*DOT_GAP)/cols<DOT_MIN){rows++;cols=Math.ceil(n/rows);}
+  const size=Math.max(DOT_MIN,Math.min(DOT_MAX,Math.floor((w-(cols-1)*DOT_GAP)/cols)));
+  row.style.setProperty('--cols',cols);
+  row.style.setProperty('--dot',size+'px');
+}
+function layoutAllBeats(){document.querySelectorAll('.beats-row').forEach(layoutBeats);}
+window.addEventListener('resize',layoutAllBeats);
 /* The rows are rebuilt by a dozen different functions as the app runs, so rather
    than teaching each one, watch for children changing and re-measure. */
 (function(){
