@@ -285,7 +285,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .bpm-big::-webkit-outer-spin-button,.bpm-big::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bpm-big:focus{outline:none;border-color:var(--blue);background:var(--bg3)}
 .bpm-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
-.tap-btn{width:auto;margin:0;height:26px;padding:0 12px;font-size:11px;cursor:pointer;border:1px solid var(--border2);
+/* It sits on the number's line now, not a label line, so it takes the app's
+   standard control height like every other button. */
+.tap-btn{width:auto;margin:0;height:var(--h);padding:0 18px;font-size:13px;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 /* it sits on a label line now, so it carries no margin of its own */
@@ -1828,7 +1830,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-17m';
+const APP_VERSION='2026-08-17n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
