@@ -377,7 +377,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:1.25rem}
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
-.play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);transition:all 0.15s;touch-action:manipulation}
+/* Waiting, it wears the app's green — it is the one thing on the screen you are
+   meant to press. Running, it turns to the matte red. Listen and Stop listening
+   in the tuner are the same button, so they follow without being told. */
+.play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;
+  border:1px solid var(--mode);border-radius:var(--r);
+  background:var(--mode-bg);color:var(--mode-fg);transition:all 0.15s;touch-action:manipulation}
 .play-btn.playing{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 
 .current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
@@ -1952,7 +1957,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18f';
+const APP_VERSION='2026-08-18g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
