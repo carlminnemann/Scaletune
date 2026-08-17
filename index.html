@@ -25,12 +25,15 @@
   --green:#22c55e;--green-bg:#14532d;
   --yellow:#eab308;--yellow-bg:#3a2a00;
   --red:#ef4444;--red-bg:#450a0a;
+  /* The transport while it runs. Its own tokens, not the red ones: red still
+     flashes the accented beat, and that mark is worth keeping. */
+  --stop:#22c55e;--stop-bg:#14532d;--stop-fg:#eaf7ee;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
-  /* --mode is the red itself: borders, and text that sits on a panel. --mode-fg
-     is the text that sits ON that red, which has to be near-white to be read —
-     red on dark red measured 4.98:1, near-white on it measures 12.67:1. */
-  --mode:#ff6b6b;--mode-bg:#5c0d0d;--mode-fg:#ffecec;
+  /* The selection colour, taken from the wordmark's own grey-green. --mode is
+     the tint itself, for borders and for text on a panel; --mode-fg is the text
+     that sits ON the fill, which has to be near-white to be read. */
+  --mode:#8d9c93;--mode-bg:#2e3a34;--mode-fg:#eef3ef;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
@@ -59,11 +62,13 @@
   --green:#116b31;--green-bg:#d9efdf;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
   --red:#b91c1c;--red-bg:#f9dedb;
+  /* On paper a pale tint reads as pink, so the running transport is solid, the
+     same way the selected chip is. */
+  --stop:#0d5626;--stop-bg:#116b31;--stop-fg:#f0f7f2;
   /* --mode also writes the italic line beside a closed family, which sits on the
-     darkest paper: the chip red read 3.9:1 there, so the ink is a shade deeper
-     than the fill. On the chip itself that shade is only the border, invisible
-     against it. */
-  --mode:#a41111;--mode-bg:#b81414;--mode-fg:#fff2f2;   /* solid red chip: a pale tint read as salmon */
+     darkest paper, so the ink is a shade deeper than the fill. On the chip
+     itself that shade is only the border, invisible against it. */
+  --mode:#3f5147;--mode-bg:#5c6f63;--mode-fg:#f3f6f3;
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -364,7 +369,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
 .play-btn{flex:1;padding:14px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);transition:all 0.15s;touch-action:manipulation}
-.play-btn.playing{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.play-btn.playing{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 
 .current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
 .current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
@@ -1938,7 +1943,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18d';
+const APP_VERSION='2026-08-18e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
