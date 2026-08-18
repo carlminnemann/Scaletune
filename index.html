@@ -149,15 +149,17 @@ details.sec[open] .sec-sum{display:none}
    empty cell instead of a ragged tail. The column count is set from the number
    of items by gridify(). */
 /* ---------- tuner ---------- */
-.tuner-panel{padding:var(--s4);text-align:center}
-.tuner-read{min-height:96px;display:flex;flex-direction:column;justify-content:center}
-.tuner-note{font-size:64px;font-weight:200;line-height:1;letter-spacing:-.02em;
+/* trimmed to fit a phone without scrolling: the reading is the one panel that
+   has to be seen whole, and it was 92px too tall on a 700px screen */
+.tuner-panel{padding:var(--s3);text-align:center}
+.tuner-read{min-height:56px;display:flex;flex-direction:column;justify-content:center}
+.tuner-note{font-size:46px;font-weight:200;line-height:1;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums}
-.tuner-note .oct{font-size:26px;color:var(--text3);margin-left:2px}
+.tuner-note .oct{font-size:20px;color:var(--text3);margin-left:2px}
 .tuner-note.in-tune{color:var(--green-hi)}
-.tuner-cents{font-size:13px;color:var(--text3);margin-top:6px;font-variant-numeric:tabular-nums}
+.tuner-cents{font-size:12px;color:var(--text3);margin-top:4px;font-variant-numeric:tabular-nums}
 /* the bar: fifty cents either side, with the in-tune zone marked */
-.tuner-bar{position:relative;height:34px;margin-top:var(--s3);border-radius:var(--r);
+.tuner-bar{position:relative;height:26px;margin-top:var(--s2);border-radius:var(--r);
   background:var(--bg3);overflow:hidden}
 .tuner-zone{position:absolute;left:48%;width:4%;top:0;bottom:0;background:var(--green-bg);opacity:.55}
 .tuner-ticks{position:absolute;inset:0;
@@ -170,9 +172,11 @@ details.sec[open] .sec-sum{display:none}
   margin-top:4px;letter-spacing:.06em}
 /* the strobe: stripes that stand still when the pitch is right, and drift in the
    direction of the error. Reads finer than any needle, and needs no numbers. */
-.tuner-strobe{display:block;width:100%;height:46px;margin-top:var(--s3);
+.tuner-strobe{display:block;width:100%;height:32px;margin-top:var(--s2);
   border-radius:var(--r);background:var(--bg3)}
-.tuner-hz{font-size:12px;color:var(--text3);margin-top:var(--s2);
+/* the deviation list is a reference, not a sentence: small and tight */
+.tuner-devs{font-size:10px;line-height:1.45;margin-top:var(--s2)}
+.tuner-hz{font-size:11px;color:var(--text3);margin-top:6px;
   font-variant-numeric:tabular-nums;min-height:18px}
 
 /* A label line: what the group is on the left, and on the right the switch that
@@ -414,6 +418,18 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .current-freq{text-align:center;font-size:12px;color:var(--text3);flex:0 0 auto}
 .current-freq:empty{display:none}
 .help-build{text-align:center;font-size:10px;color:var(--text3);opacity:0.6;letter-spacing:0.05em;margin-top:var(--s5)}
+/* On a small phone the tuner is the one panel that still will not fit, because
+   the reading has a size below which it stops being a reading. It gives up what
+   it can rather than scroll. */
+@media(max-height:680px){
+  .tuner-read{min-height:44px}
+  .tuner-note{font-size:38px}
+  .tuner-note .oct{font-size:17px}
+  .tuner-strobe{height:24px}
+  .tuner-bar{height:22px}
+  .tuner-panel{padding:var(--s2) var(--s3)}
+}
+
 /* A frame needs height to be worth it. On a screen under 520px tall — a phone on
    its side — holding the name, the modes and Start in place left 113px in the
    middle for everything else, which is worse than scrolling. There the page
@@ -491,7 +507,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="tuner-needle" id="tuner-needle"></div>
     </div>
     <div class="tuner-scale"><span>−50</span><span>−25</span><span>0</span><span>+25</span><span>+50</span></div>
-    <canvas class="tuner-strobe" id="tuner-strobe" height="46"></canvas>
+    <canvas class="tuner-strobe" id="tuner-strobe" height="32"></canvas>
     <div class="tuner-hz" id="tuner-hz">listening for a note</div>
   </div>
 
@@ -501,11 +517,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
         <span class="sig-unit">Hz</span>
       </span></div>
+    <!-- one line, because a temperament and the key it is built on are one
+         choice, and two lines of it pushed the tuner into scrolling -->
     <div class="head"><span class="group-label">Temperament</span>
-      <select class="sig-select active" id="tuner-temp" aria-label="Temperament"></select></div>
-    <div class="head" id="tuner-key-line" style="display:none"><span class="group-label">Key</span>
-      <select class="sig-select active" id="tuner-key" aria-label="Key the temperament is built on"></select></div>
-    <div class="info-line" id="tuner-temp-info"></div>
+      <span class="sig-fields">
+        <select class="sig-select active" id="tuner-temp" aria-label="Temperament"></select>
+        <select class="sig-select active" id="tuner-key" aria-label="Key the temperament is built on"
+                style="display:none"></select>
+      </span></div>
+    <div class="info-line tuner-devs" id="tuner-temp-info"></div>
   </div>
 </div>
 
@@ -2040,7 +2060,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18u';
+const APP_VERSION='2026-08-18w';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3250,10 +3270,19 @@ function spreadPanels(){
     .filter(d=>d.offsetParent);
   cards.forEach(c=>c.style.marginBottom='');
   if(cards.length<2)return;
-  const bottom=Math.max(...[...sc.children].filter(k=>k.offsetParent)
+  const floor=sc.getBoundingClientRect().bottom;
+  const reach=()=>Math.max(...[...sc.children].filter(k=>k.offsetParent)
     .map(k=>k.getBoundingClientRect().bottom));
   // a few pixels held back, or filling it exactly starts the scrollbar
-  const spare=sc.getBoundingClientRect().bottom-bottom-6;
+  let spare=floor-reach()-6;
+  /* The gap under the last block is there to keep the status line off it, but a
+     small overflow is worth more than that gap: give it up before scrolling. */
+  if(spare<0){
+    const last=cards[cards.length-1];
+    const mb=parseFloat(getComputedStyle(last).marginBottom);
+    last.style.marginBottom=Math.max(0,mb+spare)+'px';
+    spare=floor-reach()-6;
+  }
   if(spare<=1)return;
   const extra=Math.min(SPREAD_MAX,spare/(cards.length-1));
   cards.slice(0,-1).forEach(c=>{
@@ -3576,7 +3605,7 @@ function buildTunerControls(){
     tsel.value=state.tunerTemp||'equal';
     ksel.value=String(state.tunerKey||0);
     // the key means nothing to equal temperament, where every note is the same
-    document.getElementById('tuner-key-line').style.display=(tsel.value==='equal')?'none':'';
+    ksel.style.display=(tsel.value==='equal')?'none':'';
     const info=document.getElementById('tuner-temp-info');
     if(tsel.value==='equal')info.textContent='';
     else{
@@ -3586,16 +3615,19 @@ function buildTunerControls(){
         const o=tempOffset(pc);
         if(Math.abs(o)>=0.5)parts.push(TUNER_NAMES[pc]+' '+(o>0?'+':'')+o.toFixed(0));
       }
-      info.textContent=parts.length?('cents from equal · '+parts.join('  ')):'';
+      // the words cost a line of their own on a phone; the signs say cents
+      info.textContent=parts.length?parts.join('  '):'';
+      info.title='cents away from equal temperament';
     }
+    // the deviations line changes the panel's height, so the room has to be
+    // shared out again — without this the spread stayed as it was for equal
+    // temperament and pushed the taller panel into scrolling
+    spreadPanelsSoon();
   }
 }
-
 /* ---------- the guide ----------
-   A ? in the header opens it at the top; a ? on an open panel opens it at that
-   panel's entry. The panel marks are put in from here rather than written into
-   the markup, so a panel and its entry cannot drift apart: the map below is the
-   only place the two are tied together. */
+   The ? in the header opens it. The map below ties a panel to its entry, and is
+   what openHelp() is given when something wants to land on a particular one. */
 const HELP_FOR={
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
   'sec-freenotes':'help-root','sec-freerange':'help-range',
