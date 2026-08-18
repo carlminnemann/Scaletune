@@ -90,7 +90,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 /* min-height:0, or a flex child refuses to shrink below its content and the
    scrolling never starts */
 .scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px 4px}
+  margin:0 -4px;padding:0 4px 4px}
 
 /* One column, at every size and in both orientations. Two columns were tried on
    a wide screen and read as lopsided; scaling the column up to fill read as
@@ -142,22 +142,29 @@ details.sec.pinned>summary::after{display:none}
 .scroll.centred{display:flex;flex-direction:column}
 .scroll.centred>*{flex:0 0 auto}
 .scroll.centred>#metro-section{margin-top:auto;margin-bottom:auto}
-/* it has to give some of that airiness back on a short screen, and more of it
-   on a shorter one, rather than let the screen it opens on start scrolling */
-@media(max-height:760px){
-  .scroll.metro-view #tempo-block,.scroll.metro-view #sig-block{padding:var(--s3) var(--s4)}
-  .scroll.metro-view #sig-block .clear-btn{margin-top:var(--s3)}
-  .scroll.metro-view #tempo-block .head{margin-bottom:var(--s2)}
-  .scroll.metro-view #tempo-block .vol-line{margin-top:var(--s2)}
-  .scroll.metro-view #tempo-block .bpm-row{margin-bottom:var(--s2)}
-}
-@media(max-height:680px){
-  .scroll.metro-view #tempo-block,.scroll.metro-view #sig-block{padding:var(--s2) var(--s4)}
-  .scroll.metro-view .bpm-big{font-size:32px}
-  .scroll.metro-view #sig-block .clear-btn{margin-top:var(--s2)}
-  .scroll.metro-view #sig-block .head{margin-bottom:var(--s1)!important}
-  .scroll.metro-view #sig-block .beats-row{margin-bottom:var(--s1)}
-}
+/* It gives its airiness back a step at a time rather than let the screen it
+   opens on start scrolling. Which step it is on is decided by measuring, not by
+   guessing from the height of the window: how much room the panel actually has
+   depends on the browser's own bars, the safe area, the size of the type — none
+   of which a media query can see. */
+.scroll.metro-tight #tempo-block,.scroll.metro-tight #sig-block{padding:var(--s3) var(--s4)}
+.scroll.metro-tight #sig-block .clear-btn{margin-top:var(--s3)}
+.scroll.metro-tight #tempo-block .head{margin-bottom:var(--s2)}
+.scroll.metro-tight #tempo-block .vol-line{margin-top:var(--s2)}
+.scroll.metro-tight #tempo-block .bpm-row{margin-bottom:var(--s2)}
+
+.scroll.metro-tighter #tempo-block,.scroll.metro-tighter #sig-block{padding:var(--s2) var(--s4)}
+.scroll.metro-tighter .bpm-big{font-size:32px}
+.scroll.metro-tighter #sig-block .clear-btn{margin-top:var(--s2)}
+.scroll.metro-tighter #sig-block .head{margin-bottom:var(--s1)!important}
+.scroll.metro-tighter #sig-block .beats-row{margin-bottom:var(--s1)}
+
+.scroll.metro-tightest .bpm-big{font-size:26px}
+.scroll.metro-tightest .beats-hint{display:none}
+.scroll.metro-tightest #tempo-block .head{margin-bottom:var(--s1)}
+.scroll.metro-tightest #tempo-block .bpm-row{margin-bottom:var(--s1)}
+.scroll.metro-tightest #tempo-block .vol-line{margin-top:var(--s1)}
+.scroll.metro-tightest #tempo-block,.scroll.metro-tightest #sig-block{padding:var(--s1) var(--s4)}
 details.sec .sec-body{padding:1rem}
 details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
   color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -212,7 +219,7 @@ details.sec[open] .sec-sum{display:none}
 
 /* The guide itself: a sheet over the app, not another panel inside it. */
 .help-overlay{position:fixed;inset:0;z-index:50;background:var(--bg);
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overflow-y:auto;
   padding:calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right))
           calc(3rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
 .help-overlay[hidden]{display:none}
@@ -464,6 +471,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   html,body{height:auto;overflow:visible}
   .container{height:auto;display:block}
   .scroll{overflow:visible;min-height:0;margin:0;padding:0}
+  /* the page scrolls here, so there is no fixed box for Metro to centre in */
+  .scroll.centred{display:block}
+  .scroll.centred>#metro-section{margin-top:0;margin-bottom:var(--s2)}
   .btn-row{position:sticky;bottom:calc(0.5rem + env(safe-area-inset-bottom));z-index:5;
     margin-bottom:1rem}
   .btn-row::before{content:'';position:absolute;inset:-10px -16px;background:var(--bg);
@@ -2121,7 +2131,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18x';
+const APP_VERSION='2026-08-18y';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3330,23 +3340,31 @@ function layoutBeats(row){
   row.style.setProperty('--dot',size+'px');
 }
 function layoutAllBeats(){document.querySelectorAll('.beats-row').forEach(layoutBeats);}
-window.addEventListener('resize',layoutAllBeats);
 
 /* When the closed panels do not fill the screen, the space left over is shared
    between them rather than left in a heap above the Start button. Once anything
    is opened and the content is taller than the room, the extra goes back to
    nothing and it scrolls as it did. Capped, so three panels on a tall screen do
    not drift half a screen apart. */
-/* Centring only works while everything fits: auto margins on something taller
-   than the box put its top out of the scroll's reach. So it is measured first
-   and centred only when there is room, and otherwise laid out the ordinary way
-   and allowed to scroll. */
+/* Metro's front screen is made to fit, by measuring: it is offered the room it
+   would like, and if that overflows it is tightened a step and asked again.
+   Centring comes last and only if it fits, because auto margins on something
+   taller than the box put its top out of the scroll's reach. */
+const METRO_TIERS=['metro-tight','metro-tighter','metro-tightest'];
 function centreMetro(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
-  sc.classList.remove('centred');
+  sc.classList.remove('centred',...METRO_TIERS);
   if(state.mode!=='metro')return;
-  if(sc.scrollHeight<=sc.clientHeight+1)sc.classList.add('centred');
+  const over=()=>sc.scrollHeight>sc.clientHeight+1;
+  for(const tier of METRO_TIERS){
+    if(!over())break;
+    sc.classList.add(tier);
+  }
+  // if it scrolls anyway — More is open — the tightening bought nothing, and a
+  // cramped panel on a scrolling screen is worse than a comfortable one
+  if(over()){sc.classList.remove(...METRO_TIERS);return;}
+  sc.classList.add('centred');
 }
 
 const SPREAD_MAX=64;
@@ -3390,7 +3408,29 @@ function spreadPanels(){
     c.style.marginBottom=(parseFloat(getComputedStyle(c).marginBottom)+extra)+'px';
   });
 }
-window.addEventListener('resize',spreadPanels);
+/* Turning the phone changes the height, the width, which layout the media
+   queries choose and — on iOS — when the browser's own bars come and go. The
+   size settles a little after the event, and Safari can leave the old frame on
+   the screen until something makes it paint again, so this waits for the dust,
+   lays out again, and nudges it into repainting. */
+function relayoutViewport(){
+  layoutAllBeats();
+  gridifyAll();
+  spreadPanels();
+  const sc=document.getElementById('scroll-area');
+  if(sc){sc.style.overflowY='hidden';void sc.offsetHeight;sc.style.overflowY='';}
+  const c=document.querySelector('.container');
+  if(c){c.style.transform='translateZ(0)';requestAnimationFrame(()=>{c.style.transform='';});}
+}
+let viewportTimer=0;
+function viewportChanged(){
+  clearTimeout(viewportTimer);
+  relayoutViewport();
+  viewportTimer=setTimeout(relayoutViewport,250);
+}
+window.addEventListener('resize',viewportChanged);
+window.addEventListener('orientationchange',viewportChanged);
+if(window.visualViewport)window.visualViewport.addEventListener('resize',viewportChanged);
 /* The rows are rebuilt by a dozen different functions as the app runs, so rather
    than teaching each one, watch for children changing and re-measure. */
 (function(){
