@@ -2040,7 +2040,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18s';
+const APP_VERSION='2026-08-18u';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2131,6 +2131,7 @@ function setMode(m){
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
   buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildCountRow();buildTempoStepRow();updatePracticeInfo();
+  spreadPanelsSoon();
   // the rotation belongs to the note modes; nothing refreshed it on the way out,
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
@@ -3231,6 +3232,35 @@ function layoutBeats(row){
 }
 function layoutAllBeats(){document.querySelectorAll('.beats-row').forEach(layoutBeats);}
 window.addEventListener('resize',layoutAllBeats);
+
+/* When the closed panels do not fill the screen, the space left over is shared
+   between them rather than left in a heap above the Start button. Once anything
+   is opened and the content is taller than the room, the extra goes back to
+   nothing and it scrolls as it did. Capped, so three panels on a tall screen do
+   not drift half a screen apart. */
+const SPREAD_MAX=64;
+function spreadPanels(){
+  const sc=document.getElementById('scroll-area');
+  if(!sc)return;
+  // the tuner's two blocks are panels rather than folding sections, and they
+  // should share the room the same way
+  // folding sections, the tuner's two blocks, and the drone's grid of notes:
+  // whatever reads as a block on the screen
+  const cards=[...sc.querySelectorAll('details.sec,#tuner-section>.panel,#drone-section')]
+    .filter(d=>d.offsetParent);
+  cards.forEach(c=>c.style.marginBottom='');
+  if(cards.length<2)return;
+  const bottom=Math.max(...[...sc.children].filter(k=>k.offsetParent)
+    .map(k=>k.getBoundingClientRect().bottom));
+  // a few pixels held back, or filling it exactly starts the scrollbar
+  const spare=sc.getBoundingClientRect().bottom-bottom-6;
+  if(spare<=1)return;
+  const extra=Math.min(SPREAD_MAX,spare/(cards.length-1));
+  cards.slice(0,-1).forEach(c=>{
+    c.style.marginBottom=(parseFloat(getComputedStyle(c).marginBottom)+extra)+'px';
+  });
+}
+window.addEventListener('resize',spreadPanels);
 /* The rows are rebuilt by a dozen different functions as the app runs, so rather
    than teaching each one, watch for children changing and re-measure. */
 (function(){
@@ -3603,6 +3633,9 @@ function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o
   if(ms)ms.addEventListener('toggle',()=>{if(ms.classList.contains('pinned')&&!ms.open)ms.open=true;});
 })();
 
+// after the browser has laid the panel out, not before
+function spreadPanelsSoon(){requestAnimationFrame(()=>requestAnimationFrame(spreadPanels));}
+
 function initSections(){
   // earlier versions remembered this across launches; clear what they left
   // behind rather than leave dead keys sitting in storage forever
@@ -3620,6 +3653,7 @@ function initSections(){
     d.open=false;
     d.addEventListener('toggle',()=>{
       // mirror onto the other sections in the same group
+      spreadPanelsSoon();
       if(s.group)SECTIONS.forEach(o=>{
         if(o.group!==s.group||o.id===s.id)return;
         const e=document.getElementById(o.id);
@@ -3814,6 +3848,7 @@ if('serviceWorker' in navigator){
 // A visible build stamp, so it is possible to tell at a glance which version a
 // device is actually running instead of guessing.
 document.getElementById('build-stamp').textContent='build '+APP_VERSION;
+spreadPanelsSoon();
 </script>
 </body>
 </html>
