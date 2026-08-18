@@ -120,8 +120,8 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 /* Collapsible sections, built on <details> so the browser handles the state
    and keyboard behaviour; the open/closed choice is remembered per section. */
 details.sec{border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);
-  margin-bottom:1.25rem;overflow:hidden}
-details.sec>summary{list-style:none;cursor:pointer;padding:0.85rem 1rem;display:flex;align-items:center;gap:8px;
+  margin-bottom:var(--s2);overflow:hidden}
+details.sec>summary{list-style:none;cursor:pointer;padding:0.62rem 0.85rem;display:flex;align-items:center;gap:8px;
   font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);
   touch-action:manipulation;user-select:none;-webkit-user-select:none}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -148,6 +148,33 @@ details.sec[open] .sec-sum{display:none}
    row starts and ends on the same two edges, and a short last row leaves an
    empty cell instead of a ragged tail. The column count is set from the number
    of items by gridify(). */
+/* ---------- tuner ---------- */
+.tuner-panel{padding:var(--s4);text-align:center}
+.tuner-read{min-height:96px;display:flex;flex-direction:column;justify-content:center}
+.tuner-note{font-size:64px;font-weight:200;line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.tuner-note .oct{font-size:26px;color:var(--text3);margin-left:2px}
+.tuner-note.in-tune{color:var(--green-hi)}
+.tuner-cents{font-size:13px;color:var(--text3);margin-top:6px;font-variant-numeric:tabular-nums}
+/* the bar: fifty cents either side, with the in-tune zone marked */
+.tuner-bar{position:relative;height:34px;margin-top:var(--s3);border-radius:var(--r);
+  background:var(--bg3);overflow:hidden}
+.tuner-zone{position:absolute;left:48%;width:4%;top:0;bottom:0;background:var(--green-bg);opacity:.55}
+.tuner-ticks{position:absolute;inset:0;
+  background:repeating-linear-gradient(to right,var(--border2) 0 1px,transparent 1px 10%)}
+.tuner-needle{position:absolute;top:3px;bottom:3px;width:3px;border-radius:2px;
+  background:var(--text);left:50%;transform:translateX(-50%);
+  transition:left 90ms linear,background-color 120ms}
+.tuner-needle.in-tune{background:var(--green)}
+.tuner-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);
+  margin-top:4px;letter-spacing:.06em}
+/* the strobe: stripes that stand still when the pitch is right, and drift in the
+   direction of the error. Reads finer than any needle, and needs no numbers. */
+.tuner-strobe{display:block;width:100%;height:46px;margin-top:var(--s3);
+  border-radius:var(--r);background:var(--bg3)}
+.tuner-hz{font-size:12px;color:var(--text3);margin-top:var(--s2);
+  font-variant-numeric:tabular-nums;min-height:18px}
+
 /* A label line: what the group is on the left, and on the right the switch that
    says HOW you choose within it. A modifier given the same size as the things it
    modifies reads as one of them; this is the fix for that, in one rule. */
@@ -189,6 +216,9 @@ details.sec[open] .sec-sum{display:none}
 .bpm-row .bpm-label{margin:0}
 .sig-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
 .val{font-size:12px;font-weight:500;color:var(--text)}
+.vol-line{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s3)}
+.vol-line input[type=range]{flex:1;min-width:0}
+.vol-line .val{min-width:36px;text-align:right}
 .head .group-label,.head .section-label{margin:0}
 /* .seg has to out-rank .btn-wrap, which the builders also put on these rows:
    a switch is a switch whatever produced it, and must not stretch. */
@@ -628,6 +658,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
+    <!-- the click's own level belongs with the click and needs no group of its
+         own: a label, a slider and a number on one line -->
+    <div class="vol-line">
+      <span class="section-label">Click</span>
+      <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" oninput="updateClickVol(this.value)">
+      <span class="val" id="click-vol-out">50%</span>
+    </div>
   </div>
 
   <div class="mgroup" id="sig-block">
@@ -660,11 +697,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
   </div>
 
-  <div class="mgroup">
-    <div class="head"><span class="section-label">Click Volume</span>
-      <span class="val" id="click-vol-out">50%</span></div>
-    <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" style="width:100%" oninput="updateClickVol(this.value)">
-  </div>
   <div class="mgroup" id="pass-block" style="display:none">
     <div class="head" style="margin-bottom:0"><span class="section-label">Advance Every</span>
       <span class="sig-fields">
@@ -2008,7 +2040,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18r';
+const APP_VERSION='2026-08-18s';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
