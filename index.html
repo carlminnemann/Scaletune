@@ -135,6 +135,29 @@ details.sec[open]>summary{color:var(--text2);border-bottom:1px solid var(--borde
    control: no chevron, no pointer, nothing to press. */
 details.sec.pinned>summary{cursor:default;pointer-events:none}
 details.sec.pinned>summary::after{display:none}
+/* and in Metro it says nothing the screen does not already say, so it goes */
+#metro-section.pinned>summary{display:none}
+/* the tempo and the bar sit in the middle of what is left, with More at the
+   foot of it: the auto margins take the free space above and below equally */
+.scroll.centred{display:flex;flex-direction:column}
+.scroll.centred>*{flex:0 0 auto}
+.scroll.centred>#metro-section{margin-top:auto;margin-bottom:auto}
+/* it has to give some of that airiness back on a short screen, and more of it
+   on a shorter one, rather than let the screen it opens on start scrolling */
+@media(max-height:760px){
+  .scroll.metro-view #tempo-block,.scroll.metro-view #sig-block{padding:var(--s3) var(--s4)}
+  .scroll.metro-view #sig-block .clear-btn{margin-top:var(--s3)}
+  .scroll.metro-view #tempo-block .head{margin-bottom:var(--s2)}
+  .scroll.metro-view #tempo-block .vol-line{margin-top:var(--s2)}
+  .scroll.metro-view #tempo-block .bpm-row{margin-bottom:var(--s2)}
+}
+@media(max-height:680px){
+  .scroll.metro-view #tempo-block,.scroll.metro-view #sig-block{padding:var(--s2) var(--s4)}
+  .scroll.metro-view .bpm-big{font-size:32px}
+  .scroll.metro-view #sig-block .clear-btn{margin-top:var(--s2)}
+  .scroll.metro-view #sig-block .head{margin-bottom:var(--s1)!important}
+  .scroll.metro-view #sig-block .beats-row{margin-bottom:var(--s1)}
+}
 details.sec .sec-body{padding:1rem}
 details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
   color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -336,6 +359,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .timbre-btn{min-height:var(--h);padding:4px 7px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;white-space:normal;overflow-wrap:break-word;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);touch-action:manipulation}
 .timbre-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 .status-bar{font-size:12px;color:var(--text3);padding:6px 0 10px;min-height:28px}
+/* It is empty nearly all the time, and an empty line of nothing was holding a
+   line's worth of room away from the panels above it. */
+.status-bar:empty{display:none}
 
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem}
 /* the tempo is an input so it can be typed, but styled as the big readout */
@@ -724,7 +750,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <span class="btn-wrap seg" id="pass-unit-row" data-cols="fixed"></span>
       </span></div>
   </div>
-  <div class="mgroup">
+  <div class="mgroup" id="poly-block">
   <div class="head"><span class="section-label">Polyrhythm</span>
     <span class="btn-wrap seg" id="polymode-row" data-cols="fixed"></span></div>
   <div id="poly-controls" style="display:none">
@@ -741,6 +767,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
   </div>
   </div>
+</details>
+<!-- In Metro the opening screen is the tempo and the bar and nothing else, so
+     the four groups behind them are moved into here and folded away. Everywhere
+     else the metronome stays one panel and this one is not there at all. -->
+<details class="sec" id="metro-more" style="display:none">
+  <summary>More<span class="sec-sum" id="sum-metro-more"></span></summary>
+  <div class="sec-body metro-body" id="metro-more-body"></div>
 </details>
 
 <!-- Everything the notes do against the pulse: what figure they take, whether
@@ -813,7 +846,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Scale</dt><dd>Plays a scale as a line, in the key, range and direction you choose.</dd>
     <dt>Arpeggio</dt><dd>The same, built from a chord instead of a scale.</dd>
     <dt>Free</dt><dd>You pick the notes yourself, each with its own octave, and they play in that order.</dd>
-    <dt>Metro</dt><dd>The metronome on its own, with no notes at all.</dd>
+    <dt>Metro</dt><dd>The metronome on its own, with no notes at all. It opens on the tempo and the bar; the count-in, the subdivision, the speed-up and the polyrhythm are under <em>More</em>.</dd>
     <dt>Tuner</dt><dd>Listens instead of sounding. Nothing else plays while it is open —
     the microphone would hear the app itself.</dd>
   </dl></div>
@@ -1123,6 +1156,27 @@ function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MIN=10,BPM_MAX=300;   // 10 is slow enough to place a bow, 300 fast enough for a roll
 let studyIdx=0,subdivIdx=0;
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
+/* Metro opens on the tempo and the bar alone. The four groups under them are not
+   hidden — they are moved, into a folded panel of their own — so nothing about
+   them changes and every other mode still gets the one whole metronome. */
+const METRO_MORE=['count-block','subdiv-block','pass-block','poly-block'];
+function splitMetro(on){
+  const more=document.getElementById('metro-more');
+  const main=document.querySelector('#metro-section .metro-body');
+  const body=document.getElementById('metro-more-body');
+  if(!more||!main||!body)return;
+  METRO_MORE.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    // With the polyrhythm on it is the bar, and the bar is a front-screen thing
+    const host=(on&&!(id==='poly-block'&&state.poly.on))?body:main;
+    if(el.parentNode!==host)host.appendChild(el);
+  });
+  more.style.display=on?'':'none';
+  if(!on)more.open=false;
+  document.getElementById('scroll-area').classList.toggle('metro-view',on);
+  spreadPanelsSoon();
+}
 // how far into the current pass the metronome is, when nothing else marks one
 let metroBars=0,metroBeats=0,metroCycles=0;
 /* Ticks of click still owed before the notes come in. The clicks run throughout;
@@ -1178,7 +1232,14 @@ function rebuildSpelling(){
 }
 function freqOf(s){return 440*Math.pow(2,(s-semitone('A',4))/12);}
 function stdName(s){const map={'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};const pc=pcOf(s);return(map[pc]||pc)+octOf(s);}
-function setStatus(m){document.getElementById('status-bar').textContent=m;}
+/* The line is not there while it has nothing to say, so saying something makes
+   the panels above it move: they are asked to give the room back. */
+function setStatus(m){
+  const el=document.getElementById('status-bar');
+  const had=el.textContent!=='';
+  el.textContent=m;
+  if(had!==(m!==''))spreadPanelsSoon();
+}
 
 /* ---------- audio core ---------- */
 // Browsers — and iOS WKWebView, which is what Capacitor runs — can hand back a
@@ -2060,7 +2121,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18w';
+const APP_VERSION='2026-08-18x';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2126,9 +2187,14 @@ function setMode(m){
   document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
-  document.getElementById('metro-divider').style.display=(isDrone||isTuner)?'none':'';
+  // in Metro there is nothing above the metronome to be divided from
+  document.getElementById('metro-divider').style.display=(isDrone||isTuner||isMetro)?'none':'';
   const ms=document.getElementById('metro-section');
   ms.style.display=(isDrone||isTuner)?'none':'';
+  splitMetro(isMetro);
+  // Metro plays no notes, so the note readout has nothing to read but a dash
+  document.getElementById('current-note').style.display=isMetro?'none':'';
+  document.getElementById('current-freq').style.display=isMetro?'none':'';
   // Metro is nothing but the metronome, so the metronome is not foldable there.
   // What it was before is remembered, so leaving Metro gives it back.
   if(isMetro){
@@ -3077,6 +3143,8 @@ function updateSupersededControls(){
   const hint=document.querySelector('.beats-hint');
   if(beats)beats.style.display=on?'none':'';
   if(hint)hint.style.display=on?'none':'';
+  // and in Metro the pulses take the place the bar has just left
+  if(state.mode==='metro')splitMetro(true);
 }
 
 /* With notes playing, every beat is plain: an accent imposes a bar on someone
@@ -3186,6 +3254,17 @@ const SECTIONS=[
      }
      return bits.join(' · ');
    }},
+  /* The same reading, minus the two things Metro already has on the screen. */
+  {id:'metro-more',   sum:'sum-metro-more',
+   text:()=>{
+     const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
+     const bits=[];
+     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
+     if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
+     else bits.push(subdivListOn()&&subdivOrder().length>1
+       ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
+     return bits.join(' · ');
+   }},
   {id:'sec-rhythm',   sum:'sum-rhythm',
    text:()=>{
      const nl={sub:'per figure',beat:'per beat',bar:'per bar'}[state.noteLen]||'';
@@ -3258,6 +3337,18 @@ window.addEventListener('resize',layoutAllBeats);
    is opened and the content is taller than the room, the extra goes back to
    nothing and it scrolls as it did. Capped, so three panels on a tall screen do
    not drift half a screen apart. */
+/* Centring only works while everything fits: auto margins on something taller
+   than the box put its top out of the scroll's reach. So it is measured first
+   and centred only when there is room, and otherwise laid out the ordinary way
+   and allowed to scroll. */
+function centreMetro(){
+  const sc=document.getElementById('scroll-area');
+  if(!sc)return;
+  sc.classList.remove('centred');
+  if(state.mode!=='metro')return;
+  if(sc.scrollHeight<=sc.clientHeight+1)sc.classList.add('centred');
+}
+
 const SPREAD_MAX=64;
 function spreadPanels(){
   const sc=document.getElementById('scroll-area');
@@ -3269,19 +3360,29 @@ function spreadPanels(){
   const cards=[...sc.querySelectorAll('details.sec,#tuner-section>.panel,#drone-section')]
     .filter(d=>d.offsetParent);
   cards.forEach(c=>c.style.marginBottom='');
+  // Metro centres itself instead; adding margins there would push it off centre
+  centreMetro();
+  if(sc.classList.contains('centred'))return;
   if(cards.length<2)return;
-  const floor=sc.getBoundingClientRect().bottom;
-  const reach=()=>Math.max(...[...sc.children].filter(k=>k.offsetParent)
-    .map(k=>k.getBoundingClientRect().bottom));
+  /* Where the content really ends is a harder question than it looks: the last
+     margin sits outside every box, and a margin inside a plain wrapper collapses
+     through it, so no element's bottom edge is the answer. An empty line at the
+     very end is, though — whatever the margins do, it is under all of them. */
+  let probe=document.getElementById('fill-probe');
+  if(!probe){probe=document.createElement('div');probe.id='fill-probe';probe.style.height='0';}
+  if(probe.parentNode!==sc||probe.nextSibling)sc.appendChild(probe);
+  const floor=sc.getBoundingClientRect().bottom
+    -(parseFloat(getComputedStyle(sc).paddingBottom)||0);
+  const reach=()=>probe.getBoundingClientRect().top;
   // a few pixels held back, or filling it exactly starts the scrollbar
-  let spare=floor-reach()-6;
+  let spare=floor-reach()-2;
   /* The gap under the last block is there to keep the status line off it, but a
      small overflow is worth more than that gap: give it up before scrolling. */
   if(spare<0){
     const last=cards[cards.length-1];
     const mb=parseFloat(getComputedStyle(last).marginBottom);
     last.style.marginBottom=Math.max(0,mb+spare)+'px';
-    spare=floor-reach()-6;
+    spare=floor-reach()-2;
   }
   if(spare<=1)return;
   const extra=Math.min(SPREAD_MAX,spare/(cards.length-1));
@@ -3666,7 +3767,12 @@ function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o
 })();
 
 // after the browser has laid the panel out, not before
-function spreadPanelsSoon(){requestAnimationFrame(()=>requestAnimationFrame(spreadPanels));}
+function spreadPanelsSoon(){
+  requestAnimationFrame(()=>requestAnimationFrame(spreadPanels));
+  // a frame never comes while the page is hidden, and it can come back to a
+  // layout worked out before the change; the timer covers both
+  setTimeout(spreadPanels,120);
+}
 
 function initSections(){
   // earlier versions remembered this across launches; clear what they left
