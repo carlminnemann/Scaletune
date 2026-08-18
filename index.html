@@ -466,10 +466,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 
   <div class="panel">
-    <div class="head"><span class="group-label">Target</span>
-      <span class="btn-wrap seg" id="tuner-mode-row" data-cols="fixed"></span></div>
-    <div class="btn-wrap" id="tuner-note-row"></div>
-    <div class="head" style="margin-top:var(--s4)"><span class="group-label">Reference A4</span>
+    <div class="head"><span class="group-label">Reference A4</span>
       <span class="sig-fields">
         <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
         <span class="sig-unit">Hz</span>
@@ -757,9 +754,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     pitches: still means right, and it drifts the way you are wrong. It shows a quarter of
     a cent, which no needle can — at A4 that is a tenth of a hertz, one slow crawl every
     ten seconds. A long way out it blurs, which is what the number above is for.</dd>
-    <dt>Auto and Lock</dt><dd>Auto names the nearest note. Lock holds it to one string, so
-    it will not jump to the neighbour when you are half a semitone below — which is exactly
-    when you need it to hold still.</dd>
     <dt>Reference A4</dt><dd>415 to 466, moving every note with it. 415 for baroque pitch,
     442 or 443 where the orchestra sits high.</dd>
     <dt>Temperament</dt><dd>Equal, just, Pythagorean, quarter-comma meantone, Werckmeister III.
@@ -1975,7 +1969,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18k';
+const APP_VERSION='2026-08-18l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2063,6 +2057,9 @@ function setMode(m){
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
   buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
+  // the rotation belongs to the note modes; nothing refreshed it on the way out,
+  // so a study list set up in Scale left it standing in the Tuner and in Metro
+  updateRotationPanel();
   if(isTuner)buildTunerControls();
   setStatus('');
   refreshSequence();
@@ -3152,7 +3149,6 @@ let tuneBuf=null,tuneDown=null,tuneNsdf=null;
 let strobePhase=0,strobeLast=0;
 let tuneHist=[];             // recent readings, for a median that ignores a stray
 let tuneSmooth=null;         // the needle's own position, eased
-let state_tunerTarget=null;  // null = follow whatever it hears
 
 function a4(){return state.tunerA4||440;}
 // midi 69 is A4 by definition, so the reference moves the whole grid with it
@@ -3315,7 +3311,7 @@ function renderTuner(f){
     return;
   }
   // which note: the nearest, or the one you locked it to
-  const midi=state_tunerTarget!==null?state_tunerTarget:Math.round(midiOfFreq(f));
+  const midi=Math.round(midiOfFreq(f));
   const target=freqOfMidi(midi);
   const cents=1200*Math.log2(f/target);
   const clamped=Math.max(-50,Math.min(50,cents));
@@ -3408,41 +3404,10 @@ function tempOffset(midi){
   return dev[((((midi%12)+12)%12-key)%12+12)%12];
 }
 
-/* Auto follows whatever it hears; locking to a string stops it jumping to the
-   neighbour when you are half a semitone below, which is exactly when you most
-   need it to hold still. */
 const TUNER_A4=[];for(let h=415;h<=466;h++)TUNER_A4.push(h);
 function buildTunerControls(){
-  const modeRow=document.getElementById('tuner-mode-row');
-  const noteRow=document.getElementById('tuner-note-row');
   const a4sel=document.getElementById('tuner-a4');
-  if(!modeRow||!noteRow||!a4sel)return;
-  modeRow.innerHTML='';
-  [[null,'Auto'],[1,'Lock']].forEach(([v,label])=>{
-    const b=document.createElement('button');
-    const locked=state_tunerTarget!==null;
-    b.className='pick-btn'+(((v===null)!==locked)?' active':'');
-    b.textContent=label;
-    b.onclick=()=>{
-      if(v===null)state_tunerTarget=null;
-      else if(state_tunerTarget===null)state_tunerTarget=45;   // A2, a bass low string
-      buildTunerControls();
-    };
-    modeRow.appendChild(b);
-  });
-  noteRow.style.display=state_tunerTarget===null?'none':'';
-  noteRow.innerHTML='';
-  if(state_tunerTarget!==null){
-    // two octaves either side of the locked note, so any string is one tap away
-    for(let m=state_tunerTarget-6;m<=state_tunerTarget+6;m++){
-      if(m<21||m>96)continue;
-      const b=document.createElement('button');
-      b.className='pick-btn'+(m===state_tunerTarget?' active':'');
-      b.textContent=noteNameOfMidi(m)+(Math.floor(m/12)-1);
-      b.onclick=()=>{state_tunerTarget=m;buildTunerControls();};
-      noteRow.appendChild(b);
-    }
-  }
+  if(!a4sel)return;
   if(!a4sel.options.length){
     TUNER_A4.forEach(h=>a4sel.appendChild(new Option(h,h)));
     a4sel.addEventListener('change',()=>{state.tunerA4=parseInt(a4sel.value,10)||440;});
