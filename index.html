@@ -492,12 +492,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
 <div id="pitch-section" style="display:none">
-  <div class="panel">
-    <div class="head"><span class="group-label">Root</span>
-      <span class="btn-wrap seg" id="listmode-row" data-cols="fixed"></span></div>
-    <div class="btn-wrap" id="root-row"></div>
-
-  </div>
+  <!-- The root folds like the rest. Left open it was the one panel that could
+       not be put away, and with everything else closed it stood between the
+       modes and the Start button. -->
+  <details class="sec" id="sec-root">
+    <summary>Root<span class="sec-sum" id="sum-root"></span></summary>
+    <div class="sec-body">
+      <div class="head"><span class="group-label">Selection</span>
+        <span class="btn-wrap seg" id="listmode-row" data-cols="fixed"></span></div>
+      <div class="btn-wrap" id="root-row"></div>
+    </div>
+  </details>
 
   <details class="sec" id="sec-scales">
     <summary><span id="sec-scales-title">Scales</span><span class="sec-sum" id="sum-scales"></span></summary>
@@ -1969,7 +1974,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18l';
+const APP_VERSION='2026-08-18m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3000,6 +3005,8 @@ function renderBeats(){
 // Closed sections carry a one-line summary of what is set inside them, so
 // folding a section away never hides what it is doing.
 const SECTIONS=[
+  {id:'sec-root',     sum:'sum-root',
+   text:()=>bareName(NOTES.indexOf(state.root))+(useListOn()?' · study list':'')},
   {id:'sec-scales',   sum:'sum-scales',group:'notes',
    text:()=>{
      if(useListOn())return activeList().length?activeList().length+' in rotation':'nothing chosen';
