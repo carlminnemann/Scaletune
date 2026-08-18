@@ -82,7 +82,7 @@
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   padding:calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right))
-          calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
+          calc(0.4rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
 /* dvh follows the phone's URL bar as it hides and shows; vh above it as the
    fallback for browsers that do not know dvh */
 @supports(height:100dvh){html,body{height:100dvh}}
@@ -155,41 +155,6 @@ details.sec[open] .sec-sum{display:none}
   min-height:26px;margin-bottom:var(--s3)}
 .head-btns{display:flex;gap:6px;justify-self:end}
 
-/* A panel's ? shows only while the panel is open. Closed, its summary is
-   already saying what is set inside it and needs nothing more; open, the one
-   or two panels you are working in each carry one. That way the mark is
-   available everywhere without the screen being peppered with them. */
-/* ---------- tuner ---------- */
-.tuner-panel{padding:var(--s4);text-align:center}
-.tuner-read{min-height:96px;display:flex;flex-direction:column;justify-content:center}
-.tuner-note{font-size:64px;font-weight:200;line-height:1;letter-spacing:-.02em;
-  font-variant-numeric:tabular-nums}
-.tuner-note .oct{font-size:26px;color:var(--text3);margin-left:2px}
-.tuner-note.in-tune{color:var(--green-hi)}
-.tuner-cents{font-size:13px;color:var(--text3);margin-top:6px;font-variant-numeric:tabular-nums}
-/* the bar: fifty cents either side, with the in-tune zone marked */
-.tuner-bar{position:relative;height:34px;margin-top:var(--s3);border-radius:var(--r);
-  background:var(--bg3);overflow:hidden}
-.tuner-zone{position:absolute;left:48%;width:4%;top:0;bottom:0;background:var(--green-bg);opacity:.55}
-.tuner-ticks{position:absolute;inset:0;
-  background:repeating-linear-gradient(to right,var(--border2) 0 1px,transparent 1px 10%)}
-.tuner-needle{position:absolute;top:3px;bottom:3px;width:3px;border-radius:2px;
-  background:var(--text);left:50%;transform:translateX(-50%);
-  transition:left 90ms linear,background-color 120ms}
-.tuner-needle.in-tune{background:var(--green)}
-.tuner-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);
-  margin-top:4px;letter-spacing:.06em}
-/* the strobe: stripes that stand still when the pitch is right, and drift in the
-   direction of the error. Reads finer than any needle, and needs no numbers. */
-.tuner-strobe{display:block;width:100%;height:46px;margin-top:var(--s3);
-  border-radius:var(--r);background:var(--bg3)}
-.tuner-hz{font-size:12px;color:var(--text3);margin-top:var(--s2);
-  font-variant-numeric:tabular-nums;min-height:18px}
-
-.help-dot{border:none;background:none;color:var(--text3);font-size:13px;cursor:pointer;
-  padding:0 2px;line-height:1;font-family:inherit;opacity:.55;margin-left:auto;margin-right:10px}
-.help-dot:hover{opacity:1}
-details.sec:not([open]) .help-dot{display:none}
 
 /* The guide itself: a sheet over the app, not another panel inside it. */
 .help-overlay{position:fixed;inset:0;z-index:50;background:var(--bg);
@@ -402,7 +367,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 #sig-block .clear-btn,#poly-controls .clear-btn{margin-top:var(--s5)}
 
 /* part of the frame now, so it needs no trick to stay in view */
-.btn-row{display:flex;gap:8px;flex:0 0 auto;padding-top:var(--s3)}
+.btn-row{display:flex;gap:8px;flex:0 0 auto;padding-top:var(--s2)}
 /* Waiting, it wears the app's green — it is the one thing on the screen you are
    meant to press. Running, it turns to the matte red. Listen and Stop listening
    in the tuner are the same button, so they follow without being told. */
@@ -411,9 +376,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   background:var(--mode-bg);color:var(--mode-fg);transition:all 0.15s;touch-action:manipulation}
 .play-btn.playing{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 
-.current-note{text-align:center;font-size:56px;font-weight:300;color:var(--text);margin:0.5rem 0 0.2rem;min-height:66px;letter-spacing:-0.02em}
-.current-freq{text-align:center;font-size:13px;color:var(--text3);min-height:20px;margin-bottom:0.5rem}
-.build-stamp{text-align:center;font-size:10px;color:var(--text3);opacity:0.5;margin-top:1.5rem;letter-spacing:0.05em}
+/* Part of the frame, above Start — but with no height of their own when there is
+   nothing sounding, which is what left a blank stretch at the foot of the page. */
+.current-note{text-align:center;font-size:40px;font-weight:300;color:var(--text);
+  letter-spacing:-0.02em;line-height:1.15;flex:0 0 auto}
+.current-note:empty{display:none}
+.current-freq{text-align:center;font-size:12px;color:var(--text3);flex:0 0 auto}
+.current-freq:empty{display:none}
+.help-build{text-align:center;font-size:10px;color:var(--text3);opacity:0.6;letter-spacing:0.05em;margin-top:var(--s5)}
 /* A frame needs height to be worth it. On a screen under 520px tall — a phone on
    its side — holding the name, the modes and Start in place left 113px in the
    middle for everything else, which is worse than scrolling. There the page
@@ -668,6 +638,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <button class="clear-btn" onclick="clearAccents()">✕ Clear</button>
   </div>
 
+  <div class="mgroup" id="count-block">
+    <div class="head" style="margin-bottom:0"><span class="section-label">Count In</span>
+      <span class="sig-fields">
+        <select class="sig-select" id="count-bars" aria-label="Bars of count-in"></select>
+        <span class="sig-unit">bars</span>
+      </span></div>
+    <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
+      <span class="section-label">Also between passes</span>
+      <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
+  </div>
+
   <div class="mgroup" id="subdiv-block">
     <div class="head"><span class="section-label">Subdivision</span>
       <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
@@ -754,11 +735,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="rot-line rot-next" id="rot-next"></div>
 </div>
 
-<div class="current-note" id="current-note">—</div>
-<div class="current-freq" id="current-freq"></div>
-<div class="build-stamp" id="build-stamp"></div>
 </div><!-- /scroll -->
 
+<div class="current-note" id="current-note"></div>
+<div class="current-freq" id="current-freq"></div>
 <div class="btn-row">
   <button class="play-btn" id="play-btn" onclick="togglePlay()">▶ Start</button>
 </div>
@@ -851,6 +831,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     takes the ones you pick in turn, one per pass.</dd>
     <dt>Click</dt><dd>Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
     figure to the notes.</dd>
+    <dt>Count In</dt><dd>Bars of click before the notes come in. Turn "also between passes"
+    on and it comes back whenever a pass hands over to a new key or a new mode — the moment
+    you need to find the first note. Not between rounds of the same thing, which would break
+    the very drift the app is built around.</dd>
     <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
     pass is: so many bars, or so many beats. The figure list and Speed Up both move on that.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
@@ -884,6 +868,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Offline</dt><dd>Once opened, the app runs with no network at all. Add it to your home screen
     and it behaves as an app.</dd>
   </dl></div>
+  <p class="help-build" id="build-stamp"></p>
  </div>
 </div>
 <!-- Bundled locally: a packaged app must not fetch executable code at runtime
@@ -1054,6 +1039,7 @@ let state={
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
   poly:{on:false,a:4,b:5,notesFollow:'a',accA:[],accB:[],touched:false},polyVol:0.9,
+  countBars:0,countBetween:false,
   // Practice progressions: what changes each time the sequence comes round.
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
@@ -1087,6 +1073,13 @@ let studyIdx=0,subdivIdx=0;
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 // how far into the current pass the metronome is, when nothing else marks one
 let metroBars=0,metroBeats=0,metroCycles=0;
+/* Ticks of click still owed before the notes come in. The clicks run throughout;
+   only the notes wait, which is what a count-in is. */
+let countTicks=0;
+function beginCount(){
+  if(!(state.countBars>0)||notesSilent()){countTicks=0;return;}
+  countTicks=state.countBars*state.sig*subTicks(currentSubdiv());
+}
 // How long one note of the sequence lasts, expressed against the metronome.
 // 'sub' is the point of the table-of-time exercise: the notes take the figure,
 // so eighths give two notes per beat and sixteenths four.
@@ -1735,6 +1728,7 @@ function startPlayback(){
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;
+    beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
     if(metroScheduler)clearInterval(metroScheduler);
@@ -1852,6 +1846,12 @@ function schedulerTick(){
     if(subIdx===0)activeSubdiv=currentSubdiv();
     if(pendingNoteLenChange){pendingNoteLenChange=false;tickCount=0;}
     let note=null;
+    // the count-in: clicks as usual, no notes, and the phrase does not begin
+    // until it is paid off
+    if(countTicks>0){
+      countTicks--;
+      if(countTicks===0)tickCount=0;
+    } else
     if(!notesSilent()&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
       if(seqIdx>=sequence.length){
         seqIdx=0;
@@ -2008,7 +2008,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18p';
+const APP_VERSION='2026-08-18r';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2054,6 +2054,9 @@ function setMode(m){
         isTuner=m==='tuner';
   // the tuner listens, so it must not be listening to us
   if(!isTuner)stopTuner();
+  // and the button is redrawn either way: it says Start or Listen depending on
+  // the mode, and stopping the microphone does not by itself tell it anything
+  setPlayUI(false);
   /* Each mode is a different exercise, so it starts from the same clean screen:
      the panels you opened while working on scales are not the ones you want
      waiting for you in Metro. Within a mode they stay exactly as you leave them;
@@ -2095,7 +2098,7 @@ function setMode(m){
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
-  buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildTempoStepRow();updatePracticeInfo();
+  buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildCountRow();buildTempoStepRow();updatePracticeInfo();
   // the rotation belongs to the note modes; nothing refreshed it on the way out,
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
@@ -2327,14 +2330,21 @@ function advancePass(){
     buildSubdivRow();
   }
   const list=activeList();
+  let hardChange=false;
   if(wrapped&&useListOn()&&list.length>1){
     studyIdx=(studyIdx+1)%list.length;
     applyListItem(list[studyIdx]);
     wrapped=(studyIdx===0);
+    hardChange=true;                       // a different mode or chord
   }
   if(wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
     state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
+    hardChange=true;                       // a different key
   }
+  /* A new key or a new mode is where you need a moment to find the first note,
+     so the count-in can be asked for there too — not between rounds of the same
+     thing, which would break the very drift the app is built around. */
+  if(hardChange&&state.countBetween)beginCount();
   stepTempo();
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
@@ -2579,6 +2589,40 @@ function buildTempoStepRow(){
   // there is no root to move when the metronome plays alone
   const rb=document.getElementById('rootmove-block');
   if(rb)rb.style.display=notesSilent()?'none':'';
+}
+
+/* A count-in is a whole number of bars of click before the notes come in, and
+   it can be asked for again whenever a pass hands over to the next key or the
+   next mode — which is the moment you need to find the new starting note. */
+const COUNT_MAX=8;
+function buildCountRow(){
+  const sel=document.getElementById('count-bars');
+  const row=document.getElementById('count-between-row');
+  const line=document.getElementById('count-between-line');
+  if(!sel||!row)return;
+  if(!sel.options.length){
+    sel.appendChild(new Option('Off',0));
+    for(let i=1;i<=COUNT_MAX;i++)sel.appendChild(new Option(i,i));
+    sel.addEventListener('change',()=>{
+      state.countBars=parseInt(sel.value,10)||0;
+      buildCountRow();refreshSectionSummaries();
+    });
+  }
+  sel.value=String(state.countBars||0);
+  sel.classList.toggle('active',state.countBars>0);
+  // nothing to ask about if there is no count-in, and nothing to count between
+  // if the notes never hand over
+  const canBetween=state.countBars>0&&!notesSilent();
+  line.style.display=canBetween?'':'none';
+  row.innerHTML='';
+  if(!canBetween)return;
+  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(!!state.countBetween===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.countBetween=v;buildCountRow();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
 }
 
 const PASS_MAX=32;
@@ -3080,6 +3124,7 @@ const SECTIONS=[
    text:()=>{
      const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[state.bpm+' BPM'];
+     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else{
        bits.push(state.sig+(state.sig===1?' beat':' beats')+' per bar');
@@ -3513,17 +3558,6 @@ function closeHelp(){
 }
 function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o.hidden;}
 (function(){
-  Object.keys(HELP_FOR).forEach(id=>{
-    const d=document.getElementById(id);
-    const sum=d&&d.querySelector('summary');
-    if(!sum)return;
-    const b=document.createElement('button');
-    b.className='help-dot';b.type='button';b.textContent='?';
-    b.setAttribute('aria-label','What this panel does');
-    // a press here must not fold the panel it belongs to
-    b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openHelp(HELP_FOR[id]);});
-    sum.appendChild(b);
-  });
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&helpOpen()){e.preventDefault();closeHelp();}
   });
