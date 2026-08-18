@@ -385,7 +385,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beats-row.carries{position:relative}
 .beats-row.carries::after{content:'♪';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--brand)}
+/* The hint is centred under the circles, so a Clear on the left below it reads
+   as crowded even at the same distance the Scales panel uses — there the text
+   is left-aligned and the two share an edge. It gets the extra room instead. */
 .beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:0}
+#sig-block .clear-btn,#poly-controls .clear-btn{margin-top:var(--s5)}
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
 /* Waiting, it wears the app's green — it is the one thing on the screen you are
@@ -1971,7 +1975,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18j';
+const APP_VERSION='2026-08-18k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
