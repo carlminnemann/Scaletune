@@ -391,7 +391,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:0}
 #sig-block .clear-btn,#poly-controls .clear-btn{margin-top:var(--s5)}
 
-.btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
+/* The transport holds itself to the bottom of the screen until the page has
+   scrolled far enough for it to sit where it belongs. In Metro the panel is held
+   open and is taller than a phone, so without this the button you press is never
+   on the first screen — and it is the button that turns green. */
+.btn-row{display:flex;gap:8px;margin-bottom:1.25rem;
+  position:sticky;bottom:calc(0.5rem + env(safe-area-inset-bottom));z-index:5}
+/* it sits over whatever is behind it, so it needs its own ground */
+.btn-row::before{content:'';position:absolute;inset:-10px -16px;background:var(--bg);
+  z-index:-1;box-shadow:0 -12px 16px -6px var(--bg)}
 /* Waiting, it wears the app's green — it is the one thing on the screen you are
    meant to press. Running, it turns to the matte red. Listen and Stop listening
    in the tuner are the same button, so they follow without being told. */
@@ -577,10 +585,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <!-- ============ FREE ============ -->
 <div id="free-section" style="display:none">
-  <div class="panel">
-    <div class="group-label">Root</div>
-    <div class="btn-wrap" id="free-root-row"></div>
-  </div>
+  <!-- folds like the one in Scale, so it is not the last panel left standing open -->
+  <details class="sec" id="sec-freeroot">
+    <summary>Root<span class="sec-sum" id="sum-freeroot"></span></summary>
+    <div class="sec-body">
+      <div class="btn-wrap" id="free-root-row"></div>
+    </div>
+  </details>
   <details class="sec" id="sec-freenotes">
     <summary>Notes<span class="sec-sum" id="sum-freenotes"></span></summary>
     <div class="sec-body">
@@ -1974,7 +1985,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18m';
+const APP_VERSION='2026-08-18n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3007,6 +3018,8 @@ function renderBeats(){
 const SECTIONS=[
   {id:'sec-root',     sum:'sum-root',
    text:()=>bareName(NOTES.indexOf(state.root))+(useListOn()?' · study list':'')},
+  {id:'sec-freeroot', sum:'sum-freeroot',
+   text:()=>bareName(NOTES.indexOf(state.freeRoot||state.root))},
   {id:'sec-scales',   sum:'sum-scales',group:'notes',
    text:()=>{
      if(useListOn())return activeList().length?activeList().length+' in rotation':'nothing chosen';
