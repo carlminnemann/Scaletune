@@ -385,7 +385,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .beats-row.carries{position:relative}
 .beats-row.carries::after{content:'♪';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--brand)}
-.beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:1.25rem}
+.beats-hint{font-size:11px;color:var(--text3);text-align:center;margin-bottom:0}
 
 .btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
 /* Waiting, it wears the app's green — it is the one thing on the screen you are
@@ -622,10 +622,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 
   <div class="mgroup" id="sig-block">
-    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span>
-      <button class="clear-btn" onclick="clearAccents()">✕ Clear</button></div>
+    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span></div>
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint">tap a beat: accent it, then silence it</div>
+    <!-- where every other Clear in the app sits: under its panel, on the left -->
+    <button class="clear-btn" onclick="clearAccents()">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="subdiv-block">
@@ -664,6 +665,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="beats-row" id="poly-row-a"></div>
     <div class="beats-row" id="poly-row-b"></div>
     <div class="beats-hint">tap a pulse: accent it, then silence it</div>
+    <button class="clear-btn" onclick="clearPolyAccents()">✕ Clear</button>
   </div>
   </div>
   </div>
@@ -1969,7 +1971,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18i';
+const APP_VERSION='2026-08-18j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2956,6 +2958,15 @@ function clearAccents(){
   for(let i=0;i<state.accents.length;i++)state.accents[i]='high';
   state.accentsTouched=true;
   renderBeats();
+}
+
+// the same for the two cross-rhythm layers, both at once: they are one figure
+function clearPolyAccents(){
+  const P=state.poly;
+  for(let i=0;i<P.accA.length;i++)P.accA[i]='high';
+  for(let i=0;i<P.accB.length;i++)P.accB[i]='high';
+  P.touched=true;
+  renderPolyBeats();
 }
 
 function buildBeats(){
