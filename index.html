@@ -160,7 +160,11 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tighter #sig-block .beats-row{margin-bottom:var(--s1)}
 
 .scroll.tightest .bpm-big{font-size:26px}
-.scroll.tightest .beats-hint{display:none}
+.scroll.tightest /* Under an accompaniment the circles still show the beat but no longer take a
+   tap, since the accents belong to the pattern. */
+.beats-row.locked{pointer-events:none}
+.beats-row.locked .beat-dot{opacity:.75}
+.beats-hint{display:none}
 .scroll.tightest #tempo-block .head{margin-bottom:var(--s1)}
 .scroll.tightest #tempo-block .bpm-row{margin-bottom:var(--s1)}
 .scroll.tightest #tempo-block .vol-line{margin-top:var(--s1)}
@@ -658,14 +662,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="head"><span class="group-label">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
       </div>
-      <div class="group-label">Speed Up</div>
-      <div class="step-row">
-        <button class="pick-btn" id="tempostep-off">Off</button>
-        <span class="step-lead">+</span>
-        <input class="step-input" id="tempostep-input" type="number" inputmode="numeric"
-               min="1" max="60" step="1" value="5" aria-label="BPM added each pass">
-        <span class="step-unit" id="tempostep-unit">BPM per pass</span>
-      </div>
       <div class="info-line" id="practice-info"></div>
     </div>
   </details>
@@ -753,6 +749,30 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <select class="sig-select" id="groove-sel" aria-label="Accompaniment style"></select>
       </span></div>
     <div class="info-line" id="groove-info" style="display:none"></div>
+  </div>
+
+  <!-- The tempo belongs to the metronome, so the thing that changes it does too.
+       It used to sit in Practice Progressions, which is a child of the note
+       sections — so in Metro, the one mode that is nothing but a metronome,
+       there was no way to reach it at all. -->
+  <div class="mgroup" id="speed-block">
+    <div class="head"><span class="section-label">Tempo Change</span>
+      <span class="btn-wrap seg" id="speedmode-row" data-cols="fixed"></span></div>
+    <div class="step-row" id="speed-steps" style="display:none">
+      <input class="step-input" id="speed-amount" type="number" inputmode="numeric"
+             min="1" max="60" step="1" value="5" aria-label="BPM each step">
+      <span class="step-unit">BPM every</span>
+      <select class="sig-select active" id="speed-every" aria-label="How often the tempo steps"></select>
+    </div>
+    <div class="step-row" id="speed-ramp" style="display:none">
+      <span class="step-lead">to</span>
+      <input class="step-input active" id="ramp-to" type="number" inputmode="numeric"
+             min="10" max="300" step="1" value="120" aria-label="Tempo to reach">
+      <span class="step-unit">BPM over</span>
+      <select class="sig-select active" id="ramp-min" aria-label="Minutes to take"></select>
+      <span class="step-unit">min</span>
+    </div>
+    <div class="info-line" id="speed-info"></div>
   </div>
 
   <div class="mgroup" id="count-block">
@@ -935,7 +955,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="help-sec" id="help-progress"><h3>Practice Progressions</h3><dl>
     <dt>Root Movement</dt><dd>Stay in one key, or move up a fourth each time everything else has been
     round once — the cycle of fourths.</dd>
-    <dt>Speed Up</dt><dd>Adds so many BPM every pass, up to 300.</dd>
+
     <dt>What a pass is</dt><dd>One round of the notes. The order is: the rhythmic figure first, then the
     mode or chord, then the key — so one mode goes through every figure before the next mode starts.</dd>
   </dl></div>
@@ -955,7 +975,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     you need to find the first note. Not between rounds of the same thing, which would break
     the very drift the app is built around.</dd>
     <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
-    pass is: so many bars, or so many beats. The figure list and Speed Up both move on that.</dd>
+    pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
+    that.</dd>
+    <dt>Tempo Change</dt><dd>The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
+    BPM — every pass, or every so many minutes up to thirty. <em>Ramp</em> slides instead: from the
+    tempo you set to the one you name, a little on every beat, over as long as you choose, so there
+    is no moment where it jumps. A ramp starts again from your tempo every time you press Start,
+    because otherwise the second run would have nowhere to go; steps stay where they got to. Either
+    way it stops at 10 and at 300.</dd>
     <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B or Bossa, on a kick,
     a snare, hats and a side-stick. Each is a bar of four that repeats — the bossa is two, because its
     clave is — with no fills and no breaks, so it stays something to play over rather than something
@@ -1174,7 +1201,13 @@ let state={
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
   practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
-            useSubdivList:false,subdivList:[],subdivDir:'up',tempoStep:0,
+            useSubdivList:false,subdivList:[],subdivDir:'up',
+            /* The tempo can change on its own two ways: in steps, so many BPM at
+               a time, or as a ramp that slides from where you are to where you
+               want to be over so many minutes. 'every' is either a pass — one
+               round of whatever is playing — or a number of minutes. */
+            tempoMode:'off',tempoStep:5,tempoEvery:'pass',
+            rampTo:120,rampMinutes:10,rampFrom:null,
             passCount:4,passUnit:'bar'},
   playing:false,tunerA4:440,tunerTemp:'equal',tunerKey:0
 };
@@ -1201,11 +1234,12 @@ function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MIN=10,BPM_MAX=300;   // 10 is slow enough to place a bow, 300 fast enough for a roll
 let studyIdx=0,subdivIdx=0;
 let grooveBeat=0;         // where in the accompaniment's bar the pulse is
+let rampT0=0,nextStepAt=0; // when the ramp started, and when the next step is due
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
    them changes and every other mode still gets the one whole metronome. */
-const METRO_MORE=['count-block','subdiv-block','pass-block','poly-block','groove-block'];
+const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block','groove-block'];
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -1214,10 +1248,11 @@ function splitMetro(on){
   METRO_MORE.forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    // Whatever is keeping the bar belongs on the front screen: the polyrhythm
-    // when it is on, the style when one is playing.
-    const front=(id==='poly-block'&&state.poly.on)||
-                (id==='groove-block'&&grooveOn()&&!state.poly.on);
+    /* Only a polyrhythm comes forward, because only a polyrhythm replaces the
+       bar: it changes what the pulse IS. A style changes what the pulse sounds
+       like and leaves the four beats where they were, so it stays where it
+       lives — a control that moves about on its own reads as a fault. */
+    const front=id==='poly-block'&&state.poly.on;
     const host=(on&&!front)?body:main;
     if(el.parentNode!==host)host.appendChild(el);
   });
@@ -2004,6 +2039,7 @@ function startPlayback(){
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
+    armTempoOverTime(nextBeatTime);
     beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
@@ -2096,6 +2132,7 @@ function polySchedulerTick(){
   if(nextBeatTime<audioCtx.currentTime-0.5)nextBeatTime=audioCtx.currentTime+0.05;
   let guard=0;
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<8){
+    tempoOverTime(nextBeatTime);
     const len=polyCycleLen();
     schedulePolyCycle(nextBeatTime);
     nextBeatTime+=len;
@@ -2149,6 +2186,7 @@ function schedulerTick(){
     }
     const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb*tickShare(sub,subIdx);
     if(note!==null)scheduleTone(note,nextBeatTime,noteDuration(sub,tickDur));
+    if(subIdx===0)tempoOverTime(nextBeatTime);
     // A style replaces the click rather than playing over it — but not during the
     // count-in, where a click is what you want to hear.
     const groove=grooveOn()&&!counting;
@@ -2165,7 +2203,7 @@ function schedulerTick(){
     if(subIdx>=subTicks(sub)){
       subIdx=0;beatIdx=(beatIdx+1)%state.sig;
       if(!counting)grooveBeat=(grooveBeat+1)%(grooveBars()*4);
-      if(notesSilent()){
+      if(pulseOnly()){
         metroBeats++;
         if(beatIdx===0)metroBars++;
         const done=state.practice.passUnit==='beat'?metroBeats:metroBars;
@@ -2253,7 +2291,15 @@ function restartIfPlaying(){
 }
 
 /* ---------- simple controls ---------- */
-function updateBPM(v){state.bpm=parseInt(v);document.getElementById('bpm-display').value=v;tapTimes=[];refreshSectionSummaries();}
+function updateBPM(v){
+  state.bpm=parseInt(v);
+  document.getElementById('bpm-display').value=v;
+  tapTimes=[];
+  // a ramp runs from the tempo you set, so setting one moves its starting point
+  state.practice.rampFrom=state.bpm;
+  buildSpeedControls();
+  refreshSectionSummaries();
+}
 function updateVol(v){
   state.volume=parseFloat(v);
   document.getElementById('vol-out').textContent=Math.round(v*100)+'%';
@@ -2293,7 +2339,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21c';
+const APP_VERSION='2026-08-21d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2560,14 +2606,56 @@ function toggleListItem(group,name){
    where there are notes, the polyrhythm cycle where the two layers realign, and
    the bar where the metronome plays alone. Without this last case the Speed Up
    box sat there in Metro doing nothing, since no sequence ever wrapped. */
-function stepTempo(){
-  if(!(state.practice.tempoStep>0))return;
-  const next=Math.min(BPM_MAX,state.bpm+state.practice.tempoStep);
+/* Moving the tempo without the player touching it. Only this goes through here,
+   never updateBPM, because updateBPM is what the player's own hand means — and
+   what a ramp has to return to the next time it runs. */
+function setBpmAuto(v){
+  const next=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(v)));
   if(next===state.bpm)return;
   state.bpm=next;
   document.getElementById('bpm-slider').value=next;
   document.getElementById('bpm-display').value=next;
   refreshSectionSummaries();
+}
+function tempoStepping(){
+  const P=state.practice;
+  return (P.tempoMode==='up'||P.tempoMode==='down')&&P.tempoStep>0;
+}
+function tempoStepSign(){return state.practice.tempoMode==='down'?-1:1;}
+// One notch, at the seam between passes. A step measured in minutes does not
+// come through here — it has a clock of its own.
+function stepTempo(){
+  if(!tempoStepping()||state.practice.tempoEvery!=='pass')return;
+  setBpmAuto(state.bpm+tempoStepSign()*state.practice.tempoStep);
+}
+/* The two that run on the clock rather than on the music. Called once a beat,
+   with the beat's own scheduled time — the audio clock, not the wall clock, so
+   it cannot drift away from what is being played. */
+function tempoOverTime(when){
+  const P=state.practice;
+  if(P.tempoMode==='ramp'){
+    const secs=Math.max(1,P.rampMinutes*60);
+    const from=P.rampFrom==null?state.bpm:P.rampFrom;
+    const k=Math.max(0,Math.min(1,(when-rampT0)/secs));
+    setBpmAuto(from+(P.rampTo-from)*k);
+    return;
+  }
+  if(tempoStepping()&&P.tempoEvery!=='pass'&&nextStepAt&&when>=nextStepAt){
+    nextStepAt=when+P.tempoEvery*60;
+    setBpmAuto(state.bpm+tempoStepSign()*P.tempoStep);
+  }
+}
+// Every run of a ramp starts from the tempo you set, not from wherever the last
+// run left off — otherwise the second run has nowhere to go.
+function armTempoOverTime(t0){
+  const P=state.practice;
+  rampT0=t0;nextStepAt=0;
+  if(P.tempoMode==='ramp'){
+    if(P.rampFrom==null)P.rampFrom=state.bpm;
+    setBpmAuto(P.rampFrom);
+  } else if(tempoStepping()&&P.tempoEvery!=='pass'){
+    nextStepAt=t0+P.tempoEvery*60;
+  }
 }
 
 /* What a pass is, in the layout now on screen. With notes, it is one round of
@@ -2577,13 +2665,14 @@ function stepTempo(){
    makes the figure list usable on its own, for practising four bars of eighths
    then four of triplets with nothing else playing. */
 function passUnit(){
-  if(!notesSilent())return 'pass';
+  // where notes play, a pass is one round of them and there is nothing to choose
+  if(!pulseOnly())return 'pass';
   return state.poly.on?'cycle':state.practice.passUnit;
 }
 /* One cycle is already the polyrhythm's own pass — it is the point at which the
    two layers come back together — so there is nothing to choose there. */
 function passCount(){
-  if(!notesSilent()||state.poly.on)return 1;
+  if(!pulseOnly()||state.poly.on)return 1;
   return Math.max(1,state.practice.passCount|0);
 }
 function passLabel(){
@@ -2864,24 +2953,83 @@ function updateAlignInfo(){
       +' (offsets '+alignmentOffsets().join(', ')+')';
 }
 
-// The step is typed rather than picked from a list: any whole number of BPM is
-// a legitimate ramp, and a fixed list of ten buttons both crowded the panel and
-// still left out whatever the player actually wanted.
-function buildTempoStepRow(){
-  const off=document.getElementById('tempostep-off');
-  const inp=document.getElementById('tempostep-input');
-  if(!off||!inp)return;
-  const on=state.practice.tempoStep>0;
-  off.classList.toggle('active',!on);
-  inp.classList.toggle('active',on);
-  if(on)inp.value=state.practice.tempoStep;
-  // say what it is waiting for, since that is not the same in every mode
-  const u=document.getElementById('tempostep-unit');
-  if(u)u.textContent='BPM per '+passLabel();
+/* Off, up in steps, down in steps, or a ramp. The amount is typed, because any
+   whole number of BPM is a legitimate step and a row of buttons would both crowd
+   the panel and still miss whatever the player wanted. How often is picked: one
+   list holding the pass and every number of minutes up to thirty, so it is one
+   tap and there is no second control to reconcile with it. */
+const RAMP_MAX_MIN=30;
+function buildSpeedControls(){
+  const row=document.getElementById('speedmode-row');
+  if(!row)return;
+  const P=state.practice;
+  row.innerHTML='';
+  [['off','Off'],['up','Up'],['down','Down'],['ramp','Ramp']].forEach(([k,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(P.tempoMode===k?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      P.tempoMode=k;
+      if(k==='ramp'&&P.rampFrom==null)P.rampFrom=state.bpm;
+      buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
+
+  const every=document.getElementById('speed-every');
+  if(every&&!every.options.length){
+    every.appendChild(new Option('pass','pass'));
+    for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(i+(i===1?' min':' min'),String(i)));
+    every.addEventListener('change',()=>{
+      P.tempoEvery=every.value==='pass'?'pass':parseInt(every.value,10);
+      buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
+    });
+  }
+  const rmin=document.getElementById('ramp-min');
+  if(rmin&&!rmin.options.length){
+    for(let i=1;i<=RAMP_MAX_MIN;i++)rmin.appendChild(new Option(i,i));
+    rmin.addEventListener('change',()=>{
+      P.rampMinutes=parseInt(rmin.value,10)||10;
+      buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
+    });
+  }
+  if(every)every.value=P.tempoEvery==='pass'?'pass':String(P.tempoEvery);
+  if(rmin)rmin.value=String(P.rampMinutes);
+  const amt=document.getElementById('speed-amount');
+  if(amt&&document.activeElement!==amt)amt.value=P.tempoStep;
+  const to=document.getElementById('ramp-to');
+  if(to&&document.activeElement!==to)to.value=P.rampTo;
+
+  const steps=document.getElementById('speed-steps');
+  const ramp=document.getElementById('speed-ramp');
+  if(steps)steps.style.display=(P.tempoMode==='up'||P.tempoMode==='down')?'':'none';
+  if(ramp)ramp.style.display=P.tempoMode==='ramp'?'':'none';
+
+  const info=document.getElementById('speed-info');
+  if(info)info.textContent=speedSentence();
+
   // there is no root to move when the metronome plays alone
   const rb=document.getElementById('rootmove-block');
   if(rb)rb.style.display=notesSilent()?'none':'';
 }
+// The whole setting in one line, because none of it is obvious from the fields
+function speedSentence(){
+  const P=state.practice;
+  if(P.tempoMode==='ramp'){
+    const from=P.rampFrom==null?state.bpm:P.rampFrom;
+    if(from===P.rampTo)return 'nowhere to go \u2014 pick a different tempo to reach';
+    return from+' to '+P.rampTo+' BPM over '+P.rampMinutes+
+      (P.rampMinutes===1?' minute':' minutes')+', a little every beat';
+  }
+  if(!tempoStepping())return '';
+  const sign=P.tempoMode==='down'?'\u2212':'+';
+  const when=P.tempoEvery==='pass'?'every '+passLabel()
+            :'every '+P.tempoEvery+(P.tempoEvery===1?' minute':' minutes');
+  return sign+P.tempoStep+' BPM '+when+', between '+BPM_MIN+' and '+BPM_MAX;
+}
+// kept under its old name: a dozen places call it when the pass length changes
+function buildTempoStepRow(){buildSpeedControls();}
 
 /* A count-in is a whole number of bars of click before the notes come in, and
    it can be asked for again whenever a pass hands over to the next key or the
@@ -2923,8 +3071,10 @@ function buildPassRow(){
   const row=document.getElementById('pass-unit-row');
   const block=document.getElementById('pass-block');
   if(!sel||!row)return;
-  // only the bare metronome needs to be told what a pass is
-  if(block)block.style.display=(notesSilent()&&!state.poly.on)?'':'none';
+  /* Only a pulse without notes needs to be told what a pass is — Metro, and now
+     Drone, where the metronome runs over a held note and nothing comes round on
+     its own either. */
+  if(block)block.style.display=(pulseOnly()&&!state.poly.on)?'':'none';
   if(!sel.options.length){
     for(let i=1;i<=PASS_MAX;i++)sel.appendChild(new Option(i,i));
     sel.addEventListener('change',()=>{
@@ -2945,8 +3095,12 @@ function buildPassRow(){
 }
 
 function setTempoStep(n){
-  state.practice.tempoStep=Math.max(0,Math.min(TEMPO_STEP_MAX,Math.round(n)||0));
-  buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
+  state.practice.tempoStep=Math.max(1,Math.min(TEMPO_STEP_MAX,Math.round(n)||1));
+  buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
+}
+function setRampTo(n){
+  state.practice.rampTo=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(n)||BPM_MIN));
+  buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
 }
 
 function updatePracticeInfo(){
@@ -2956,7 +3110,7 @@ function updatePracticeInfo(){
   if(state.practice.rootMove==='fourths')bits.push('root up a 4th'+((listEnabled()||subdivListOn())?' after the full cycle':' each pass'));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
-  if(state.practice.tempoStep>0)bits.push('+'+state.practice.tempoStep+' BPM per '+passLabel()+' (max '+BPM_MAX+')');
+
   el.textContent=bits.length?bits.join(' · '):'Repeats unchanged.';
 }
 
@@ -3375,17 +3529,23 @@ function updateSupersededControls(){
     const el=document.getElementById(id);
     if(el)el.style.display=on?'none':'';
   });
-  // A style carries its own bar and its own accents, so the bar goes away under
-  // one too; and a polyrhythm is a grid of its own, which leaves no room for a
-  // style at all.
+  // A polyrhythm is a grid of its own, which leaves no room for a style at all
   const g=document.getElementById('groove-block');
   if(g)g.style.display=on?'none':'';
-  const sig=document.getElementById('sig-block');
-  if(sig&&!on&&grooveOn())sig.style.display='none';
+  /* Under a style the bar stays on the screen — it is still four beats and the
+     circles still show which one you are on — but the accents are the pattern's
+     now, so tapping them would promise something it cannot do. */
+  const styled=!on&&grooveOn();
   const beats=document.getElementById('beats-row');
   const hint=document.querySelector('.beats-hint');
-  if(beats)beats.style.display=on?'none':'';
-  if(hint)hint.style.display=on?'none':'';
+  const clear=document.querySelector('#sig-block .clear-btn');
+  if(beats){beats.style.display=on?'none':'';beats.classList.toggle('locked',styled);}
+  if(clear)clear.style.display=styled?'none':'';
+  if(hint){
+    hint.style.display=on?'none':'';
+    hint.textContent=styled?'the style plays the accents'
+                           :'tap a beat: accent it, then silence it';
+  }
   // and in Metro the pulses take the place the bar has just left
   if(state.mode==='metro')splitMetro(true);
 }
@@ -3481,7 +3641,7 @@ const SECTIONS=[
    text:()=>{
      const b=[];
      if(state.practice.rootMove==='fourths')b.push('cycle of 4ths');
-     if(state.practice.tempoStep>0)b.push('+'+state.practice.tempoStep+' BPM/'+passLabel());
+
      return b.length?b.join(' · '):'off';
    }},
   {id:'metro-section',sum:'sum-metro',
@@ -4109,7 +4269,7 @@ buildMetroOnRow();
 buildSubdivRow();
 buildClickModeRow();
 buildAlignRow();
-buildTempoStepRow();
+buildSpeedControls();
 buildRootMoveRow();
 renderPitchPickers();
 // A wheel over a range input silently changes its value — that once moved
@@ -4152,31 +4312,28 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   });
 })();
 
-/* Speed Up: typing a number turns the ramp on, the Off button turns it off.
-   Like the tempo field, the value is clamped on blur so a half-typed number is
+/* The two typed numbers in Tempo Change. Like the tempo field itself, each is
+   clamped when it settles rather than as it is typed, so a half-typed number is
    not rewritten under the player's fingers. */
 (function(){
-  const off=document.getElementById('tempostep-off');
-  const inp=document.getElementById('tempostep-input');
-  off.onclick=()=>{setTempoStep(0);inp.blur();};
-  inp.addEventListener('input',()=>{
-    const v=parseInt(inp.value,10);
-    if(!isNaN(v)&&v>=1&&v<=TEMPO_STEP_MAX){
-      state.practice.tempoStep=v;
-      buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
-    }
-  });
-  const settle=()=>{
-    let v=parseInt(inp.value,10);
-    if(isNaN(v)||v<1){inp.value=state.practice.tempoStep||5;return;}
-    setTempoStep(v);
+  const bind=(id,lo,hi,commit,read)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('input',()=>{
+      const v=parseInt(el.value,10);
+      if(!isNaN(v)&&v>=lo&&v<=hi)commit(v);
+    });
+    const settle=()=>{
+      const v=parseInt(el.value,10);
+      if(isNaN(v)){el.value=read();return;}
+      commit(Math.max(lo,Math.min(hi,v)));
+      el.value=read();
+    };
+    el.addEventListener('blur',settle);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();settle();el.blur();}});
   };
-  inp.addEventListener('blur',settle);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();settle();inp.blur();}});
-  inp.addEventListener('focus',()=>{
-    // focusing the field is itself the way to switch the ramp on
-    if(!state.practice.tempoStep)setTempoStep(parseInt(inp.value,10)||5);
-  });
+  bind('speed-amount',1,TEMPO_STEP_MAX,setTempoStep,()=>state.practice.tempoStep);
+  bind('ramp-to',BPM_MIN,BPM_MAX,setRampTo,()=>state.practice.rampTo);
 })();
 
 /* Bar length: a picker rather than a typed number, so it is one tap on a phone. */
