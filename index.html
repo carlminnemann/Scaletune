@@ -160,7 +160,35 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tighter #sig-block .beats-row{margin-bottom:var(--s1)}
 
 .scroll.tightest .bpm-big{font-size:26px}
-.scroll.tightest /* Under an accompaniment the circles still show the beat but no longer take a
+.scroll.tightest /* ---------- the pattern editor ----------
+   A step sequencer is a grid, and the only real constraint is the finger: at
+   sixteen cells to the bar a cell is about 19px on a phone, which works; at the
+   twelfths the engine actually uses it would be 6px, which does not. So the grid
+   is a view — sixteenths, or triplets for the swung things — onto the twelfths
+   underneath. */
+/* Every pixel here is a pixel of cell: on a phone the sixteen cells of a bar
+   have about 300px between them, so the labels are two letters and the gaps are
+   one pixel. Below a cell of 17px it scrolls sideways instead of shrinking. */
+.pat-scroll{overflow-x:auto;padding-bottom:2px;margin:0 -2px;padding-left:2px;padding-right:2px}
+.pat-grid{display:flex;flex-direction:column;gap:3px;min-width:300px}
+.pat-lane{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
+.pat-name{font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+  color:var(--text3);text-align:right;line-height:1.1}
+.pat-cells{display:grid;gap:1px}
+.pat-cell{height:22px;border-radius:3px;background:var(--bg3);border:0;padding:0;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.pat-cell.beat{background:var(--border2)}
+.pat-cell[data-v="1"]{background:var(--green-bg)}
+.pat-cell[data-v="2"]{background:var(--green)}
+.pat-cell[data-v="3"]{background:var(--green);box-shadow:inset 0 0 0 2px var(--green-hi)}
+.pat-cell.now{outline:2px solid var(--text2);outline-offset:-1px}
+.pat-ruler{display:grid;grid-template-columns:30px 1fr;gap:6px}
+.pat-ruler-cells{display:grid;gap:1px;font-size:9px;color:var(--text3);
+  font-variant-numeric:tabular-nums}
+
+#pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
+
+/* Under an accompaniment the circles still show the beat but no longer take a
    tap, since the accents belong to the pattern. */
 .beats-row.locked{pointer-events:none}
 .beats-row.locked .beat-dot{opacity:.75}
@@ -756,7 +784,30 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <span class="sig-fields">
         <select class="sig-select" id="groove-sel" aria-label="Accompaniment style"></select>
       </span></div>
+    <div class="head" id="kit-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+      <span class="section-label">Kit</span>
+      <span class="btn-wrap seg" id="kit-row" data-cols="fixed"></span></div>
     <div class="info-line" id="groove-info" style="display:none"></div>
+  </div>
+
+  <!-- The pattern itself, writable. Six voices down the side, a bar across, and
+       a cell that goes round soft, middling, hard and off again — which is how a
+       ghost note and an accent are written without a row each. -->
+  <div class="mgroup" id="pattern-block">
+    <div class="head"><span class="section-label">Pattern</span>
+      <span class="sig-fields">
+        <select class="sig-select" id="pat-bars" aria-label="Bars in the pattern"></select>
+        <span class="sig-unit">bars</span>
+        <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
+      </span></div>
+    <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
+    <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
+    <div class="step-row" style="margin-top:var(--s3)">
+      <span class="step-unit">start from</span>
+      <select class="sig-select" id="pat-from" aria-label="Copy a style into the pattern"></select>
+      <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
+    </div>
+    <div class="info-line" id="pat-info"></div>
   </div>
 
   <!-- The tempo belongs to the metronome, so the thing that changes it does too.
@@ -983,9 +1034,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     takes the ones you pick in turn, one per pass.</dd>
     <dt>Click</dt><dd>Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
     figure to the notes.</dd>
-    <dt>Count In</dt><dd>Bars of click before the notes come in. Turn "also between passes"
-    on and it comes back whenever a pass hands over to a new key or a new mode — the moment
-    you need to find the first note. Not between rounds of the same thing, which would break
+    <dt>Count In</dt><dd>Bars of click before the notes come in. It ends on a downbeat: what is left of
+    the bar first, then whole bars, so a phrase that finishes mid-bar does not put your entry off the
+    beat. Turn "also between passes" on and it comes back whenever a pass hands over to a new key or a new
+    mode — the moment you need to find the first note. Not between rounds of the same thing, which would break
     the very drift the app is built around.</dd>
     <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
     pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
@@ -1005,6 +1057,16 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
     synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
+    <dt>Kit</dt><dd>Two of them. <em>Recorded</em> is a real acoustic kit, warm and big. <em>Machine</em>
+    is made rather than recorded — dry, tight, and it cuts through a small speaker. Switch it while
+    something is playing; that is the only way to hear the difference.</dd>
+    <dt>Pattern</dt><dd>Write your own. Six voices down the side, a bar across, and a cell that goes
+    round: ghost, middling, accented, off again — which is how a ghost note and an accent are written
+    without a row each. The grid is sixteenths, or triplets for swung things; changing it moves what
+    is already written to the nearest cell rather than hiding it. Starting from a style copies that
+    style in and leaves the original untouched, so the styles never get spoiled. Two bars if you want
+    a clave that takes two. What you write is kept for next time — it is your work, not a setting —
+    and it plays under <em>Accompaniment &rarr; Custom</em>.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
     it is on.</dd>
@@ -1253,6 +1315,11 @@ let state={
   countBars:0,countBetween:false,
   // The metronome plays a style instead of a click: 'click' is the click.
   groove:'click',sigBeforeGroove:null,
+  kit:'recorded',            // 'recorded' or 'machine'
+  /* A pattern of the player's own. Kept in the same twelfths the styles use, so
+     what is written is exactly what plays; the editor is a view onto it at a
+     resolution a finger can hit. */
+  custom:{bars:1,grid:16,hits:[]},
   // In Drone the metronome is not the point, so there it is asked for
   metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
@@ -1297,7 +1364,8 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
    them changes and every other mode still gets the one whole metronome. */
-const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block','groove-block'];
+const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block',
+                  'groove-block','pattern-block'];
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -1324,9 +1392,23 @@ let metroBars=0,metroBeats=0,metroCycles=0;
 /* Ticks of click still owed before the notes come in. The clicks run throughout;
    only the notes wait, which is what a count-in is. */
 let countTicks=0;
+/* A count-in has to end on a downbeat, or it is not a count-in.
+
+   This used to add whole bars from wherever the pass happened to end, and since
+   the phrases drift against the pulse on purpose, that was almost never a bar
+   line: end a phrase on the first beat of a bar and you were given that beat and
+   four more, entering off the bar. So the count now takes what is left of the
+   bar first and adds the rest as whole bars — end on beat one of four and you
+   wait the three that remain, and come in on the next first beat. A sliver is
+   not a count, so anything under a beat is given a bar of its own instead. */
 function beginCount(){
   if(!(state.countBars>0)||pulseOnly()){countTicks=0;return;}
-  countTicks=state.countBars*state.sig*subTicks(currentSubdiv());
+  const t=subTicks(activeSubdiv||currentSubdiv());
+  const bar=Math.max(1,state.sig*t);
+  const into=(beatIdx*t+subIdx)%bar;
+  let toBar=bar-into;                       // whatever is left of this bar
+  if(toBar<t)toBar+=bar;                    // too little to count: take another
+  countTicks=toBar+(state.countBars-1)*bar;
 }
 // How long one note of the sequence lasts, expressed against the metronome.
 // 'sub' is the point of the table-of-time exercise: the notes take the figure,
@@ -1905,7 +1987,59 @@ function woodClick(t,v){
     schedNodes.push(osc,gain);
   });
 }
-const KIT={
+/* The second kit is made rather than recorded: a transient and a body, which is
+   what a drum is. It weighs nothing, carries no licence, and it is dry and tight
+   where the recorded kit is big and warm — so it is a choice, not a fallback.
+   Every voice keeps content above 400Hz, which is where a phone speaker starts. */
+function drumNoise(t,o){
+  const n=Math.ceil(audioCtx.sampleRate*o.dur);
+  const buf=audioCtx.createBuffer(1,n,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,1.6);
+  const src=audioCtx.createBufferSource();src.buffer=buf;
+  const f=audioCtx.createBiquadFilter();
+  if(o.bp){f.type='bandpass';f.frequency.value=o.bp;f.Q.value=o.q||1;}
+  else{f.type='highpass';f.frequency.value=o.hp||4000;}
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(Math.max(1e-4,o.gain),t);
+  g.gain.exponentialRampToValueAtTime(1e-4,t+o.dur);
+  src.connect(f);f.connect(g);g.connect(audioCtx.destination);
+  src.start(t);src.stop(t+o.dur+0.02);
+  schedNodes.push(src,f,g);
+}
+function drumTone(t,o){
+  const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+  osc.type=o.type||'sine';
+  osc.frequency.setValueAtTime(o.f0,t);
+  if(o.f1)osc.frequency.exponentialRampToValueAtTime(o.f1,t+Math.min(o.dur,o.bend||0.05));
+  g.gain.setValueAtTime(Math.max(1e-4,o.gain),t);
+  g.gain.exponentialRampToValueAtTime(1e-4,t+o.dur);
+  osc.connect(g);g.connect(audioCtx.destination);
+  osc.start(t);osc.stop(t+o.dur+0.02);
+  schedNodes.push(osc,g);
+}
+// a cymbal is inharmonic: six unrelated partials and no fundamental to speak of
+function drumMetal(t,gain,dur){
+  [1727,2093,2609,3221,4243,5417].forEach((f,i)=>{
+    drumTone(t,{f0:f,dur:dur*(1-i*0.09),gain:gain*(0.30-i*0.035),type:'square',bend:0});
+  });
+  drumNoise(t,{dur:dur*0.5,gain:gain*0.20,hp:7000});
+}
+const MACHINE={
+  k:(t,v)=>{drumTone(t,{f0:125,f1:48,dur:0.30,gain:0.85*v,bend:0.055});
+            drumNoise(t,{dur:0.012,gain:0.22*v,hp:1600});return true;},
+  s:(t,v)=>{drumNoise(t,{dur:0.17,gain:0.42*v,bp:1750,q:0.6});
+            drumTone(t,{f0:222,dur:0.10,gain:0.20*v,type:'triangle',bend:0});
+            drumTone(t,{f0:314,dur:0.07,gain:0.13*v,type:'triangle',bend:0});return true;},
+  g:(t,v)=>{drumNoise(t,{dur:0.05,gain:0.11*v,bp:1900,q:0.7});return true;},
+  h:(t,v)=>{drumNoise(t,{dur:0.032,gain:0.20*v,bp:9000,q:0.8});
+            drumNoise(t,{dur:0.016,gain:0.10*v,hp:5000});return true;},
+  o:(t,v)=>{drumNoise(t,{dur:0.24,gain:0.15*v,bp:8200,q:0.7});return true;},
+  d:(t,v)=>{drumMetal(t,0.55*v,0.55);return true;},
+  r:(t,v)=>{woodClick(t,0.9*v);return true;},
+  b:(t,v)=>{drumTone(t,{f0:96,f1:52,dur:0.34,gain:0.80*v,bend:0.06});return true;},
+};
+const RECORDED={
   k:(t,v)=>drumHit('kick', t,0.95*v),
   s:(t,v)=>drumHit('snare',t,0.80*v),
   g:(t,v)=>drumHit('snare',t,0.16*v),
@@ -1915,6 +2049,8 @@ const KIT={
   r:(t,v)=>{woodClick(t,0.9*v);return true;},
   b:(t,v)=>drumHit('kick', t,0.85*v),
 };
+// Which kit the letters mean right now.
+function kitVoices(){return state.kit==='machine'?MACHINE:RECORDED;}
 /* The grid is twelfths of a beat, because twelve divides by four and by three:
    a sixteenth lands on every third, a triplet on every fourth, and a swung
    eighth — two thirds of the way through the beat — on the eighth. A sixteenth
@@ -1956,8 +2092,15 @@ const GROOVES={
     [12,'h',.5],[36,'h',.5],
     [0,'k',.22],[12,'k',.2],[24,'k',.22],[36,'k',.2]]},
 };
-function grooveOn(){return !!GROOVES[state.groove];}
-function grooveBars(){const G=GROOVES[state.groove];return G?G.bars:1;}
+/* Everything that plays a pattern asks for it here, so a style and a hand-written
+   pattern are the same thing to the scheduler. */
+function grooveDef(){
+  if(state.groove==='custom')
+    return {label:'Custom',bars:state.custom.bars,hits:state.custom.hits};
+  return GROOVES[state.groove]||null;
+}
+function grooveOn(){const G=grooveDef();return !!(G&&G.hits.length);}
+function grooveBars(){const G=grooveDef();return G?G.bars:1;}
 /* Several drums land on the same sixteenth — a kick, a hat and a ghost snare all
    at once in the funk — and at full volume that summed to 1.30 on the output,
    which clips. The whole kit is scaled to bring the loudest bar under one, and
@@ -1969,14 +2112,16 @@ const KIT_HEADROOM=0.85;
 // One beat's worth of the pattern, placed by time inside it. Returns false when
 // there is nothing to play it with, so the beat can fall back to a click.
 function scheduleGrooveBeat(t0,beat){
-  const G=GROOVES[state.groove];
-  if(!G)return false;
-  if(!drumBufs){loadDrums();return false;}
+  const G=grooveDef();
+  if(!G||!G.hits.length)return false;
+  // the machine makes its own sounds; the recorded kit has to arrive first
+  if(state.kit!=='machine'&&!drumBufs){loadDrums();return false;}
+  const voices=kitVoices();
   const unit=(60/state.bpm)/GRID;
   const from=(beat%(G.bars*4))*GRID;
   G.hits.forEach(h=>{
     if(h[0]<from||h[0]>=from+GRID)return;
-    const voice=KIT[h[1]];
+    const voice=voices[h[1]];
     if(voice)voice(t0+(h[0]-from)*unit,h[2]*state.clickVol*KIT_HEADROOM);
   });
   return true;
@@ -2295,7 +2440,7 @@ function schedulerTick(){
       if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(!(groove&&drumBufs)&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
+    } else if(!(groove&&(drumBufs||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
@@ -2440,7 +2585,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21e';
+const APP_VERSION='2026-08-21f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3554,6 +3699,7 @@ function buildGrooveRow(){
   if(!sel.options.length){
     sel.appendChild(new Option('Click','click'));
     Object.keys(GROOVES).forEach(k=>sel.appendChild(new Option(GROOVES[k].label,k)));
+    sel.appendChild(new Option('Custom','custom'));   // the player's own
     sel.addEventListener('change',()=>setGroove(sel.value));
   }
   sel.value=state.groove;
@@ -3566,10 +3712,223 @@ function buildGrooveRow(){
   }
   const info=document.getElementById('groove-info');
   if(info){
-    const G=GROOVES[state.groove];
+    const G=grooveDef();
     info.style.display=G?'':'none';
-    info.textContent=G?(G.bars===2?'two bars of four':'one bar of four')+', repeating — no fills, no breaks':'';
+    if(!G)info.textContent='';
+    else if(state.groove==='custom')
+      info.textContent=G.hits.length
+        ? 'yours: '+(G.bars===2?'two bars':'one bar')+', '+G.hits.length+' hits, repeating'
+        : 'yours, and still empty — write it under Pattern';
+    else info.textContent=(G.bars===2?'two bars of four':'one bar of four')+', repeating — no fills, no breaks';
   }
+  buildKitRow();
+}
+
+/* ---------- the editor ----------
+
+   The pattern is stored in twelfths, the same as the styles, so nothing is
+   converted at playing time. A cell at editor step k is twelfth k*3 on the
+   sixteenth grid and k*4 on the triplet grid. Changing grid quantises what is
+   already written to the nearest cell of the new one rather than hiding it. */
+// two letters, because the labels are competing with the cells for the width
+const PAT_VOICES=[['k','BD'],['s','SN'],['h','HH'],['o','OH'],['d','RD'],['r','CL']];
+const PAT_VELS=[0,0.2,0.55,1.0];        // off, ghost, middling, accented
+let patBar=0;                            // which bar of the pattern is on screen
+const patStep=()=>state.custom.grid===12?4:3;    // twelfths per cell
+const patCells=()=>state.custom.grid===12?12:16; // cells per bar
+
+function patAt(voice,pos){
+  return state.custom.hits.find(h=>h[1]===voice&&h[0]===pos);
+}
+function patLevel(h){
+  if(!h)return 0;
+  for(let i=PAT_VELS.length-1;i>0;i--)if(h[2]>=PAT_VELS[i]-0.01)return i;
+  return 1;
+}
+/* Copying a style in flattens it a little: its velocities become the three the
+   editor has, and the two voices that are really other voices played differently
+   — the ghost snare, the bossa's bass drum — become what they are. */
+function patFromStyle(key){
+  const G=GROOVES[key];
+  if(!G)return;
+  const step=patStep();
+  state.custom.bars=G.bars;
+  state.custom.hits=G.hits.map(h=>{
+    const voice=h[1]==='g'?'s':(h[1]==='b'?'k':h[1]);
+    const vel=h[1]==='g'?PAT_VELS[1]:(h[2]<0.3?PAT_VELS[1]:(h[2]<0.75?PAT_VELS[2]:PAT_VELS[3]));
+    return [Math.round(h[0]/step)*step,voice,vel];
+  });
+  patQuantise();
+}
+// nothing written may sit between two cells of the grid on screen
+function patQuantise(){
+  const step=patStep(),span=state.custom.bars*4*GRID;
+  const seen={};
+  state.custom.hits.forEach(h=>{
+    const pos=Math.min(span-step,Math.round(h[0]/step)*step);
+    const key=h[1]+':'+pos;
+    if(seen[key]){seen[key][2]=Math.max(seen[key][2],h[2]);return;}
+    seen[key]=[pos,h[1],h[2]];
+  });
+  state.custom.hits=Object.values(seen).sort((a,b)=>a[0]-b[0]);
+}
+function patToggle(voice,pos){
+  const h=patAt(voice,pos);
+  const next=(patLevel(h)+1)%PAT_VELS.length;
+  state.custom.hits=state.custom.hits.filter(x=>x!==h);
+  if(next>0)state.custom.hits.push([pos,voice,PAT_VELS[next]]);
+  state.custom.hits.sort((a,b)=>a[0]-b[0]);
+  savePattern();
+}
+function buildPatternEditor(){
+  const grid=document.getElementById('pat-grid');
+  if(!grid)return;
+  const bars=state.custom.bars,cells=patCells(),step=patStep();
+  if(patBar>=bars)patBar=0;
+
+  const bsel=document.getElementById('pat-bars');
+  if(bsel&&!bsel.options.length){
+    [1,2].forEach(n=>bsel.appendChild(new Option(n,n)));
+    bsel.addEventListener('change',()=>{
+      state.custom.bars=parseInt(bsel.value,10)||1;
+      const span=state.custom.bars*4*GRID;
+      state.custom.hits=state.custom.hits.filter(h=>h[0]<span);
+      savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
+    });
+  }
+  if(bsel)bsel.value=String(bars);
+
+  const grow=document.getElementById('pat-grid-row');
+  if(grow){
+    grow.innerHTML='';
+    [[16,'16ths'],[12,'Triplets']].forEach(([v,label])=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(state.custom.grid===v?' active':'');
+      b.textContent=label;
+      b.onclick=()=>{state.custom.grid=v;patQuantise();savePattern();buildPatternEditor();restartIfPlaying();};
+      grow.appendChild(b);
+    });
+    gridify(grow);
+  }
+  const brow=document.getElementById('pat-bar-row');
+  if(brow){
+    brow.style.display=bars>1?'':'none';
+    brow.innerHTML='';
+    for(let i=0;i<bars;i++){
+      const b=document.createElement('button');
+      b.className='pick-btn'+(patBar===i?' active':'');
+      b.textContent='Bar '+(i+1);
+      b.onclick=()=>{patBar=i;buildPatternEditor();};
+      brow.appendChild(b);
+    }
+    gridify(brow);
+  }
+  const clr=document.getElementById('pat-clear');
+  if(clr&&!clr.dataset.wired){
+    clr.dataset.wired='1';
+    clr.onclick=()=>{
+      state.custom.hits=[];savePattern();buildPatternEditor();
+      buildGrooveRow();refreshSectionSummaries();restartIfPlaying();
+    };
+  }
+  const from=document.getElementById('pat-from');
+  if(from&&!from.options.length){
+    from.appendChild(new Option('a style',''));
+    Object.keys(GROOVES).forEach(k=>from.appendChild(new Option(GROOVES[k].label,k)));
+    from.addEventListener('change',()=>{
+      if(!from.value)return;
+      patFromStyle(from.value);
+      from.value='';
+      savePattern();buildPatternEditor();
+      setGroove('custom');
+    });
+  }
+
+  grid.innerHTML='';
+  const offset=patBar*4*GRID;
+  PAT_VOICES.forEach(([voice,name])=>{
+    const lane=document.createElement('div');lane.className='pat-lane';
+    const label=document.createElement('div');label.className='pat-name';label.textContent=name;
+    const row=document.createElement('div');
+    row.className='pat-cells';
+    row.style.gridTemplateColumns='repeat('+cells+',1fr)';
+    for(let c=0;c<cells;c++){
+      const pos=offset+c*step;
+      const cell=document.createElement('button');
+      const perBeat=cells/4;
+      cell.className='pat-cell'+(c%perBeat===0?' beat':'');
+      cell.dataset.v=String(patLevel(patAt(voice,pos)));
+      cell.dataset.pos=String(pos);
+      cell.dataset.voice=voice;
+      cell.setAttribute('aria-label',name+', cell '+(c+1));
+      cell.onclick=()=>{
+        patToggle(voice,pos);
+        cell.dataset.v=String(patLevel(patAt(voice,pos)));
+        if(state.groove!=='custom')setGroove('custom');
+        else{refreshSectionSummaries();restartIfPlaying();}
+        patInfo();
+      };
+      row.appendChild(cell);
+    }
+    lane.append(label,row);
+    grid.appendChild(lane);
+  });
+  const ruler=document.createElement('div');ruler.className='pat-ruler';
+  const spacer=document.createElement('div');
+  const marks=document.createElement('div');
+  marks.className='pat-ruler-cells';
+  marks.style.gridTemplateColumns='repeat(4,1fr)';
+  for(let b=0;b<4;b++){const sp=document.createElement('span');sp.textContent=String(b+1);marks.appendChild(sp);}
+  ruler.append(spacer,marks);
+  grid.appendChild(ruler);
+  patInfo();
+}
+function patInfo(){
+  const el=document.getElementById('pat-info');
+  if(!el)return;
+  const n=state.custom.hits.length;
+  el.textContent=n
+    ? n+' hit'+(n===1?'':'s')+' · tap a cell again for a ghost, an accent, then nothing'
+    : 'empty — tap the grid, or start from a style';
+}
+/* The one thing worth remembering across launches: the app opens clean on
+   purpose, but a pattern you wrote is your work, not a view setting. */
+function savePattern(){
+  try{localStorage.setItem('scaletune-pattern',JSON.stringify({
+    bars:state.custom.bars,grid:state.custom.grid,hits:state.custom.hits,kit:state.kit}));}catch(e){}
+}
+function loadPattern(){
+  try{
+    const raw=localStorage.getItem('scaletune-pattern');
+    if(!raw)return;
+    const p=JSON.parse(raw);
+    if(p&&Array.isArray(p.hits)){
+      state.custom.hits=p.hits.filter(h=>Array.isArray(h)&&h.length===3);
+      state.custom.bars=p.bars===2?2:1;
+      state.custom.grid=p.grid===12?12:16;
+    }
+    if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;
+  }catch(e){}
+}
+
+function buildKitRow(){
+  const row=document.getElementById('kit-row');
+  if(!row)return;
+  const line=document.getElementById('kit-line');
+  if(line)line.style.display=grooveOn()?'':'none';
+  row.innerHTML='';
+  [['recorded','Recorded'],['machine','Machine']].forEach(([k,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.kit===k?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      state.kit=k;savePattern();buildKitRow();
+      if(k!=='machine')Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
+      refreshSectionSummaries();
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
 }
 
 function setGroove(k){
@@ -3585,7 +3944,7 @@ function setGroove(k){
   }
   // fetch them now rather than on the first beat, and only once there is a
   // context to decode them into
-  if(grooveOn())Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
+  if(grooveOn()&&state.kit!=='machine')Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
   buildGrooveRow();updateSupersededControls();splitMetro(state.mode==='metro');
   refreshSectionSummaries();restartIfPlaying();
 }
@@ -4392,7 +4751,10 @@ buildBeats();
 buildPolyBeats();
 updateSupersededControls();
 buildNoteLenRow();
+loadPattern();
 buildGrooveRow();
+buildKitRow();
+buildPatternEditor();
 buildMetroOnRow();
 buildSubdivRow();
 buildClickModeRow();
