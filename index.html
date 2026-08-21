@@ -612,6 +612,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
           <summary>Major Scale<span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="gregorian-btns"></div>
         </details>
+        <details class="fam" data-fam="pentatonic">
+          <summary>Pentatonic<span class="fam-sum"></span></summary>
+          <div class="btn-wrap" id="pentatonic-btns"></div>
+          <div class="head" id="blue-line" style="margin-top:var(--s3);margin-bottom:0">
+            <span class="section-label">Blue notes</span>
+            <span class="btn-wrap seg" id="blue-row" data-cols="fixed"></span></div>
+          <div class="info-line" id="blue-info"></div>
+        </details>
         <details class="fam" data-fam="melodic">
           <summary>Melodic Minor<span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="melodic-btns"></div>
@@ -938,6 +946,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="help-sec" id="help-scales"><h3>Scales and chords</h3><dl>
     <dt>The family boxes</dt><dd>One opens at a time and the others fold away. A closed box still says
     what is chosen inside it, so folding one never hides a selection.</dd>
+    <dt>Pentatonic and the blue notes</dt><dd>Five notes, and what is missing is the point: the major
+    has no fourth and no seventh, the minor no second and no sixth, so neither leans anywhere.
+    <em>Blue notes</em> adds one note to each — a flat third over the major, a flat fifth over the
+    minor — which is what turns a pentatonic into a blues scale. It is spelled the way it is written:
+    A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
     <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
     <dt>Clear</dt><dd>Empties the selection, or the whole study list.</dd>
@@ -983,11 +996,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     is no moment where it jumps. A ramp starts again from your tempo every time you press Start,
     because otherwise the second run would have nowhere to go; steps stay where they got to. Either
     way it stops at 10 and at 300.</dd>
-    <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B or Bossa, on a kick,
-    a snare, hats and a side-stick. Each is a bar of four that repeats — the bossa is two, because its
+    <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
+    a snare, hats, a ride and a wooden clave. Each is a bar of four that repeats — the bossa is two, because its
     clave is — with no fills and no breaks, so it stays something to play over rather than something
-    to listen to. The styles are written in four, so the bar goes to four while one plays and comes
-    back to what it was when the click returns. The count-in still clicks: there you want a beat and
+    to listen to. The swing sits where a swing sits — two thirds through the beat, not half — and its
+    bass drum feathers all four beats so quietly it is felt rather than heard. The styles are written
+    in four, so the bar goes to four while one plays and comes back to what it was when the click
+    returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
     synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
@@ -1052,9 +1067,14 @@ function accStr(a){return a<0?'b'.repeat(-a):(a>0?'#'.repeat(a):'');}
 // nearest signed distance from a letter's natural pitch, in [-6,5]
 function accOf(pc,letterIdx){return((pc-NATURAL[letterIdx]+18)%12)-6;}
 
-// Returns {names:[...], letters:[...], accs:[...]} spelled from the root.
-// letterStep is 1 for scales (stepwise) and 2 for chords (stacked thirds).
+/* Returns {names:[...], letters:[...], accs:[...]} spelled from the root.
+   letterStep is 1 for scales (stepwise), 2 for chords (stacked thirds) — or an
+   array of letter offsets, one per interval, for a scale whose steps are not
+   even. A pentatonic is such a scale: it is a seven-letter scale with two
+   letters left out, and stepping one letter at a time through five notes spelled
+   C minor pentatonic "Dbb Eb F G A#". */
 function spell(rootPc,intervals,letterStep){
+  const plan=Array.isArray(letterStep)?letterStep:null;
   let best=null;
   for(let li=0;li<7;li++){
     const rootAcc=accOf(rootPc,li);
@@ -1062,7 +1082,7 @@ function spell(rootPc,intervals,letterStep){
     let cost=0,ok=true;
     const names=[],letters=[],accs=[];
     for(let i=0;i<intervals.length;i++){
-      const l=(li+letterStep*i)%7;
+      const l=(li+(plan?plan[i]:letterStep*i))%7;
       const a=accOf((rootPc+intervals[i])%12,l);
       if(Math.abs(a)>2){ok=false;break;}
       cost+=a*a;                      // squared: double accidentals hurt a lot
@@ -1114,6 +1134,15 @@ const SCALES={
     'Lydian #2':[0,3,4,6,7,9,11],
     'Ultra Locrian':[0,1,3,4,6,8,9],
   },
+  /* Five notes, and the note that is missing is the point: no fourth in the
+     major, no second in the minor, so nothing in either one leans anywhere. The
+     blue note is added rather than built in, because a pentatonic and a blues
+     scale are the same shape with one note between two of its steps — the flat
+     third over the major, the flat fifth over the minor. */
+  pentatonic:{
+    'Major Pentatonic':[0,2,4,7,9],
+    'Minor Pentatonic':[0,3,5,7,10],
+  },
   // Modes of the harmonic major, verified as rotations of [0,2,4,5,7,8,11].
   // Natural Minor was dropped: it is note-for-note the Aeolian already listed.
   harmonicMajor:{
@@ -1126,6 +1155,33 @@ const SCALES={
     'Locrian bb7':[0,1,3,5,6,8,9],
   }
 };
+
+/* A pentatonic's letters, as degrees of the scale it comes from: the major
+   pentatonic is a major scale without its fourth and seventh, the minor is a
+   natural minor without its second and sixth. The blue note borrows the letter
+   of the note it sits under — a flat third shares its letter with the third, a
+   flat fifth with the fifth — which is exactly how the blues scale is written:
+   A C D Eb E G. */
+const LETTER_PLANS={
+  'Major Pentatonic':{plain:[0,1,2,4,5],blue:[0,1,2,2,4,5]},
+  'Minor Pentatonic':{plain:[0,2,3,4,6],blue:[0,2,3,4,4,6]},
+};
+function letterPlanFor(group,name){
+  const p=LETTER_PLANS[name];
+  if(!p||group!=='pentatonic')return null;
+  return (state.blueNotes&&BLUE_NOTE[name]!=null)?p.blue:p.plain;
+}
+// The letter walk for whatever is selected: thirds for a chord, steps for a
+// scale, and a plan of its own for a pentatonic.
+function letterWalk(){
+  if(state.mode==='arpeggio')return 2;
+  return letterPlanFor(state.scaleGroup,state.scaleName)||1;
+}
+
+/* Which semitone the blue note is, per pentatonic. Major plus a flat third is
+   the major blues scale; minor plus a flat fifth is the one everybody means by
+   "the blues scale". */
+const BLUE_NOTE={'Major Pentatonic':3,'Minor Pentatonic':6};
 
 const CHORDS={
   triad:{
@@ -1169,7 +1225,7 @@ const DEFAULT_SPELL=[
 function rootLabelFor(pc){
   const degrees=activeDegrees();
   if(!degrees)return DEFAULT_SPELL[pc].name;
-  const r=spell(pc,degrees,state.mode==='arpeggio'?2:1);
+  const r=spell(pc,degrees,letterWalk());
   return r?r.names[0]:DEFAULT_SPELL[pc].name;
 }
 
@@ -1182,6 +1238,8 @@ let state={
   // span/rootOct are what is playing now; the "Wanted" values are what the user
   // asked for, so a range clamp can be undone once the key allows it again
   span:1,spanWanted:1,rootOctWanted:3,direction:'up',startDeg:0,
+  blueNotes:false,           // the added note in the two pentatonics
+
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   // remembered separately per mode family: Drone can only use a sustaining
   // wave, the sequence modes default to the sampled piano
@@ -1307,7 +1365,7 @@ function rebuildSpelling(){
   spellMap=null;
   const degrees=activeDegrees();
   if(!degrees||(state.mode!=='scale'&&state.mode!=='arpeggio'))return;
-  const res=spell(NOTES.indexOf(state.root),degrees,state.mode==='arpeggio'?2:1);
+  const res=spell(NOTES.indexOf(state.root),degrees,letterWalk());
   if(!res)return;
   spellMap={};
   degrees.forEach((d,i)=>{
@@ -1798,7 +1856,7 @@ function playClickBuffer(buf,time,gain){
    Until they are decoded the accompaniment falls back to the click, because a
    metronome that has gone quiet is worse than one that is not the sound you
    asked for. */
-const DRUM_FILES={kick:'kick',snare:'snare',stick:'stick',hhc:'hhc',hho:'hho'};
+const DRUM_FILES={kick:'kick',snare:'snare',hhc:'hhc',hho:'hho',ride:'ride'};
 let drumBufs=null,drumsLoading=false,drumsFailed=false;
 function loadDrums(){
   if(drumBufs||drumsLoading||drumsFailed)return;
@@ -1832,38 +1890,71 @@ function drumHit(name,t,gain){
 /* Which hit each letter in a pattern is, and how loud it sits against the
    others. The ghost snare is the same drum played lightly, which is what a
    ghost note is; the bossa's bass drum is the bass drum. */
+/* The clave is the one voice that is better made than recorded. The kit has no
+   rim and no side-stick; standing in with a snare played soft gave a thud where
+   a bossa wants a piece of wood, which is what a clave is: two short partials
+   and no body at all. Twenty milliseconds of it. */
+function woodClick(t,v){
+  [[1250,0.024,0.75],[2500,0.016,0.35],[3700,0.010,0.18]].forEach(([f,dur,g])=>{
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.type='sine';osc.frequency.value=f;
+    gain.gain.setValueAtTime(Math.max(0.0001,g*v),t);
+    gain.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    osc.start(t);osc.stop(t+dur+0.01);
+    schedNodes.push(osc,gain);
+  });
+}
 const KIT={
   k:(t,v)=>drumHit('kick', t,0.95*v),
   s:(t,v)=>drumHit('snare',t,0.80*v),
   g:(t,v)=>drumHit('snare',t,0.16*v),
   h:(t,v)=>drumHit('hhc',  t,0.42*v),
   o:(t,v)=>drumHit('hho',  t,0.34*v),
-  r:(t,v)=>drumHit('stick',t,0.50*v),
+  d:(t,v)=>drumHit('ride', t,0.80*v),
+  r:(t,v)=>{woodClick(t,0.9*v);return true;},
   b:(t,v)=>drumHit('kick', t,0.85*v),
 };
-// [sixteenth, voice, how hard]
+/* The grid is twelfths of a beat, because twelve divides by four and by three:
+   a sixteenth lands on every third, a triplet on every fourth, and a swung
+   eighth — two thirds of the way through the beat — on the eighth. A sixteenth
+   grid had nowhere to put that, which is why there was no swing until now.
+   Patterns written in sixteenths say so and are converted here. */
+const GRID=12;
+const inSixteenths=hits=>hits.map(h=>[h[0]*3,h[1],h[2]]);
+// [twelfth of a beat, voice, how hard]
 const GROOVES={
-  rock:{label:'Rock',bars:1,hits:[
+  rock:{label:'Rock',bars:1,hits:inSixteenths([
     [0,'k',1],[8,'k',.95],[4,'s',1],[12,'s',1],
-    [0,'h',.9],[2,'h',.55],[4,'h',.8],[6,'h',.55],[8,'h',.9],[10,'h',.55],[12,'h',.8],[14,'h',.55]]},
-  pop:{label:'Pop',bars:1,hits:[
+    [0,'h',.9],[2,'h',.55],[4,'h',.8],[6,'h',.55],[8,'h',.9],[10,'h',.55],[12,'h',.8],[14,'h',.55]])},
+  pop:{label:'Pop',bars:1,hits:inSixteenths([
     [0,'k',1],[6,'k',.8],[8,'k',.7],[4,'s',1],[12,'s',1],
-    [0,'h',.8],[2,'h',.5],[4,'h',.7],[6,'h',.5],[8,'h',.8],[10,'h',.5],[12,'h',.7],[14,'o',.5]]},
-  funk:{label:'Funk',bars:1,hits:[
+    [0,'h',.8],[2,'h',.5],[4,'h',.7],[6,'h',.5],[8,'h',.8],[10,'h',.5],[12,'h',.7],[14,'o',.5]])},
+  funk:{label:'Funk',bars:1,hits:inSixteenths([
     [0,'k',1],[3,'k',.7],[6,'k',.85],[10,'k',.75],[11,'k',.6],
     [4,'s',1],[12,'s',1],[2,'g',1],[7,'g',1],[10,'g',1],[15,'g',1],
     [0,'h',.9],[1,'h',.4],[2,'h',.6],[3,'h',.4],[4,'h',.8],[5,'h',.4],[6,'h',.6],[7,'h',.4],
-    [8,'h',.9],[9,'h',.4],[10,'h',.6],[11,'h',.4],[12,'h',.8],[13,'h',.4],[14,'h',.6],[15,'h',.4]]},
-  rnb:{label:'R&B',bars:1,hits:[
+    [8,'h',.9],[9,'h',.4],[10,'h',.6],[11,'h',.4],[12,'h',.8],[13,'h',.4],[14,'h',.6],[15,'h',.4]])},
+  rnb:{label:'R&B',bars:1,hits:inSixteenths([
     [0,'k',1],[6,'k',.75],[10,'k',.8],[8,'s',1],[3,'g',1],[13,'g',1],
-    [0,'h',.7],[2,'h',.45],[4,'h',.6],[6,'h',.45],[8,'h',.7],[10,'h',.45],[12,'h',.6],[14,'h',.45]]},
+    [0,'h',.7],[2,'h',.45],[4,'h',.6],[6,'h',.45],[8,'h',.7],[10,'h',.45],[12,'h',.6],[14,'h',.45]])},
   // The clave runs across two bars, which is what makes it a bossa and not a
   // one-bar pattern with a Latin sound.
-  bossa:{label:'Bossa',bars:2,hits:[
+  bossa:{label:'Bossa',bars:2,hits:inSixteenths([
     [0,'b',1],[8,'b',.85],[16,'b',1],[24,'b',.85],
     [0,'r',.9],[6,'r',.9],[12,'r',.9],[20,'r',.9],[26,'r',.9],
     [0,'h',.55],[2,'h',.4],[4,'h',.55],[6,'h',.4],[8,'h',.55],[10,'h',.4],[12,'h',.55],[14,'h',.4],
-    [16,'h',.55],[18,'h',.4],[20,'h',.55],[22,'h',.4],[24,'h',.55],[26,'h',.4],[28,'h',.55],[30,'h',.4]]},
+    [16,'h',.55],[18,'h',.4],[20,'h',.55],[22,'h',.4],[24,'h',.55],[26,'h',.4],[28,'h',.55],[30,'h',.4]])},
+  /* Jazz: the ride carries it. A quarter on every beat, and after two and four
+     the swung eighth that gives the style its name — two thirds of the way
+     through the beat, not half. The hi-hat is the foot, on two and four. The
+     bass drum feathers all four so quietly that it is felt rather than heard,
+     which is what feathering is. No snare: a comp is a conversation, and this
+     has to be the same every bar. */
+  swing:{label:'Jazz Swing',bars:1,hits:[
+    [0,'d',.9],[12,'d',.8],[20,'d',.7],[24,'d',.85],[36,'d',.8],[44,'d',.7],
+    [12,'h',.5],[36,'h',.5],
+    [0,'k',.22],[12,'k',.2],[24,'k',.22],[36,'k',.2]]},
 };
 function grooveOn(){return !!GROOVES[state.groove];}
 function grooveBars(){const G=GROOVES[state.groove];return G?G.bars:1;}
@@ -1881,12 +1972,12 @@ function scheduleGrooveBeat(t0,beat){
   const G=GROOVES[state.groove];
   if(!G)return false;
   if(!drumBufs){loadDrums();return false;}
-  const sixteenth=(60/state.bpm)/4;
-  const from=(beat%(G.bars*4))*4;
+  const unit=(60/state.bpm)/GRID;
+  const from=(beat%(G.bars*4))*GRID;
   G.hits.forEach(h=>{
-    if(h[0]<from||h[0]>=from+4)return;
+    if(h[0]<from||h[0]>=from+GRID)return;
     const voice=KIT[h[1]];
-    if(voice)voice(t0+(h[0]-from)*sixteenth,h[2]*state.clickVol*KIT_HEADROOM);
+    if(voice)voice(t0+(h[0]-from)*unit,h[2]*state.clickVol*KIT_HEADROOM);
   });
   return true;
 }
@@ -1936,11 +2027,21 @@ function currentSubdiv(){
 }
 
 /* ---------- sequence building ---------- */
+/* A scale's notes, with the blue note folded in where it applies. Everything
+   that needs the degrees goes through here, so the toggle cannot be true in one
+   place and false in another. */
+function degreesOf(group,name){
+  const base=SCALES[group]&&SCALES[group][name];
+  if(!base)return base;
+  const blue=BLUE_NOTE[name];
+  if(!(state.blueNotes&&group==='pentatonic'&&blue!=null))return base;
+  return base.concat([blue]).sort((a,b)=>a-b);
+}
 function activeDegrees(){
   // in Study list mode an empty list means nothing is selected, even if a
   // single selection is left over from before
   if(useListOn()&&!activeList().length)return null;
-  if(state.mode==='scale'&&state.scaleGroup)return SCALES[state.scaleGroup][state.scaleName];
+  if(state.mode==='scale'&&state.scaleGroup)return degreesOf(state.scaleGroup,state.scaleName);
   if(state.mode==='arpeggio'&&state.chordGroup)return CHORDS[state.chordGroup][state.chordName];
   return null;
 }
@@ -2339,7 +2440,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21d';
+const APP_VERSION='2026-08-21e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2530,7 +2631,8 @@ function buildPitchLists(){
     b.onclick=()=>{state.root=n;state.startDeg=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
     root.appendChild(b);
   });
-  const scaleGroups={gregorian:'gregorian-btns',melodic:'melodic-btns',harmonic:'harmonic-btns',harmonicMajor:'harmonicmajor-btns'};
+  const scaleGroups={gregorian:'gregorian-btns',pentatonic:'pentatonic-btns',
+                     melodic:'melodic-btns',harmonic:'harmonic-btns',harmonicMajor:'harmonicmajor-btns'};
   Object.entries(scaleGroups).forEach(([gk,cid])=>{
     const c=document.getElementById(cid);
     Object.keys(SCALES[gk]).forEach(sn=>{
@@ -3131,6 +3233,31 @@ function initFamilies(){
       refreshFamilySummaries();
     });
   });
+}
+
+/* The blue note is one switch for both pentatonics rather than two more scales
+   in the list: it is the same decision either way, and a list of four where two
+   are the other two plus a note reads as four unrelated things. */
+function buildBlueRow(){
+  const row=document.getElementById('blue-row');
+  if(!row)return;
+  row.innerHTML='';
+  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.blueNotes===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      state.blueNotes=v;
+      buildBlueRow();clampStartDeg();renderPitchPickers();updateInfo();
+      refreshSequence();refreshSectionSummaries();restartIfPlaying();
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
+  const info=document.getElementById('blue-info');
+  if(info)info.textContent=state.blueNotes
+    ? 'a flat third over the major, a flat fifth over the minor \u2014 six notes'
+    : 'five notes, as written';
 }
 
 function familyMembers(fam){
@@ -4258,6 +4385,7 @@ initSections();
 initFamilies();
 buildTimbreRow();
 buildPitchLists();
+buildBlueRow();
 buildDroneGrid();
 buildFreeGrid();
 buildBeats();

@@ -38,11 +38,13 @@ License: MIT
 Source: https://github.com/gleitz/midi-js-soundfonts
 
 ## Muldjord Kit — drum samples
-`vendor/drums/kick.wav` · `snare.wav` · `stick.wav` · `hhc.wav` · `hho.wav` — 180 KB together
+`vendor/drums/kick.wav` · `snare.wav` · `hhc.wav` · `hho.wav` · `ride.wav` — 220 KB together
 
 Five hits from a recorded acoustic kit, used by the metronome's accompaniment
-styles: bass drum, snare, snare-with-the-snares-off (the clave in the bossa),
-closed hi-hat, open hi-hat. Each is one velocity layer of the original,
+styles: bass drum, snare, closed hi-hat, open hi-hat, ride. The clave in the
+bossa is not among them — it is synthesised, two short partials and no body,
+because the kit has no rim and a soft snare hit gave a thud where a bossa wants
+a piece of wood. Each is one velocity layer of the original,
 trimmed to length, tapered over its last third so the cut cannot click, and
 normalised to a peak of 0.95. The originals are 24-bit 44.1kHz FLAC, several
 hundred kilobytes each and up to fifty velocity layers per drum; what is

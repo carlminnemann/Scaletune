@@ -21,9 +21,9 @@ TMP='.drum-build'
 SPEC=[
  ('kick',  'KdrumL/20-KdrumL.flac',                0.55, 'kick'),
  ('snare', 'Snare1/40-Snare.flac',                 0.45, None),
- ('stick', 'SnareRest1/9-SnareRest.flac',          0.30, 'stick'),
  ('hhc',   'HihatClosed/20-HihatClosed.flac',      0.22, None),
  ('hho',   'HihatOpen/20-HihatOpen.flac',          0.55, None),
+ ('ride',  'RideR/9-RideR.flac',                  0.70, None),
 ]
 
 def biquad(d,b0,b1,b2,a1,a2):
@@ -51,8 +51,6 @@ def peaking(d,sr,f,db,q=1.0):
 SHAPE={
  # the beater end of the drum, brought up to where a phone can reproduce it
  'kick':  lambda d,sr: shelf_high(hp(d,sr,50),sr,1400,9),
- # the clave has to cut through whatever you are playing over it
- 'stick': lambda d,sr: peaking(hp(d,sr,120),sr,2000,7),
 }
 
 def decode(src,dst):
