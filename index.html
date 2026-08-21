@@ -2293,7 +2293,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21b';
+const APP_VERSION='2026-08-21c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4253,7 +4253,9 @@ if('serviceWorker' in navigator){
       reloading=true;
       location.reload();
     });
-    navigator.serviceWorker.register('sw.js').then(reg=>{
+    // updateViaCache:'none' keeps the worker script itself out of the HTTP
+    // cache, so an update check always sees what the host actually has
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
       reg.update().catch(()=>{});                 // check on every launch
       setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
     }).catch(()=>{});

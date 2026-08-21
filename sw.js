@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v86';
+const CACHE = 'scaletune-v87';
 const ASSETS = [
   './',
   './index.html',
@@ -65,8 +65,12 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
 
   if (isDocument(req)) {
+    // 'reload' bypasses the browser's own HTTP cache for this one request. The
+    // host serves the page with max-age=600, so without this a device could be
+    // handed a ten-minute-old build even though the worker asked the network —
+    // which reads exactly like the app not having been updated.
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'reload' })
         .then(res => {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
