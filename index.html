@@ -147,24 +147,30 @@ details.sec.pinned>summary::after{display:none}
    guessing from the height of the window: how much room the panel actually has
    depends on the browser's own bars, the safe area, the size of the type — none
    of which a media query can see. */
-.scroll.metro-tight #tempo-block,.scroll.metro-tight #sig-block{padding:var(--s3) var(--s4)}
-.scroll.metro-tight #sig-block .clear-btn{margin-top:var(--s3)}
-.scroll.metro-tight #tempo-block .head{margin-bottom:var(--s2)}
-.scroll.metro-tight #tempo-block .vol-line{margin-top:var(--s2)}
-.scroll.metro-tight #tempo-block .bpm-row{margin-bottom:var(--s2)}
+.scroll.tight #tempo-block,.scroll.tight #sig-block{padding:var(--s3) var(--s4)}
+.scroll.tight #sig-block .clear-btn{margin-top:var(--s3)}
+.scroll.tight #tempo-block .head{margin-bottom:var(--s2)}
+.scroll.tight #tempo-block .vol-line{margin-top:var(--s2)}
+.scroll.tight #tempo-block .bpm-row{margin-bottom:var(--s2)}
 
-.scroll.metro-tighter #tempo-block,.scroll.metro-tighter #sig-block{padding:var(--s2) var(--s4)}
-.scroll.metro-tighter .bpm-big{font-size:32px}
-.scroll.metro-tighter #sig-block .clear-btn{margin-top:var(--s2)}
-.scroll.metro-tighter #sig-block .head{margin-bottom:var(--s1)!important}
-.scroll.metro-tighter #sig-block .beats-row{margin-bottom:var(--s1)}
+.scroll.tighter #tempo-block,.scroll.tighter #sig-block{padding:var(--s2) var(--s4)}
+.scroll.tighter .bpm-big{font-size:32px}
+.scroll.tighter #sig-block .clear-btn{margin-top:var(--s2)}
+.scroll.tighter #sig-block .head{margin-bottom:var(--s1)!important}
+.scroll.tighter #sig-block .beats-row{margin-bottom:var(--s1)}
 
-.scroll.metro-tightest .bpm-big{font-size:26px}
-.scroll.metro-tightest .beats-hint{display:none}
-.scroll.metro-tightest #tempo-block .head{margin-bottom:var(--s1)}
-.scroll.metro-tightest #tempo-block .bpm-row{margin-bottom:var(--s1)}
-.scroll.metro-tightest #tempo-block .vol-line{margin-top:var(--s1)}
-.scroll.metro-tightest #tempo-block,.scroll.metro-tightest #sig-block{padding:var(--s1) var(--s4)}
+.scroll.tightest .bpm-big{font-size:26px}
+.scroll.tightest .beats-hint{display:none}
+.scroll.tightest #tempo-block .head{margin-bottom:var(--s1)}
+.scroll.tightest #tempo-block .bpm-row{margin-bottom:var(--s1)}
+.scroll.tightest #tempo-block .vol-line{margin-top:var(--s1)}
+.scroll.tightest #tempo-block,.scroll.tightest #sig-block{padding:var(--s1) var(--s4)}
+
+/* and what every mode can spare, in the same order: the note grid's legend
+   loses its air, then the legend itself, then the cards lose some padding */
+.scroll.tight .legend{font-size:10px;line-height:1.35}
+.scroll.tighter .legend{display:none}
+.scroll.tightest details.sec .sec-body,.scroll.tightest #drone-section{padding:0.7rem}
 details.sec .sec-body{padding:1rem}
 details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
   color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -242,6 +248,9 @@ details.sec[open] .sec-sum{display:none}
 .metro-body{padding:0}
 .mgroup{padding:var(--s4)}
 .mgroup+.mgroup{border-top:1px solid var(--border)}
+/* A hidden group is still a sibling, so the group under it drew a line with
+   nothing above it. Outside Drone the switch is not there and neither is that. */
+.metro-body.no-switch>#tempo-block{border-top:0}
 .mgroup>.head:last-child,.mgroup>*:last-child{margin-bottom:0}
 .bpm-row{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s3)}
 /* Tap tempo is pushed to the far end of the number's own line, on its baseline. */
@@ -385,6 +394,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .tap-btn.tapping{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 /* it sits on a label line now, so it carries no margin of its own */
 .sig-fields{display:flex;gap:var(--s2);align-items:center}
+.sig-select:disabled{opacity:.45}
 .sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
   cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg2);color:var(--text2);touch-action:manipulation}
@@ -696,6 +706,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <details class="sec" id="metro-section" style="display:none">
   <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body metro-body">
+  <!-- Drone is a note to tune against, and a click over it is a choice rather
+       than the point, so there it is asked for. -->
+  <div class="mgroup" id="metro-on-block" style="display:none">
+    <div class="head" style="margin-bottom:0"><span class="section-label">Over the drone</span>
+      <span class="btn-wrap seg" id="metro-on-row" data-cols="fixed"></span></div>
+  </div>
   <!-- Five named groups instead of one undivided box. The tempo, the bar and the
        figure were sharing a single space with nothing between them, which is what
        made the panel hard to read. -->
@@ -729,6 +745,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="beats-hint">tap a beat: accent it, then silence it</div>
     <!-- where every other Clear in the app sits: under its panel, on the left -->
     <button class="clear-btn" onclick="clearAccents()">✕ Clear</button>
+  </div>
+
+  <div class="mgroup" id="groove-block">
+    <div class="head" style="margin-bottom:0"><span class="section-label">Accompaniment</span>
+      <span class="sig-fields">
+        <select class="sig-select" id="groove-sel" aria-label="Accompaniment style"></select>
+      </span></div>
+    <div class="info-line" id="groove-info" style="display:none"></div>
   </div>
 
   <div class="mgroup" id="count-block">
@@ -852,7 +876,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   strings, winds, voice. Everything here is a reference to play against, not a thing to listen to.</p>
 
   <div class="help-sec" id="help-modes"><h3>Modes</h3><dl>
-    <dt>Drone</dt><dd>Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord.</dd>
+    <dt>Drone</dt><dd>Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord. The metronome is there too, switched off until you ask for it: a held note, and a pulse to place it against.</dd>
     <dt>Scale</dt><dd>Plays a scale as a line, in the key, range and direction you choose.</dd>
     <dt>Arpeggio</dt><dd>The same, built from a chord instead of a scale.</dd>
     <dt>Free</dt><dd>You pick the notes yourself, each with its own octave, and they play in that order.</dd>
@@ -932,6 +956,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     the very drift the app is built around.</dd>
     <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
     pass is: so many bars, or so many beats. The figure list and Speed Up both move on that.</dd>
+    <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B or Bossa, on a kick,
+    a snare, hats and a side-stick. Each is a bar of four that repeats — the bossa is two, because its
+    clave is — with no fills and no breaks, so it stays something to play over rather than something
+    to listen to. The styles are written in four, so the bar goes to four while one plays and comes
+    back to what it was when the click returns. The count-in still clicks: there you want a beat and
+    nothing else. The Click slider is its volume.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
     it is on.</dd>
@@ -1135,6 +1165,10 @@ let state={
   // own count into exactly that.
   poly:{on:false,a:4,b:5,notesFollow:'a',accA:[],accB:[],touched:false},polyVol:0.9,
   countBars:0,countBetween:false,
+  // The metronome plays a style instead of a click: 'click' is the click.
+  groove:'click',sigBeforeGroove:null,
+  // In Drone the metronome is not the point, so there it is asked for
+  metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
   // useScaleList / useChordList are per mode: turning the study list on for
   // scales must not blank out the arpeggio selection
@@ -1165,11 +1199,12 @@ function subTicks(k){return k==='2s'?2:k;}
 function tickShare(k,i){return k==='2s'?SWING_SHARES[i]:1/k;}
 const BPM_MIN=10,BPM_MAX=300;   // 10 is slow enough to place a bow, 300 fast enough for a roll
 let studyIdx=0,subdivIdx=0;
+let grooveBeat=0;         // where in the accompaniment's bar the pulse is
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
    them changes and every other mode still gets the one whole metronome. */
-const METRO_MORE=['count-block','subdiv-block','pass-block','poly-block'];
+const METRO_MORE=['count-block','subdiv-block','pass-block','poly-block','groove-block'];
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -1178,8 +1213,11 @@ function splitMetro(on){
   METRO_MORE.forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    // With the polyrhythm on it is the bar, and the bar is a front-screen thing
-    const host=(on&&!(id==='poly-block'&&state.poly.on))?body:main;
+    // Whatever is keeping the bar belongs on the front screen: the polyrhythm
+    // when it is on, the style when one is playing.
+    const front=(id==='poly-block'&&state.poly.on)||
+                (id==='groove-block'&&grooveOn()&&!state.poly.on);
+    const host=(on&&!front)?body:main;
     if(el.parentNode!==host)host.appendChild(el);
   });
   more.style.display=on?'':'none';
@@ -1193,7 +1231,7 @@ let metroBars=0,metroBeats=0,metroCycles=0;
    only the notes wait, which is what a count-in is. */
 let countTicks=0;
 function beginCount(){
-  if(!(state.countBars>0)||notesSilent()){countTicks=0;return;}
+  if(!(state.countBars>0)||pulseOnly()){countTicks=0;return;}
   countTicks=state.countBars*state.sig*subTicks(currentSubdiv());
 }
 // How long one note of the sequence lasts, expressed against the metronome.
@@ -1703,6 +1741,105 @@ function playClickBuffer(buf,time,gain){
   schedNodes.push(src,g);
 }
 
+/* ---------- the accompaniment ----------
+
+   A drum kit is four sounds, and all four are noise and a sine away: a kick is
+   a sine falling fast from 150Hz to 48, a snare is filtered noise with a little
+   tuned body under it, a hi-hat is the same noise high-passed and cut short, a
+   side-stick is a click with a ring. Sampling a real kit would have cost several
+   megabytes for something the ear only needs to keep time by.
+
+   The patterns are written on a sixteenth grid, one bar of 4/4 unless they say
+   otherwise, and they simply repeat. No fills and no breaks: this is something
+   to play over, not something to listen to. */
+let noiseBuf=null;
+function noiseBuffer(){
+  if(noiseBuf)return noiseBuf;
+  const sr=audioCtx.sampleRate,n=Math.floor(sr*0.5);
+  noiseBuf=audioCtx.createBuffer(1,n,sr);
+  const d=noiseBuf.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+  return noiseBuf;
+}
+function drumNoise(t,o){
+  const src=audioCtx.createBufferSource();src.buffer=noiseBuffer();
+  const f=audioCtx.createBiquadFilter();
+  if(o.bp){f.type='bandpass';f.frequency.value=o.bp;f.Q.value=o.q||1;}
+  else{f.type='highpass';f.frequency.value=o.hp||4000;}
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(Math.max(0.0001,o.gain),t);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+o.dur);
+  src.connect(f);f.connect(g);g.connect(audioCtx.destination);
+  src.start(t);src.stop(t+o.dur+0.02);
+  schedNodes.push(src,f,g);
+}
+function drumTone(t,o){
+  const osc=audioCtx.createOscillator();osc.type=o.type||'sine';
+  osc.frequency.setValueAtTime(o.f0,t);
+  if(o.f1)osc.frequency.exponentialRampToValueAtTime(o.f1,t+Math.min(o.dur,0.09));
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(Math.max(0.0001,o.gain),t);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+o.dur);
+  osc.connect(g);g.connect(audioCtx.destination);
+  osc.start(t);osc.stop(t+o.dur+0.02);
+  schedNodes.push(osc,g);
+}
+const KIT={
+  k:(t,v)=>{drumTone(t,{f0:150,f1:48,dur:0.24,gain:0.9*v});
+            drumNoise(t,{hp:1200,dur:0.02,gain:0.10*v});},
+  s:(t,v)=>{drumNoise(t,{bp:1900,q:0.6,dur:0.15,gain:0.45*v});
+            drumTone(t,{f0:190,f1:150,dur:0.09,gain:0.22*v,type:'triangle'});},
+  g:(t,v)=>{drumNoise(t,{bp:1900,q:0.6,dur:0.06,gain:0.12*v});},   // a ghost snare
+  h:(t,v)=>drumNoise(t,{hp:7500,dur:0.03,gain:0.20*v}),            // hi-hat, closed
+  o:(t,v)=>drumNoise(t,{hp:6500,dur:0.20,gain:0.15*v}),            // hi-hat, open
+  r:(t,v)=>{drumNoise(t,{bp:2500,q:2,dur:0.03,gain:0.30*v});
+            drumTone(t,{f0:820,dur:0.04,gain:0.16*v,type:'square'});},  // side-stick
+  b:(t,v)=>drumTone(t,{f0:82,f1:56,dur:0.30,gain:0.75*v}),         // the surdo under a bossa
+};
+// [sixteenth, voice, how hard]
+const GROOVES={
+  rock:{label:'Rock',bars:1,hits:[
+    [0,'k',1],[8,'k',.95],[4,'s',1],[12,'s',1],
+    [0,'h',.9],[2,'h',.55],[4,'h',.8],[6,'h',.55],[8,'h',.9],[10,'h',.55],[12,'h',.8],[14,'h',.55]]},
+  pop:{label:'Pop',bars:1,hits:[
+    [0,'k',1],[6,'k',.8],[8,'k',.7],[4,'s',1],[12,'s',1],
+    [0,'h',.8],[2,'h',.5],[4,'h',.7],[6,'h',.5],[8,'h',.8],[10,'h',.5],[12,'h',.7],[14,'o',.5]]},
+  funk:{label:'Funk',bars:1,hits:[
+    [0,'k',1],[3,'k',.7],[6,'k',.85],[10,'k',.75],[11,'k',.6],
+    [4,'s',1],[12,'s',1],[2,'g',1],[7,'g',1],[10,'g',1],[15,'g',1],
+    [0,'h',.9],[1,'h',.4],[2,'h',.6],[3,'h',.4],[4,'h',.8],[5,'h',.4],[6,'h',.6],[7,'h',.4],
+    [8,'h',.9],[9,'h',.4],[10,'h',.6],[11,'h',.4],[12,'h',.8],[13,'h',.4],[14,'h',.6],[15,'h',.4]]},
+  rnb:{label:'R&B',bars:1,hits:[
+    [0,'k',1],[6,'k',.75],[10,'k',.8],[8,'s',1],[3,'g',1],[13,'g',1],
+    [0,'h',.7],[2,'h',.45],[4,'h',.6],[6,'h',.45],[8,'h',.7],[10,'h',.45],[12,'h',.6],[14,'h',.45]]},
+  // The clave runs across two bars, which is what makes it a bossa and not a
+  // one-bar pattern with a Latin sound.
+  bossa:{label:'Bossa',bars:2,hits:[
+    [0,'b',1],[8,'b',.85],[16,'b',1],[24,'b',.85],
+    [0,'r',.9],[6,'r',.9],[12,'r',.9],[20,'r',.9],[26,'r',.9],
+    [0,'h',.55],[2,'h',.4],[4,'h',.55],[6,'h',.4],[8,'h',.55],[10,'h',.4],[12,'h',.55],[14,'h',.4],
+    [16,'h',.55],[18,'h',.4],[20,'h',.55],[22,'h',.4],[24,'h',.55],[26,'h',.4],[28,'h',.55],[30,'h',.4]]},
+};
+function grooveOn(){return !!GROOVES[state.groove];}
+function grooveBars(){const G=GROOVES[state.groove];return G?G.bars:1;}
+/* Several drums land on the same sixteenth — a kick, a hat and a ghost snare all
+   at once in the funk — and at full volume that summed to 1.30 on the output,
+   which clips. The whole kit is scaled to bring the loudest bar under one, and
+   measured again after: 0.94, just under the plain click's 0.98. */
+const KIT_HEADROOM=0.72;
+// One beat's worth of the pattern, placed by time inside it.
+function scheduleGrooveBeat(t0,beat){
+  const G=GROOVES[state.groove];
+  if(!G)return;
+  const sixteenth=(60/state.bpm)/4;
+  const from=(beat%(G.bars*4))*4;
+  G.hits.forEach(h=>{
+    if(h[0]<from||h[0]>=from+4)return;
+    const voice=KIT[h[1]];
+    if(voice)voice(t0+(h[0]-from)*sixteenth,h[2]*state.clickVol*KIT_HEADROOM);
+  });
+}
+
 function scheduleClick(time,kind){
   const tone=CLICK_TONE[kind];
   if(!tone)return;                       // 'off' — silent beat
@@ -1841,7 +1978,7 @@ function startPlayback(){
     if(!state.playing)return;   // stopped while resuming
     if(state.mode==='drone'){
       if(droneSemitones().length){startContinuous();updateDroneReadout();}
-      return;
+      if(!state.metroInDrone)return;   // the drone alone, as it has always been
     }
     if(!notesSilent()){
       // every run starts at the top of the study list
@@ -1850,7 +1987,7 @@ function startPlayback(){
     }
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
-    metroBars=0;metroBeats=0;metroCycles=0;
+    metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
     beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
@@ -1863,6 +2000,9 @@ function startPlayback(){
 // Metro mode is the metronome on its own, so notes stay silent there for the
 // same reason they do under Metro only.
 function notesSilent(){return state.mode==='metro';}
+// Drone holds its own notes; the scheduler runs there only to keep time, so it
+// plays no sequence and counts no passes.
+function pulseOnly(){return notesSilent()||state.mode==='drone';}
 
 // Subdivision ticks that one note occupies.
 function ticksPerNote(sub){
@@ -1971,11 +2111,12 @@ function schedulerTick(){
     let note=null;
     // the count-in: clicks as usual, no notes, and the phrase does not begin
     // until it is paid off
+    const counting=countTicks>0;
     if(countTicks>0){
       countTicks--;
-      if(countTicks===0)tickCount=0;
+      if(countTicks===0){tickCount=0;grooveBeat=0;}
     } else
-    if(!notesSilent()&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
+    if(!pulseOnly()&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
       if(seqIdx>=sequence.length){
         seqIdx=0;
         // Within a figure the pulse runs on unbroken and the phrase precesses
@@ -1992,10 +2133,14 @@ function schedulerTick(){
     }
     const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb*tickShare(sub,subIdx);
     if(note!==null)scheduleTone(note,nextBeatTime,noteDuration(sub,tickDur));
+    // A style replaces the click rather than playing over it — but not during the
+    // count-in, where a click is what you want to hear.
+    const groove=grooveOn()&&!counting;
     if(subIdx===0){
-      scheduleClick(nextBeatTime,accentFor(beatIdx));
+      if(groove)scheduleGrooveBeat(nextBeatTime,grooveBeat);
+      else scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
+    } else if(!groove&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
@@ -2003,6 +2148,7 @@ function schedulerTick(){
     subIdx++;
     if(subIdx>=subTicks(sub)){
       subIdx=0;beatIdx=(beatIdx+1)%state.sig;
+      if(!counting)grooveBeat=(grooveBeat+1)%(grooveBars()*4);
       if(notesSilent()){
         metroBeats++;
         if(beatIdx===0)metroBars++;
@@ -2131,7 +2277,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-18y';
+const APP_VERSION='2026-08-21a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2198,9 +2344,10 @@ function setMode(m){
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   // in Metro there is nothing above the metronome to be divided from
-  document.getElementById('metro-divider').style.display=(isDrone||isTuner||isMetro)?'none':'';
+  document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone)?'none':'';
   const ms=document.getElementById('metro-section');
-  ms.style.display=(isDrone||isTuner)?'none':'';
+  ms.style.display=isTuner?'none':'';
+  buildMetroOnRow();
   splitMetro(isMetro);
   // Metro plays no notes, so the note readout has nothing to read but a dash
   document.getElementById('current-note').style.display=isMetro?'none':'';
@@ -3102,6 +3249,66 @@ function renderPolyBeats(){
   });
 }
 
+/* Click, or one of the styles. A style is not a second thing playing over the
+   click: it takes its place, because two timekeepers are one too many. */
+function buildGrooveRow(){
+  const sel=document.getElementById('groove-sel');
+  if(!sel)return;
+  if(!sel.options.length){
+    sel.appendChild(new Option('Click','click'));
+    Object.keys(GROOVES).forEach(k=>sel.appendChild(new Option(GROOVES[k].label,k)));
+    sel.addEventListener('change',()=>setGroove(sel.value));
+  }
+  sel.value=state.groove;
+  sel.classList.toggle('active',grooveOn());
+  // the bar is the style's while one is playing, so it cannot be typed over
+  const q=document.getElementById('sig-4');
+  if(q){
+    q.disabled=grooveOn();
+    q.title=grooveOn()?'the accompaniment styles are written in four':'';
+  }
+  const info=document.getElementById('groove-info');
+  if(info){
+    const G=GROOVES[state.groove];
+    info.style.display=G?'':'none';
+    info.textContent=G?(G.bars===2?'two bars of four':'one bar of four')+', repeating — no fills, no breaks':'';
+  }
+}
+
+function setGroove(k){
+  const had=grooveOn();
+  state.groove=k;
+  // The styles are written in four. Rather than let one run against a bar it was
+  // not written for, the bar goes to four while a style plays and comes back to
+  // what it was when the click returns.
+  if(grooveOn()){
+    if(state.sig!==4){if(!had)state.sigBeforeGroove=state.sig;setSig(4);}
+  } else if(had&&state.sigBeforeGroove){
+    const back=state.sigBeforeGroove;state.sigBeforeGroove=null;setSig(back);
+  }
+  buildGrooveRow();updateSupersededControls();splitMetro(state.mode==='metro');
+  refreshSectionSummaries();restartIfPlaying();
+}
+
+// Drone: a click over a held note is a choice, so it is asked for and starts off.
+function buildMetroOnRow(){
+  const row=document.getElementById('metro-on-row');
+  if(!row)return;
+  const on=state.mode==='drone';
+  const block=document.getElementById('metro-on-block');
+  if(block)block.style.display=on?'':'none';
+  document.querySelectorAll('#metro-section .metro-body').forEach(b=>b.classList.toggle('no-switch',!on));
+  row.innerHTML='';
+  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.metroInDrone===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.metroInDrone=v;buildMetroOnRow();refreshSectionSummaries();restartIfPlaying();};
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+
 function buildPolyModeRow(){
   const row=document.getElementById('polymode-row');if(!row)return;
   row.innerHTML='';
@@ -3149,6 +3356,13 @@ function updateSupersededControls(){
     const el=document.getElementById(id);
     if(el)el.style.display=on?'none':'';
   });
+  // A style carries its own bar and its own accents, so the bar goes away under
+  // one too; and a polyrhythm is a grid of its own, which leaves no room for a
+  // style at all.
+  const g=document.getElementById('groove-block');
+  if(g)g.style.display=on?'none':'';
+  const sig=document.getElementById('sig-block');
+  if(sig&&!on&&grooveOn())sig.style.display='none';
   const beats=document.getElementById('beats-row');
   const hint=document.querySelector('.beats-hint');
   if(beats)beats.style.display=on?'none':'';
@@ -3255,8 +3469,10 @@ const SECTIONS=[
    text:()=>{
      const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[state.bpm+' BPM'];
+     if(state.mode==='drone'&&!state.metroInDrone)return 'off';
      if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
+     else if(grooveOn())bits.push(GROOVES[state.groove].label);
      else{
        bits.push(state.sig+(state.sig===1?' beat':' beats')+' per bar');
        bits.push(subdivListOn()&&subdivOrder().length>1
@@ -3271,6 +3487,7 @@ const SECTIONS=[
      const bits=[];
      if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
+     else if(grooveOn())bits.push(GROOVES[state.groove].label);
      else bits.push(subdivListOn()&&subdivOrder().length>1
        ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
      return bits.join(' · ');
@@ -3350,21 +3567,20 @@ function layoutAllBeats(){document.querySelectorAll('.beats-row').forEach(layout
    would like, and if that overflows it is tightened a step and asked again.
    Centring comes last and only if it fits, because auto margins on something
    taller than the box put its top out of the scroll's reach. */
-const METRO_TIERS=['metro-tight','metro-tighter','metro-tightest'];
+const FIT_TIERS=['tight','tighter','tightest'];
 function centreMetro(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
-  sc.classList.remove('centred',...METRO_TIERS);
-  if(state.mode!=='metro')return;
+  sc.classList.remove('centred',...FIT_TIERS);
   const over=()=>sc.scrollHeight>sc.clientHeight+1;
-  for(const tier of METRO_TIERS){
+  for(const tier of FIT_TIERS){
     if(!over())break;
     sc.classList.add(tier);
   }
-  // if it scrolls anyway — More is open — the tightening bought nothing, and a
-  // cramped panel on a scrolling screen is worse than a comfortable one
-  if(over()){sc.classList.remove(...METRO_TIERS);return;}
-  sc.classList.add('centred');
+  // if it scrolls anyway — a panel is open — the tightening bought nothing, and
+  // a cramped screen that scrolls is worse than a comfortable one
+  if(over()){sc.classList.remove(...FIT_TIERS);return;}
+  if(state.mode==='metro')sc.classList.add('centred');
 }
 
 const SPREAD_MAX=64;
@@ -3869,6 +4085,8 @@ buildBeats();
 buildPolyBeats();
 updateSupersededControls();
 buildNoteLenRow();
+buildGrooveRow();
+buildMetroOnRow();
 buildSubdivRow();
 buildClickModeRow();
 buildAlignRow();
