@@ -961,7 +961,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     clave is — with no fills and no breaks, so it stays something to play over rather than something
     to listen to. The styles are written in four, so the bar goes to four while one plays and comes
     back to what it was when the click returns. The count-in still clicks: there you want a beat and
-    nothing else. The Click slider is its volume.</dd>
+    nothing else. The Click slider is its volume. The kit is recorded, not
+    synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
     it is on.</dd>
@@ -1752,49 +1753,58 @@ function playClickBuffer(buf,time,gain){
    The patterns are written on a sixteenth grid, one bar of 4/4 unless they say
    otherwise, and they simply repeat. No fills and no breaks: this is something
    to play over, not something to listen to. */
-let noiseBuf=null;
-function noiseBuffer(){
-  if(noiseBuf)return noiseBuf;
-  const sr=audioCtx.sampleRate,n=Math.floor(sr*0.5);
-  noiseBuf=audioCtx.createBuffer(1,n,sr);
-  const d=noiseBuf.getChannelData(0);
-  for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
-  return noiseBuf;
+/* The kit is recorded, not synthesised. The first version made its own sounds —
+   a sine falling for a kick, filtered noise for a snare and hats — and on a
+   phone speaker that came to nothing: a 50Hz kick is below what the speaker can
+   move, and a 7kHz hiss is barely there. These are five hits from the Muldjord
+   Kit (FreePats, CC-BY 4.0), trimmed to length, tapered so the cut cannot click,
+   and normalised. 180KB for the whole kit.
+
+   Until they are decoded the accompaniment falls back to the click, because a
+   metronome that has gone quiet is worse than one that is not the sound you
+   asked for. */
+const DRUM_FILES={kick:'kick',snare:'snare',stick:'stick',hhc:'hhc',hho:'hho'};
+let drumBufs=null,drumsLoading=false,drumsFailed=false;
+function loadDrums(){
+  if(drumBufs||drumsLoading||drumsFailed)return;
+  if(!audioCtx)return;
+  drumsLoading=true;
+  const names=Object.keys(DRUM_FILES);
+  Promise.all(names.map(n=>fetch('vendor/drums/'+DRUM_FILES[n]+'.wav')
+    .then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();})
+    .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))))
+  .then(bufs=>{
+    const out={};names.forEach((n,i)=>out[n]=bufs[i]);
+    drumBufs=out;drumsLoading=false;
+    if(grooveOn())setStatus('Drums loaded \u2713'),setTimeout(()=>setStatus(''),1500);
+  })
+  .catch(()=>{
+    drumsLoading=false;drumsFailed=true;
+    setStatus('The drums could not load \u2014 the accompaniment is clicking instead.');
+  });
 }
-function drumNoise(t,o){
-  const src=audioCtx.createBufferSource();src.buffer=noiseBuffer();
-  const f=audioCtx.createBiquadFilter();
-  if(o.bp){f.type='bandpass';f.frequency.value=o.bp;f.Q.value=o.q||1;}
-  else{f.type='highpass';f.frequency.value=o.hp||4000;}
+function drumHit(name,t,gain){
+  const buf=drumBufs&&drumBufs[name];
+  if(!buf)return false;
+  const src=audioCtx.createBufferSource();
   const g=audioCtx.createGain();
-  g.gain.setValueAtTime(Math.max(0.0001,o.gain),t);
-  g.gain.exponentialRampToValueAtTime(0.0001,t+o.dur);
-  src.connect(f);f.connect(g);g.connect(audioCtx.destination);
-  src.start(t);src.stop(t+o.dur+0.02);
-  schedNodes.push(src,f,g);
+  g.gain.value=gain;
+  src.buffer=buf;src.connect(g);g.connect(audioCtx.destination);
+  src.start(t);
+  schedNodes.push(src,g);
+  return true;
 }
-function drumTone(t,o){
-  const osc=audioCtx.createOscillator();osc.type=o.type||'sine';
-  osc.frequency.setValueAtTime(o.f0,t);
-  if(o.f1)osc.frequency.exponentialRampToValueAtTime(o.f1,t+Math.min(o.dur,0.09));
-  const g=audioCtx.createGain();
-  g.gain.setValueAtTime(Math.max(0.0001,o.gain),t);
-  g.gain.exponentialRampToValueAtTime(0.0001,t+o.dur);
-  osc.connect(g);g.connect(audioCtx.destination);
-  osc.start(t);osc.stop(t+o.dur+0.02);
-  schedNodes.push(osc,g);
-}
+/* Which hit each letter in a pattern is, and how loud it sits against the
+   others. The ghost snare is the same drum played lightly, which is what a
+   ghost note is; the bossa's bass drum is the bass drum. */
 const KIT={
-  k:(t,v)=>{drumTone(t,{f0:150,f1:48,dur:0.24,gain:0.9*v});
-            drumNoise(t,{hp:1200,dur:0.02,gain:0.10*v});},
-  s:(t,v)=>{drumNoise(t,{bp:1900,q:0.6,dur:0.15,gain:0.45*v});
-            drumTone(t,{f0:190,f1:150,dur:0.09,gain:0.22*v,type:'triangle'});},
-  g:(t,v)=>{drumNoise(t,{bp:1900,q:0.6,dur:0.06,gain:0.12*v});},   // a ghost snare
-  h:(t,v)=>drumNoise(t,{hp:7500,dur:0.03,gain:0.20*v}),            // hi-hat, closed
-  o:(t,v)=>drumNoise(t,{hp:6500,dur:0.20,gain:0.15*v}),            // hi-hat, open
-  r:(t,v)=>{drumNoise(t,{bp:2500,q:2,dur:0.03,gain:0.30*v});
-            drumTone(t,{f0:820,dur:0.04,gain:0.16*v,type:'square'});},  // side-stick
-  b:(t,v)=>drumTone(t,{f0:82,f1:56,dur:0.30,gain:0.75*v}),         // the surdo under a bossa
+  k:(t,v)=>drumHit('kick', t,0.95*v),
+  s:(t,v)=>drumHit('snare',t,0.80*v),
+  g:(t,v)=>drumHit('snare',t,0.16*v),
+  h:(t,v)=>drumHit('hhc',  t,0.42*v),
+  o:(t,v)=>drumHit('hho',  t,0.34*v),
+  r:(t,v)=>drumHit('stick',t,0.50*v),
+  b:(t,v)=>drumHit('kick', t,0.85*v),
 };
 // [sixteenth, voice, how hard]
 const GROOVES={
@@ -1826,11 +1836,16 @@ function grooveBars(){const G=GROOVES[state.groove];return G?G.bars:1;}
    at once in the funk — and at full volume that summed to 1.30 on the output,
    which clips. The whole kit is scaled to bring the loudest bar under one, and
    measured again after: 0.94, just under the plain click's 0.98. */
-const KIT_HEADROOM=0.72;
-// One beat's worth of the pattern, placed by time inside it.
+/* Several drums land on the same sixteenth — a kick, a hat and a ghost snare all
+   at once in the funk — and at full volume that clips. The kit is scaled to
+   bring the loudest bar under one; measured on the output afterwards. */
+const KIT_HEADROOM=0.85;
+// One beat's worth of the pattern, placed by time inside it. Returns false when
+// there is nothing to play it with, so the beat can fall back to a click.
 function scheduleGrooveBeat(t0,beat){
   const G=GROOVES[state.groove];
-  if(!G)return;
+  if(!G)return false;
+  if(!drumBufs){loadDrums();return false;}
   const sixteenth=(60/state.bpm)/4;
   const from=(beat%(G.bars*4))*4;
   G.hits.forEach(h=>{
@@ -1838,6 +1853,7 @@ function scheduleGrooveBeat(t0,beat){
     const voice=KIT[h[1]];
     if(voice)voice(t0+(h[0]-from)*sixteenth,h[2]*state.clickVol*KIT_HEADROOM);
   });
+  return true;
 }
 
 function scheduleClick(time,kind){
@@ -2137,10 +2153,10 @@ function schedulerTick(){
     // count-in, where a click is what you want to hear.
     const groove=grooveOn()&&!counting;
     if(subIdx===0){
-      if(groove)scheduleGrooveBeat(nextBeatTime,grooveBeat);
-      else scheduleClick(nextBeatTime,accentFor(beatIdx));
+      if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
+        scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(!groove&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
+    } else if(!(groove&&drumBufs)&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
@@ -2277,7 +2293,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21a';
+const APP_VERSION='2026-08-21b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3286,6 +3302,9 @@ function setGroove(k){
   } else if(had&&state.sigBeforeGroove){
     const back=state.sigBeforeGroove;state.sigBeforeGroove=null;setSig(back);
   }
+  // fetch them now rather than on the first beat, and only once there is a
+  // context to decode them into
+  if(grooveOn())Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
   buildGrooveRow();updateSupersededControls();splitMetro(state.mode==='metro');
   refreshSectionSummaries();restartIfPlaying();
 }

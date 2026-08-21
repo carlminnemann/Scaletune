@@ -1,9 +1,10 @@
 # Third-party components bundled with ScaleTune
 
-Both components below are MIT licensed, which permits redistribution inside a
-compiled application provided the copyright notice is retained. Keep this file
-in the app bundle and surface the attributions in an "About / Licenses" screen
-before submitting to the App Store or Google Play.
+Everything below permits redistribution inside a compiled application. The two
+MIT components require the copyright notice to be retained; the drum kit is
+CC-BY 4.0 and requires attribution. Keep this file in the app bundle and surface
+the attributions in an "About / Licenses" screen before submitting to the App
+Store or Google Play.
 
 ---
 
@@ -35,6 +36,26 @@ FluidR3 GM soundfont by Frank Wen.
 MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.
 License: MIT
 Source: https://github.com/gleitz/midi-js-soundfonts
+
+## Muldjord Kit — drum samples
+`vendor/drums/kick.wav` · `snare.wav` · `stick.wav` · `hhc.wav` · `hho.wav` — 180 KB together
+
+Five hits from a recorded acoustic kit, used by the metronome's accompaniment
+styles: bass drum, snare, snare-with-the-snares-off (the clave in the bossa),
+closed hi-hat, open hi-hat. Each is one velocity layer of the original,
+trimmed to length, tapered over its last third so the cut cannot click, and
+normalised to a peak of 0.95. The originals are 24-bit 44.1kHz FLAC, several
+hundred kilobytes each and up to fifty velocity layers per drum; what is
+bundled is a small selection at 16-bit, which is what a practice tool needs.
+
+Recorded by Lars Muldjord. Published by the FreePats project.
+License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+Source: https://freepats.zenvoid.org/Percussion/acoustic-drum-kit.html
+        https://github.com/freepats/muldjordkit
+
+**Attribution required.** Any distribution of the app must credit "Muldjord Kit
+by Lars Muldjord (FreePats), CC-BY 4.0" where users can find it — the app's
+guide, an About screen, or the store listing.
 
 ---
 
