@@ -959,14 +959,23 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
   </div>
 
+  <!-- A fold like the pattern and the mixer: five figures and a direction on
+       permanent display is a lot of buttons for something most players set once. -->
   <div class="mgroup" id="subdiv-block">
-    <div class="head"><span class="section-label">Subdivision</span>
-      <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
-    <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
-    <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
-    <div id="click-block">
-    <div class="head"><span class="section-label">Click</span>
-      <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
+    <div class="head pat-head" id="subdiv-head" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="subdiv-body" style="margin-bottom:0">
+      <span class="section-label">Subdivision</span>
+      <span class="pat-sum" id="subdiv-sum"></span>
+    </div>
+    <div id="subdiv-body" hidden>
+      <div class="head" style="margin-top:var(--s3)"><span class="section-label">Choose</span>
+        <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
+      <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
+      <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
+      <div id="click-block">
+      <div class="head" style="margin-bottom:0"><span class="section-label">Click</span>
+        <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
+      </div>
     </div>
   </div>
 
@@ -1165,7 +1174,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Bar</dt><dd>How many beats it counts. Tap a circle to cycle it: accented, plain, silent. With
     notes playing every beat is plain unless you ask otherwise; with the metronome alone the first
     beat is accented, so the bar you chose can be heard.</dd>
-    <dt>Subdivision</dt><dd>What each beat is divided into. Swing is two ticks split two to one — the
+    <dt>Subdivision</dt><dd>A fold, like the pattern and the mixer, saying what it is set to while it
+    is shut. What each beat is divided into. Swing is two ticks split two to one — the
     triplet feel a written pair of eighths is actually played with. Single uses one figure; Sequence
     takes the ones you pick in turn, one per pass.</dd>
     <dt>Click</dt><dd>Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
@@ -2947,7 +2957,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23b';
+const APP_VERSION='2026-08-23c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3021,6 +3031,16 @@ function setMode(m){
   buildListModeRow();
   splitMetro(isMetro);
   updateSupersededControls();      // the accompaniment is Metro's alone
+  /* The panels close when the mode changes; the folds inside them are panels in
+     everything but name, so they close with them. */
+  ['pat-body','mix-body','subdiv-body'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b&&!b.hidden){
+      b.hidden=true;
+      const h=document.getElementById(id.replace('-body','-head'));
+      if(h)h.setAttribute('aria-expanded','false');
+    }
+  });
   // Metro plays no notes, so the note readout has nothing to read but a dash
   document.getElementById('current-note').style.display=isMetro?'none':'';
   document.getElementById('current-freq').style.display=isMetro?'none':'';
@@ -3523,7 +3543,19 @@ function buildSubdivModeRow(){
   });
 }
 
+// what the closed fold says: the figure in force, or how many are in the table
+function subdivSummary(){
+  const el=document.getElementById('subdiv-sum');
+  if(!el)return;
+  const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
+  el.textContent=subdivListOn()&&subdivOrder().length>1
+    ? '· '+subdivOrder().length+' figures'
+    : '· '+(nm[currentSubdiv()]||'');
+}
+
 function buildSubdivRow(){
+  wireFold('subdiv-head','subdiv-body');
+  subdivSummary();
   const row=document.getElementById('subdiv-row');row.innerHTML='';
   const list=state.practice.subdivList;
   SUBDIVS.forEach(sd=>{
@@ -4349,14 +4381,7 @@ function buildPatternEditor(){
     }
     gridify(brow);
   }
-  const head=document.getElementById('pat-head');
-  if(head&&!head.dataset.wired){
-    head.dataset.wired='1';
-    head.onclick=()=>setPatOpen(!patOpen());
-    head.onkeydown=e=>{
-      if(e.key==='Enter'||e.key===' '){e.preventDefault();setPatOpen(!patOpen());}
-    };
-  }
+  wireFold('pat-head','pat-body',()=>{buildPatternEditor();patInfo();});
   /* Any bar into the one you are editing, in either direction: bar three into
      bar one is as reasonable as bar one into bar three, and four bars are often
      three variations of one — but only when asked, since they are sometimes four
@@ -4462,18 +4487,32 @@ function buildPatternEditor(){
   }
   patInfo();
 }
-function patOpen(){
-  const b=document.getElementById('pat-body');
-  return b&&!b.hidden;
+/* Three groups fold inside the metronome — the pattern, the mixer and the
+   subdivision — and they all fold the same way. */
+function foldOpen(id){
+  const b=document.getElementById(id);
+  return !!(b&&!b.hidden);
 }
-function setPatOpen(on){
-  const body=document.getElementById('pat-body'),head=document.getElementById('pat-head');
+function setFold(headId,bodyId,on,after){
+  const body=document.getElementById(bodyId),head=document.getElementById(headId);
   if(!body||!head)return;
   body.hidden=!on;
   head.setAttribute('aria-expanded',String(!!on));
-  if(on)buildPatternEditor();     // lay the cells out at the width it now has
-  patInfo();
+  if(on&&after)after();
   spreadPanelsSoon();
+}
+function wireFold(headId,bodyId,after){
+  const head=document.getElementById(headId);
+  if(!head||head.dataset.wired)return;
+  head.dataset.wired='1';
+  const toggle=()=>setFold(headId,bodyId,!foldOpen(bodyId),after);
+  head.onclick=toggle;
+  head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
+}
+function patOpen(){return foldOpen('pat-body');}
+function setPatOpen(on){
+  setFold('pat-head','pat-body',on,buildPatternEditor);
+  patInfo();
 }
 function patInfo(){
   const el=document.getElementById('pat-info');
@@ -4610,12 +4649,7 @@ function buildMixer(){
     row.querySelector('.val').textContent=v+'%';
   });
   paintMixUsed();
-  const head=document.getElementById('mix-head');
-  if(head&&!head.dataset.wired){
-    head.dataset.wired='1';
-    head.onclick=()=>setMixOpen(!mixOpen());
-    head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setMixOpen(!mixOpen());}};
-  }
+  wireFold('mix-head','mix-body');
   const reset=document.getElementById('mix-reset');
   if(reset&&!reset.dataset.wired){
     reset.dataset.wired='1';
