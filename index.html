@@ -86,6 +86,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 /* dvh follows the phone's URL bar as it hides and shows; vh above it as the
    fallback for browsers that do not know dvh */
 @supports(height:100dvh){html,body{height:100dvh}}
+/* An iPad reports the wrong height on the first paint and nothing measures
+   again until the device is turned, which is how the Start button went missing
+   in portrait and came back after a rotation. Where the window can be measured,
+   the measurement wins. */
+html,body{height:var(--app-h,100dvh)}
 .container{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column}
 /* min-height:0, or a flex child refuses to shrink below its content and the
    scrolling never starts */
@@ -925,7 +930,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <span class="sig-unit">bars</span>
       </span></div>
     <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Also between passes</span>
+      <span class="section-label">Count again on</span>
       <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
   </div>
 
@@ -1128,9 +1133,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     figure to the notes.</dd>
     <dt>Count In</dt><dd>Bars of click before the notes come in. It ends on a downbeat: what is left of
     the bar first, then whole bars, so a phrase that finishes mid-bar does not put your entry off the
-    beat. Turn "also between passes" on and it comes back whenever a pass hands over to a new key or a new
-    mode — the moment you need to find the first note. Not between rounds of the same thing, which would break
-    the very drift the app is built around.</dd>
+    beat — and the note you are being counted into waits for the count rather than sounding before it.
+    <em>Count again on</em> says when it comes back: on a <em>new key</em> only, which is the moment
+    you always need, or on <em>any change</em>, which includes handing over from one scale or chord to
+    the next in the same key. Never between rounds of the same thing, which would break the very drift
+    the app is built around.</dd>
     <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
     pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
     that.</dd>
@@ -1140,6 +1147,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     is no moment where it jumps. A ramp starts again from your tempo every time you press Start,
     because otherwise the second run would have nowhere to go; steps stay where they got to. Either
     way it stops at 10 and at 300.</dd>
+    <dt>Where the accompaniment lives</dt><dd>In Metro, and only there. In the other modes the
+    metronome is something to play against, so it clicks and nothing more — a kit, a mixer and a
+    pattern editor were six controls deep in a panel you open to set a tempo. Choose a style in Metro
+    and it stays chosen; step into Scale and you get the click back.</dd>
     <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
     a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes: one
     sweep that never stops, the way a brush is actually played, leaning a little on two and four and
@@ -1427,7 +1438,9 @@ let state={
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
   poly:{on:false,a:4,b:5,notesFollow:'a',accA:[],accB:[],touched:false},polyVol:0.9,
-  countBars:0,countBetween:false,
+  countBars:0,
+  // 'off' | 'key' — only when the key moves | 'change' — any new key or mode
+  countWhen:'off',
   // The metronome plays a style instead of a click: 'click' is the click.
   groove:'click',sigBeforeGroove:null,
   kit:'recorded',            // 'recorded' or 'machine'
@@ -2261,7 +2274,16 @@ function grooveDef(){
   if(hits===G.hits)return G;
   return {label:G.label,bars:G.bars,hits:hits};
 }
-function grooveOn(){const G=grooveDef();return !!(G&&G.hits.length);}
+/* The accompaniment belongs to the bare metronome. In the note modes the
+   metronome is there to be played against, and a kit, a mixer and a pattern
+   editor in that panel were six controls deep in something you open to set a
+   tempo. So there it clicks, and everything else lives in Metro. */
+function grooveAllowed(){return state.mode==='metro';}
+function grooveOn(){
+  if(!grooveAllowed())return false;
+  const G=grooveDef();
+  return !!(G&&G.hits.length);
+}
 function grooveBars(){const G=grooveDef();return G?G.bars:1;}
 /* Several drums land on the same sixteenth — a kick, a hat and a ghost snare all
    at once in the funk — and at full volume that summed to 1.30 on the output,
@@ -2653,6 +2675,7 @@ function schedulerTick(){
     let note=null;
     // the count-in: clicks as usual, no notes, and the phrase does not begin
     // until it is paid off
+    let countedThisTick=false;
     const counting=countTicks>0;
     if(countTicks>0){
       countTicks--;
@@ -2670,15 +2693,25 @@ function schedulerTick(){
           activeSubdiv=currentSubdiv();
           subIdx=0;beatIdx=0;tickCount=0;
         }
+        /* If that armed a count-in, this tick is the first of it: the note it
+           was about to play is the one you are being counted into, so it waits.
+           Without this the first note of the new key sounded before the count
+           and you came in on the second — which reads as the count-in eating
+           your first beat. */
+        if(countTicks>0){
+          countTicks--;
+          if(countTicks===0){tickCount=0;grooveBeat=0;}
+          countedThisTick=true;
+        }
       }
-      if(sequence.length){note=sequence[seqIdx];seqIdx++;}
+      if(!countedThisTick&&sequence.length){note=sequence[seqIdx];seqIdx++;}
     }
     const spb=60/state.bpm,sub=activeSubdiv,tickDur=spb*tickShare(sub,subIdx);
     if(note!==null)scheduleTone(note,nextBeatTime,noteDuration(sub,tickDur));
     if(subIdx===0)tempoOverTime(nextBeatTime);
     // A style replaces the click rather than playing over it — but not during the
     // count-in, where a click is what you want to hear.
-    const groove=grooveOn()&&!counting;
+    const groove=grooveOn()&&!(counting||countedThisTick);
     if(subIdx===0){
       if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
@@ -2829,7 +2862,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22j';
+const APP_VERSION='2026-08-22k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2902,6 +2935,7 @@ function setMode(m){
   buildMetroOnRow();
   buildListModeRow();
   splitMetro(isMetro);
+  updateSupersededControls();      // the accompaniment is Metro's alone
   // Metro plays no notes, so the note readout has nothing to read but a dash
   document.getElementById('current-note').style.display=isMetro?'none':'';
   document.getElementById('current-freq').style.display=isMetro?'none':'';
@@ -3201,21 +3235,24 @@ function advancePass(){
     buildSubdivRow();
   }
   const list=activeList();
-  let hardChange=false;
+  let itemChange=false,keyChange=false;
   if(wrapped&&useListOn()&&list.length>1){
     studyIdx=(studyIdx+1)%list.length;
     applyListItem(list[studyIdx]);
     wrapped=(studyIdx===0);
-    hardChange=true;                       // a different mode or chord
+    itemChange=true;                       // a different mode or chord
   }
   if(wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
     state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
-    hardChange=true;                       // a different key
+    keyChange=true;                        // a different key
   }
   /* A new key or a new mode is where you need a moment to find the first note,
-     so the count-in can be asked for there too — not between rounds of the same
-     thing, which would break the very drift the app is built around. */
-  if(hardChange&&state.countBetween)beginCount();
+     so the count-in can be asked for there — not between rounds of the same
+     thing, which would break the very drift the app is built around. Which of
+     the two is a choice: a new key always needs finding, a dorian handing over
+     to a minor seventh in the same key often does not. */
+  const want=state.countWhen;
+  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange))beginCount();
   stepTempo();
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
@@ -3550,13 +3587,14 @@ function buildCountRow(){
   line.style.display=canBetween?'':'none';
   row.innerHTML='';
   if(!canBetween)return;
-  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+  [['off','Off'],['key','New key'],['change','Any change']].forEach(([v,label])=>{
     const b=document.createElement('button');
-    b.className='pick-btn'+(!!state.countBetween===v?' active':'');
+    b.className='pick-btn'+((state.countWhen||'off')===v?' active':'');
     b.textContent=label;
-    b.onclick=()=>{state.countBetween=v;buildCountRow();refreshSectionSummaries();};
+    b.onclick=()=>{state.countWhen=v;buildCountRow();refreshSectionSummaries();};
     row.appendChild(b);
   });
+  gridify(row);
 }
 
 const PASS_MAX=32;
@@ -4533,9 +4571,12 @@ function updateSupersededControls(){
     const el=document.getElementById(id);
     if(el)el.style.display=on?'none':'';
   });
-  // A polyrhythm is a grid of its own, which leaves no room for a style at all
-  const g=document.getElementById('groove-block');
-  if(g)g.style.display=on?'none':'';
+  /* A polyrhythm is a grid of its own, which leaves no room for a style at all;
+     and outside Metro there is no accompaniment to speak of. */
+  ['groove-block','mixer-block','pattern-block'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=(on||!grooveAllowed())?'none':'';
+  });
   /* Under a style the bar stays on the screen — it is still four beats and the
      circles still show which one you are on — but the accents are the pattern's
      now, so tapping them would promise something it cannot do. */
@@ -4653,7 +4694,8 @@ const SECTIONS=[
      const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[state.bpm+' BPM'];
      if(state.mode==='drone'&&!state.metroInDrone)return 'off';
-     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
+     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'
+       +(state.countWhen==='key'?', each new key':(state.countWhen==='change'?', each change':'')));
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else if(grooveOn())bits.push(GROOVES[state.groove].label);
      else{
@@ -4668,7 +4710,8 @@ const SECTIONS=[
    text:()=>{
      const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[];
-     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'+(state.countBetween?' each pass':''));
+     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'
+       +(state.countWhen==='key'?', each new key':(state.countWhen==='change'?', each change':'')));
      if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
      else if(grooveOn())bits.push(GROOVES[state.groove].label);
      else bits.push(subdivListOn()&&subdivOrder().length>1
@@ -4812,7 +4855,15 @@ function spreadPanels(){
    size settles a little after the event, and Safari can leave the old frame on
    the screen until something makes it paint again, so this waits for the dust,
    lays out again, and nudges it into repainting. */
+/* The one number the frame is built on. visualViewport is what the browser is
+   actually showing, which on iOS is not always what innerHeight claims. */
+function measureViewport(){
+  const vv=window.visualViewport;
+  const h=Math.round(vv?vv.height:window.innerHeight);
+  if(h>200)document.documentElement.style.setProperty('--app-h',h+'px');
+}
 function relayoutViewport(){
+  measureViewport();
   layoutAllBeats();
   gridifyAll();
   spreadPanels();
@@ -4830,6 +4881,13 @@ function viewportChanged(){
 window.addEventListener('resize',viewportChanged);
 window.addEventListener('orientationchange',viewportChanged);
 if(window.visualViewport)window.visualViewport.addEventListener('resize',viewportChanged);
+/* Coming back to a suspended app is the other moment iOS hands over a stale
+   height, and the first paint is measured again twice as it settles. */
+window.addEventListener('pageshow',viewportChanged);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)viewportChanged();});
+measureViewport();
+setTimeout(viewportChanged,250);
+setTimeout(viewportChanged,1200);
 /* The rows are rebuilt by a dozen different functions as the app runs, so rather
    than teaching each one, watch for children changing and re-measure. */
 (function(){
