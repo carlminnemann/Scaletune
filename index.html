@@ -2957,7 +2957,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23c';
+const APP_VERSION='2026-08-23d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3844,6 +3844,7 @@ function initFamilies(){
         document.querySelectorAll('details.fam').forEach(o=>{
           if(o!==d&&o.open&&o.parentElement===d.parentElement)o.open=false;
         });
+        revealPanel(d);
       }
       refreshFamilySummaries();
     });
@@ -4487,6 +4488,25 @@ function buildPatternEditor(){
   }
   patInfo();
 }
+/* Opening something taller than the screen used to leave you looking at where it
+   used to be: the page grew downwards and the view stayed put. Whatever was
+   opened is brought into view — its top to the top, if it does not already fit —
+   after the layout has settled, since opening also re-shares the leftover room. */
+function revealPanel(el){
+  const sc=document.getElementById('scroll-area');
+  if(!sc||!el)return;
+  const bring=()=>{
+    const r=el.getBoundingClientRect(),v=sc.getBoundingClientRect();
+    if(r.top>=v.top-1&&r.bottom<=v.bottom+1)return;      // all of it is already there
+    const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const top=Math.max(0,sc.scrollTop+(r.top-v.top)-8);
+    if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
+    else sc.scrollTop=top;
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(bring));
+  setTimeout(bring,180);          // and again once the spread has finished
+}
+
 /* Three groups fold inside the metronome — the pattern, the mixer and the
    subdivision — and they all fold the same way. */
 function foldOpen(id){
@@ -4500,6 +4520,7 @@ function setFold(headId,bodyId,on,after){
   head.setAttribute('aria-expanded',String(!!on));
   if(on&&after)after();
   spreadPanelsSoon();
+  if(on)revealPanel(head.parentElement||head);
 }
 function wireFold(headId,bodyId,after){
   const head=document.getElementById(headId);
@@ -5502,6 +5523,18 @@ function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o
 })();
 
 // after the browser has laid the panel out, not before
+/* The note readout is part of the frame, so when it appears it takes its height
+   from the panels — and nothing was telling them. Same trap as the status line:
+   the frame changed and no one re-measured. */
+(function(){
+  const watch=['current-note','current-freq'];
+  const obs=new MutationObserver(()=>spreadPanelsSoon());
+  watch.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)obs.observe(el,{childList:true,characterData:true,subtree:true});
+  });
+})();
+
 function spreadPanelsSoon(){
   requestAnimationFrame(()=>requestAnimationFrame(spreadPanels));
   // a frame never comes while the page is hidden, and it can come back to a
@@ -5527,6 +5560,7 @@ function initSections(){
     d.addEventListener('toggle',()=>{
       // mirror onto the other sections in the same group
       spreadPanelsSoon();
+      if(d.open)revealPanel(d);
       if(s.group)SECTIONS.forEach(o=>{
         if(o.group!==s.group||o.id===s.id)return;
         const e=document.getElementById(o.id);
