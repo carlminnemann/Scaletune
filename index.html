@@ -207,6 +207,12 @@ details.sec.pinned>summary::after{display:none}
 
 #pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
 #pat-info{white-space:pre-line}
+#mixer-block{padding-left:var(--s2);padding-right:var(--s2)}
+.mix-row{display:grid;grid-template-columns:74px 1fr 42px;gap:var(--s2);align-items:center;
+  margin-bottom:6px}
+.mix-name{font-size:11px;color:var(--text2)}
+.mix-row input[type=range]{width:100%;min-width:0}
+.mix-row .val{font-size:11px;color:var(--text3);text-align:right;font-variant-numeric:tabular-nums}
 /* The editor is a fold of its own inside the panel: it is the tallest thing in
    the metronome and nobody wants it in the way while setting a tempo. */
 .pat-head{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;
@@ -828,6 +834,18 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="info-line" id="groove-info" style="display:none"></div>
   </div>
 
+  <div class="mgroup" id="mixer-block">
+    <div class="head pat-head" id="mix-head" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="mix-body" style="margin-bottom:0">
+      <span class="section-label">Mixer</span>
+      <span class="pat-sum" id="mix-sum"></span>
+    </div>
+    <div id="mix-body" hidden>
+      <div id="mix-rows" style="margin-top:var(--s3)"></div>
+      <button class="clear-btn" id="mix-reset" style="margin-top:var(--s2)">✕ Level again</button>
+    </div>
+  </div>
+
   <!-- The pattern itself, writable. Six voices down the side, a bar across, and
        a cell that goes round soft, middling, hard and off again — which is how a
        ghost note and an accent are written without a row each. -->
@@ -1057,7 +1075,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
     <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
-    <dt>Clear</dt><dd>Empties the selection, or the whole study list.</dd>
+    <dt>The study list</dt><dd>One list, holding scales and chords together: pick scales in Scale and
+    chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
+    same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
+    happen to be looking at, and the numbers on the buttons count through the whole list.</dd>
+    <dt>Clear</dt><dd>Empties the selection. With the study list on it drops that panel's kind from
+    the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-range"><h3>Range &amp; Direction</h3><dl>
@@ -1113,6 +1136,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
     synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
+    <dt>Mixer</dt><dd>A level for each drum, over whatever the pattern asks for — the one thing that
+    can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
+    not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
+    next time. <em>Level again</em> puts every fader back.</dd>
     <dt>Density</dt><dd>How full a style plays. <em>Busy</em> adds what a drummer would add — the extra
     hits are written into each style, not invented on the fly, because a random note is not a groove.
     <em>Light</em> takes the ghost notes out and leaves the cymbals on the beat. A pattern of your own
@@ -1306,7 +1333,7 @@ function letterPlanFor(group,name){
 // The letter walk for whatever is selected: thirds for a chord, steps for a
 // scale, and a plan of its own for a pentatonic.
 function letterWalk(){
-  if(state.mode==='arpeggio')return 2;
+  if(playingKind()==='chord')return 2;      // a chord steps two letters at a time
   return letterPlanFor(state.scaleGroup,state.scaleName)||1;
 }
 
@@ -1388,6 +1415,11 @@ let state={
   kit:'recorded',            // 'recorded' or 'machine'
   density:'normal',          // how full a style plays: 'light', 'normal', 'busy'
   balladHat:false,           // the foot on two and four, under the brushes
+  /* One level per drum, over whatever the pattern asks for. Nothing else can
+     answer "the hi-hat is too quiet against the brushes": the patterns are
+     written to balance each other, and what balances on headphones does not on
+     a phone. */
+  mix:{k:1,s:1,h:1,o:1,d:1,r:1,w:1,x:1},
   /* A pattern of the player's own. Kept in the same twelfths the styles use, so
      what is written is exactly what plays; the editor is a view onto it at a
      resolution a finger can hit. */
@@ -1395,9 +1427,11 @@ let state={
   // In Drone the metronome is not the point, so there it is asked for
   metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
-  // useScaleList / useChordList are per mode: turning the study list on for
-  // scales must not blank out the arpeggio selection
-  practice:{rootMove:'stay',useScaleList:false,useChordList:false,scaleList:[],chordList:[],
+  /* One study list, holding scales and chords together: a rotation of "the
+     dorian, then a minor seventh on the same root" is a real exercise and there
+     was no way to ask for it. Each item says which it is, and what is playing
+     follows the item rather than the panel you happen to be looking at. */
+  practice:{rootMove:'stay',useList:false,list:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
@@ -1406,7 +1440,8 @@ let state={
             tempoMode:'off',tempoStep:5,tempoEvery:'pass',
             rampTo:120,rampMinutes:10,rampFrom:null,
             passCount:4,passUnit:'bar'},
-  playing:false,tunerA4:440,tunerTemp:'equal',tunerKey:0
+  playing:false,tunerA4:440,tunerTemp:'equal',tunerKey:0,
+  listKind:null,             // which kind the rotation is on right now
 };
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
@@ -1437,7 +1472,7 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
    hidden — they are moved, into a folded panel of their own — so nothing about
    them changes and every other mode still gets the one whole metronome. */
 const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block',
-                  'groove-block','pattern-block'];
+                  'groove-block','mixer-block','pattern-block'];
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -2310,7 +2345,8 @@ function scheduleGrooveBeat(t0,beat){
   G.hits.forEach(h=>{
     if(h[0]<from||h[0]>=from+GRID)return;
     const voice=voices[h[1]];
-    if(voice)voice(t0+(h[0]-from)*unit,h[2]*state.clickVol*KIT_HEADROOM,60/state.bpm);
+    const level=(state.mix&&state.mix[h[1]]!=null)?state.mix[h[1]]:1;
+    if(voice)voice(t0+(h[0]-from)*unit,h[2]*level*state.clickVol*KIT_HEADROOM,60/state.bpm);
   });
   return true;
 }
@@ -2374,8 +2410,9 @@ function activeDegrees(){
   // in Study list mode an empty list means nothing is selected, even if a
   // single selection is left over from before
   if(useListOn()&&!activeList().length)return null;
-  if(state.mode==='scale'&&state.scaleGroup)return degreesOf(state.scaleGroup,state.scaleName);
-  if(state.mode==='arpeggio'&&state.chordGroup)return CHORDS[state.chordGroup][state.chordName];
+  const kind=playingKind();
+  if(kind==='scale'&&state.scaleGroup)return degreesOf(state.scaleGroup,state.scaleName);
+  if(kind==='chord'&&state.chordGroup)return CHORDS[state.chordGroup][state.chordName];
   return null;
 }
 
@@ -2412,7 +2449,7 @@ function buildSequence(){
   // A single-octave seventh arpeggio is four notes and stops there — adding the
   // octave on top would make five and blur the inversion. Across two or more
   // octaves it does land back on the starting note.
-  const seventh=state.mode==='arpeggio'&&state.chordGroup==='seventh';
+  const seventh=playingKind()==='chord'&&state.chordGroup==='seventh';
   const appendTop=!(seventh&&state.span===1);
   return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,state.direction);
 }
@@ -2774,7 +2811,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22g';
+const APP_VERSION='2026-08-22h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2973,7 +3010,7 @@ function buildPitchLists(){
       const b=document.createElement('button');
       b.className='pick-btn';b.dataset.scale=sn;b.dataset.group=gk;b.textContent=sn;
       b.onclick=()=>{
-        if(useListOn()){toggleListItem(gk,sn);return;}
+        if(useListOn()){toggleListItem('scale',gk,sn);return;}
         state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
         renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
       };
@@ -2987,7 +3024,7 @@ function buildPitchLists(){
       const b=document.createElement('button');
       b.className='pick-btn';b.dataset.chord=cn;b.dataset.group=gk;b.textContent=cn;
       b.onclick=()=>{
-        if(useListOn()){toggleListItem(gk,cn);return;}
+        if(useListOn()){toggleListItem('chord',gk,cn);return;}
         state.chordGroup=gk;state.chordName=cn;state.startDeg=0;
         renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
       };
@@ -2997,19 +3034,16 @@ function buildPitchLists(){
 }
 
 /* ---------- practice progressions ---------- */
-function activeList(){
-  if(state.mode==='scale')return state.practice.scaleList;
-  if(state.mode==='arpeggio')return state.practice.chordList;
-  return[];
-}
+function activeList(){return state.practice.list;}
 function useListOn(){
-  if(state.mode==='scale')return state.practice.useScaleList;
-  if(state.mode==='arpeggio')return state.practice.useChordList;
-  return false;
+  return (state.mode==='scale'||state.mode==='arpeggio')&&state.practice.useList;
 }
-function setUseList(v){
-  if(state.mode==='scale')state.practice.useScaleList=v;
-  else if(state.mode==='arpeggio')state.practice.useChordList=v;
+function setUseList(v){state.practice.useList=v;}
+// Scale or chord: the item's own kind while a rotation is running, and the mode
+// you are in otherwise.
+function playingKind(){
+  if(listEnabled()&&state.listKind)return state.listKind;
+  return state.mode==='arpeggio'?'chord':'scale';
 }
 function listEnabled(){return useListOn()&&activeList().length>0;}
 
@@ -3022,15 +3056,16 @@ function clampStartDeg(){
 
 function applyListItem(item){
   if(!item)return;
-  if(state.mode==='scale'){state.scaleGroup=item.group;state.scaleName=item.name;}
-  else{state.chordGroup=item.group;state.chordName=item.name;}
+  state.listKind=item.kind||(state.mode==='arpeggio'?'chord':'scale');
+  if(state.listKind==='chord'){state.chordGroup=item.group;state.chordName=item.name;}
+  else{state.scaleGroup=item.group;state.scaleName=item.name;}
   clampStartDeg();
 }
 
-function toggleListItem(group,name){
+function toggleListItem(kind,group,name){
   const list=activeList();
-  const i=list.findIndex(x=>x.group===group&&x.name===name);
-  if(i>=0)list.splice(i,1);else list.push({group,name});
+  const i=list.findIndex(x=>x.group===group&&x.name===name&&(x.kind||'scale')===kind);
+  if(i>=0)list.splice(i,1);else list.push({kind,group,name});
   if(list.length){studyIdx=0;applyListItem(list[0]);}
   renderPitchPickers();refreshSequence();restartIfPlaying();
 }
@@ -3603,10 +3638,10 @@ function refreshFamilySummaries(){
     const el=d.querySelector('.fam-sum');if(!el)return;
     const fam=d.dataset.fam, names=familyMembers(fam);
     if(useListOn()){
-      const n=activeList().filter(x=>names.indexOf(x.name)>=0).length;
+      const n=activeList().filter(x=>x.group===fam&&names.indexOf(x.name)>=0).length;
       el.textContent=n?'· '+n+' chosen':'';
     } else {
-      const cur=state.mode==='scale'?state.scaleName:state.chordName;
+    const cur=state.mode==='scale'?state.scaleName:state.chordName;
       el.textContent=(cur&&names.indexOf(cur)>=0)?'· '+cur:'';
     }
   });
@@ -3615,7 +3650,7 @@ function refreshFamilySummaries(){
 // Open the box holding what is currently selected, so a fresh selection or a
 // progression stepping to another family is never hidden behind a closed box.
 function revealActiveFamily(){
-  const fam=state.mode==='scale'?state.scaleGroup:state.chordGroup;
+  const fam=playingKind()==='chord'?state.chordGroup:state.scaleGroup;
   if(!fam)return;
   const d=document.querySelector('details.fam[data-fam="'+fam+'"]');
   if(d&&!d.open&&d.offsetParent!==null)d.open=true;
@@ -3624,13 +3659,15 @@ function revealActiveFamily(){
 function paintSetButtons(selector,attr,forMode){
   const mine=state.mode===forMode;
   const list=activeList();
+  const kind=forMode==='scale'?'scale':'chord';
   const current=forMode==='scale'?state.scaleName:state.chordName;
   document.querySelectorAll(selector).forEach(b=>{
     const name=b.dataset[attr];
     b.classList.remove('active','now');
     if(!mine){b.textContent=name;return;}
     if(useListOn()){
-      const i=list.findIndex(x=>x.name===name);
+      // the list holds both kinds, so a chord called Major is not a scale of it
+      const i=list.findIndex(x=>x.name===name&&(x.kind||'scale')===kind);
       if(i>=0){
         b.classList.add(i===studyIdx&&state.playing?'now':'active');
         b.classList.add('numbered');
@@ -3717,8 +3754,11 @@ function updateInfo(){
 function clearPitch(){
   if(state.mode==='scale'){state.scaleGroup=null;state.scaleName=null;}
   else{state.chordGroup=null;state.chordName=null;}
-  // clear the study list too, or its buttons stay lit while playback refuses
-  activeList().length=0;
+  /* The list holds both kinds now, so Clear in the Scales panel drops the scales
+     from it and leaves the chords where they are. */
+  const kind=state.mode==='arpeggio'?'chord':'scale';
+  state.practice.list=activeList().filter(x=>(x.kind||'scale')!==kind);
+  if(!activeList().length)state.listKind=null;
   studyIdx=0;
   state.startDeg=0;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
@@ -3912,7 +3952,7 @@ function buildGrooveRow(){
       +(state.density==='busy'?', filled out':(state.density==='light'?', pared back':''))
       +' — no fills, no breaks';
   }
-  buildKitRow();buildDensityRow();buildHatRow();
+  buildKitRow();buildDensityRow();buildHatRow();buildMixer();
 }
 
 /* ---------- the editor ----------
@@ -4199,7 +4239,8 @@ function patInfo(){
    purpose, but a pattern you wrote is your work, not a view setting. */
 function savePattern(){
   try{localStorage.setItem('scaletune-pattern',JSON.stringify({
-    bars:state.custom.bars,grid:state.custom.grid,hits:state.custom.hits,kit:state.kit}));}catch(e){}
+    bars:state.custom.bars,grid:state.custom.grid,hits:state.custom.hits,
+    kit:state.kit,mix:state.mix}));}catch(e){}
 }
 function loadPattern(){
   try{
@@ -4212,6 +4253,10 @@ function loadPattern(){
       state.custom.grid=p.grid===12?12:16;
     }
     if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;
+    if(p&&p.mix)Object.keys(state.mix).forEach(k=>{
+      const v=parseFloat(p.mix[k]);
+      if(!isNaN(v)&&v>=0&&v<=1.5)state.mix[k]=v;
+    });
   }catch(e){}
 }
 
@@ -4234,6 +4279,70 @@ function buildDensityRow(){
     row.appendChild(b);
   });
   gridify(row);
+}
+
+/* A level per drum. The faders are where the ear says they should be rather
+   than where the pattern put them: brushes and a foot hi-hat, for instance,
+   balance differently on a phone than on headphones. */
+const MIX_VOICES=[['k','Bass drum'],['s','Snare'],['h','Hi-hat'],['o','Open hat'],
+                  ['d','Ride'],['r','Clave'],['w','Brush sweep'],['x','Brush tap']];
+function mixOpen(){const b=document.getElementById('mix-body');return b&&!b.hidden;}
+function setMixOpen(on){
+  const body=document.getElementById('mix-body'),head=document.getElementById('mix-head');
+  if(!body||!head)return;
+  body.hidden=!on;
+  head.setAttribute('aria-expanded',String(!!on));
+  spreadPanelsSoon();
+}
+function mixSummary(){
+  const el=document.getElementById('mix-sum');
+  if(!el)return;
+  const moved=MIX_VOICES.filter(([k])=>Math.abs((state.mix[k]||1)-1)>0.01);
+  el.textContent=moved.length
+    ? '· '+moved.map(([k,n])=>n.split(' ')[0].toLowerCase()+' '+Math.round(state.mix[k]*100)+'%').join(', ')
+    : '· even';
+}
+function buildMixer(){
+  const host=document.getElementById('mix-rows');
+  if(!host)return;
+  if(!host.children.length){
+    MIX_VOICES.forEach(([k,name])=>{
+      const row=document.createElement('div');row.className='mix-row';
+      const label=document.createElement('span');label.className='mix-name';label.textContent=name;
+      const sl=document.createElement('input');
+      sl.type='range';sl.min='0';sl.max='150';sl.step='5';
+      sl.setAttribute('aria-label',name+' level');
+      const out=document.createElement('span');out.className='val';
+      sl.oninput=()=>{
+        state.mix[k]=parseInt(sl.value,10)/100;
+        out.textContent=sl.value+'%';
+        savePattern();mixSummary();
+      };
+      row.append(label,sl,out);
+      host.appendChild(row);
+      row.dataset.voice=k;
+    });
+  }
+  [...host.children].forEach(row=>{
+    const k=row.dataset.voice, v=Math.round((state.mix[k]!=null?state.mix[k]:1)*100);
+    row.querySelector('input').value=String(v);
+    row.querySelector('.val').textContent=v+'%';
+  });
+  const head=document.getElementById('mix-head');
+  if(head&&!head.dataset.wired){
+    head.dataset.wired='1';
+    head.onclick=()=>setMixOpen(!mixOpen());
+    head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setMixOpen(!mixOpen());}};
+  }
+  const reset=document.getElementById('mix-reset');
+  if(reset&&!reset.dataset.wired){
+    reset.dataset.wired='1';
+    reset.onclick=()=>{
+      MIX_VOICES.forEach(([k])=>state.mix[k]=1);
+      savePattern();buildMixer();
+    };
+  }
+  mixSummary();
 }
 
 function buildHatRow(){
@@ -5098,6 +5207,7 @@ buildGrooveRow();
 buildKitRow();
 buildDensityRow();
 buildHatRow();
+buildMixer();
 buildPatternEditor();
 buildMetroOnRow();
 buildSubdivRow();
@@ -5122,6 +5232,17 @@ document.querySelectorAll('input[type=range]').forEach(el=>{
 // let the page scroll — the field keeps what was typed.
 document.querySelectorAll('input[type=number]').forEach(el=>{
   el.addEventListener('wheel',()=>{ if(document.activeElement===el)el.blur(); },{passive:true});
+  /* Typing into a field that already holds a number should replace it, not add
+     digits to the end: nobody wants to clear 120 before typing 90. */
+  /* Selecting inside the focus handler is enough on a desktop; on iOS the touch
+     that gave focus can clear it again, so it is asked for once more after the
+     event has finished. */
+  const takeAll=()=>{
+    try{el.select();}catch(e){}
+    setTimeout(()=>{try{if(document.activeElement===el)el.select();}catch(e){}},0);
+  };
+  el.addEventListener('focus',takeAll);
+  el.addEventListener('click',takeAll);
 });
 
 /* Selecting the whole field on focus, so a tempo is typed over rather than
