@@ -187,6 +187,13 @@ details.sec.pinned>summary::after{display:none}
 .pat-cell[data-v="2"]{background:var(--green)}
 .pat-cell[data-v="3"]{background:var(--green);box-shadow:inset 0 0 0 2px var(--green-hi)}
 .pat-cell.now{outline:2px solid var(--text2);outline-offset:-1px}
+/* something is written here, but between these cells: it belongs to the other
+   grid and is left exactly where it is */
+.pat-cell.off{box-shadow:inset 0 0 0 1px var(--green-bg)}
+/* the mark has to read on an empty cell and on a full one, so it takes the text
+   colour rather than the green it would disappear into */
+.pat-cell.off::before{content:'';display:block;width:5px;height:5px;border-radius:50%;
+  background:var(--text);margin:0 auto;opacity:.6}
 .pat-ruler{display:grid;grid-template-columns:30px 1fr;gap:6px}
 .pat-ruler-cells{display:grid;gap:1px;font-size:9px;color:var(--text3);
   font-variant-numeric:tabular-nums}
@@ -2611,7 +2618,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22a';
+const APP_VERSION='2026-08-22b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3777,7 +3784,6 @@ function patLevel(h){
 function patFromStyle(key){
   const G=GROOVES[key];
   if(!G)return;
-  const step=patStep();
   /* Keep the length you chose. A style is one bar or two, and taking its length
      would throw away a four-bar pattern the moment you asked to start from one;
      it is laid down repeatedly instead, up to the length you have, so four bars
@@ -3791,23 +3797,24 @@ function patFromStyle(key){
       if(pos>=span)return;
       const voice=h[1]==='g'?'s':(h[1]==='b'?'k':h[1]);
       const vel=h[1]==='g'?PAT_VELS[1]:(h[2]<0.3?PAT_VELS[1]:(h[2]<0.75?PAT_VELS[2]:PAT_VELS[3]));
-      hits.push([Math.round(pos/step)*step,voice,vel]);
+      hits.push([pos,voice,vel]);   // exactly where the style has it
     });
   }
-  state.custom.hits=hits;
-  patQuantise();
+  state.custom.hits=hits.sort((a,b)=>a[0]-b[0]);
 }
-// nothing written may sit between two cells of the grid on screen
-function patQuantise(){
-  const step=patStep(),span=state.custom.bars*4*GRID;
-  const seen={};
-  state.custom.hits.forEach(h=>{
-    const pos=Math.min(span-step,Math.round(h[0]/step)*step);
-    const key=h[1]+':'+pos;
-    if(seen[key]){seen[key][2]=Math.max(seen[key][2],h[2]);return;}
-    seen[key]=[pos,h[1],h[2]];
-  });
-  state.custom.hits=Object.values(seen).sort((a,b)=>a[0]-b[0]);
+/* The grid is a view, not a rewrite. Switching it used to round every hit to
+   the nearest cell of the new one, which is destructive twice over — a sixteenth
+   at 6 became a triplet at 8 and came back at 9, and two hits could land on the
+   same cell and become one. Nothing is moved now: the pattern keeps the
+   twelfths it was written in, and a hit that does not sit on the grid you are
+   looking at is marked in the cell it falls inside rather than hidden or moved.
+   Switch back and it is exactly as you left it. */
+function patOffGrid(voice,from,to){
+  return state.custom.hits.some(h=>h[1]===voice&&h[0]>from&&h[0]<to);
+}
+function patOffGridCount(){
+  const step=patStep();
+  return state.custom.hits.filter(h=>h[0]%step!==0).length;
 }
 function patToggle(voice,pos){
   const h=patAt(voice,pos);
@@ -3842,7 +3849,7 @@ function buildPatternEditor(){
       const b=document.createElement('button');
       b.className='pick-btn'+(state.custom.grid===v?' active':'');
       b.textContent=label;
-      b.onclick=()=>{state.custom.grid=v;patQuantise();savePattern();buildPatternEditor();restartIfPlaying();};
+      b.onclick=()=>{state.custom.grid=v;savePattern();buildPatternEditor();};
       grow.appendChild(b);
     });
     gridify(grow);
@@ -3911,14 +3918,16 @@ function buildPatternEditor(){
         const pos=offset+c*step;
         const cell=document.createElement('button');
         const perBeat=cells/4;
-        cell.className='pat-cell'+(c%perBeat===0?' beat':'');
+        const off=patOffGrid(voice,pos,pos+step);
+        cell.className='pat-cell'+(c%perBeat===0?' beat':'')+(off?' off':'');
         cell.dataset.v=String(patLevel(patAt(voice,pos)));
         cell.dataset.pos=String(pos);
         cell.dataset.voice=voice;
         cell.setAttribute('aria-label',name+', beat '+(Math.floor(c/perBeat)+1)+', cell '+(c%perBeat+1));
-        cell.onclick=()=>{
+          cell.onclick=()=>{
           patToggle(voice,pos);
           cell.dataset.v=String(patLevel(patAt(voice,pos)));
+          cell.classList.toggle('off',patOffGrid(voice,pos,pos+step));
           if(state.groove!=='custom')setGroove('custom');
           else{refreshSectionSummaries();restartIfPlaying();}
           patInfo();
@@ -3960,8 +3969,10 @@ function patInfo(){
   const el=document.getElementById('pat-info');
   if(!el)return;
   const n=state.custom.hits.length;
+  const off=patOffGridCount();
   el.textContent=n
     ? n+' hit'+(n===1?'':'s')+' · tap a cell again for a ghost, an accent, then nothing'
+      +(off?' · '+off+' sit'+(off===1?'s':'')+' between these cells, on the other grid':'')
     : 'empty — tap the grid, or start from a style';
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=n
