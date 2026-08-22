@@ -822,6 +822,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="head" id="density-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
       <span class="section-label">Density</span>
       <span class="btn-wrap seg" id="density-row" data-cols="fixed"></span></div>
+    <div class="head" id="hat-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+      <span class="section-label">Hi-hat on 2 &amp; 4</span>
+      <span class="btn-wrap seg" id="hat-row" data-cols="fixed"></span></div>
     <div class="info-line" id="groove-info" style="display:none"></div>
   </div>
 
@@ -1101,7 +1104,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
     a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes: one
     sweep that never stops, the way a brush is actually played, leaning a little on two and four and
-    breathing on one and three. No cymbal at all — try it under 90. Each is a bar of four that repeats — the bossa is two, because its
+    breathing on one and three. No cymbal in it unless you ask: <em>Hi-hat on 2 &amp; 4</em> puts the foot under the sweep, which is
+    the other half of how a ballad is usually played. Try it under 90. Each is a bar of four that repeats — the bossa is two, because its
     clave is — with no fills and no breaks, so it stays something to play over rather than something
     to listen to. The swing sits where a swing sits — two thirds through the beat, not half — and its
     bass drum feathers all four beats so quietly it is felt rather than heard. The styles are written
@@ -1383,6 +1387,7 @@ let state={
   groove:'click',sigBeforeGroove:null,
   kit:'recorded',            // 'recorded' or 'machine'
   density:'normal',          // how full a style plays: 'light', 'normal', 'busy'
+  balladHat:false,           // the foot on two and four, under the brushes
   /* A pattern of the player's own. Kept in the same twelfths the styles use, so
      what is written is exactly what plays; the editor is a view onto it at a
      resolution a finger can hit. */
@@ -2162,7 +2167,7 @@ const GROOVES={
   /* A brush ballad: the left hand goes round the head and the right taps the
      swing rhythm on it. Slow — try it under 90 — and there is no cymbal in it at
      all, which is the point of brushes. */
-  ballad:{label:'Ballad (brushes)',bars:1,hits:[
+  ballad:{label:'Ballad (brushes)',bars:1,brushes:true,hits:[
     [12,'w',.9],[36,'w',.9],          // the sweep leans on two and four
     [0,'w',.35],[24,'w',.35],         // and breathes on one and three
     [0,'k',.16],[24,'k',.14]],
@@ -2189,11 +2194,19 @@ function grooveDef(){
     return {label:'Custom',bars:state.custom.bars,hits:state.custom.hits};
   const G=GROOVES[state.groove];
   if(!G)return null;
-  if(state.density==='busy'&&G.extra)
-    return {label:G.label,bars:G.bars,hits:G.hits.concat(G.extra)};
-  if(state.density==='light')
-    return {label:G.label,bars:G.bars,hits:thinHits(G.hits)};
-  return G;
+  let hits=G.hits;
+  if(state.density==='busy'&&G.extra)hits=hits.concat(G.extra);
+  else if(state.density==='light')hits=thinHits(hits);
+  /* Brushes and a foot on two and four: the pair a ballad is usually played
+     with, and asked for rather than assumed, since brushes alone is the other
+     half of the answer. A hat every bar, wherever the bar happens to be. */
+  if(G.brushes&&state.balladHat){
+    const add=[];
+    for(let b=0;b<G.bars;b++)add.push([b*4*GRID+GRID,'h',.55],[b*4*GRID+3*GRID,'h',.55]);
+    hits=hits.concat(add);
+  }
+  if(hits===G.hits)return G;
+  return {label:G.label,bars:G.bars,hits:hits};
 }
 function grooveOn(){const G=grooveDef();return !!(G&&G.hits.length);}
 function grooveBars(){const G=grooveDef();return G?G.bars:1;}
@@ -2761,7 +2774,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22f';
+const APP_VERSION='2026-08-22g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3899,7 +3912,7 @@ function buildGrooveRow(){
       +(state.density==='busy'?', filled out':(state.density==='light'?', pared back':''))
       +' — no fills, no breaks';
   }
-  buildKitRow();buildDensityRow();
+  buildKitRow();buildDensityRow();buildHatRow();
 }
 
 /* ---------- the editor ----------
@@ -4218,6 +4231,23 @@ function buildDensityRow(){
       state.density=k;buildDensityRow();buildGrooveRow();
       refreshSectionSummaries();restartIfPlaying();
     };
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+
+function buildHatRow(){
+  const row=document.getElementById('hat-row');
+  if(!row)return;
+  const G=GROOVES[state.groove];
+  const line=document.getElementById('hat-line');
+  if(line)line.style.display=(G&&G.brushes)?'':'none';
+  row.innerHTML='';
+  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.balladHat===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.balladHat=v;buildHatRow();buildGrooveRow();refreshSectionSummaries();restartIfPlaying();};
     row.appendChild(b);
   });
   gridify(row);
@@ -5067,6 +5097,7 @@ loadPattern();
 buildGrooveRow();
 buildKitRow();
 buildDensityRow();
+buildHatRow();
 buildPatternEditor();
 buildMetroOnRow();
 buildSubdivRow();
