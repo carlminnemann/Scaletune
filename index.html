@@ -1133,7 +1133,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     figure to the notes.</dd>
     <dt>Count In</dt><dd>Bars of click before the notes come in. It ends on a downbeat: what is left of
     the bar first, then whole bars, so a phrase that finishes mid-bar does not put your entry off the
-    beat — and the note you are being counted into waits for the count rather than sounding before it.
+    beat. And the phrase finishes where a phrase finishes: on the handover the line runs to the next bar
+    line and lands there on the tonic of the key it has been in, and only then does the waiting begin
+    — the rest of that bar, and any further bars you asked for.
     <em>Count again on</em> says when it comes back: on a <em>new key</em> only, which is the moment
     you always need, or on <em>any change</em>, which includes handing over from one scale or chord to
     the next in the same key. Never between rounds of the same thing, which would break the very drift
@@ -1498,6 +1500,7 @@ const BPM_MIN=10,BPM_MAX=300;   // 10 is slow enough to place a bow, 300 fast en
 let studyIdx=0,subdivIdx=0;
 let grooveBeat=0;         // where in the accompaniment's bar the pulse is
 let rampT0=0,nextStepAt=0; // when the ramp started, and when the next step is due
+let resolveNote=null,resolveIn=0;   // the tonic a handover lands on, and when
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
@@ -1539,14 +1542,55 @@ let countTicks=0;
    bar first and adds the rest as whole bars — end on beat one of four and you
    wait the three that remain, and come in on the next first beat. A sliver is
    not a count, so anything under a beat is given a bar of its own instead. */
-function beginCount(){
+/* The nearest tonic to a note: what the phrase is reaching for when it lands. */
+function tonicNear(abs){
+  const pc=NOTES.indexOf(state.root);
+  if(pc<0)return abs;
+  let best=null;
+  for(let k=-12;k<=12;k++){
+    const cand=abs+k;
+    if(((cand%12)+12)%12!==pc)continue;
+    if(best===null||Math.abs(cand-abs)<Math.abs(best-abs))best=cand;
+  }
+  return best===null?abs:best;
+}
+/* A phrase should finish where a phrase finishes: on the tonic, on a downbeat.
+   So when a pass hands over, the line runs to the next bar line, lands there on
+   the tonic of the key it has just been in, and only then does the count-in run
+   — the rest of that bar, and any further bars asked for. Starting from silence
+   there is nothing to land, so that count is the bars asked for and no more. */
+function beginCount(landOn){
+  resolveNote=null;resolveIn=0;
   if(!(state.countBars>0)||pulseOnly()){countTicks=0;return;}
   const t=subTicks(activeSubdiv||currentSubdiv());
   const bar=Math.max(1,state.sig*t);
   const into=(beatIdx*t+subIdx)%bar;
   let toBar=bar-into;                       // whatever is left of this bar
   if(toBar<t)toBar+=bar;                    // too little to count: take another
-  countTicks=toBar+(state.countBars-1)*bar;
+  if(landOn!=null){
+    /* The landing is on the next bar line — and if the phrase has just arrived
+       on one, that is this very tick rather than a bar away. countTick() emits
+       the note when this counter reaches zero, so it is one more than the ticks
+       to wait. */
+    resolveNote=landOn;
+    resolveIn=(into===0?0:(bar-into))+1;
+    countTicks=(resolveIn-1)+state.countBars*bar;
+  } else {
+    countTicks=toBar+(state.countBars-1)*bar;
+  }
+}
+// One tick of a count-in. Returns the note that falls on it, which is the
+// landing tonic or nothing at all.
+function countTick(){
+  if(countTicks<=0)return null;
+  countTicks--;
+  let out=null;
+  if(resolveIn>0){
+    resolveIn--;
+    if(resolveIn===0)out=resolveNote;
+  }
+  if(countTicks===0){tickCount=0;grooveBeat=0;}
+  return out;
 }
 // How long one note of the sequence lasts, expressed against the metronome.
 // 'sub' is the point of the table-of-time exercise: the notes take the figure,
@@ -2677,9 +2721,8 @@ function schedulerTick(){
     // until it is paid off
     let countedThisTick=false;
     const counting=countTicks>0;
-    if(countTicks>0){
-      countTicks--;
-      if(countTicks===0){tickCount=0;grooveBeat=0;}
+    if(counting){
+      note=countTick();
     } else
     if(!pulseOnly()&&sequence.length&&tickCount%ticksPerNote(activeSubdiv)===0){
       if(seqIdx>=sequence.length){
@@ -2699,8 +2742,7 @@ function schedulerTick(){
            and you came in on the second — which reads as the count-in eating
            your first beat. */
         if(countTicks>0){
-          countTicks--;
-          if(countTicks===0){tickCount=0;grooveBeat=0;}
+          note=countTick();
           countedThisTick=true;
         }
       }
@@ -2862,7 +2904,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22k';
+const APP_VERSION='2026-08-22l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3215,6 +3257,9 @@ function metroPass(){
 }
 
 function advancePass(){
+  /* Where the phrase has just arrived, and the tonic nearest it — taken before
+     anything moves, because by the end of this the key may be a fourth away. */
+  const landing=sequence.length?tonicNear(sequence[sequence.length-1]):null;
   // The innermost loop is the drift itself: while the phrase is still walking
   // round against the pulse, nothing else may move — otherwise the figure
   // changes before the displacement has had time to resolve.
@@ -3252,7 +3297,7 @@ function advancePass(){
      the two is a choice: a new key always needs finding, a dorian handing over
      to a minor seventh in the same key often does not. */
   const want=state.countWhen;
-  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange))beginCount();
+  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange))beginCount(landing);
   stepTempo();
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
