@@ -111,6 +111,8 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
+.mode-row.two{grid-template-columns:1fr 1fr;margin-bottom:var(--s2)}
+.mode-row.two .mode-btn{padding:0.5rem 0.6rem;font-size:13px}
 .mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1);margin-bottom:var(--s3);flex:0 0 auto}
 .mode-btn{min-width:0;height:44px;padding:0 4px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
 .mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
@@ -211,6 +213,7 @@ details.sec.pinned>summary::after{display:none}
 .mix-row{display:grid;grid-template-columns:74px 1fr 42px;gap:var(--s2);align-items:center;
   margin-bottom:6px}
 .mix-name{font-size:11px;color:var(--text2)}
+.mix-row.unused{opacity:.45}
 .mix-row input[type=range]{width:100%;min-width:0}
 .mix-row .val{font-size:11px;color:var(--text3);text-align:right;font-variant-numeric:tabular-nums}
 /* The editor is a fold of its own inside the panel: it is the tallest thing in
@@ -236,8 +239,13 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tightest #tempo-block .vol-line{margin-top:var(--s1)}
 .scroll.tightest #tempo-block,.scroll.tightest #sig-block{padding:var(--s1) var(--s4)}
 
-/* and what every mode can spare, in the same order: the note grid's legend
-   loses its air, then the legend itself, then the cards lose some padding */
+/* and what every mode can spare, in the same order: the headers give up some of
+   their height first — seven closed panels are seven times whatever is taken —
+   then the note grid's legend loses its air, then the legend itself, then the
+   cards lose some padding */
+.scroll.tight details.sec>summary{padding:0.45rem 0.85rem}
+.scroll.tight .mode-row.two .mode-btn{padding:0.36rem 0.6rem}
+.scroll.tighter details.sec{margin-bottom:6px}
 .scroll.tight .legend{font-size:10px;line-height:1.35}
 .scroll.tighter .legend{display:none}
 .scroll.tightest details.sec .sec-body,.scroll.tightest #drone-section{padding:0.7rem}
@@ -607,6 +615,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      move. If they fit, nothing scrolls at all. -->
 <div class="scroll" id="scroll-area">
 
+<!-- One thing or a rotation: the choice that governs every panel below it, so it
+     sits above them all rather than inside the Root panel, where it was easy to
+     miss. Two boxes, the width of the modes — but inside the scrolling part, or
+     it takes its height from the panels and Scale stops fitting on a phone. -->
+<div class="mode-row two" id="listmode-row" style="display:none"></div>
+
 <!-- ============ DRONE ============ -->
 <!-- The tuner. Its own mode because it is the only thing that listens rather
      than sounds: the microphone would hear the app itself, so nothing else may
@@ -664,8 +678,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <details class="sec" id="sec-root">
     <summary>Root<span class="sec-sum" id="sum-root"></span></summary>
     <div class="sec-body">
-      <div class="head"><span class="group-label">Selection</span>
-        <span class="btn-wrap seg" id="listmode-row" data-cols="fixed"></span></div>
       <div class="btn-wrap" id="root-row"></div>
     </div>
   </details>
@@ -842,6 +854,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
     <div id="mix-body" hidden>
       <div id="mix-rows" style="margin-top:var(--s3)"></div>
+      <div class="info-line" id="mix-note"></div>
       <button class="clear-btn" id="mix-reset" style="margin-top:var(--s2)">✕ Level again</button>
     </div>
   </div>
@@ -1075,6 +1088,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
     <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
+    <dt>Single or Study list</dt><dd>The two boxes under the modes. Single plays the one thing you
+    pick; Study list turns your picks into a rotation. It governs every panel below it, which is why
+    it sits above them rather than inside the Root panel where it used to hide.</dd>
     <dt>The study list</dt><dd>One list, holding scales and chords together: pick scales in Scale and
     chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
     same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
@@ -1139,7 +1155,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Mixer</dt><dd>A level for each drum, over whatever the pattern asks for — the one thing that
     can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
     not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
-    next time. <em>Level again</em> puts every fader back.</dd>
+    next time. A ghost note answers to the snare and the bossa's bass drum to the bass drum, since
+    that is what they are; the faders a style does not use are faded out, so a fader that can do
+    nothing says so. <em>Level again</em> puts every fader back.</dd>
     <dt>Density</dt><dd>How full a style plays. <em>Busy</em> adds what a drummer would add — the extra
     hits are written into each style, not invented on the fly, because a random note is not a groove.
     <em>Light</em> takes the ghost notes out and leaves the cymbals on the beat. A pattern of your own
@@ -2282,7 +2300,7 @@ function brushNoiseBuf(dur){
    first version made a separate wash per beat, which pulsed like a wave machine
    and was rightly called horrible. */
 let brushBed=null;
-function brushBedLevel(){return 0.42*state.clickVol;}
+function brushBedLevel(){return 0.42*state.clickVol*mixLevel('w');}
 function startBrushBed(t){
   if(brushBed)return;
   const src=audioCtx.createBufferSource();
@@ -2345,7 +2363,7 @@ function scheduleGrooveBeat(t0,beat){
   G.hits.forEach(h=>{
     if(h[0]<from||h[0]>=from+GRID)return;
     const voice=voices[h[1]];
-    const level=(state.mix&&state.mix[h[1]]!=null)?state.mix[h[1]]:1;
+    const level=mixLevel(h[1]);
     if(voice)voice(t0+(h[0]-from)*unit,h[2]*level*state.clickVol*KIT_HEADROOM,60/state.bpm);
   });
   return true;
@@ -2811,7 +2829,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22h';
+const APP_VERSION='2026-08-22i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -2882,6 +2900,7 @@ function setMode(m){
   const ms=document.getElementById('metro-section');
   ms.style.display=isTuner?'none':'';
   buildMetroOnRow();
+  buildListModeRow();
   splitMetro(isMetro);
   // Metro plays no notes, so the note readout has nothing to read but a dash
   document.getElementById('current-note').style.display=isMetro?'none':'';
@@ -3285,10 +3304,14 @@ function buildRootMoveRow(){
 }
 
 function buildListModeRow(){
-  const row=document.getElementById('listmode-row');row.innerHTML='';
+  const row=document.getElementById('listmode-row');
+  if(!row)return;
+  row.style.display=(state.mode==='scale'||state.mode==='arpeggio')?'':'none';
+  row.innerHTML='';
   [[false,'Single'],[true,'Study list']].forEach(([v,label])=>{
     const b=document.createElement('button');
-    b.className='pick-btn'+(useListOn()===v?' active':'');
+    // it sits with the modes now, so it is shaped like them
+    b.className='mode-btn'+(useListOn()===v?' active':'');
     b.textContent=label;
     b.onclick=()=>{
       setUseList(v);
@@ -4286,6 +4309,25 @@ function buildDensityRow(){
    balance differently on a phone than on headphones. */
 const MIX_VOICES=[['k','Bass drum'],['s','Snare'],['h','Hi-hat'],['o','Open hat'],
                   ['d','Ride'],['r','Clave'],['w','Brush sweep'],['x','Brush tap']];
+/* A ghost note is the snare played softly and the bossa's bass drum is the bass
+   drum, so they answer to those faders — without this the snare fader left the
+   funk's ghosts where they were and the bass fader did nothing at all under a
+   bossa, which is what "some of them do nothing" was. */
+const MIX_OF={g:'s',b:'k'};
+function mixLevel(voice){
+  const k=MIX_OF[voice]||voice;
+  const v=state.mix&&state.mix[k];
+  return (v==null)?1:v;
+}
+// which drums the pattern in force actually uses, so a fader that can do nothing
+// can say so rather than look broken
+function mixUsed(){
+  const G=grooveDef();
+  const set=new Set();
+  if(G)G.hits.forEach(h=>set.add(MIX_OF[h[1]]||h[1]));
+  if(GROOVES[state.groove]&&GROOVES[state.groove].brushes&&state.balladHat)set.add('h');
+  return set;
+}
 function mixOpen(){const b=document.getElementById('mix-body');return b&&!b.hidden;}
 function setMixOpen(on){
   const body=document.getElementById('mix-body'),head=document.getElementById('mix-head');
@@ -4316,6 +4358,9 @@ function buildMixer(){
       sl.oninput=()=>{
         state.mix[k]=parseInt(sl.value,10)/100;
         out.textContent=sl.value+'%';
+        // the sweep is one long sound: it has to be told, not waited for
+        if(k==='w'&&brushBed)
+          brushBed.g.gain.setTargetAtTime(brushBedLevel(),audioCtx.currentTime,0.05);
         savePattern();mixSummary();
       };
       row.append(label,sl,out);
@@ -4323,16 +4368,25 @@ function buildMixer(){
       row.dataset.voice=k;
     });
   }
+  const used=mixUsed();
   [...host.children].forEach(row=>{
     const k=row.dataset.voice, v=Math.round((state.mix[k]!=null?state.mix[k]:1)*100);
     row.querySelector('input').value=String(v);
     row.querySelector('.val').textContent=v+'%';
+    row.classList.toggle('unused',grooveOn()&&!used.has(k));
   });
   const head=document.getElementById('mix-head');
   if(head&&!head.dataset.wired){
     head.dataset.wired='1';
     head.onclick=()=>setMixOpen(!mixOpen());
     head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setMixOpen(!mixOpen());}};
+  }
+  const note=document.getElementById('mix-note');
+  if(note){
+    const G=grooveDef();
+    note.textContent=grooveOn()
+      ? 'the faded ones are not in '+((G&&G.label)||'this pattern')
+      : 'choose an accompaniment to hear these';
   }
   const reset=document.getElementById('mix-reset');
   if(reset&&!reset.dataset.wired){
@@ -4356,7 +4410,7 @@ function buildHatRow(){
     const b=document.createElement('button');
     b.className='pick-btn'+(state.balladHat===v?' active':'');
     b.textContent=label;
-    b.onclick=()=>{state.balladHat=v;buildHatRow();buildGrooveRow();refreshSectionSummaries();restartIfPlaying();};
+    b.onclick=()=>{state.balladHat=v;buildHatRow();buildGrooveRow();buildMixer();refreshSectionSummaries();restartIfPlaying();};
     row.appendChild(b);
   });
   gridify(row);
