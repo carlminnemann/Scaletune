@@ -386,6 +386,8 @@ details.fam[open] .fam-sum{display:none}
    ending wherever the names ended, exactly as the rest of the app used to. */
 .rot-chips{display:grid;gap:var(--s1);margin-bottom:var(--s2);
   grid-template-columns:repeat(var(--cols,3),1fr)}
+.rot-chip.drop{cursor:pointer;font:inherit}
+.rot-chip.drop:hover{border-color:var(--text3)}
 .rot-chip{min-height:30px;display:flex;align-items:center;justify-content:center;
   padding:4px 7px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg3);color:var(--text3);text-align:center;line-height:1.2;
@@ -1099,7 +1101,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>The study list</dt><dd>One list, holding scales and chords together: pick scales in Scale and
     chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
     same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
-    happen to be looking at, and the numbers on the buttons count through the whole list.</dd>
+    happen to be looking at, and the numbers on the buttons count through the whole list. A tap adds,
+    every time, so the same thing can be in twice — a major chord after the ionian and again after
+    the lydian is a real exercise, and a button that only toggled could not say it. A button in the
+    list twice shows both its places. To take one out, tap it in the rotation, where you can see
+    which of the two you mean.</dd>
     <dt>Clear</dt><dd>Empties the selection. With the study list on it drops that panel's kind from
     the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
   </dl></div>
@@ -1501,6 +1507,7 @@ let studyIdx=0,subdivIdx=0;
 let grooveBeat=0;         // where in the accompaniment's bar the pulse is
 let rampT0=0,nextStepAt=0; // when the ramp started, and when the next step is due
 let resolveNote=null,resolveIn=0;   // the tonic a handover lands on, and when
+let pendingCount=false,pendingLanding=null;   // a count asked for by a handover
 let metroWasOpen=false;   // how the metronome panel stood before Metro pinned it
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
@@ -2594,6 +2601,7 @@ function startPlayback(){
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
+    pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
     beginCount();
     if(state.poly.on)buildPolyBeats();
@@ -2736,6 +2744,7 @@ function schedulerTick(){
           activeSubdiv=currentSubdiv();
           subIdx=0;beatIdx=0;tickCount=0;
         }
+        if(pendingCount){pendingCount=false;beginCount(pendingLanding);pendingLanding=null;}
         /* If that armed a count-in, this tick is the first of it: the note it
            was about to play is the one you are being counted into, so it waits.
            Without this the first note of the new key sounded before the count
@@ -2904,7 +2913,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22l';
+const APP_VERSION='2026-08-22m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3157,10 +3166,13 @@ function applyListItem(item){
   clampStartDeg();
 }
 
+/* A tap adds, every time. The same thing twice in a rotation is a real exercise
+   — a major chord after the ionian and again after the lydian — and a toggle
+   cannot say it. Taking one out is done in the rotation itself, where you can
+   see which of the two you mean. */
 function toggleListItem(kind,group,name){
   const list=activeList();
-  const i=list.findIndex(x=>x.group===group&&x.name===name&&(x.kind||'scale')===kind);
-  if(i>=0)list.splice(i,1);else list.push({kind,group,name});
+  list.push({kind,group,name});
   if(list.length){studyIdx=0;applyListItem(list[0]);}
   renderPitchPickers();refreshSequence();restartIfPlaying();
 }
@@ -3296,8 +3308,15 @@ function advancePass(){
      thing, which would break the very drift the app is built around. Which of
      the two is a choice: a new key always needs finding, a dorian handing over
      to a minor seventh in the same key often does not. */
+  /* Armed, not started. When the rhythmic figure changes the scheduler re-anchors
+     the pulse a moment later — beatIdx back to zero — and a count worked out
+     against the old position would then be wrong by however far into the bar the
+     phrase had got. So the count is set up after that, from where the pulse
+     actually is. */
   const want=state.countWhen;
-  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange))beginCount(landing);
+  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange)){
+    pendingCount=true;pendingLanding=landing;
+  }
   stepTempo();
   refreshSequence();
   if(state.mode==='scale'||state.mode==='arpeggio'){renderPitchPickers();revealActiveFamily();}
@@ -3358,10 +3377,26 @@ function updateRotationPanel(){
   const p=rotationPreview();
   document.getElementById('rot-clear').style.display=(useListOn()&&p.items.length)?'':'none';
   const chips=document.getElementById('rot-chips');chips.innerHTML='';
+  const removable=useListOn()&&activeList().length>0;
   p.items.forEach((it,i)=>{
-    const d=document.createElement('span');
+    const d=document.createElement(removable?'button':'span');
     d.className='rot-chip'+(i===p.currentIdx?' now':(i===p.nextIdx&&p.moved?' next':''));
     d.textContent=(i+1)+'. '+it.name;
+    if(removable){
+      d.classList.add('drop');
+      d.title='Remove from the rotation';
+      d.setAttribute('aria-label','Remove '+it.name+' from the rotation');
+      d.onclick=()=>{
+        const list=activeList();
+        if(i>=list.length)return;
+        list.splice(i,1);
+        if(!list.length)state.listKind=null;
+        studyIdx=0;
+        if(list.length)applyListItem(list[0]);
+        renderPitchPickers();refreshSequence();refreshSectionSummaries();
+        updateRotationPanel();restartIfPlaying();
+      };
+    }
     chips.appendChild(d);
   });
   const playing=state.playing;
@@ -3773,11 +3808,13 @@ function paintSetButtons(selector,attr,forMode){
     if(!mine){b.textContent=name;return;}
     if(useListOn()){
       // the list holds both kinds, so a chord called Major is not a scale of it
-      const i=list.findIndex(x=>x.name===name&&(x.kind||'scale')===kind);
-      if(i>=0){
-        b.classList.add(i===studyIdx&&state.playing?'now':'active');
+      const at=[];
+      list.forEach((x,j)=>{if(x.name===name&&(x.kind||'scale')===kind)at.push(j);});
+      if(at.length){
+        b.classList.add(at.indexOf(studyIdx)>=0&&state.playing?'now':'active');
         b.classList.add('numbered');
-        b.innerHTML='<span class="idx">'+(i+1)+'</span>'+name;
+        // every place it appears, since the same thing can be in twice
+        b.innerHTML='<span class="idx">'+at.map(j=>j+1).join(',')+'</span>'+name;
       } else b.textContent=name;
     } else {
       b.textContent=name;
