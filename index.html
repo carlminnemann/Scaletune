@@ -400,8 +400,11 @@ details.fam[open] .fam-sum{display:none}
    ending wherever the names ended, exactly as the rest of the app used to. */
 .rot-chips{display:grid;gap:var(--s1);margin-bottom:var(--s2);
   grid-template-columns:repeat(var(--cols,3),1fr)}
-.rot-chip.drop{cursor:pointer;font:inherit}
+.rot-chip.drop{cursor:pointer;font:inherit;gap:5px}
 .rot-chip.drop:hover{border-color:var(--text3)}
+.rot-chip .chip-x{font-size:10px;opacity:.55}
+.rot-chip.drop:hover .chip-x{opacity:1}
+.rot-chip.now .chip-x,.rot-chip.next .chip-x{opacity:.75}
 .rot-chip{min-height:30px;display:flex;align-items:center;justify-content:center;
   padding:4px 7px;font-size:12px;border:1px solid var(--border2);border-radius:var(--r);
   background:var(--bg3);color:var(--text3);text-align:center;line-height:1.2;
@@ -1036,6 +1039,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <button class="clear-btn rot-clear" id="rot-clear" onclick="clearStudyList()">✕ Clear list</button>
   </div>
   <div class="rot-chips" id="rot-chips"></div>
+  <div class="info-line" id="rot-hint" style="display:none">tap one to take it out</div>
   <div class="rot-line" id="rot-now"></div>
   <div class="rot-line rot-next" id="rot-next"></div>
 </div>
@@ -1125,8 +1129,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     happen to be looking at, and the numbers on the buttons count through the whole list. A tap adds,
     every time, so the same thing can be in twice — a major chord after the ionian and again after
     the lydian is a real exercise, and a button that only toggled could not say it. A button in the
-    list twice shows both its places. To take one out, tap it in the rotation, where you can see
-    which of the two you mean.</dd>
+    list twice shows both its places. To take one out, tap it in the rotation, where every item
+    carries a ✕ and you can see which of the two you mean — four taps by mistake are four taps
+    back.</dd>
     <dt>Clear</dt><dd>Empties the selection. With the study list on it drops that panel's kind from
     the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
   </dl></div>
@@ -2934,7 +2939,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22n';
+const APP_VERSION='2026-08-22o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3405,6 +3410,12 @@ function updateRotationPanel(){
     d.textContent=(i+1)+'. '+it.name;
     if(removable){
       d.classList.add('drop');
+      // a cross on the chip, because a chip that removes itself without saying so
+      // is a chip nobody presses: the way back was there and could not be found
+      d.innerHTML='';
+      d.append(document.createTextNode((i+1)+'. '+it.name));
+      const x=document.createElement('span');x.className='chip-x';x.textContent='✕';
+      d.appendChild(x);
       d.title='Remove from the rotation';
       d.setAttribute('aria-label','Remove '+it.name+' from the rotation');
       d.onclick=()=>{
@@ -3420,6 +3431,8 @@ function updateRotationPanel(){
     }
     chips.appendChild(d);
   });
+  const hint=document.getElementById('rot-hint');
+  if(hint)hint.style.display=removable?'':'none';
   const playing=state.playing;
   document.getElementById('rot-now').innerHTML=
     (playing?'Now: ':'Starts on: ')+'<b>'+p.now+'</b>'+
