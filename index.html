@@ -187,6 +187,17 @@ details.sec.pinned>summary::after{display:none}
   font-variant-numeric:tabular-nums}
 
 #pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
+/* The editor is a fold of its own inside the panel: it is the tallest thing in
+   the metronome and nobody wants it in the way while setting a tempo. */
+.pat-head{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.pat-head::after{content:'';margin-left:auto;width:7px;height:7px;flex:0 0 auto;
+  border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);
+  transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.pat-head[aria-expanded="true"]::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.pat-head:focus-visible{outline:2px solid var(--text3);outline-offset:3px;border-radius:4px}
+.pat-sum{font-size:11px;font-style:italic;color:var(--text3);margin-left:8px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pat-head[aria-expanded="true"] .pat-sum{display:none}
 
 /* Under an accompaniment the circles still show the beat but no longer take a
    tap, since the accents belong to the pattern. */
@@ -794,20 +805,28 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
        a cell that goes round soft, middling, hard and off again — which is how a
        ghost note and an accent are written without a row each. -->
   <div class="mgroup" id="pattern-block">
-    <div class="head"><span class="section-label">Pattern</span>
-      <span class="sig-fields">
-        <select class="sig-select" id="pat-bars" aria-label="Bars in the pattern"></select>
-        <span class="sig-unit">bars</span>
-        <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
-      </span></div>
-    <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
-    <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
-    <div class="step-row" style="margin-top:var(--s3)">
-      <span class="step-unit">start from</span>
-      <select class="sig-select" id="pat-from" aria-label="Copy a style into the pattern"></select>
-      <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
+    <div class="head pat-head" id="pat-head" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="pat-body" style="margin-bottom:0">
+      <span class="section-label">Pattern</span>
+      <span class="pat-sum" id="pat-sum"></span>
     </div>
-    <div class="info-line" id="pat-info"></div>
+    <div id="pat-body" hidden>
+      <div class="head" style="margin-top:var(--s3)">
+        <span class="sig-fields">
+          <select class="sig-select" id="pat-bars" aria-label="Bars in the pattern"></select>
+          <span class="sig-unit">bars</span>
+        </span>
+        <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
+      </div>
+      <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
+      <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
+      <div class="step-row" style="margin-top:var(--s3)">
+        <span class="step-unit">start from</span>
+        <select class="sig-select" id="pat-from" aria-label="Copy a style into the pattern"></select>
+        <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
+      </div>
+      <div class="info-line" id="pat-info"></div>
+    </div>
   </div>
 
   <!-- The tempo belongs to the metronome, so the thing that changes it does too.
@@ -2585,7 +2604,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21f';
+const APP_VERSION='2026-08-21g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3823,6 +3842,14 @@ function buildPatternEditor(){
     }
     gridify(brow);
   }
+  const head=document.getElementById('pat-head');
+  if(head&&!head.dataset.wired){
+    head.dataset.wired='1';
+    head.onclick=()=>setPatOpen(!patOpen());
+    head.onkeydown=e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();setPatOpen(!patOpen());}
+    };
+  }
   const clr=document.getElementById('pat-clear');
   if(clr&&!clr.dataset.wired){
     clr.dataset.wired='1';
@@ -3883,6 +3910,19 @@ function buildPatternEditor(){
   grid.appendChild(ruler);
   patInfo();
 }
+function patOpen(){
+  const b=document.getElementById('pat-body');
+  return b&&!b.hidden;
+}
+function setPatOpen(on){
+  const body=document.getElementById('pat-body'),head=document.getElementById('pat-head');
+  if(!body||!head)return;
+  body.hidden=!on;
+  head.setAttribute('aria-expanded',String(!!on));
+  if(on)buildPatternEditor();     // lay the cells out at the width it now has
+  patInfo();
+  spreadPanelsSoon();
+}
 function patInfo(){
   const el=document.getElementById('pat-info');
   if(!el)return;
@@ -3890,6 +3930,10 @@ function patInfo(){
   el.textContent=n
     ? n+' hit'+(n===1?'':'s')+' · tap a cell again for a ghost, an accent, then nothing'
     : 'empty — tap the grid, or start from a style';
+  const sum=document.getElementById('pat-sum');
+  if(sum)sum.textContent=n
+    ? '· '+n+' hits, '+state.custom.bars+(state.custom.bars===1?' bar':' bars')
+    : '· empty';
 }
 /* The one thing worth remembering across launches: the app opens clean on
    purpose, but a pattern you wrote is your work, not a view setting. */
@@ -4762,6 +4806,12 @@ buildAlignRow();
 buildSpeedControls();
 buildRootMoveRow();
 renderPitchPickers();
+/* Everything above builds the controls; this puts the app into the mode it says
+   it is in. Without it the opening mode kept whatever the markup happened to
+   say, which is how Drone opened with no metronome — the panel is marked hidden
+   in the markup, from when Drone had no metronome, and only a mode change ever
+   corrected it. */
+setMode(state.mode);
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{
