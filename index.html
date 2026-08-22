@@ -847,7 +847,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <span class="section-label">Level</span>
         <span class="btn-wrap seg" id="pat-pen-row" data-cols="fixed"></span></div>
       <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
-      <button class="clear-btn" id="pat-copy" style="display:none;margin-top:0;margin-bottom:var(--s2)"></button>
+      <div class="head" id="pat-copy-line" style="display:none;margin-bottom:var(--s2)">
+        <span class="section-label">Copy into this bar</span>
+        <span class="btn-wrap seg" id="pat-copy-row" data-cols="fixed"></span></div>
       <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
       <div class="step-row" style="margin-top:var(--s3)">
         <span class="step-unit">start from</span>
@@ -1097,9 +1099,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     because otherwise the second run would have nowhere to go; steps stay where they got to. Either
     way it stops at 10 and at 300.</dd>
     <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
-    a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes:
-    one hand going round the head and the other tapping the swing rhythm on it, with no cymbal at all
-    — try it under 90. Each is a bar of four that repeats — the bossa is two, because its
+    a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes: one
+    sweep that never stops, the way a brush is actually played, leaning a little on two and four and
+    breathing on one and three. No cymbal at all — try it under 90. Each is a bar of four that repeats — the bossa is two, because its
     clave is — with no fills and no breaks, so it stays something to play over rather than something
     to listen to. The swing sits where a swing sits — two thirds through the beat, not half — and its
     bass drum feathers all four beats so quietly it is felt rather than heard. The styles are written
@@ -1124,8 +1126,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     swung ones, and both can live in the same pattern — straight sixteenths under a swung ride, both
     playing. A hit written on the grid you are not looking at shows as a dot in the cell it falls
     inside; tap the dot to remove it, or switch grid to move it. Starting from a style copies that
-    style in and leaves the original untouched, so the styles never get spoiled. On the second bar and
-    after there is a <em>Copy bar</em> button, for when the next bar is a variation of the last rather
+    style in and leaves the original untouched, so the styles never get spoiled. With more than one bar
+    there is <em>Copy into this bar</em>, which takes any other bar and puts it here — bar three into
+    bar one as readily as bar one into bar three — for when a bar is a variation of another rather
     than something new. Up to four bars, for
     a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
     cells stay wide enough to hit. What you write is kept for next time — it is your work, not a setting —
@@ -1795,6 +1798,7 @@ function killNodes(list){
   list.length=0;
 }
 function stopAllAudio(){
+  stopBrushBed();
   killNodes(liveNodes);killNodes(schedNodes);
   schedPiano.forEach(n=>{try{n.stop();}catch(e){}});schedPiano=[];
   pendingTimeouts.forEach(t=>clearTimeout(t));pendingTimeouts=[];
@@ -2159,10 +2163,10 @@ const GROOVES={
      swing rhythm on it. Slow — try it under 90 — and there is no cymbal in it at
      all, which is the point of brushes. */
   ballad:{label:'Ballad (brushes)',bars:1,hits:[
-    [0,'w',1],[24,'w',.9],
-    [0,'x',.75],[12,'x',.6],[20,'x',.5],[24,'x',.7],[36,'x',.6],[44,'x',.5],
-    [0,'k',.18],[24,'k',.16]],
-    extra:[[12,'w',.55],[36,'w',.5],[8,'x',.35],[32,'x',.35]]},
+    [12,'w',.9],[36,'w',.9],          // the sweep leans on two and four
+    [0,'w',.35],[24,'w',.35],         // and breathes on one and three
+    [0,'k',.16],[24,'k',.14]],
+    extra:[[20,'x',.4],[44,'x',.4],[12,'k',.12],[36,'k',.12]]},
   swing:{label:'Jazz Swing',bars:1,hits:[
     [0,'d',.9],[12,'d',.8],[20,'d',.7],[24,'d',.85],[36,'d',.8],[44,'d',.7],
     [12,'h',.5],[36,'h',.5],
@@ -2224,17 +2228,48 @@ function brushNoiseBuf(dur){
   if(peak>0)for(let i=0;i<n;i++)d[i]/=peak;
   return buf;
 }
-function brushSwirl(t,v,spb){
-  const dur=Math.max(0.35,(spb||0.6)*1.9);
-  const src=audioCtx.createBufferSource();src.buffer=brushNoiseBuf(dur);
-  const f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=2300;f.Q.value=0.5;
+/* A brush does not stop. In jazz the hand goes round the head continuously and
+   leans a little on the beat you want heard — so this is one sweep that runs for
+   as long as the pattern plays, with a swell where the pattern asks for one. The
+   first version made a separate wash per beat, which pulsed like a wave machine
+   and was rightly called horrible. */
+let brushBed=null;
+function brushBedLevel(){return 0.42*state.clickVol;}
+function startBrushBed(t){
+  if(brushBed)return;
+  const src=audioCtx.createBufferSource();
+  src.buffer=brushNoiseBuf(2.2);      // two seconds of hand, looped: no seam to hear
+  src.loop=true;
+  const f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=2400;f.Q.value=0.45;
   const g=audioCtx.createGain();
-  g.gain.setValueAtTime(0.0001,t);
-  g.gain.linearRampToValueAtTime(0.60*v,t+dur*0.38);      // the hand coming round
-  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  g.gain.setValueAtTime(0.0001,Math.max(t-0.05,audioCtx.currentTime));
+  g.gain.setTargetAtTime(brushBedLevel(),t,0.12);
   src.connect(f);f.connect(g);g.connect(audioCtx.destination);
-  src.start(t);src.stop(t+dur+0.02);
+  src.start(Math.max(t-0.05,audioCtx.currentTime));
+  brushBed={src,f,g};
   schedNodes.push(src,f,g);
+}
+function stopBrushBed(){
+  if(!brushBed)return;
+  const {src,g}=brushBed;
+  brushBed=null;
+  try{
+    g.gain.cancelScheduledValues(audioCtx.currentTime);
+    g.gain.setTargetAtTime(0.0001,audioCtx.currentTime,0.06);
+    src.stop(audioCtx.currentTime+0.4);
+  }catch(e){}
+}
+// a lean on the beat, not a new stroke
+function brushSwirl(t,v,spb){
+  startBrushBed(t);
+  if(!brushBed)return;
+  /* The velocity arriving here has already been through the click volume and the
+     kit's headroom, and the bed's own level goes through the click volume too —
+     multiplying by it again made the lean almost invisible. It is added, not
+     multiplied: a lean of about half as much again on the beat asked for. */
+  const g=brushBed.g.gain, base=brushBedLevel();
+  g.setTargetAtTime(base+0.55*v,t,0.030);
+  g.setTargetAtTime(base,t+Math.min(0.22,(spb||0.6)*0.4),0.10);
 }
 function brushTap(t,v){
   const dur=0.075;
@@ -2620,6 +2655,7 @@ function flashBeat(i){
 
 function stopPlayback(){
   if(metroScheduler){clearInterval(metroScheduler);metroScheduler=null;}
+  stopBrushBed();
   stopAllAudio();
   document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('active-beat'));
   document.getElementById('current-note').textContent='—';
@@ -2725,7 +2761,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22e';
+const APP_VERSION='2026-08-22f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4010,23 +4046,32 @@ function buildPatternEditor(){
       if(e.key==='Enter'||e.key===' '){e.preventDefault();setPatOpen(!patOpen());}
     };
   }
-  /* Copying the bar before this one, when asked and not before: four bars are
-     often three variations of one, and sometimes four different bars. */
-  const cp=document.getElementById('pat-copy');
-  if(cp){
-    cp.style.display=(state.custom.bars>1&&patBar>0)?'':'none';
-    cp.textContent='Copy bar '+patBar;
-    if(!cp.dataset.wired){
-      cp.dataset.wired='1';
-      cp.onclick=()=>{
-        const span=4*GRID, from=(patBar-1)*span, to=patBar*span;
-        state.custom.hits=state.custom.hits.filter(h=>h[0]<to||h[0]>=to+span);
-        state.custom.hits.push(...state.custom.hits.filter(h=>h[0]>=from&&h[0]<from+span)
-          .map(h=>[h[0]+span,h[1],h[2]]));
+  /* Any bar into the one you are editing, in either direction: bar three into
+     bar one is as reasonable as bar one into bar three, and four bars are often
+     three variations of one — but only when asked, since they are sometimes four
+     different bars. */
+  const cprow=document.getElementById('pat-copy-row');
+  const cpline=document.getElementById('pat-copy-line');
+  if(cprow&&cpline){
+    cpline.style.display=state.custom.bars>1?'':'none';
+    cprow.innerHTML='';
+    for(let i=0;i<state.custom.bars;i++){
+      if(i===patBar)continue;
+      const b=document.createElement('button');
+      b.className='pick-btn';
+      b.textContent=String(i+1);
+      b.setAttribute('aria-label','Copy bar '+(i+1)+' into bar '+(patBar+1));
+      b.onclick=()=>{
+        const span=4*GRID, from=i*span, to=patBar*span;
+        const taken=state.custom.hits.filter(h=>h[0]>=from&&h[0]<from+span)
+          .map(h=>[h[0]-from+to,h[1],h[2]]);
+        state.custom.hits=state.custom.hits.filter(h=>h[0]<to||h[0]>=to+span).concat(taken);
         state.custom.hits.sort((a,b)=>a[0]-b[0]);
         savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
       };
+      cprow.appendChild(b);
     }
+    gridify(cprow);
   }
   const clr=document.getElementById('pat-clear');
   if(clr&&!clr.dataset.wired){
