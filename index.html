@@ -121,7 +121,11 @@ h1.wordmark .cap{font-size:38px;color:var(--brand)}
    and keyboard behaviour; the open/closed choice is remembered per section. */
 details.sec{border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);
   margin-bottom:var(--s2);overflow:hidden}
+/* A header that opens something should not look like the panel it opens: the
+   summaries carry a tint of their own, so the chevron is not the only sign that
+   there is anything behind them. */
 details.sec>summary{list-style:none;cursor:pointer;padding:0.62rem 0.85rem;display:flex;align-items:center;gap:8px;
+  background:var(--bg3);
   font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);
   touch-action:manipulation;user-select:none;-webkit-user-select:none}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -170,12 +174,13 @@ details.sec.pinned>summary::after{display:none}
    have about 300px between them, so the labels are two letters and the gaps are
    one pixel. Below a cell of 17px it scrolls sideways instead of shrinking. */
 .pat-scroll{overflow-x:auto;padding-bottom:2px;margin:0 -2px;padding-left:2px;padding-right:2px}
-.pat-grid{display:flex;flex-direction:column;gap:3px;min-width:300px}
+.pat-grid{display:flex;flex-direction:column;gap:var(--s3);min-width:260px}
+.pat-half{display:flex;flex-direction:column;gap:3px}
 .pat-lane{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
 .pat-name{font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
   color:var(--text3);text-align:right;line-height:1.1}
 .pat-cells{display:grid;gap:1px}
-.pat-cell{height:22px;border-radius:3px;background:var(--bg3);border:0;padding:0;
+.pat-cell{height:26px;border-radius:3px;background:var(--bg3);border:0;padding:0;
   cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .pat-cell.beat{background:var(--border2)}
 .pat-cell[data-v="1"]{background:var(--green-bg)}
@@ -189,7 +194,8 @@ details.sec.pinned>summary::after{display:none}
 #pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
 /* The editor is a fold of its own inside the panel: it is the tallest thing in
    the metronome and nobody wants it in the way while setting a tempo. */
-.pat-head{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.pat-head{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 10px}
 .pat-head::after{content:'';margin-left:auto;width:7px;height:7px;flex:0 0 auto;
   border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);
   transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
@@ -324,7 +330,7 @@ details.sec[open] .sec-sum{display:none}
 /* One box per scale family. Showing all twenty-eight modes at once was more
    noise than help, so a family opens only when it is being used. */
 details.fam{border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);margin-bottom:6px}
-details.fam>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;
+details.fam>summary{background:var(--bg3);list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;
   font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);
   touch-action:manipulation;user-select:none;-webkit-user-select:none}
 details.fam>summary::-webkit-details-marker{display:none}
@@ -1083,8 +1089,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     round: ghost, middling, accented, off again — which is how a ghost note and an accent are written
     without a row each. The grid is sixteenths, or triplets for swung things; changing it moves what
     is already written to the nearest cell rather than hiding it. Starting from a style copies that
-    style in and leaves the original untouched, so the styles never get spoiled. Two bars if you want
-    a clave that takes two. What you write is kept for next time — it is your work, not a setting —
+    style in and leaves the original untouched, so the styles never get spoiled. Up to four bars, for
+    a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
+    cells stay wide enough to hit. What you write is kept for next time — it is your work, not a setting —
     and it plays under <em>Accompaniment &rarr; Custom</em>.</dd>
     <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
@@ -2054,7 +2061,7 @@ const MACHINE={
   h:(t,v)=>{drumNoise(t,{dur:0.032,gain:0.20*v,bp:9000,q:0.8});
             drumNoise(t,{dur:0.016,gain:0.10*v,hp:5000});return true;},
   o:(t,v)=>{drumNoise(t,{dur:0.24,gain:0.15*v,bp:8200,q:0.7});return true;},
-  d:(t,v)=>{drumMetal(t,0.55*v,0.55);return true;},
+  d:(t,v)=>{drumMetal(t,0.55*v,2.2);return true;},   // long enough to reach the next beat at 60
   r:(t,v)=>{woodClick(t,0.9*v);return true;},
   b:(t,v)=>{drumTone(t,{f0:96,f1:52,dur:0.34,gain:0.80*v,bend:0.06});return true;},
 };
@@ -2604,7 +2611,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-21g';
+const APP_VERSION='2026-08-22a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3771,12 +3778,23 @@ function patFromStyle(key){
   const G=GROOVES[key];
   if(!G)return;
   const step=patStep();
-  state.custom.bars=G.bars;
-  state.custom.hits=G.hits.map(h=>{
-    const voice=h[1]==='g'?'s':(h[1]==='b'?'k':h[1]);
-    const vel=h[1]==='g'?PAT_VELS[1]:(h[2]<0.3?PAT_VELS[1]:(h[2]<0.75?PAT_VELS[2]:PAT_VELS[3]));
-    return [Math.round(h[0]/step)*step,voice,vel];
-  });
+  /* Keep the length you chose. A style is one bar or two, and taking its length
+     would throw away a four-bar pattern the moment you asked to start from one;
+     it is laid down repeatedly instead, up to the length you have, so four bars
+     of rock is four bars of rock to work on. */
+  if(state.custom.bars<G.bars)state.custom.bars=G.bars;
+  const span=state.custom.bars*4*GRID, styleSpan=G.bars*4*GRID;
+  const hits=[];
+  for(let at=0;at<span;at+=styleSpan){
+    G.hits.forEach(h=>{
+      const pos=at+h[0];
+      if(pos>=span)return;
+      const voice=h[1]==='g'?'s':(h[1]==='b'?'k':h[1]);
+      const vel=h[1]==='g'?PAT_VELS[1]:(h[2]<0.3?PAT_VELS[1]:(h[2]<0.75?PAT_VELS[2]:PAT_VELS[3]));
+      hits.push([Math.round(pos/step)*step,voice,vel]);
+    });
+  }
+  state.custom.hits=hits;
   patQuantise();
 }
 // nothing written may sit between two cells of the grid on screen
@@ -3807,9 +3825,9 @@ function buildPatternEditor(){
 
   const bsel=document.getElementById('pat-bars');
   if(bsel&&!bsel.options.length){
-    [1,2].forEach(n=>bsel.appendChild(new Option(n,n)));
+    [1,2,3,4].forEach(n=>bsel.appendChild(new Option(n,n)));
     bsel.addEventListener('change',()=>{
-      state.custom.bars=parseInt(bsel.value,10)||1;
+      state.custom.bars=Math.max(1,Math.min(4,parseInt(bsel.value,10)||1));
       const span=state.custom.bars*4*GRID;
       state.custom.hits=state.custom.hits.filter(h=>h[0]<span);
       savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
@@ -3873,41 +3891,56 @@ function buildPatternEditor(){
 
   grid.innerHTML='';
   const offset=patBar*4*GRID;
-  PAT_VOICES.forEach(([voice,name])=>{
-    const lane=document.createElement('div');lane.className='pat-lane';
-    const label=document.createElement('div');label.className='pat-name';label.textContent=name;
-    const row=document.createElement('div');
-    row.className='pat-cells';
-    row.style.gridTemplateColumns='repeat('+cells+',1fr)';
-    for(let c=0;c<cells;c++){
-      const pos=offset+c*step;
-      const cell=document.createElement('button');
-      const perBeat=cells/4;
-      cell.className='pat-cell'+(c%perBeat===0?' beat':'');
-      cell.dataset.v=String(patLevel(patAt(voice,pos)));
-      cell.dataset.pos=String(pos);
-      cell.dataset.voice=voice;
-      cell.setAttribute('aria-label',name+', cell '+(c+1));
-      cell.onclick=()=>{
-        patToggle(voice,pos);
+  /* A finger needs about 24px. On a phone held upright sixteen cells cannot have
+     that between them, so the bar is cut in half and stacked: two beats to a
+     row, twice the width each. On anything wider the bar stays one line. */
+  const room=(grid.parentElement?grid.parentElement.clientWidth:320)-36;
+  const perRow=(room/cells<24)?Math.ceil(cells/2):cells;
+  const beatsPerRow=perRow/(cells/4);
+
+  for(let start=0;start<cells;start+=perRow){
+    const half=document.createElement('div');half.className='pat-half';
+    const count=Math.min(perRow,cells-start);
+    PAT_VOICES.forEach(([voice,name])=>{
+      const lane=document.createElement('div');lane.className='pat-lane';
+      const label=document.createElement('div');label.className='pat-name';label.textContent=name;
+      const row=document.createElement('div');
+      row.className='pat-cells';
+      row.style.gridTemplateColumns='repeat('+count+',1fr)';
+      for(let c=start;c<start+count;c++){
+        const pos=offset+c*step;
+        const cell=document.createElement('button');
+        const perBeat=cells/4;
+        cell.className='pat-cell'+(c%perBeat===0?' beat':'');
         cell.dataset.v=String(patLevel(patAt(voice,pos)));
-        if(state.groove!=='custom')setGroove('custom');
-        else{refreshSectionSummaries();restartIfPlaying();}
-        patInfo();
-      };
-      row.appendChild(cell);
+        cell.dataset.pos=String(pos);
+        cell.dataset.voice=voice;
+        cell.setAttribute('aria-label',name+', beat '+(Math.floor(c/perBeat)+1)+', cell '+(c%perBeat+1));
+        cell.onclick=()=>{
+          patToggle(voice,pos);
+          cell.dataset.v=String(patLevel(patAt(voice,pos)));
+          if(state.groove!=='custom')setGroove('custom');
+          else{refreshSectionSummaries();restartIfPlaying();}
+          patInfo();
+        };
+        row.appendChild(cell);
+      }
+      lane.append(label,row);
+      half.appendChild(lane);
+    });
+    const ruler=document.createElement('div');ruler.className='pat-ruler';
+    const spacer=document.createElement('div');
+    const marks=document.createElement('div');
+    marks.className='pat-ruler-cells';
+    marks.style.gridTemplateColumns='repeat('+(count/(cells/4))+',1fr)';
+    const firstBeat=Math.floor(start/(cells/4))+1;
+    for(let b=0;b<count/(cells/4);b++){
+      const sp=document.createElement('span');sp.textContent=String(firstBeat+b);marks.appendChild(sp);
     }
-    lane.append(label,row);
-    grid.appendChild(lane);
-  });
-  const ruler=document.createElement('div');ruler.className='pat-ruler';
-  const spacer=document.createElement('div');
-  const marks=document.createElement('div');
-  marks.className='pat-ruler-cells';
-  marks.style.gridTemplateColumns='repeat(4,1fr)';
-  for(let b=0;b<4;b++){const sp=document.createElement('span');sp.textContent=String(b+1);marks.appendChild(sp);}
-  ruler.append(spacer,marks);
-  grid.appendChild(ruler);
+    ruler.append(spacer,marks);
+    half.appendChild(ruler);
+    grid.appendChild(half);
+  }
   patInfo();
 }
 function patOpen(){
@@ -3948,7 +3981,7 @@ function loadPattern(){
     const p=JSON.parse(raw);
     if(p&&Array.isArray(p.hits)){
       state.custom.hits=p.hits.filter(h=>Array.isArray(h)&&h.length===3);
-      state.custom.bars=p.bars===2?2:1;
+      state.custom.bars=Math.max(1,Math.min(4,parseInt(p.bars,10)||1));
       state.custom.grid=p.grid===12?12:16;
     }
     if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;

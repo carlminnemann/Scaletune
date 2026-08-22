@@ -17,13 +17,18 @@ BASE='https://raw.githubusercontent.com/freepats/muldjordkit/main/samples'
 OUT='vendor/drums'
 TMP='.drum-build'
 
-# name          source file                        seconds  shaping
+# A cymbal has to be allowed to ring. Cut at 0.7s the ride died before the next
+# beat at any slow tempo, which is what a ride must never do, so it runs 2.4s
+# now with only a short taper at the end and the natural decay doing the work.
+# It is the one sample kept at 32kHz: its tail is all shimmer, and 32k holds
+# everything under 16kHz for two thirds of the bytes. 
+# name          source file                        secs  shaping  taper  rate
 SPEC=[
- ('kick',  'KdrumL/20-KdrumL.flac',                0.55, 'kick'),
- ('snare', 'Snare1/40-Snare.flac',                 0.45, None),
- ('hhc',   'HihatClosed/20-HihatClosed.flac',      0.22, None),
- ('hho',   'HihatOpen/20-HihatOpen.flac',          0.55, None),
- ('ride',  'RideR/9-RideR.flac',                  0.70, None),
+ ('kick',  'KdrumL/20-KdrumL.flac',                0.55, 'kick',  0.34, 44100),
+ ('snare', 'Snare1/40-Snare.flac',                 0.45, None,    0.34, 44100),
+ ('hhc',   'HihatClosed/20-HihatClosed.flac',      0.22, None,    0.34, 44100),
+ ('hho',   'HihatOpen/20-HihatOpen.flac',          1.00, None,    0.18, 44100),
+ ('ride',  'RideR/9-RideR.flac',                   2.40, None,    0.15, 32000),
 ]
 
 def biquad(d,b0,b1,b2,a1,a2):
@@ -53,8 +58,8 @@ SHAPE={
  'kick':  lambda d,sr: shelf_high(hp(d,sr,50),sr,1400,9),
 }
 
-def decode(src,dst):
-    subprocess.run(['afconvert','-f','WAVE','-d','LEI16@44100','-c','1',src,dst],check=True)
+def decode(src,dst,rate=44100):
+    subprocess.run(['afconvert','-f','WAVE','-d','LEI16@%d'%rate,'-c','1',src,dst],check=True)
 
 def read(p):
     w=wave.open(p);sr=w.getframerate();n=w.getnframes()
@@ -68,17 +73,17 @@ def phone_peak(d,sr):
 
 def main():
     os.makedirs(OUT,exist_ok=True);os.makedirs(TMP,exist_ok=True)
-    for name,src,dur,shape in SPEC:
+    for name,src,dur,shape,taper,rate in SPEC:
         flac=os.path.join(TMP,name+'.flac');wav=os.path.join(TMP,name+'.wav')
         if not os.path.exists(flac):
             subprocess.run(['curl','-sL','-o',flac,BASE+'/'+src],check=True)
-        decode(flac,wav)
+        decode(flac,wav,rate)
         d,sr=read(wav)
         pk=max(abs(x) for x in d)
         start=next(i for i,x in enumerate(d) if abs(x)>pk*0.02)
         start=max(0,start-int(0.002*sr))
         cut=list(d[start:start+int(dur*sr)])
-        tail=int(len(cut)*0.34)          # a cosine taper over the last third
+        tail=int(len(cut)*taper)         # a cosine taper over the end
         for i in range(tail):
             cut[len(cut)-tail+i]*=0.5*(1+math.cos(math.pi*(i/tail)))
         if shape:cut=SHAPE[shape](cut,sr)

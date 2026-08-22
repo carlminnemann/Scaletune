@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v91';
+const CACHE = 'scaletune-v92';
 const ASSETS = [
   './',
   './index.html',
@@ -31,9 +31,13 @@ const ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      // addAll is all-or-nothing; cache what we can so one bad entry cannot
-      // leave the app with no cache at all
-      .then(c => Promise.allSettled(ASSETS.map(a => c.add(a))))
+      /* addAll is all-or-nothing; cache what we can so one bad entry cannot
+         leave the app with no cache at all. Each request bypasses the browser's
+         own HTTP cache: the host sends max-age=600, so a new cache version
+         installed just after a deploy could otherwise be filled with the files
+         it was meant to replace. */
+      .then(c => Promise.allSettled(
+        ASSETS.map(a => c.add(new Request(a, {cache: 'reload'})))))
       .then(() => self.skipWaiting())
   );
 });
