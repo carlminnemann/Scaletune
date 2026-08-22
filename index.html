@@ -1102,8 +1102,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
   <div class="help-sec" id="help-root"><h3>Root</h3><dl>
     <dt>The twelve notes</dt><dd>The key everything else is built from.</dd>
-    <dt>Single / Study list</dt><dd>Single works on one scale or chord at a time. Study list collects
-    several and takes them in turn, one per pass, so you can work a whole family without stopping.</dd>
+
   </dl></div>
 
   <div class="help-sec" id="help-scales"><h3>Scales and chords</h3><dl>
@@ -1121,9 +1120,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
     <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
-    <dt>Single or Study list</dt><dd>The two boxes under the modes. Single plays the one thing you
-    pick; Study list turns your picks into a rotation. It governs every panel below it, which is why
-    it sits above them rather than inside the Root panel where it used to hide.</dd>
+    <dt>Single or Study list</dt><dd>The two boxes under the modes. Single works on one scale or
+    chord at a time; Study list collects several and takes them in turn, one per pass, so a whole
+    family can be worked without stopping. It governs every panel below it, which is why it sits
+    above them rather than inside the Root panel where it used to hide.</dd>
     <dt>The study list</dt><dd>One list, holding scales and chords together: pick scales in Scale and
     chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
     same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
@@ -2942,7 +2942,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22p';
+const APP_VERSION='2026-08-23a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
