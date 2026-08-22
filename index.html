@@ -2829,7 +2829,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22i';
+const APP_VERSION='2026-08-22j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4253,6 +4253,7 @@ function patInfo(){
         +(state.custom.grid===12?'sixteenths':'triplets')
         +' grid, between these cells. Tap a dot to remove it, or switch grid to move it.':'')
     : where+' \u2014 pick a level and tap the grid, or start from a style';
+  paintMixUsed();      // a voice written in just now must become movable
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=n
     ? '· '+n+' hits, '+state.custom.bars+(state.custom.bars===1?' bar':' bars')
@@ -4368,25 +4369,17 @@ function buildMixer(){
       row.dataset.voice=k;
     });
   }
-  const used=mixUsed();
   [...host.children].forEach(row=>{
     const k=row.dataset.voice, v=Math.round((state.mix[k]!=null?state.mix[k]:1)*100);
     row.querySelector('input').value=String(v);
     row.querySelector('.val').textContent=v+'%';
-    row.classList.toggle('unused',grooveOn()&&!used.has(k));
   });
+  paintMixUsed();
   const head=document.getElementById('mix-head');
   if(head&&!head.dataset.wired){
     head.dataset.wired='1';
     head.onclick=()=>setMixOpen(!mixOpen());
     head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setMixOpen(!mixOpen());}};
-  }
-  const note=document.getElementById('mix-note');
-  if(note){
-    const G=grooveDef();
-    note.textContent=grooveOn()
-      ? 'the faded ones are not in '+((G&&G.label)||'this pattern')
-      : 'choose an accompaniment to hear these';
   }
   const reset=document.getElementById('mix-reset');
   if(reset&&!reset.dataset.wired){
@@ -4397,6 +4390,26 @@ function buildMixer(){
     };
   }
   mixSummary();
+}
+
+/* Which faders can be heard right now. A pattern of your own is edited a cell
+   at a time, so this runs on every edit: put a ride in and the ride fader lights
+   up with it. */
+function paintMixUsed(){
+  const host=document.getElementById('mix-rows');
+  if(!host||!host.children.length)return;
+  const used=mixUsed();
+  [...host.children].forEach(row=>{
+    row.classList.toggle('unused',grooveOn()&&!used.has(row.dataset.voice));
+  });
+  const note=document.getElementById('mix-note');
+  if(!note)return;
+  if(!grooveOn())note.textContent='choose an accompaniment to hear these';
+  else if(state.groove==='custom')note.textContent='the faded ones are not in your pattern yet';
+  else{
+    const G=grooveDef();
+    note.textContent='the faded ones are not in '+((G&&G.label)||'this pattern');
+  }
 }
 
 function buildHatRow(){
