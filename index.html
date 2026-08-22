@@ -101,9 +101,22 @@ html,body{height:var(--app-h,100dvh)}
    a wide screen and read as lopsided; scaling the column up to fill read as
    oversized. The column stays the size it was designed at.                  */
 
-/* 34px side columns keep the wordmark optically centred despite the button */
-.header{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:8px;
+/* The side columns match the buttons, so the wordmark sits optically centred
+   between them however many there are. Three of them is 110px on the right, and
+   the name gives way rather than being written over. */
+/* Three buttons of 34 and two gaps of 6 is 116, and the side columns have to be
+   that or the name is written over. Below 400px the buttons come down to 30 —
+   .header .theme-btn, because the plain .theme-btn rule comes later in the file
+   and would otherwise win. */
+.header{display:grid;grid-template-columns:116px minmax(0,1fr) 116px;align-items:center;gap:6px;
   margin-bottom:var(--s4);flex:0 0 auto}
+.header h1.wordmark{min-width:0;white-space:nowrap}
+@media(max-width:400px){
+  .header{grid-template-columns:104px minmax(0,1fr) 104px}
+  .header .theme-btn{width:30px;height:30px;font-size:14px}
+  .header h1.wordmark{font-size:20px}
+  .header h1.wordmark .cap{font-size:32px}
+}
 /* Lowercase runs smaller so the two capitals carry the name. */
 /* Optima on Apple devices; Android has nothing like it, so it falls back
    through the nearest humanist faces to the system font. */
@@ -112,6 +125,7 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
   letter-spacing:0.015em;line-height:1;white-space:nowrap}
 h1.wordmark .cap{font-size:38px;color:var(--brand)}
 @media(max-width:340px){h1.wordmark{font-size:19px}h1.wordmark .cap{font-size:31px}}
+.theme-btn.armed{border-color:var(--text2);color:var(--text)}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
@@ -602,6 +616,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <span></span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap">T</span>une</h1>
   <span class="head-btns">
+    <button class="theme-btn" id="clearall-btn" onclick="clearEverything()"
+            aria-label="Clear every selection">✕</button>
     <button class="theme-btn" id="help-btn" onclick="openHelp()" aria-label="What everything does">?</button>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">☀</button>
   </span>
@@ -1086,6 +1102,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </dl></div>
 
   <div class="help-sec" id="help-scales"><h3>Scales and chords</h3><dl>
+    <dt>Clear everything</dt><dd>The ✕ beside the ? empties every selection at once — the scale, the
+    chord, the whole study list, the drone's notes, the free notes, the figures and every accent —
+    rather than clearing each panel in turn. It asks first: the second tap within four seconds is the
+    one that does it. It leaves alone what you built rather than chose: the pattern you wrote, the
+    mixer, the tempo and the metronome's settings.</dd>
     <dt>The family boxes</dt><dd>One opens at a time and the others fold away. A closed box still says
     what is chosen inside it, so folding one never hides a selection.</dd>
     <dt>Pentatonic and the blue notes</dt><dd>Five notes, and what is missing is the point: the major
@@ -2913,7 +2934,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22m';
+const APP_VERSION='2026-08-22n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3906,6 +3927,48 @@ function clearPitch(){
   state.startDeg=0;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   renderPitchPickers();refreshSequence();
+}
+
+/* Everything you have chosen, in one go: the scale, the chord, the whole study
+   list, the drone's notes, the free notes and every accent. It asks first,
+   because it undoes more than any other button in the app — the second tap
+   within four seconds is the one that does it.
+
+   What it does NOT touch is what you built rather than chose: the pattern you
+   wrote, the mixer, the tempo and the metronome's settings. Those are work, not
+   a selection. */
+let clearArmed=0;
+function clearEverything(){
+  const btn=document.getElementById('clearall-btn');
+  if(Date.now()-clearArmed>4000){
+    clearArmed=Date.now();
+    if(btn){btn.textContent='✕?';btn.classList.add('armed');}
+    setStatus('Tap again to clear every selection.');
+    setTimeout(()=>{
+      if(Date.now()-clearArmed>=4000){
+        if(btn){btn.textContent='✕';btn.classList.remove('armed');}
+        if(/clear every selection/.test(document.getElementById('status-bar').textContent))setStatus('');
+      }
+    },4100);
+    return;
+  }
+  clearArmed=0;
+  if(btn){btn.textContent='✕';btn.classList.remove('armed');}
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  state.scaleGroup=null;state.scaleName=null;
+  state.chordGroup=null;state.chordName=null;
+  state.practice.list=[];state.listKind=null;studyIdx=0;
+  state.practice.subdivList=[];state.practice.useSubdivList=false;
+  state.droneSelected={};state.freeSelected={};
+  state.startDeg=0;
+  state.accentsTouched=false;state.poly.touched=false;
+  clearAccents();clearPolyAccents();
+  NOTES.forEach(renderDroneNote);
+  buildFreeGrid();buildSubdivRow();buildListModeRow();
+  renderPitchPickers();refreshSequence();updateInfo();updateDroneReadout();
+  refreshSectionSummaries();updateRotationPanel();
+  setStatus('Cleared.');
+  setTimeout(()=>{if(document.getElementById('status-bar').textContent==='Cleared.')setStatus('');},1500);
 }
 
 /* ---------- free UI ---------- */
