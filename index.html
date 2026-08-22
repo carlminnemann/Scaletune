@@ -206,6 +206,7 @@ details.sec.pinned>summary::after{display:none}
   font-variant-numeric:tabular-nums}
 
 #pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
+#pat-info{white-space:pre-line}
 /* The editor is a fold of its own inside the panel: it is the tallest thing in
    the metronome and nobody wants it in the way while setting a tempo. */
 .pat-head{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;
@@ -833,7 +834,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div id="pat-body" hidden>
       <div class="head" style="margin-top:var(--s3)">
         <span class="sig-fields">
-          <select class="sig-select" id="pat-bars" aria-label="Bars in the pattern"></select>
+          <span class="sig-unit">loop</span>
+          <select class="sig-select" id="pat-bars" aria-label="How many bars loop"></select>
           <span class="sig-unit">bars</span>
         </span>
         <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
@@ -1102,13 +1104,16 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt>Kit</dt><dd>Two of them. <em>Recorded</em> is a real acoustic kit, warm and big. <em>Machine</em>
     is made rather than recorded — dry, tight, and it cuts through a small speaker. Switch it while
     something is playing; that is the only way to hear the difference.</dd>
-    <dt>Pattern</dt><dd>Write your own. Six voices down the side and a bar across. Pick a
+    <dt>Pattern</dt><dd>Write your own. Six voices down the side and a bar across. <em>Loop</em> is how
+    many bars go round: set it to one and the bar you write repeats, set it to four and you have four
+    to fill, with tabs to move between them. Pick a
     <em>Level</em> — ghost, middling or accented — and every tap writes at it; tapping a cell that
     already has that level clears it, and tapping one at another level changes it. One tap either
-    way, so a wrong cell costs one tap to undo. The grid is sixteenths, or triplets for swung things, and changing it moves
-    nothing: a hit that does not sit on the grid you are looking
-    at is marked with a dot in the cell it falls inside, so the two can be mixed — straight
-    sixteenths under a swung ride, both playing. Starting from a style copies that
+    way, so a wrong cell costs one tap to undo. <em>Grid</em> is what you are writing on, not what is written: it changes which cells you can put a
+    hit on, and moves nothing that is already there. Sixteenths for straight things, triplets for
+    swung ones, and both can live in the same pattern — straight sixteenths under a swung ride, both
+    playing. A hit written on the grid you are not looking at shows as a dot in the cell it falls
+    inside; tap the dot to remove it, or switch grid to move it. Starting from a style copies that
     style in and leaves the original untouched, so the styles never get spoiled. Up to four bars, for
     a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
     cells stay wide enough to hit. What you write is kept for next time — it is your work, not a setting —
@@ -2631,7 +2636,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22c';
+const APP_VERSION='2026-08-22d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3836,6 +3841,14 @@ function patOffGridCount(){
    once for everything written at it. */
 function patToggle(voice,pos){
   const h=patAt(voice,pos);
+  const step=patStep();
+  /* A cell showing only a dot holds something written on the other grid. Tapping
+     it clears that, because a tap has to act on what you can see — otherwise the
+     only way to be rid of it is to remember which grid it was written on. */
+  if(!h&&patOffGrid(voice,pos,pos+step)){
+    state.custom.hits=state.custom.hits.filter(x=>!(x[1]===voice&&x[0]>pos&&x[0]<pos+step));
+    savePattern();return;
+  }
   const pen=Math.max(1,Math.min(3,state.custom.pen||3));
   state.custom.hits=state.custom.hits.filter(x=>x!==h);
   if(!h||patLevel(h)!==pen)state.custom.hits.push([pos,voice,PAT_VELS[pen]]);
@@ -3959,6 +3972,7 @@ function buildPatternEditor(){
           patToggle(voice,pos);
           cell.dataset.v=String(patLevel(patAt(voice,pos)));
           cell.classList.toggle('off',patOffGrid(voice,pos,pos+step));
+          cell.title=patOffGrid(voice,pos,pos+step)?'written on the other grid':'';
           if(state.groove!=='custom')setGroove('custom');
           else{refreshSectionSummaries();restartIfPlaying();}
           patInfo();
@@ -4001,10 +4015,14 @@ function patInfo(){
   if(!el)return;
   const n=state.custom.hits.length;
   const off=patOffGridCount();
+  const bars=state.custom.bars;
+  const where='loops '+bars+(bars===1?' bar':' bars')+(bars>1?', editing bar '+(patBar+1):'');
   el.textContent=n
-    ? n+' hit'+(n===1?'':'s')+' · tap writes at the level above, tap it again to clear'
-      +(off?' · '+off+' sit'+(off===1?'s':'')+' between these cells, on the other grid':'')
-    : 'empty — pick a level and tap the grid, or start from a style';
+    ? where+' · '+n+' hit'+(n===1?'':'s')+' · tap writes at the level above, tap again to clear'
+      +(off?'\n'+off+' dot'+(off===1?'':'s')+': written on the '
+        +(state.custom.grid===12?'sixteenths':'triplets')
+        +' grid, between these cells. Tap a dot to remove it, or switch grid to move it.':'')
+    : where+' \u2014 pick a level and tap the grid, or start from a style';
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=n
     ? '· '+n+' hits, '+state.custom.bars+(state.custom.bars===1?' bar':' bars')
