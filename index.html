@@ -402,7 +402,8 @@ details.fam[open] .fam-sum{display:none}
   grid-template-columns:repeat(var(--cols,3),1fr)}
 .rot-chip.drop{cursor:pointer;font:inherit;gap:5px}
 .rot-chip.drop:hover{border-color:var(--text3)}
-.rot-chip .chip-x{font-size:10px;opacity:.55}
+.rot-chip .chip-x{font-size:10px;opacity:.55;padding:2px 1px 2px 3px;cursor:pointer}
+.rot-chip.held{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
 .rot-chip.drop:hover .chip-x{opacity:1}
 .rot-chip.now .chip-x,.rot-chip.next .chip-x{opacity:.75}
 .rot-chip{min-height:30px;display:flex;align-items:center;justify-content:center;
@@ -1129,9 +1130,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     happen to be looking at, and the numbers on the buttons count through the whole list. A tap adds,
     every time, so the same thing can be in twice — a major chord after the ionian and again after
     the lydian is a real exercise, and a button that only toggled could not say it. A button in the
-    list twice shows both its places. To take one out, tap it in the rotation, where every item
-    carries a ✕ and you can see which of the two you mean — four taps by mistake are four taps
-    back.</dd>
+    list twice shows both its places. In the rotation itself every item does two things:
+    its ✕ takes it out — four taps by mistake are four taps back — and the item itself picks it up.
+    Picked up, the next one you tap is where it goes; tap the same one again to leave it where it
+    was. Two taps and no dragging, which is the only kind of reordering a finger can do on a phone.
+    Moving while it plays keeps whatever is sounding.</dd>
     <dt>Clear</dt><dd>Empties the selection. With the study list on it drops that panel's kind from
     the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
   </dl></div>
@@ -2939,7 +2942,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-22o';
+const APP_VERSION='2026-08-22p';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3392,6 +3395,7 @@ function clearStudyList(){
   renderPitchPickers();refreshSequence();
 }
 
+let rotHold=null;   // the item picked up, waiting to be put somewhere
 function updateRotationPanelSoon(){setTimeout(updateRotationPanel,0);}
 
 function updateRotationPanel(){
@@ -3403,36 +3407,66 @@ function updateRotationPanel(){
   const p=rotationPreview();
   document.getElementById('rot-clear').style.display=(useListOn()&&p.items.length)?'':'none';
   const chips=document.getElementById('rot-chips');chips.innerHTML='';
-  const removable=useListOn()&&activeList().length>0;
+  const editable=useListOn()&&activeList().length>0;
+  if(!editable)rotHold=null;
+  if(rotHold!=null&&rotHold>=activeList().length)rotHold=null;
   p.items.forEach((it,i)=>{
-    const d=document.createElement(removable?'button':'span');
+    const d=document.createElement(editable?'button':'span');
     d.className='rot-chip'+(i===p.currentIdx?' now':(i===p.nextIdx&&p.moved?' next':''));
     d.textContent=(i+1)+'. '+it.name;
-    if(removable){
+    if(editable){
+      /* Two things on one chip: the cross takes it out, the chip itself picks it
+         up. Picked up, the next chip you tap is where it goes — two taps and no
+         dragging, which is the only kind of reordering a finger can do reliably
+         on a phone. */
       d.classList.add('drop');
-      // a cross on the chip, because a chip that removes itself without saying so
-      // is a chip nobody presses: the way back was there and could not be found
+      if(i===rotHold)d.classList.add('held');
       d.innerHTML='';
       d.append(document.createTextNode((i+1)+'. '+it.name));
       const x=document.createElement('span');x.className='chip-x';x.textContent='✕';
-      d.appendChild(x);
-      d.title='Remove from the rotation';
-      d.setAttribute('aria-label','Remove '+it.name+' from the rotation');
-      d.onclick=()=>{
+      x.title='Remove from the rotation';
+      x.setAttribute('role','button');
+      x.setAttribute('aria-label','Remove '+it.name);
+      x.onclick=e=>{
+        e.stopPropagation();
         const list=activeList();
         if(i>=list.length)return;
+        const cur=list[studyIdx];
         list.splice(i,1);
-        if(!list.length)state.listKind=null;
-        studyIdx=0;
-        if(list.length)applyListItem(list[0]);
+        rotHold=null;
+        if(!list.length){state.listKind=null;studyIdx=0;}
+        else{
+          const at=list.indexOf(cur);
+          studyIdx=at>=0?at:0;
+          applyListItem(list[studyIdx]);
+        }
         renderPitchPickers();refreshSequence();refreshSectionSummaries();
         updateRotationPanel();restartIfPlaying();
+      };
+      d.appendChild(x);
+      d.setAttribute('aria-label',(rotHold==null?'Move ':'Put it here: ')+it.name);
+      d.onclick=()=>{
+        const list=activeList();
+        if(rotHold==null){rotHold=i;updateRotationPanel();return;}
+        if(rotHold===i){rotHold=null;updateRotationPanel();return;}
+        const cur=list[studyIdx];
+        const [moved]=list.splice(rotHold,1);
+        list.splice(i,0,moved);
+        rotHold=null;
+        const at=list.indexOf(cur);
+        studyIdx=at>=0?at:0;
+        refreshSectionSummaries();updateRotationPanel();
       };
     }
     chips.appendChild(d);
   });
   const hint=document.getElementById('rot-hint');
-  if(hint)hint.style.display=removable?'':'none';
+  if(hint){
+    hint.style.display=editable?'':'none';
+    hint.textContent=rotHold==null
+      ? 'tap one to move it, or its \u2715 to take it out'
+      : 'tap where it should go, or the same one to leave it';
+  }
   const playing=state.playing;
   document.getElementById('rot-now').innerHTML=
     (playing?'Now: ':'Starts on: ')+'<b>'+p.now+'</b>'+
