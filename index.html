@@ -2957,7 +2957,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23d';
+const APP_VERSION='2026-08-23e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4492,19 +4492,47 @@ function buildPatternEditor(){
    used to be: the page grew downwards and the view stayed put. Whatever was
    opened is brought into view — its top to the top, if it does not already fit —
    after the layout has settled, since opening also re-shares the leftover room. */
+/* Opening one thing moves everything: the leftover room is shared out again, and
+   in Metro the whole screen can stop being centred. Aiming once, on a timer, was
+   aiming at where the panel was about to stop being. So the target is remembered
+   for a moment and re-aimed at whenever the layout is worked out again — the end
+   of spreadPanels, which is the last thing to touch it — until it settles. */
+let revealFor=null,revealUntil=0;
 function revealPanel(el){
+  if(!el)return;
+  revealFor=el;
+  revealUntil=(performance&&performance.now?performance.now():Date.now())+1200;
+  const sc0=document.getElementById('scroll-area');
+  if(sc0&&!sc0.dataset.revealWired){       // a hand on the list wins over the chase
+    sc0.dataset.revealWired='1';
+    ['wheel','touchstart'].forEach(ev=>
+      sc0.addEventListener(ev,()=>{revealFor=null;},{passive:true}));
+  }
+  bringRevealed();
+  requestAnimationFrame(()=>requestAnimationFrame(bringRevealed));
+  setTimeout(bringRevealed,180);
+  setTimeout(bringRevealed,420);
+}
+function bringRevealed(){
+  const el=revealFor;
+  if(!el)return;
+  const now=(performance&&performance.now?performance.now():Date.now());
+  if(now>revealUntil){revealFor=null;return;}
   const sc=document.getElementById('scroll-area');
-  if(!sc||!el)return;
-  const bring=()=>{
-    const r=el.getBoundingClientRect(),v=sc.getBoundingClientRect();
-    if(r.top>=v.top-1&&r.bottom<=v.bottom+1)return;      // all of it is already there
-    const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const top=Math.max(0,sc.scrollTop+(r.top-v.top)-8);
-    if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
-    else sc.scrollTop=top;
-  };
-  requestAnimationFrame(()=>requestAnimationFrame(bring));
-  setTimeout(bring,180);          // and again once the spread has finished
+  if(!sc)return;
+  /* Some sections come in pairs — Scale's list and Free's, Scale's range and
+     Free's — and opening one opens the other so the layout does not change under
+     you when switching mode. The twin belonging to the other mode is not on the
+     screen, and an element that is not laid out measures as a zero box at the
+     origin: chasing it drags the view to the top, which is what it did. */
+  if(!el.getClientRects().length)return;
+  const r=el.getBoundingClientRect(),v=sc.getBoundingClientRect();
+  if(r.top>=v.top-1&&r.bottom<=v.bottom+1)return;        // all of it is already there
+  const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const top=Math.max(0,sc.scrollTop+(r.top-v.top)-8);
+  if(Math.abs(top-sc.scrollTop)<1)return;
+  if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
+  else sc.scrollTop=top;
 }
 
 /* Three groups fold inside the metronome — the pattern, the mixer and the
@@ -5069,7 +5097,10 @@ function centreMetro(){
 }
 
 const SPREAD_MAX=64;
-function spreadPanels(){
+/* Whatever was just opened is aimed at again here, at the end, because this is
+   where the layout stops moving. */
+function spreadPanels(){shareOutRoom();bringRevealed();}
+function shareOutRoom(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
   // the tuner's two blocks are panels rather than folding sections, and they
