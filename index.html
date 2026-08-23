@@ -630,14 +630,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </span>
 </div>
 
-<div class="section-label" style="flex:0 0 auto">Mode</div>
+<div class="section-label" style="flex:0 0 auto" data-t="mode">Mode</div>
 <div class="mode-row">
-  <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')">Drone</button>
-  <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')">Scale</button>
-  <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')">Arpeggio</button>
-  <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')">Free</button>
-  <button class="mode-btn" id="btn-mode-tuner" onclick="setMode('tuner')">Tuner</button>
-  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')">♩ Metro</button>
+  <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')" data-t="drone">Drone</button>
+  <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')" data-t="scale">Scale</button>
+  <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')" data-t="arpeggio">Arpeggio</button>
+  <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')" data-t="free">Free</button>
+  <button class="mode-btn" id="btn-mode-tuner" onclick="setMode('tuner')" data-t="tuner">Tuner</button>
+  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')" data-t="metro">♩ Metro</button>
 </div>
 
 <!-- Everything that scrolls lives in here. The name, the two head buttons, the
@@ -672,14 +672,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </div>
 
   <div class="panel">
-    <div class="head"><span class="group-label">Reference A4</span>
+    <div class="head"><span class="group-label" data-t="reference-a4">Reference A4</span>
       <span class="sig-fields">
         <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
-        <span class="sig-unit">Hz</span>
+        <span class="sig-unit" data-t="hz">Hz</span>
       </span></div>
     <!-- one line, because a temperament and the key it is built on are one
          choice, and two lines of it pushed the tuner into scrolling -->
-    <div class="head"><span class="group-label">Temperament</span>
+    <div class="head"><span class="group-label" data-t="temperament">Temperament</span>
       <span class="sig-fields">
         <select class="sig-select active" id="tuner-temp" aria-label="Temperament"></select>
         <select class="sig-select active" id="tuner-key" aria-label="Key the temperament is built on"
@@ -690,14 +690,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </div>
 
 <div id="drone-section">
-  <div class="section-label">Notes</div>
-  <div class="legend">
+  <div class="section-label" data-t="notes">Notes</div>
+  <div class="legend" data-t="tap-add-or-remove-a">
     <span>tap — add or remove a note</span>
     <span>+/− — octave</span>
     <span>several notes sound together</span>
   </div>
   <div class="note-grid free-grid" id="drone-grid"></div>
-  <button class="clear-btn" onclick="clearDrone()" style="margin-bottom:1.25rem">✕ Clear</button>
+  <button class="clear-btn" onclick="clearDrone()" style="margin-bottom:1.25rem" data-t="clear">✕ Clear</button>
 </div>
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
@@ -706,7 +706,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
        not be put away, and with everything else closed it stood between the
        modes and the Start button. -->
   <details class="sec" id="sec-root">
-    <summary>Root<span class="sec-sum" id="sum-root"></span></summary>
+    <summary><span data-t="sec.root">Root</span><span class="sec-sum" id="sum-root"></span></summary>
     <div class="sec-body">
       <div class="btn-wrap" id="root-row"></div>
     </div>
@@ -717,65 +717,65 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="sec-body">
       <div id="scale-lists">
         <details class="fam" data-fam="gregorian">
-          <summary>Major Scale<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.major-scale">Major Scale</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="gregorian-btns"></div>
         </details>
         <details class="fam" data-fam="pentatonic">
-          <summary>Pentatonic<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.pentatonic">Pentatonic</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="pentatonic-btns"></div>
           <div class="head" id="blue-line" style="margin-top:var(--s3);margin-bottom:0">
-            <span class="section-label">Blue notes</span>
+            <span class="section-label" data-t="blue-notes">Blue notes</span>
             <span class="btn-wrap seg" id="blue-row" data-cols="fixed"></span></div>
           <div class="info-line" id="blue-info"></div>
         </details>
         <details class="fam" data-fam="melodic">
-          <summary>Melodic Minor<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.melodic-minor">Melodic Minor</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="melodic-btns"></div>
         </details>
         <details class="fam" data-fam="harmonic">
-          <summary>Harmonic Minor<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.harmonic-minor">Harmonic Minor</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="harmonic-btns"></div>
         </details>
         <details class="fam" data-fam="harmonicMajor">
-          <summary>Harmonic Major<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.harmonic-major">Harmonic Major</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="harmonicmajor-btns"></div>
         </details>
       </div>
 
       <div id="arp-lists" style="display:none">
         <details class="fam" data-fam="triad">
-          <summary>Triads<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.triads">Triads</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="triad-btns"></div>
         </details>
         <details class="fam" data-fam="seventh">
-          <summary>Seventh Chords<span class="fam-sum"></span></summary>
+          <summary><span data-t="fam.seventh-chords">Seventh Chords</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="seventh-btns"></div>
         </details>
       </div>
 
       <div class="info-line" id="pitch-info"></div>
-      <button class="clear-btn" onclick="clearPitch()">✕ Clear</button>
+      <button class="clear-btn" onclick="clearPitch()" data-t="clear-2">✕ Clear</button>
     </div>
   </details>
 
   <details class="sec" id="sec-range">
-    <summary>Range &amp; Direction<span class="sec-sum" id="sum-range"></span></summary>
+    <summary><span data-t="sec.range">Range &amp; Direction</span><span class="sec-sum" id="sum-range"></span></summary>
     <div class="sec-body">
-      <div class="head"><span class="group-label">Octaves</span>
+      <div class="head"><span class="group-label" data-t="octaves">Octaves</span>
         <span class="btn-wrap seg" id="dir-row" data-cols="fixed"></span></div>
       <div class="btn-wrap" id="span-row"></div>
-      <div class="group-label">Start Octave</div>
+      <div class="group-label" data-t="start-octave">Start Octave</div>
       <div class="btn-wrap" id="rootoct-row"></div>
-      <div class="group-label">Start On</div>
+      <div class="group-label" data-t="start-on">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
     </div>
   </details>
 
   <details class="sec" id="sec-progress">
-    <summary>Practice Progressions<span class="sec-sum" id="sum-progress"></span></summary>
+    <summary><span data-t="sec.practice-progressions">Practice Progressions</span><span class="sec-sum" id="sum-progress"></span></summary>
     <div class="sec-body">
       <div id="rootmove-block">
-      <div class="head"><span class="group-label">Root Movement</span>
+      <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
       </div>
       <div class="info-line" id="practice-info"></div>
@@ -787,28 +787,28 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div id="free-section" style="display:none">
   <!-- folds like the one in Scale, so it is not the last panel left standing open -->
   <details class="sec" id="sec-freeroot">
-    <summary>Root<span class="sec-sum" id="sum-freeroot"></span></summary>
+    <summary><span data-t="sec.root">Root</span><span class="sec-sum" id="sum-freeroot"></span></summary>
     <div class="sec-body">
       <div class="btn-wrap" id="free-root-row"></div>
     </div>
   </details>
   <details class="sec" id="sec-freenotes">
-    <summary>Notes<span class="sec-sum" id="sum-freenotes"></span></summary>
+    <summary><span data-t="sec.notes">Notes</span><span class="sec-sum" id="sum-freenotes"></span></summary>
     <div class="sec-body">
-      <div class="legend">
+      <div class="legend" data-t="tap-toggle-note-on-off">
         <span>tap — toggle note on/off</span>
         <span>+/− — octave</span>
       </div>
       <div class="note-grid free-grid" id="free-grid" style="margin-bottom:0"></div>
-      <button class="clear-btn" onclick="clearFree()">✕ Clear</button>
+      <button class="clear-btn" onclick="clearFree()" data-t="clear-3">✕ Clear</button>
     </div>
   </details>
   <details class="sec" id="sec-freerange">
-    <summary>Range &amp; Direction<span class="sec-sum" id="sum-freerange"></span></summary>
+    <summary><span data-t="sec.range">Range &amp; Direction</span><span class="sec-sum" id="sum-freerange"></span></summary>
     <div class="sec-body">
-      <div class="group-label">Octaves</div>
+      <div class="group-label" data-t="octaves-2">Octaves</div>
       <div class="btn-wrap" id="free-span-row"></div>
-      <div class="group-label">Direction</div>
+      <div class="group-label" data-t="direction">Direction</div>
       <div class="btn-wrap" id="free-dir-row"></div>
     </div>
   </details>
@@ -816,12 +816,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <hr class="divider" id="metro-divider" style="display:none">
 <details class="sec" id="metro-section" style="display:none">
-  <summary>Metronome<span class="sec-sum" id="sum-metro"></span></summary>
+  <summary><span data-t="sec.metronome">Metronome</span><span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body metro-body">
   <!-- Drone is a note to tune against, and a click over it is a choice rather
        than the point, so there it is asked for. -->
   <div class="mgroup" id="metro-on-block" style="display:none">
-    <div class="head" style="margin-bottom:0"><span class="section-label">Over the drone</span>
+    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="over-the-drone">Over the drone</span>
       <span class="btn-wrap seg" id="metro-on-row" data-cols="fixed"></span></div>
   </div>
   <!-- Five named groups instead of one undivided box. The tempo, the bar and the
@@ -831,47 +831,47 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <!-- The bar length rides the label line, where every other group keeps its
          controls. Tap tempo sits against the number instead: it is a way of
          setting that number, so it belongs beside it and not up in the title. -->
-    <div class="head"><span class="section-label">Tempo</span>
+    <div class="head"><span class="section-label" data-t="tempo">Tempo</span>
       <span class="sig-fields">
         <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
-        <span class="sig-unit">beats</span>
+        <span class="sig-unit" data-t="beats">beats</span>
       </span></div>
     <div class="bpm-row">
       <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" aria-label="Beats per minute">
-      <span class="bpm-label">BPM</span>
+      <span class="bpm-label" data-t="bpm">BPM</span>
       <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
          own: a label, a slider and a number on one line -->
     <div class="vol-line">
-      <span class="section-label">Click</span>
+      <span class="section-label" data-t="click">Click</span>
       <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.5" oninput="updateClickVol(this.value)">
       <span class="val" id="click-vol-out">50%</span>
     </div>
   </div>
 
   <div class="mgroup" id="sig-block">
-    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label">Bar</span></div>
+    <div class="head" style="margin-bottom:var(--s2)" data-t="bar"><span class="section-label">Bar</span></div>
     <div class="beats-row" id="beats-row"></div>
-    <div class="beats-hint">tap a beat: accent it, then silence it</div>
+    <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
     <!-- where every other Clear in the app sits: under its panel, on the left -->
-    <button class="clear-btn" onclick="clearAccents()">✕ Clear</button>
+    <button class="clear-btn" onclick="clearAccents()" data-t="clear-4">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="groove-block">
-    <div class="head" style="margin-bottom:0"><span class="section-label">Accompaniment</span>
+    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="accompaniment">Accompaniment</span>
       <span class="sig-fields">
         <select class="sig-select" id="groove-sel" aria-label="Accompaniment style"></select>
       </span></div>
     <div class="head" id="kit-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Kit</span>
+      <span class="section-label" data-t="kit">Kit</span>
       <span class="btn-wrap seg" id="kit-row" data-cols="fixed"></span></div>
     <div class="head" id="density-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Density</span>
+      <span class="section-label" data-t="density">Density</span>
       <span class="btn-wrap seg" id="density-row" data-cols="fixed"></span></div>
     <div class="head" id="hat-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Hi-hat on 2 &amp; 4</span>
+      <span class="section-label" data-t="hi-hat-on-2-amp">Hi-hat on 2 &amp; 4</span>
       <span class="btn-wrap seg" id="hat-row" data-cols="fixed"></span></div>
     <div class="info-line" id="groove-info" style="display:none"></div>
   </div>
@@ -879,7 +879,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="mixer-block">
     <div class="head pat-head" id="mix-head" role="button" tabindex="0"
          aria-expanded="false" aria-controls="mix-body" style="margin-bottom:0">
-      <span class="section-label">Mixer</span>
+      <span class="section-label" data-t="mixer">Mixer</span>
       <span class="pat-sum" id="mix-sum"></span>
     </div>
     <div id="mix-body" hidden>
@@ -895,28 +895,28 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="pattern-block">
     <div class="head pat-head" id="pat-head" role="button" tabindex="0"
          aria-expanded="false" aria-controls="pat-body" style="margin-bottom:0">
-      <span class="section-label">Pattern</span>
+      <span class="section-label" data-t="pattern">Pattern</span>
       <span class="pat-sum" id="pat-sum"></span>
     </div>
     <div id="pat-body" hidden>
       <div class="head" style="margin-top:var(--s3)">
         <span class="sig-fields">
-          <span class="sig-unit">loop</span>
+          <span class="sig-unit" data-t="loop">loop</span>
           <select class="sig-select" id="pat-bars" aria-label="How many bars loop"></select>
-          <span class="sig-unit">bars</span>
+          <span class="sig-unit" data-t="bars">bars</span>
         </span>
         <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
       </div>
       <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
-        <span class="section-label">Level</span>
+        <span class="section-label" data-t="level">Level</span>
         <span class="btn-wrap seg" id="pat-pen-row" data-cols="fixed"></span></div>
       <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
       <div class="head" id="pat-copy-line" style="display:none;margin-bottom:var(--s2)">
-        <span class="section-label">Copy into this bar</span>
+        <span class="section-label" data-t="copy-into-this-bar">Copy into this bar</span>
         <span class="btn-wrap seg" id="pat-copy-row" data-cols="fixed"></span></div>
       <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
       <div class="step-row" style="margin-top:var(--s3)">
-        <span class="step-unit">start from</span>
+        <span class="step-unit" data-t="start-from">start from</span>
         <select class="sig-select" id="pat-from" aria-label="Copy a style into the pattern"></select>
         <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
       </div>
@@ -929,33 +929,33 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
        sections — so in Metro, the one mode that is nothing but a metronome,
        there was no way to reach it at all. -->
   <div class="mgroup" id="speed-block">
-    <div class="head"><span class="section-label">Tempo Change</span>
+    <div class="head"><span class="section-label" data-t="tempo-change">Tempo Change</span>
       <span class="btn-wrap seg" id="speedmode-row" data-cols="fixed"></span></div>
     <div class="step-row" id="speed-steps" style="display:none">
       <input class="step-input" id="speed-amount" type="number" inputmode="numeric"
              min="1" max="60" step="1" value="5" aria-label="BPM each step">
-      <span class="step-unit">BPM every</span>
+      <span class="step-unit" data-t="bpm-every">BPM every</span>
       <select class="sig-select active" id="speed-every" aria-label="How often the tempo steps"></select>
     </div>
     <div class="step-row" id="speed-ramp" style="display:none">
-      <span class="step-lead">to</span>
+      <span class="step-lead" data-t="to">to</span>
       <input class="step-input active" id="ramp-to" type="number" inputmode="numeric"
              min="10" max="300" step="1" value="120" aria-label="Tempo to reach">
-      <span class="step-unit">BPM over</span>
+      <span class="step-unit" data-t="bpm-over">BPM over</span>
       <select class="sig-select active" id="ramp-min" aria-label="Minutes to take"></select>
-      <span class="step-unit">min</span>
+      <span class="step-unit" data-t="min">min</span>
     </div>
     <div class="info-line" id="speed-info"></div>
   </div>
 
   <div class="mgroup" id="count-block">
-    <div class="head" style="margin-bottom:0"><span class="section-label">Count In</span>
+    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="count-in">Count In</span>
       <span class="sig-fields">
         <select class="sig-select" id="count-bars" aria-label="Bars of count-in"></select>
-        <span class="sig-unit">bars</span>
+        <span class="sig-unit" data-t="bars-2">bars</span>
       </span></div>
     <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Count again on</span>
+      <span class="section-label" data-t="count-again-on">Count again on</span>
       <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
   </div>
 
@@ -964,47 +964,47 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="subdiv-block">
     <div class="head pat-head" id="subdiv-head" role="button" tabindex="0"
          aria-expanded="false" aria-controls="subdiv-body" style="margin-bottom:0">
-      <span class="section-label">Subdivision</span>
+      <span class="section-label" data-t="subdivision">Subdivision</span>
       <span class="pat-sum" id="subdiv-sum"></span>
     </div>
     <div id="subdiv-body" hidden>
-      <div class="head" style="margin-top:var(--s3)"><span class="section-label">Choose</span>
+      <div class="head" style="margin-top:var(--s3)"><span class="section-label" data-t="choose">Choose</span>
         <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
       <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
       <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
       <div id="click-block">
-      <div class="head" style="margin-bottom:0"><span class="section-label">Click</span>
+      <div class="head" style="margin-bottom:0"><span class="section-label" data-t="click-2">Click</span>
         <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
       </div>
     </div>
   </div>
 
   <div class="mgroup" id="pass-block" style="display:none">
-    <div class="head" style="margin-bottom:0"><span class="section-label">Advance Every</span>
+    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="advance-every">Advance Every</span>
       <span class="sig-fields">
         <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
         <span class="btn-wrap seg" id="pass-unit-row" data-cols="fixed"></span>
       </span></div>
   </div>
   <div class="mgroup" id="poly-block">
-  <div class="head"><span class="section-label">Polyrhythm</span>
+  <div class="head"><span class="section-label" data-t="polyrhythm">Polyrhythm</span>
     <span class="btn-wrap seg" id="polymode-row" data-cols="fixed"></span></div>
   <div id="poly-controls" style="display:none">
     <div class="step-row" style="margin-bottom:4px">
       <select class="sig-select active" id="poly-a" aria-label="Pulses in layer A"></select>
-      <span class="step-unit">against</span>
+      <span class="step-unit" data-t="against">against</span>
       <select class="sig-select active" id="poly-b" aria-label="Pulses in layer B"></select>
       <span class="step-unit" id="poly-label"></span>
     </div>
     <div class="beats-row" id="poly-row-a"></div>
     <div class="beats-row" id="poly-row-b"></div>
-    <div class="beats-hint">tap a pulse: accent it, then silence it</div>
+    <div class="beats-hint" data-t="tap-a-pulse-accent-it">tap a pulse: accent it, then silence it</div>
     <!-- Which of the two the notes ride on. It sat in Phrasing, a panel away from
          the two numbers it refers to; here it is under them. -->
     <div class="head" id="polynotes-block" style="margin-top:var(--s3);margin-bottom:0">
-      <span class="section-label">Notes follow</span>
+      <span class="section-label" data-t="notes-follow">Notes follow</span>
       <span class="btn-wrap seg" id="polynotes-row" data-cols="fixed"></span></div>
-    <button class="clear-btn" onclick="clearPolyAccents()">✕ Clear</button>
+    <button class="clear-btn" onclick="clearPolyAccents()" data-t="clear-5">✕ Clear</button>
   </div>
   </div>
   </div>
@@ -1013,7 +1013,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      the four groups behind them are moved into here and folded away. Everywhere
      else the metronome stays one panel and this one is not there at all. -->
 <details class="sec" id="metro-more" style="display:none">
-  <summary>More<span class="sec-sum" id="sum-metro-more"></span></summary>
+  <summary><span data-t="sec.more">More</span><span class="sec-sum" id="sum-metro-more"></span></summary>
   <div class="sec-body metro-body" id="metro-more-body"></div>
 </details>
 
@@ -1023,24 +1023,24 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      click; this is everything the phrase does over it — which is why the whole
      panel goes away in Metro, where there is no phrase. -->
 <details class="sec" id="sec-rhythm" style="display:none">
-  <summary>Phrasing<span class="sec-sum" id="sum-rhythm"></span></summary>
+  <summary><span data-t="sec.phrasing">Phrasing</span><span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body">
     <div id="notelen-block">
-    <div class="head"><span class="group-label">Note Length</span>
+    <div class="head"><span class="group-label" data-t="note-length">Note Length</span>
       <span class="btn-wrap seg" id="notelen-row" data-cols="fixed"></span></div>
     </div>
-    <div class="head"><span class="group-label">Phrase Alignment</span>
+    <div class="head"><span class="group-label" data-t="phrase-alignment">Phrase Alignment</span>
       <span class="btn-wrap seg" id="align-row" data-cols="fixed"></span></div>
     <div class="info-line" id="align-info"></div>
   </div>
 </details>
 
 <details class="sec" id="sec-sound">
-  <summary>Timbre<span class="sec-sum" id="sum-sound"></span></summary>
+  <summary><span data-t="sec.timbre">Timbre</span><span class="sec-sum" id="sum-sound"></span></summary>
   <div class="sec-body">
     <div class="timbre-row" id="timbre-row"></div>
     <div class="control-row" style="margin-top:1rem;margin-bottom:0">
-      <label>Volume</label>
+      <label data-t="volume">Volume</label>
       <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.7" style="flex:1" oninput="updateVol(this.value)">
       <span id="vol-out">70%</span>
     </div>
@@ -1049,7 +1049,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div class="status-bar" id="status-bar"></div>
 <div class="panel rot-panel" id="rotation-panel" style="display:none">
   <div class="rot-head">
-    <span class="group-label" style="margin:0">Rotation</span>
+    <span class="group-label" style="margin:0" data-t="rotation">Rotation</span>
     <button class="clear-btn rot-clear" id="rot-clear" onclick="clearStudyList()">✕ Clear list</button>
   </div>
   <div class="rot-chips" id="rot-chips"></div>
@@ -1073,71 +1073,71 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
  <button class="theme-btn help-close" onclick="closeHelp()" aria-label="Close">✕</button>
  <div class="help-inner">
   <div class="help-top">
-    <h2>What everything does</h2>
+    <h2 data-t="what-everything-does">What everything does</h2>
   </div>
 
-  <p class="help-lead">ScaleTune is for instruments whose intonation you have to make yourself —
+  <p class="help-lead" data-t="scaletune-is-for-instruments-whose">ScaleTune is for instruments whose intonation you have to make yourself —
   strings, winds, voice. Everything here is a reference to play against, not a thing to listen to.</p>
 
-  <div class="help-sec" id="help-modes"><h3>Modes</h3><dl>
-    <dt>Drone</dt><dd>Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord. The metronome is there too, switched off until you ask for it: a held note, and a pulse to place it against.</dd>
-    <dt>Scale</dt><dd>Plays a scale as a line, in the key, range and direction you choose.</dd>
-    <dt>Arpeggio</dt><dd>The same, built from a chord instead of a scale.</dd>
-    <dt>Free</dt><dd>You pick the notes yourself, each with its own octave, and they play in that order.</dd>
-    <dt>Metro</dt><dd>The metronome on its own, with no notes at all. It opens on the tempo and the bar; the count-in, the subdivision, the speed-up and the polyrhythm are under <em>More</em>.</dd>
-    <dt>Tuner</dt><dd>Listens instead of sounding. Nothing else plays while it is open —
+  <div class="help-sec" id="help-modes"><h3 data-t="modes">Modes</h3><dl>
+    <dt data-t="drone-2">Drone</dt><dd data-t="holds-notes-indefinitely-to-tune">Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord. The metronome is there too, switched off until you ask for it: a held note, and a pulse to place it against.</dd>
+    <dt data-t="scale-2">Scale</dt><dd data-t="plays-a-scale-as-a">Plays a scale as a line, in the key, range and direction you choose.</dd>
+    <dt data-t="arpeggio-2">Arpeggio</dt><dd data-t="the-same-built-from-a">The same, built from a chord instead of a scale.</dd>
+    <dt data-t="free-2">Free</dt><dd data-t="you-pick-the-notes-yourself">You pick the notes yourself, each with its own octave, and they play in that order.</dd>
+    <dt data-t="metro-2">Metro</dt><dd data-t="the-metronome-on-its-own">The metronome on its own, with no notes at all. It opens on the tempo and the bar; the count-in, the subdivision, the speed-up and the polyrhythm are under <em>More</em>.</dd>
+    <dt data-t="tuner-2">Tuner</dt><dd data-t="listens-instead-of-sounding-nothing">Listens instead of sounding. Nothing else plays while it is open —
     the microphone would hear the app itself.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-tuner"><h3>Tuner</h3><dl>
-    <dt>What it reads</dt><dd>The note, how many cents away you are, and both frequencies —
+  <div class="help-sec" id="help-tuner"><h3 data-t="tuner-3">Tuner</h3><dl>
+    <dt data-t="what-it-reads">What it reads</dt><dd data-t="the-note-how-many-cents">The note, how many cents away you are, and both frequencies —
     the one you are playing and the one you want. Under two cents it turns green.</dd>
-    <dt>The strobe</dt><dd>The band of stripes drifts at the difference between the two
+    <dt data-t="the-strobe">The strobe</dt><dd data-t="the-band-of-stripes-drifts">The band of stripes drifts at the difference between the two
     pitches: still means right, and it drifts the way you are wrong. It shows a quarter of
     a cent, which no needle can — at A4 that is a tenth of a hertz, one slow crawl every
     ten seconds. A long way out it blurs, which is what the number above is for.</dd>
-    <dt>Reference A4</dt><dd>415 to 466, moving every note with it. 415 for baroque pitch,
+    <dt data-t="reference-a4-2">Reference A4</dt><dd data-t="415-to-466-moving-every">415 to 466, moving every note with it. 415 for baroque pitch,
     442 or 443 where the orchestra sits high.</dd>
-    <dt>Temperament</dt><dd>Equal, just, Pythagorean, quarter-comma meantone, Werckmeister III.
+    <dt data-t="temperament-2">Temperament</dt><dd data-t="equal-just-pythagorean-quarter-comma">Equal, just, Pythagorean, quarter-comma meantone, Werckmeister III.
     Each is a set of deviations from equal temperament, counted from the key you name, so the
     key note is the one everything else is made pure against. Just makes the thirds pure and
     the fifths nearly so; Pythagorean makes the fifths pure and the thirds wide; meantone buys
     pure thirds by narrowing every fifth; Werckmeister spreads the error so that every key is
     playable and none is identical.</dd>
-    <dt>What Key does to the reading</dt><dd>In just intonation in C, an A sits about fifteen
+    <dt data-t="what-key-does-to-the">What Key does to the reading</dt><dd data-t="in-just-intonation-in-c">In just intonation in C, an A sits about fifteen
     cents under an equal A — and the tuner will say so. That is not an error to correct; it is
     what the temperament is. Reference A4 keeps its own job, which is to place the equal grid
     that the deviations are counted from.</dd>
-    <dt>Low strings</dt><dd>It reads down to 27.5 Hz, below the lowest string on a
+    <dt data-t="low-strings">Low strings</dt><dd data-t="it-reads-down-to-27">It reads down to 27.5 Hz, below the lowest string on a
     five-string bass. Down there it answers more slowly: a pitch that low needs a fifth of
     a second of sound before there is anything to measure.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-root"><h3>Root</h3><dl>
-    <dt>The twelve notes</dt><dd>The key everything else is built from.</dd>
+  <div class="help-sec" id="help-root"><h3 data-t="root">Root</h3><dl>
+    <dt data-t="the-twelve-notes">The twelve notes</dt><dd data-t="the-key-everything-else-is">The key everything else is built from.</dd>
 
   </dl></div>
 
-  <div class="help-sec" id="help-scales"><h3>Scales and chords</h3><dl>
-    <dt>Clear everything</dt><dd>The ✕ beside the ? empties every selection at once — the scale, the
+  <div class="help-sec" id="help-scales"><h3 data-t="scales-and-chords">Scales and chords</h3><dl>
+    <dt data-t="clear-everything">Clear everything</dt><dd data-t="the-beside-the-empties-every">The ✕ beside the ? empties every selection at once — the scale, the
     chord, the whole study list, the drone's notes, the free notes, the figures and every accent —
     rather than clearing each panel in turn. It asks first: the second tap within four seconds is the
     one that does it. It leaves alone what you built rather than chose: the pattern you wrote, the
     mixer, the tempo and the metronome's settings.</dd>
-    <dt>The family boxes</dt><dd>One opens at a time and the others fold away. A closed box still says
+    <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="one-opens-at-a-time">One opens at a time and the others fold away. A closed box still says
     what is chosen inside it, so folding one never hides a selection.</dd>
-    <dt>Pentatonic and the blue notes</dt><dd>Five notes, and what is missing is the point: the major
+    <dt data-t="pentatonic-and-the-blue-notes">Pentatonic and the blue notes</dt><dd data-t="five-notes-and-what-is">Five notes, and what is missing is the point: the major
     has no fourth and no seventh, the minor no second and no sixth, so neither leans anywhere.
     <em>Blue notes</em> adds one note to each — a flat third over the major, a flat fifth over the
     minor — which is what turns a pentatonic into a blues scale. It is spelled the way it is written:
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
-    <dt>Sevenths in one octave</dt><dd>A seventh arpeggio over one octave stops below its top note, the
+    <dt data-t="sevenths-in-one-octave">Sevenths in one octave</dt><dd data-t="a-seventh-arpeggio-over-one">A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
-    <dt>Single or Study list</dt><dd>The two boxes under the modes. Single works on one scale or
+    <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="the-two-boxes-under-the">The two boxes under the modes. Single works on one scale or
     chord at a time; Study list collects several and takes them in turn, one per pass, so a whole
     family can be worked without stopping. It governs every panel below it, which is why it sits
     above them rather than inside the Root panel where it used to hide.</dd>
-    <dt>The study list</dt><dd>One list, holding scales and chords together: pick scales in Scale and
+    <dt data-t="the-study-list">The study list</dt><dd data-t="one-list-holding-scales-and">One list, holding scales and chords together: pick scales in Scale and
     chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
     same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
     happen to be looking at, and the numbers on the buttons count through the whole list. A tap adds,
@@ -1148,39 +1148,39 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     Picked up, the next one you tap is where it goes; tap the same one again to leave it where it
     was. Two taps and no dragging, which is the only kind of reordering a finger can do on a phone.
     Moving while it plays keeps whatever is sounding.</dd>
-    <dt>Clear</dt><dd>Empties the selection. With the study list on it drops that panel's kind from
+    <dt data-t="clear-6">Clear</dt><dd data-t="empties-the-selection-with-the">Empties the selection. With the study list on it drops that panel's kind from
     the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-range"><h3>Range &amp; Direction</h3><dl>
-    <dt>Octaves</dt><dd>How far the line reaches. If the top would run past the highest sample, the
+  <div class="help-sec" id="help-range"><h3 data-t="range-amp-direction">Range &amp; Direction</h3><dl>
+    <dt data-t="octaves-3">Octaves</dt><dd data-t="how-far-the-line-reaches">How far the line reaches. If the top would run past the highest sample, the
     span is reduced until it fits — and grows back by itself once there is room again.</dd>
-    <dt>Start Octave</dt><dd>Where the line begins.</dd>
-    <dt>Direction</dt><dd>Up, down, or up then back down.</dd>
-    <dt>Start On</dt><dd>Which degree of the scale the line starts from — the way a mode is practised
+    <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
+    <dt data-t="direction-2">Direction</dt><dd data-t="up-down-or-up-then">Up, down, or up then back down.</dd>
+    <dt data-t="start-on-2">Start On</dt><dd data-t="which-degree-of-the-scale">Which degree of the scale the line starts from — the way a mode is practised
     from each of its own notes.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-progress"><h3>Practice Progressions</h3><dl>
-    <dt>Root Movement</dt><dd>Stay in one key, or move up a fourth each time everything else has been
+  <div class="help-sec" id="help-progress"><h3 data-t="practice-progressions">Practice Progressions</h3><dl>
+    <dt data-t="root-movement-2">Root Movement</dt><dd data-t="stay-in-one-key-or">Stay in one key, or move up a fourth each time everything else has been
     round once — the cycle of fourths.</dd>
 
-    <dt>What a pass is</dt><dd>One round of the notes. The order is: the rhythmic figure first, then the
+    <dt data-t="what-a-pass-is">What a pass is</dt><dd data-t="one-round-of-the-notes">One round of the notes. The order is: the rhythmic figure first, then the
     mode or chord, then the key — so one mode goes through every figure before the next mode starts.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-metro"><h3>Metronome</h3><dl>
-    <dt>Tempo</dt><dd>10 to 300 BPM. Type it, drag it, or tap it in — Tap tempo averages the last few taps.</dd>
-    <dt>Bar</dt><dd>How many beats it counts. Tap a circle to cycle it: accented, plain, silent. With
+  <div class="help-sec" id="help-metro"><h3 data-t="metronome">Metronome</h3><dl>
+    <dt data-t="tempo-2">Tempo</dt><dd data-t="10-to-300-bpm-type">10 to 300 BPM. Type it, drag it, or tap it in — Tap tempo averages the last few taps.</dd>
+    <dt data-t="bar-2">Bar</dt><dd data-t="how-many-beats-it-counts">How many beats it counts. Tap a circle to cycle it: accented, plain, silent. With
     notes playing every beat is plain unless you ask otherwise; with the metronome alone the first
     beat is accented, so the bar you chose can be heard.</dd>
-    <dt>Subdivision</dt><dd>A fold, like the pattern and the mixer, saying what it is set to while it
+    <dt data-t="subdivision-2">Subdivision</dt><dd data-t="a-fold-like-the-pattern">A fold, like the pattern and the mixer, saying what it is set to while it
     is shut. What each beat is divided into. Swing is two ticks split two to one — the
     triplet feel a written pair of eighths is actually played with. Single uses one figure; Sequence
     takes the ones you pick in turn, one per pass.</dd>
-    <dt>Click</dt><dd>Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
+    <dt data-t="click-3">Click</dt><dd data-t="follow-figure-clicks-every-subdivision">Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
     figure to the notes.</dd>
-    <dt>Count In</dt><dd>Bars of click before the notes come in. It ends on a downbeat: what is left of
+    <dt data-t="count-in-2">Count In</dt><dd data-t="bars-of-click-before-the">Bars of click before the notes come in. It ends on a downbeat: what is left of
     the bar first, then whole bars, so a phrase that finishes mid-bar does not put your entry off the
     beat. And the phrase finishes where a phrase finishes: on the handover the line runs to the next bar
     line and lands there on the tonic of the key it has been in, and only then does the waiting begin
@@ -1189,20 +1189,20 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     you always need, or on <em>any change</em>, which includes handing over from one scale or chord to
     the next in the same key. Never between rounds of the same thing, which would break the very drift
     the app is built around.</dd>
-    <dt>Advance Every</dt><dd>With the metronome alone nothing comes round on its own, so you say what a
+    <dt data-t="advance-every-2">Advance Every</dt><dd data-t="with-the-metronome-alone-nothing">With the metronome alone nothing comes round on its own, so you say what a
     pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
     that.</dd>
-    <dt>Tempo Change</dt><dd>The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
+    <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="the-tempo-moving-on-its">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
     BPM — every pass, or every so many minutes up to thirty. <em>Ramp</em> slides instead: from the
     tempo you set to the one you name, a little on every beat, over as long as you choose, so there
     is no moment where it jumps. A ramp starts again from your tempo every time you press Start,
     because otherwise the second run would have nowhere to go; steps stay where they got to. Either
     way it stops at 10 and at 300.</dd>
-    <dt>Where the accompaniment lives</dt><dd>In Metro, and only there. In the other modes the
+    <dt data-t="where-the-accompaniment-lives">Where the accompaniment lives</dt><dd data-t="in-metro-and-only-there">In Metro, and only there. In the other modes the
     metronome is something to play against, so it clicks and nothing more — a kit, a mixer and a
     pattern editor were six controls deep in a panel you open to set a tempo. Choose a style in Metro
     and it stays chosen; step into Scale and you get the click back.</dd>
-    <dt>Accompaniment</dt><dd>Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
+    <dt data-t="accompaniment-2">Accompaniment</dt><dd data-t="instead-of-a-click-a">Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
     a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes: one
     sweep that never stops, the way a brush is actually played, leaning a little on two and four and
     breathing on one and three. No cymbal in it unless you ask: <em>Hi-hat on 2 &amp; 4</em> puts the foot under the sweep, which is
@@ -1214,21 +1214,21 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
     synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
-    <dt>Mixer</dt><dd>A level for each drum, over whatever the pattern asks for — the one thing that
+    <dt data-t="mixer-2">Mixer</dt><dd data-t="a-level-for-each-drum">A level for each drum, over whatever the pattern asks for — the one thing that
     can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
     not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
     next time. A ghost note answers to the snare and the bossa's bass drum to the bass drum, since
     that is what they are; the faders a style does not use are faded out, so a fader that can do
     nothing says so. <em>Level again</em> puts every fader back.</dd>
-    <dt>Density</dt><dd>How full a style plays. <em>Busy</em> adds what a drummer would add — the extra
+    <dt data-t="density-2">Density</dt><dd data-t="how-full-a-style-plays">How full a style plays. <em>Busy</em> adds what a drummer would add — the extra
     hits are written into each style, not invented on the fly, because a random note is not a groove.
     <em>Light</em> takes the ghost notes out and leaves the cymbals on the beat. A pattern of your own
     is never thinned or filled: it is exactly as full as you made it.</dd>
-    <dt>Notes follow</dt><dd>Under a polyrhythm, which of the two layers the notes ride.</dd>
-    <dt>Kit</dt><dd>Two of them. <em>Recorded</em> is a real acoustic kit, warm and big. <em>Machine</em>
+    <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
+    <dt data-t="kit-2">Kit</dt><dd data-t="two-of-them-recorded-is">Two of them. <em>Recorded</em> is a real acoustic kit, warm and big. <em>Machine</em>
     is made rather than recorded — dry, tight, and it cuts through a small speaker. Switch it while
     something is playing; that is the only way to hear the difference.</dd>
-    <dt>Pattern</dt><dd>Write your own. Six voices down the side and a bar across. <em>Loop</em> is how
+    <dt data-t="pattern-2">Pattern</dt><dd data-t="write-your-own-six-voices">Write your own. Six voices down the side and a bar across. <em>Loop</em> is how
     many bars go round: set it to one and the bar you write repeats, set it to four and you have four
     to fill, with tabs to move between them. Pick a
     <em>Level</em> — ghost, middling or accented — and every tap writes at it; tapping a cell that
@@ -1245,45 +1245,45 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
     cells stay wide enough to hit. What you write is kept for next time — it is your work, not a setting —
     and it plays under <em>Accompaniment &rarr; Custom</em>.</dd>
-    <dt>Polyrhythm</dt><dd>Two pulses at once, any two numbers. The cycle shown is how long until they
+    <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="two-pulses-at-once-any">Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
     it is on.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-phrasing"><h3>Phrasing</h3><dl>
-    <dt>Note Length</dt><dd>Per figure gives a note on every subdivision; Per beat one note a beat;
+  <div class="help-sec" id="help-phrasing"><h3 data-t="phrasing">Phrasing</h3><dl>
+    <dt data-t="note-length-2">Note Length</dt><dd data-t="per-figure-gives-a-note">Per figure gives a note on every subdivision; Per beat one note a beat;
     Per bar one note a bar. Under swing the notes take the swing too, long then short.</dd>
-    <dt>Phrase Alignment</dt><dd>Let it drift is the exercise: a phrase whose length does not divide the
+    <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="let-it-drift-is-the">Let it drift is the exercise: a phrase whose length does not divide the
     bar walks round against the pulse and only comes back after several rounds, and the metronome is
     never resynchronised to it. Restart each round puts note one back on beat one every time.</dd>
 
   </dl></div>
 
-  <div class="help-sec" id="help-timbre"><h3>Timbre</h3><dl>
-    <dt>Why it matters</dt><dd>You tune by the beating between partials, so a voice with partials is
+  <div class="help-sec" id="help-timbre"><h3 data-t="timbre">Timbre</h3><dl>
+    <dt data-t="why-it-matters">Why it matters</dt><dd data-t="you-tune-by-the-beating">You tune by the beating between partials, so a voice with partials is
     worth more than a clean one. A sine has a single partial: excellent for a unison or an octave,
     useless for anything else.</dd>
-    <dt>Cello and Oboe</dt><dd>Recordings of real players, with the vibrato tracked out — a reference
+    <dt data-t="cello-and-oboe">Cello and Oboe</dt><dd data-t="recordings-of-real-players-with">Recordings of real players, with the vibrato tracked out — a reference
     must not wobble — and retuned so every note lands within a cent.</dd>
-    <dt>Organ</dt><dd>Synthesised rather than recorded, from the harmonic profile of a church organ.
+    <dt data-t="organ">Organ</dt><dd data-t="synthesised-rather-than-recorded-from">Synthesised rather than recorded, from the harmonic profile of a church organ.
     Its pitch is exact by construction, at every note.</dd>
-    <dt>Real piano, Piano synth</dt><dd>For the note sequences, where a clear attack makes the rhythm
+    <dt data-t="real-piano-piano-synth">Real piano, Piano synth</dt><dd data-t="for-the-note-sequences-where">For the note sequences, where a clear attack makes the rhythm
     of a line easy to hear. Both fade, so they are not offered as drones.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-settings"><h3>Settings — the ⚙ in the corner</h3><dl>
-    <dt>Note names</dt><dd>What the notes are called on the screen, and nothing else: no pitch moves.
+  <div class="help-sec" id="help-settings"><h3 data-t="settings-the-in-the-corner">Settings — the ⚙ in the corner</h3><dl>
+    <dt data-t="note-names">Note names</dt><dd data-t="what-the-notes-are-called">What the notes are called on the screen, and nothing else: no pitch moves.
     <b>A B C</b> is the English convention. <b>Dó Ré Mi</b> is fixed do — the note keeps its name in
     every key, as it is taught in Portugal, Spain, Italy and France. <b>Cis Des H</b> is the German one,
     where a sharp is the suffix -is and a flat -es, the seventh letter is H, and the note a semitone
     under it is called B rather than H flat.
     The spelling still follows the key: in Db major you get Ré♭ — or Des — never Dó♯.</dd>
-    <dt>Theme</dt><dd>Dark or light. It used to be the sun in the header; it lives here now.</dd>
+    <dt data-t="theme">Theme</dt><dd data-t="dark-or-light-it-used">Dark or light. It used to be the sun in the header; it lives here now.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-transport"><h3>Playing</h3><dl>
-    <dt>Start</dt><dd>Or the space bar, which works wherever you are — unless you are typing in a field.</dd>
-    <dt>Offline</dt><dd>Once opened, the app runs with no network at all. Add it to your home screen
+  <div class="help-sec" id="help-transport"><h3 data-t="playing">Playing</h3><dl>
+    <dt data-t="start">Start</dt><dd data-t="or-the-space-bar-which">Or the space bar, which works wherever you are — unless you are typing in a field.</dd>
+    <dt data-t="offline">Offline</dt><dd data-t="once-opened-the-app-runs">Once opened, the app runs with no network at all. Add it to your home screen
     and it behaves as an app.</dd>
   </dl></div>
   <p class="help-build" id="build-stamp"></p>
@@ -1295,16 +1295,22 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div class="help-overlay" id="settings-overlay" hidden role="dialog" aria-modal="true" aria-label="Settings">
  <button class="theme-btn help-close" onclick="closeSettings()" aria-label="Close">✕</button>
  <div class="help-inner">
-  <div class="help-top"><h2>Settings</h2></div>
+  <div class="help-top"><h2 data-t="set.title">Settings</h2></div>
 
   <div class="help-sec">
-    <h3>Note names</h3>
+    <h3 data-t="set.language">Language</h3>
+    <div class="btn-wrap" id="lang-row" style="--cols:2"></div>
+    <div class="info-line" data-t="set.language.hint">English is built in; the others are fetched once and then kept, so they work offline too.</div>
+  </div>
+
+  <div class="help-sec">
+    <h3 data-t="set.notenames">Note names</h3>
     <div class="btn-wrap" id="notenames-row" style="--cols:3"></div>
     <div class="info-line" id="notenames-hint"></div>
   </div>
 
   <div class="help-sec">
-    <h3>Theme</h3>
+    <h3 data-t="set.theme">Theme</h3>
     <div class="btn-wrap" id="theme-row" style="--cols:2"></div>
   </div>
  </div>
@@ -1320,6 +1326,69 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
    This is what lets a scale span several octaves; the old
    pitch-class-keyed map could not represent C3 and C4 at once.
    ============================================================ */
+
+/* ---------- language ----------
+   English is not a pack: it is the text in the file, written where it is used.
+   Every other language is a file of its own, fetched the first time it is
+   chosen and then held by the service worker, so the app stays the size it was
+   for anyone reading it in English and works offline in any language once seen.
+
+   Nothing is glued together from words. A sentence with a number in it is one
+   whole sentence with a hole in it — '{n} beats per bar' — because where the
+   number goes, and what the noun does around it, is a fact about the language
+   and not about the app. Languages that count in more than two ways say so in
+   PLURALS; a key whose English is an object has one form per category. */
+const LANGS=[
+  {code:'en',label:'English',   notes:'letters'},
+  {code:'pt',label:'Português', notes:'solfege'},
+  {code:'es',label:'Español',   notes:'solfege'},
+  {code:'it',label:'Italiano',  notes:'solfege'},
+  {code:'fr',label:'Français',  notes:'solfege'},
+  {code:'de',label:'Deutsch',   notes:'german'},
+  {code:'ru',label:'Русский',   notes:'letters'},
+  {code:'zh',label:'中文',       notes:'letters'},
+];
+const PLURALS={
+  en:n=>n===1?'one':'other',
+  pt:n=>n===1?'one':'other',
+  es:n=>n===1?'one':'other',
+  it:n=>n===1?'one':'other',
+  de:n=>n===1?'one':'other',
+  fr:n=>(n===0||n===1)?'one':'other',
+  zh:()=>'other',
+  ru:n=>{
+    const m10=n%10,m100=n%100;
+    if(m10===1&&m100!==11)return 'one';
+    if(m10>=2&&m10<=4&&(m100<12||m100>14))return 'few';
+    return 'many';
+  },
+};
+let LANG='en', PACK=null;
+function pluralOf(n){return (PLURALS[LANG]||PLURALS.en)(Math.abs(Number(n)||0));}
+/* key: what the translators file it under. en: the English, written here so the
+   source language is never a second copy that can drift. vars: the holes. */
+function tr(key,en,vars){
+  let v=(PACK&&PACK[key]!=null)?PACK[key]:en;
+  if(v&&typeof v==='object')v=v[pluralOf(vars&&vars.n)]||v.other||v.one||'';
+  if(v==null)v='';
+  return String(v).replace(/\{(\w+)\}/g,(m,k)=>(vars&&vars[k]!=null)?vars[k]:m);
+}
+
+/* A name that is also a key. The scale a player picks is stored as "Ionian" and
+   written into the study list as "Ionian" whatever language is on the screen —
+   what changes is only how it is read out. Every such table keeps its English
+   as the fallback, so an untranslated entry reads in English rather than
+   vanishing. */
+function lab(ns,key,en){return tr(ns+'.'+key,en!=null?en:key);}
+function scaleLabel(n){return lab('scale',n);}
+// a study-list entry reads as whatever kind it is, not as the mode you are in
+function itemLabel(it){return it&&it.kind==='chord'?chordLabel(it.name):scaleLabel(it&&it.name);}
+function chordLabel(n){return lab('chord',n);}
+function timbreLabel(k){const x=TIMBRES.find(v=>v.k===k);return lab('timbre',k,x?x.label:k);}
+function dirLabel(k){const x=DIRECTIONS.find(v=>v.k===k);return lab('dir',k,x?x.label:k);}
+function subdivLabel(k){const x=SUBDIVS.find(v=>v.k===k);return lab('subdiv',String(k),x?x.label:String(k));}
+function grooveLabel(k){const g=GROOVES[k];return lab('groove',k,g?g.label:k);}
+function mixLabel(k){const v=MIX_VOICES.find(v=>v[0]===k);return lab('drum',k,v?v[1]:k);}
 
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const OCT_MIN=1,OCT_MAX=6;
@@ -1831,16 +1900,16 @@ function loadSampler(k,cb){
   // the load is the common case, not an edge one.
   if(S.loading){if(cb)S.queue.push(cb);return;}
   if(!soundfontAvailable()){
-    setStatus('Samples are unavailable — the other timbres still work.');
+    setStatus(tr('samples.none','Samples are unavailable — the other timbres still work.'));
     return;
   }
   S.loading=true;
   if(cb)S.queue.push(cb);
-  setStatus('Loading '+spec.label+' samples...');
+  setStatus(tr('samples.loading','Loading {name} samples...',{name:timbreLabel(k)}));
   initAudio();
   const fail=()=>{
     S.loading=false;S.queue=[];
-    setStatus('Could not load the '+spec.label+' — the other timbres still work.');
+    setStatus(tr('samples.failed','Could not load the {name} — the other timbres still work.',{name:timbreLabel(k)}));
   };
   try{
     Soundfont.instrument(audioCtx,spec.sf,{
@@ -1849,7 +1918,7 @@ function loadSampler(k,cb){
       nameToUrl:()=>spec.file
     }).then(inst=>{
       S.inst=inst;S.ready=true;S.loading=false;
-      setStatus(spec.label.charAt(0).toUpperCase()+spec.label.slice(1)+' loaded ✓');
+      setStatus(tr('samples.ready','{name} loaded ✓',{name:timbreLabel(k)}));
       setTimeout(()=>setStatus(''),2000);
       const queued=S.queue;S.queue=[];
       queued.forEach(f=>{try{f();}catch(e){}});
@@ -2253,11 +2322,11 @@ function loadDrums(){
   .then(bufs=>{
     const out={};names.forEach((n,i)=>out[n]=bufs[i]);
     drumBufs=out;drumsLoading=false;
-    if(grooveOn())setStatus('Drums loaded \u2713'),setTimeout(()=>setStatus(''),1500);
+    if(grooveOn())setStatus(tr('drums.ready','Drums loaded \u2713')),setTimeout(()=>setStatus(''),1500);
   })
   .catch(()=>{
     drumsLoading=false;drumsFailed=true;
-    setStatus('The drums could not load \u2014 the accompaniment is clicking instead.');
+    setStatus(tr('drums.failed','The drums could not load \u2014 the accompaniment is clicking instead.'));
   });
 }
 function drumHit(name,t,gain){
@@ -2929,7 +2998,9 @@ function stopPlayback(){
 function setPlayUI(on){
   updateRotationPanelSoon();
   const b=document.getElementById('play-btn');
-  b.textContent=state.mode==='tuner'?(on?'■ Stop listening':'● Listen'):(on?'■ Stop':'▶ Start');
+  b.textContent=state.mode==='tuner'
+    ?(on?tr('play.stopListening','■ Stop listening'):tr('play.listen','● Listen'))
+    :(on?tr('play.stop','■ Stop'):tr('play.start','▶ Start'));
   b.classList.toggle('playing',on);
   // clears (or lights) the green "sounding now" marker on the study list
   if(state.mode==='scale'||state.mode==='arpeggio'){
@@ -2951,18 +3022,18 @@ function togglePlay(){
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
   initAudio();
-  if(state.mode==='drone'&&!droneSemitones().length){setStatus('Pick at least one note first.');return;}
+  if(state.mode==='drone'&&!droneSemitones().length){setStatus(tr('need.note','Pick at least one note first.'));return;}
   if(state.mode!=='drone'&&state.mode!=='metro'){
     refreshSequence();
-    if(!sequence.length){setStatus(state.mode==='free'?'Select some notes first.':'Pick a scale or chord first.');return;}
+    if(!sequence.length){setStatus(state.mode==='free'?tr('need.notes','Select some notes first.'):tr('need.scale','Pick a scale or chord first.'));return;}
   }
   // Metro plays no notes, so it must not wait on an instrument to load
   if(state.mode!=='metro'&&isSampled(state.timbre)&&!samplerReady(state.timbre)){
     const S=samplerFor(state.timbre);
     // a second press while a start is already queued would start twice
-    if(S.loading&&S.queue.length){setStatus('Starting as soon as the samples are ready...');return;}
+    if(S.loading&&S.queue.length){setStatus(tr('wait.samples','Starting as soon as the samples are ready...'));return;}
     loadSampler(state.timbre,()=>{state.playing=true;setPlayUI(true);startPlayback();});
-    if(samplerFor(state.timbre).loading)setStatus('Starting as soon as the samples are ready...');
+    if(samplerFor(state.timbre).loading)setStatus(tr('wait.samples','Starting as soon as the samples are ready...'));
     return;
   }
   state.playing=true;setPlayUI(true);startPlayback();
@@ -3025,7 +3096,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23f';
+const APP_VERSION='2026-08-23g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3045,7 +3116,7 @@ function buildTimbreRow(){
   availableTimbres().forEach(t=>{
     const b=document.createElement('button');
     b.className='timbre-btn'+(t.k===state.timbre?' active':'');
-    b.textContent=t.label;
+    b.textContent=timbreLabel(t.k);
     b.onclick=()=>setTimbre(t.k);
     row.appendChild(b);
   });
@@ -3089,7 +3160,7 @@ function setMode(m){
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
   document.getElementById('free-section').style.display=m==='free'?'':'none';
   document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
-  document.getElementById('sec-scales-title').textContent=m==='arpeggio'?'Chords':'Scales';
+  document.getElementById('sec-scales-title').textContent=m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales');
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   // in Metro there is nothing above the metronome to be divided from
   document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone)?'none':'';
@@ -3215,12 +3286,18 @@ function updateDroneReadout(){
   if(state.mode!=='drone'||!state.playing)return;
   note.textContent=list.map(nameOf).join(' ');
   freq.textContent=list.length===1?freqOf(list[0]).toFixed(2)+' Hz'
-                  :list.length+' notes sounding';
+                  :tr('drone.sounding',{one:'{n} note sounding',other:'{n} notes sounding'},{n:list.length});
 }
 
 /* ---------- scale / arpeggio UI ---------- */
 function buildPitchLists(){
   const root=document.getElementById('root-row');
+  // built again whenever the language changes, so it must start from empty
+  root.innerHTML='';
+  ['gregorian-btns','pentatonic-btns','melodic-btns','harmonic-btns',
+   'harmonicmajor-btns','triad-btns','seventh-btns'].forEach(id=>{
+    const c=document.getElementById(id);if(c)c.innerHTML='';
+  });
   NOTES.forEach(n=>{
     const b=document.createElement('button');
     // label is replaced by renderPitchPickers with the spelling of the key in use
@@ -3234,7 +3311,7 @@ function buildPitchLists(){
     const c=document.getElementById(cid);
     Object.keys(SCALES[gk]).forEach(sn=>{
       const b=document.createElement('button');
-      b.className='pick-btn';b.dataset.scale=sn;b.dataset.group=gk;b.textContent=sn;
+      b.className='pick-btn';b.dataset.scale=sn;b.dataset.group=gk;b.textContent=scaleLabel(sn);
       b.onclick=()=>{
         if(useListOn()){toggleListItem('scale',gk,sn);return;}
         state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
@@ -3248,7 +3325,7 @@ function buildPitchLists(){
     const c=document.getElementById(cid);
     Object.keys(CHORDS[gk]).forEach(cn=>{
       const b=document.createElement('button');
-      b.className='pick-btn';b.dataset.chord=cn;b.dataset.group=gk;b.textContent=cn;
+      b.className='pick-btn';b.dataset.chord=cn;b.dataset.group=gk;b.textContent=chordLabel(cn);
       b.onclick=()=>{
         if(useListOn()){toggleListItem('chord',gk,cn);return;}
         state.chordGroup=gk;state.chordName=cn;state.startDeg=0;
@@ -3462,10 +3539,12 @@ function rotationPreview(){
     if(wrapped&&useListOn()&&list.length>1){sIdx=(sIdx+1)%list.length;wrapped=(sIdx===0);}
     if(wrapped&&state.practice.rootMove==='fourths')root=NOTES[(NOTES.indexOf(root)+5)%12];
   }
-  const figName=v=>({1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'})[v]||'';
+  const figName=v=>({1:tr('fig.quarters','quarters'),2:tr('fig.eighths','eighths'),
+    '2s':tr('fig.swing','swing'),3:tr('fig.triplets','triplets'),4:tr('fig.sixteenths','sixteenths')})[v]||'';
   const describe=(item,fig,rt)=>{
     const bits=[];
-    bits.push(bareName(NOTES.indexOf(rt))+' '+(item?item.name:(state.mode==='scale'?state.scaleName:state.chordName)||'—'));
+    bits.push(bareName(NOTES.indexOf(rt))+' '+(item?itemLabel(item)
+      :(state.mode==='scale'?scaleLabel(state.scaleName):chordLabel(state.chordName))||'—'));
     if(figs||state.subdiv!==1)bits.push(figName(fig));
     return bits.filter(Boolean).join(' · ');
   };
@@ -3506,7 +3585,7 @@ function updateRotationPanel(){
   p.items.forEach((it,i)=>{
     const d=document.createElement(editable?'button':'span');
     d.className='rot-chip'+(i===p.currentIdx?' now':(i===p.nextIdx&&p.moved?' next':''));
-    d.textContent=(i+1)+'. '+it.name;
+    d.textContent=(i+1)+'. '+itemLabel(it);
     if(editable){
       /* Two things on one chip: the cross takes it out, the chip itself picks it
          up. Picked up, the next chip you tap is where it goes — two taps and no
@@ -3515,11 +3594,11 @@ function updateRotationPanel(){
       d.classList.add('drop');
       if(i===rotHold)d.classList.add('held');
       d.innerHTML='';
-      d.append(document.createTextNode((i+1)+'. '+it.name));
+      d.append(document.createTextNode((i+1)+'. '+itemLabel(it)));
       const x=document.createElement('span');x.className='chip-x';x.textContent='✕';
-      x.title='Remove from the rotation';
+      x.title=tr('rot.remove','Remove from the rotation');
       x.setAttribute('role','button');
-      x.setAttribute('aria-label','Remove '+it.name);
+      x.setAttribute('aria-label',tr('rot.removeName','Remove {name}',{name:itemLabel(it)}));
       x.onclick=e=>{
         e.stopPropagation();
         const list=activeList();
@@ -3537,7 +3616,7 @@ function updateRotationPanel(){
         updateRotationPanel();restartIfPlaying();
       };
       d.appendChild(x);
-      d.setAttribute('aria-label',(rotHold==null?'Move ':'Put it here: ')+it.name);
+      d.setAttribute('aria-label',rotHold==null?tr('rot.move','Move {name}',{name:itemLabel(it)}):tr('rot.place','Put it here: {name}',{name:itemLabel(it)}));
       d.onclick=()=>{
         const list=activeList();
         if(rotHold==null){rotHold=i;updateRotationPanel();return;}
@@ -3574,7 +3653,7 @@ function buildRootMoveRow(){
   ROOT_MOVES.forEach(m=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'');
-    b.textContent=m.label;
+    b.textContent=lab('rootmove',m.k,m.label);
     b.onclick=()=>{state.practice.rootMove=m.k;buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();};
     row.appendChild(b);
   });
@@ -3586,7 +3665,7 @@ function buildListModeRow(){
   if(!row)return;
   row.style.display=(state.mode==='scale'||state.mode==='arpeggio')?'':'none';
   row.innerHTML='';
-  [[false,'Single'],[true,'Study list']].forEach(([v,label])=>{
+  [[false,tr('list.single','Single')],[true,tr('list.study','Study list')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     // it sits with the modes now, so it is shaped like them
     b.className='mode-btn'+(useListOn()===v?' active':'');
@@ -3602,7 +3681,7 @@ function buildListModeRow(){
 
 function buildSubdivModeRow(){
   const row=document.getElementById('subdivmode-row');row.innerHTML='';
-  [[false,'Single'],[true,'Sequence']].forEach(([v,label])=>{
+  [[false,tr('list.single','Single')],[true,tr('subdiv.sequence','Sequence')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.practice.useSubdivList===v?' active':'');
     b.textContent=label;
@@ -3628,12 +3707,12 @@ function buildSubdivRow(){
   const list=state.practice.subdivList;
   SUBDIVS.forEach(sd=>{
     const b=document.createElement('button');
-    b.textContent=sd.label;
+    b.textContent=subdivLabel(sd.k);
     if(state.practice.useSubdivList){
       const i=list.indexOf(sd.k);
       const sounding=i>=0&&sd.k===currentSubdiv()&&state.playing;
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
-      if(i>=0){b.classList.add('numbered');b.innerHTML='<span class="idx">'+(i+1)+'</span>'+sd.label;}
+      if(i>=0){b.classList.add('numbered');b.innerHTML='<span class="idx">'+(i+1)+'</span>'+subdivLabel(sd.k);}
       b.onclick=()=>{
         const at=list.indexOf(sd.k);
         if(at>=0)list.splice(at,1);else list.push(sd.k);
@@ -3678,13 +3757,13 @@ function tapTempo(){
     // tap does not throw the tempo
     const avg=(tapTimes[tapTimes.length-1]-tapTimes[0])/(tapTimes.length-1);
     const bpm=60000/avg;
-    if(bpm>=BPM_MIN&&bpm<=BPM_MAX){setBpm(bpm);btn.textContent='Tap tempo · '+state.bpm;}
-    else btn.textContent='Tap tempo · out of range';
-  } else btn.textContent='Tap tempo · keep tapping';
+    if(bpm>=BPM_MIN&&bpm<=BPM_MAX){setBpm(bpm);btn.textContent=tr('tap.at','Tap tempo · {n}',{n:state.bpm});}
+    else btn.textContent=tr('tap.outOfRange','Tap tempo · out of range');
+  } else btn.textContent=tr('tap.keepTapping','Tap tempo · keep tapping');
   btn.classList.add('tapping');
   clearTimeout(tapResetTimer);
   tapResetTimer=setTimeout(()=>{
-    btn.classList.remove('tapping');btn.textContent='Tap tempo';tapTimes=[];
+    btn.classList.remove('tapping');btn.textContent=tr('tap.tempo','Tap tempo');tapTimes=[];
   },2200);
 }
 
@@ -3694,7 +3773,7 @@ function buildSubdivDirRow(){
   DIRECTIONS.forEach(d=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.practice.subdivDir?' active':'');
-    b.textContent=d.label;
+    b.textContent=lab('subdivdir',d.k,d.label);
     b.onclick=()=>{state.practice.subdivDir=d.k;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
     row.appendChild(b);
   });
@@ -3702,7 +3781,7 @@ function buildSubdivDirRow(){
 
 function buildClickModeRow(){
   const row=document.getElementById('clickmode-row');row.innerHTML='';
-  [[true,'Follow figure'],[false,'Beats only']].forEach(([v,label])=>{
+  [[true,tr('click.followFigure','Follow figure')],[false,tr('click.beatsOnly','Beats only')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.clickFollowsFigure===v?' active':'');
     b.textContent=label;
@@ -3713,7 +3792,7 @@ function buildClickModeRow(){
 
 function buildAlignRow(){
   const row=document.getElementById('align-row');row.innerHTML='';
-  [[false,'Let it drift'],[true,'Restart each round']].forEach(([v,label])=>{
+  [[false,tr('align.drift','Let it drift')],[true,tr('align.restartEach','Restart each round')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.alignPasses===v?' active':'');
     b.textContent=label;
@@ -3727,14 +3806,17 @@ function updateAlignInfo(){
   const el=document.getElementById('align-info');if(!el)return;
   if(!sequence.length||state.mode==='drone'){el.textContent='';return;}
   if(state.alignPasses){
-    el.textContent='Every round restarts on beat 1.';return;
+    el.textContent=tr('align.restart','Every round restarts on beat 1.');return;
   }
   const n=alignmentRounds(),sub=currentSubdiv();
-  const group=sub===1?'beat':sub===2?'eighth pair':sub==='2s'?'swung pair':sub===3?'triplet':'sixteenth group';
+  const group={1:tr('group.beat','beat'),2:tr('group.eighthPair','eighth pair'),
+    '2s':tr('group.swungPair','swung pair'),3:tr('group.triplet','triplet'),
+    4:tr('group.sixteenthGroup','sixteenth group')}[sub]||'';
   el.textContent=n===1
-    ? sequence.length+' notes · lands on the head of every '+group
-    : sequence.length+' notes · '+n+' rounds before note 1 falls on the head of a '+group+' again'
-      +' (offsets '+alignmentOffsets().join(', ')+')';
+    ? tr('align.lands','{notes} notes · lands on the head of every {group}',
+        {notes:sequence.length,group:group})
+    : tr('align.rounds','{notes} notes · {n} rounds before note 1 falls on the head of a {group} again (offsets {list})',
+        {notes:sequence.length,n:n,group:group,list:alignmentOffsets().join(', ')});
 }
 
 /* Off, up in steps, down in steps, or a ramp. The amount is typed, because any
@@ -3748,7 +3830,7 @@ function buildSpeedControls(){
   if(!row)return;
   const P=state.practice;
   row.innerHTML='';
-  [['off','Off'],['up','Up'],['down','Down'],['ramp','Ramp']].forEach(([k,label])=>{
+  [['off',tr('common.off','Off')],['up',tr('dir.up','Up')],['down',tr('dir.down','Down')],['ramp',tr('speed.rampMode','Ramp')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(P.tempoMode===k?' active':'');
     b.textContent=label;
@@ -3763,8 +3845,8 @@ function buildSpeedControls(){
 
   const every=document.getElementById('speed-every');
   if(every&&!every.options.length){
-    every.appendChild(new Option('pass','pass'));
-    for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(i+(i===1?' min':' min'),String(i)));
+    every.appendChild(new Option(tr('ramp.pass','pass'),'pass'));
+    for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(tr('ramp.min','{n} min',{n:i}),String(i)));
     every.addEventListener('change',()=>{
       P.tempoEvery=every.value==='pass'?'pass':parseInt(every.value,10);
       buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
@@ -3802,15 +3884,17 @@ function speedSentence(){
   const P=state.practice;
   if(P.tempoMode==='ramp'){
     const from=P.rampFrom==null?state.bpm:P.rampFrom;
-    if(from===P.rampTo)return 'nowhere to go \u2014 pick a different tempo to reach';
-    return from+' to '+P.rampTo+' BPM over '+P.rampMinutes+
-      (P.rampMinutes===1?' minute':' minutes')+', a little every beat';
+    if(from===P.rampTo)return tr('speed.nowhere','nowhere to go \u2014 pick a different tempo to reach');
+    return tr('speed.ramp','{from} to {to} BPM over {mins}, a little every beat',
+      {from:from,to:P.rampTo,mins:tr('speed.minutes',{one:'{n} minute',other:'{n} minutes'},{n:P.rampMinutes})});
   }
   if(!tempoStepping())return '';
   const sign=P.tempoMode==='down'?'\u2212':'+';
-  const when=P.tempoEvery==='pass'?'every '+passLabel()
-            :'every '+P.tempoEvery+(P.tempoEvery===1?' minute':' minutes');
-  return sign+P.tempoStep+' BPM '+when+', between '+BPM_MIN+' and '+BPM_MAX;
+  const when=P.tempoEvery==='pass'
+    ? tr('speed.everyPass','every {what}',{what:passLabel()})
+    : tr('speed.everyMinutes',{one:'every {n} minute',other:'every {n} minutes'},{n:P.tempoEvery});
+  return tr('speed.step','{sign}{step} BPM {when}, between {lo} and {hi}',
+    {sign:sign,step:P.tempoStep,when:when,lo:BPM_MIN,hi:BPM_MAX});
 }
 // kept under its old name: a dozen places call it when the pass length changes
 function buildTempoStepRow(){buildSpeedControls();}
@@ -3825,7 +3909,7 @@ function buildCountRow(){
   const line=document.getElementById('count-between-line');
   if(!sel||!row)return;
   if(!sel.options.length){
-    sel.appendChild(new Option('Off',0));
+    sel.appendChild(new Option(tr('common.off','Off'),0));
     for(let i=1;i<=COUNT_MAX;i++)sel.appendChild(new Option(i,i));
     sel.addEventListener('change',()=>{
       state.countBars=parseInt(sel.value,10)||0;
@@ -3840,7 +3924,7 @@ function buildCountRow(){
   line.style.display=canBetween?'':'none';
   row.innerHTML='';
   if(!canBetween)return;
-  [['off','Off'],['key','New key'],['change','Any change']].forEach(([v,label])=>{
+  [['off',tr('common.off','Off')],['key',tr('count.newKey','New key')],['change',tr('count.anyChange','Any change')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+((state.countWhen||'off')===v?' active':'');
     b.textContent=label;
@@ -3870,7 +3954,7 @@ function buildPassRow(){
   sel.value=String(passCount());
   sel.classList.add('active');
   row.innerHTML='';
-  [['bar','Bars'],['beat','Beats']].forEach(([k,label])=>{
+  [['bar',tr('pass.bars','Bars')],['beat',tr('pass.beats','Beats')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.practice.passUnit===k?' active':'');
     b.textContent=label;
@@ -3896,7 +3980,7 @@ function updatePracticeInfo(){
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
 
-  el.textContent=bits.length?bits.join(' · '):'Repeats unchanged.';
+  el.textContent=bits.length?bits.join(' · '):tr('practice.unchanged','Repeats unchanged.');
 }
 
 // In Single mode one button is lit; in Study list mode every chosen button is
@@ -3926,7 +4010,7 @@ function buildBlueRow(){
   const row=document.getElementById('blue-row');
   if(!row)return;
   row.innerHTML='';
-  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+  [[false,tr('common.off','Off')],[true,tr('common.on','On')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.blueNotes===v?' active':'');
     b.textContent=label;
@@ -3940,8 +4024,8 @@ function buildBlueRow(){
   gridify(row);
   const info=document.getElementById('blue-info');
   if(info)info.textContent=state.blueNotes
-    ? 'a flat third over the major, a flat fifth over the minor \u2014 six notes'
-    : 'five notes, as written';
+    ? tr('blue.on','a flat third over the major, a flat fifth over the minor \u2014 six notes')
+    : tr('blue.off','five notes, as written');
 }
 
 /* Changing what a note is called repaints every place one is written. Nothing
@@ -3949,6 +4033,7 @@ function buildBlueRow(){
 function setNoteNames(k){
   if(!NOTE_STYLES[k]||state.noteNames===k)return;
   state.noteNames=k;
+  notesChosen=true;
   try{localStorage.setItem('scaletune-notes',k);}catch(e){}
   repaintNoteNames();
 }
@@ -3972,10 +4057,10 @@ function refreshFamilySummaries(){
     const fam=d.dataset.fam, names=familyMembers(fam);
     if(useListOn()){
       const n=activeList().filter(x=>x.group===fam&&names.indexOf(x.name)>=0).length;
-      el.textContent=n?'· '+n+' chosen':'';
+      el.textContent=n?'· '+tr('fam.chosen','{n} chosen',{n:n}):'';
     } else {
     const cur=state.mode==='scale'?state.scaleName:state.chordName;
-      el.textContent=(cur&&names.indexOf(cur)>=0)?'· '+cur:'';
+      el.textContent=(cur&&names.indexOf(cur)>=0)?'· '+(state.mode==='arpeggio'?chordLabel(cur):scaleLabel(cur)):'';
     }
   });
 }
@@ -3995,9 +4080,12 @@ function paintSetButtons(selector,attr,forMode){
   const kind=forMode==='scale'?'scale':'chord';
   const current=forMode==='scale'?state.scaleName:state.chordName;
   document.querySelectorAll(selector).forEach(b=>{
+    // the name is the key, kept on the button; what is written on it is the
+    // reading of that key in the language on the screen
     const name=b.dataset[attr];
+    const shown=kind==='scale'?scaleLabel(name):chordLabel(name);
     b.classList.remove('active','now');
-    if(!mine){b.textContent=name;return;}
+    if(!mine){b.textContent=shown;return;}
     if(useListOn()){
       // the list holds both kinds, so a chord called Major is not a scale of it
       const at=[];
@@ -4006,10 +4094,10 @@ function paintSetButtons(selector,attr,forMode){
         b.classList.add(at.indexOf(studyIdx)>=0&&state.playing?'now':'active');
         b.classList.add('numbered');
         // every place it appears, since the same thing can be in twice
-        b.innerHTML='<span class="idx">'+at.map(j=>j+1).join(',')+'</span>'+name;
-      } else b.textContent=name;
+        b.innerHTML='<span class="idx">'+at.map(j=>j+1).join(',')+'</span>'+shown;
+      } else b.textContent=shown;
     } else {
-      b.textContent=name;
+      b.textContent=shown;
       if(name===current)b.classList.add('active');
     }
   });
@@ -4031,8 +4119,8 @@ function renderPitchPickers(){
     const b=document.createElement('button');
     const off=exceedsRange({span:s});
     b.className='pick-btn'+(s===state.span?' active':'')+(off?' disabled':'');
-    b.textContent=s===1?'1 octave':s+' octaves';
-    if(off)b.title='Would go above C8 from this start octave';
+    b.textContent=tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:s});
+    if(off)b.title=tr('range.tooHighStart','Would go above C8 from this start octave');
     else b.onclick=()=>{state.span=s;state.spanWanted=s;renderPitchPickers();refreshSequence();restartIfPlaying();};
     spanRow.appendChild(b);
   });
@@ -4043,7 +4131,7 @@ function renderPitchPickers(){
     const off=exceedsRange({rootOct:o});
     b.className='pick-btn'+(o===state.rootOct?' active':'')+(off?' disabled':'');
     b.textContent=o;
-    if(off)b.title='Would go above C8 with '+state.span+' octave(s)';
+    if(off)b.title=tr('range.tooHighSpan','Would go above C8 with {n} octaves',{n:state.span});
     else b.onclick=()=>{state.rootOct=o;state.rootOctWanted=o;renderPitchPickers();refreshSequence();restartIfPlaying();};
     octRow.appendChild(b);
   });
@@ -4052,7 +4140,7 @@ function renderPitchPickers(){
   DIRECTIONS.forEach(d=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.direction?' active':'');
-    b.textContent=d.label;
+    b.textContent=dirLabel(d.k);
     b.onclick=()=>{state.direction=d.k;renderPitchPickers();refreshSequence();restartIfPlaying();};
     dirRow.appendChild(b);
   });
@@ -4083,7 +4171,8 @@ function updateInfo(){
   rebuildSpelling();
   const rootIdx=NOTES.indexOf(state.root);
   const label=state.mode==='scale'?state.scaleName:state.chordName;
-  el.textContent=bareName(rootIdx)+' '+label+' — '+degrees.map(d=>bareName((rootIdx+d)%12)).join(', ');
+  el.textContent=tr('pitch.line','{key} {name} — {notes}',
+    {key:bareName(rootIdx),name:label,notes:degrees.map(d=>bareName((rootIdx+d)%12)).join(', ')});
 }
 
 function clearPitch(){
@@ -4113,12 +4202,12 @@ function clearEverything(){
   const btn=document.getElementById('clearall-btn');
   if(Date.now()-clearArmed>4000){
     clearArmed=Date.now();
-    if(btn){btn.textContent='✕?';btn.classList.add('armed');}
-    setStatus('Tap again to clear every selection.');
+    if(btn){btn.textContent=tr('clear.armed','✕?');btn.classList.add('armed');}
+    setStatus(tr('clear.again','Tap again to clear every selection.'));
     setTimeout(()=>{
       if(Date.now()-clearArmed>=4000){
         if(btn){btn.textContent='✕';btn.classList.remove('armed');}
-        if(/clear every selection/.test(document.getElementById('status-bar').textContent))setStatus('');
+        if(document.getElementById('status-bar').textContent===tr('clear.again','Tap again to clear every selection.'))setStatus('');
       }
     },4100);
     return;
@@ -4138,8 +4227,8 @@ function clearEverything(){
   buildFreeGrid();buildSubdivRow();buildListModeRow();
   renderPitchPickers();refreshSequence();updateInfo();updateDroneReadout();
   refreshSectionSummaries();updateRotationPanel();
-  setStatus('Cleared.');
-  setTimeout(()=>{if(document.getElementById('status-bar').textContent==='Cleared.')setStatus('');},1500);
+  setStatus(tr('clear.done','Cleared.'));
+  setTimeout(()=>{if(document.getElementById('status-bar').textContent===tr('clear.done','Cleared.'))setStatus('');},1500);
 }
 
 /* ---------- free UI ---------- */
@@ -4174,8 +4263,8 @@ function buildFreeRangeRows(){
     const b=document.createElement('button');
     const off=exceedsRange({freeSpan:s});
     b.className='pick-btn'+(s===state.freeSpan?' active':'')+(off?' disabled':'');
-    b.textContent=s===1?'1 octave':s+' octaves';
-    if(off)b.title='Would go above C8 from these octaves';
+    b.textContent=tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:s});
+    if(off)b.title=tr('range.tooHighFree','Would go above C8 from these octaves');
     else b.onclick=()=>{state.freeSpan=s;state.freeSpanWanted=s;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
     spanRow.appendChild(b);
   });
@@ -4183,7 +4272,7 @@ function buildFreeRangeRows(){
   DIRECTIONS.forEach(d=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.freeDirection?' active':'');
-    b.textContent=d.label;
+    b.textContent=dirLabel(d.k);
     b.onclick=()=>{state.freeDirection=d.k;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
     dirRow.appendChild(b);
   });
@@ -4240,7 +4329,7 @@ function buildNoteLenRow(){
   NOTE_LENS.forEach(n=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(n.k===state.noteLen?' active':'');
-    b.textContent=n.label;
+    b.textContent=lab('notelen',n.k,n.label);
     b.onclick=()=>{
       state.noteLen=n.k;buildNoteLenRow();updateAlignInfo();refreshSectionSummaries();
       // Take effect where the exercise already is rather than restarting it.
@@ -4285,7 +4374,7 @@ function renderPolyBeats(){
     for(let i=0;i<n;i++){
       const d=document.createElement('div');
       d.className='beat-dot'+(layer==='b'?' poly':'')+' acc-'+acc[i];
-      d.title='Tap: accent it, then silence it';
+      d.title=tr('beat.tapPoly','Tap: accent it, then silence it');
       d.onclick=()=>{
         acc[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(acc[i])+1)%ACCENT_CYCLE.length];
         P.touched=true;
@@ -4302,11 +4391,14 @@ function renderPolyBeats(){
 function buildGrooveRow(){
   const sel=document.getElementById('groove-sel');
   if(!sel)return;
-  if(!sel.options.length){
-    sel.appendChild(new Option('Click','click'));
-    Object.keys(GROOVES).forEach(k=>sel.appendChild(new Option(GROOVES[k].label,k)));
-    sel.appendChild(new Option('Custom','custom'));   // the player's own
-    sel.addEventListener('change',()=>setGroove(sel.value));
+  // refilled when the language changes: an <option> carries its own words
+  if(!sel.options.length||sel.dataset.lang!==LANG){
+    const wire=!sel.options.length;
+    sel.innerHTML='';sel.dataset.lang=LANG;
+    sel.appendChild(new Option(tr('groove.click','Click'),'click'));
+    Object.keys(GROOVES).forEach(k=>sel.appendChild(new Option(grooveLabel(k),k)));
+    sel.appendChild(new Option(tr('groove.custom','Custom'),'custom'));   // the player's own
+    if(wire)sel.addEventListener('change',()=>setGroove(sel.value));
   }
   sel.value=state.groove;
   sel.classList.toggle('active',grooveOn());
@@ -4314,7 +4406,7 @@ function buildGrooveRow(){
   const q=document.getElementById('sig-4');
   if(q){
     q.disabled=grooveOn();
-    q.title=grooveOn()?'the accompaniment styles are written in four':'';
+    q.title=grooveOn()?tr('sig.styleIsFour','the accompaniment styles are written in four'):'';
   }
   const info=document.getElementById('groove-info');
   if(info){
@@ -4323,11 +4415,14 @@ function buildGrooveRow(){
     if(!G)info.textContent='';
     else if(state.groove==='custom')
       info.textContent=G.hits.length
-        ? 'yours: '+(G.bars===2?'two bars':'one bar')+', '+G.hits.length+' hits, repeating'
-        : 'yours, and still empty — write it under Pattern';
-    else info.textContent=(G.bars===2?'two bars of four':'one bar of four')+', repeating'
-      +(state.density==='busy'?', filled out':(state.density==='light'?', pared back':''))
-      +' — no fills, no breaks';
+        ? tr('groove.yours','yours: {bars}, {hits}, repeating',
+            {bars:tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:G.bars}),
+             hits:tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:G.hits.length})})
+        : tr('groove.yoursEmpty','yours, and still empty — write it under Pattern');
+    else info.textContent=(G.bars===2?tr('groove.twoBars','two bars of four'):tr('groove.oneBar','one bar of four'))+tr('groove.repeating',', repeating')
+      +(state.density==='busy'?tr('groove.filledOut',', filled out')
+        :(state.density==='light'?tr('groove.paredBack',', pared back'):''))
+      +tr('groove.noFills',' — no fills, no breaks');
   }
   buildKitRow();buildDensityRow();buildHatRow();buildMixer();
 }
@@ -4433,7 +4528,7 @@ function buildPatternEditor(){
   const grow=document.getElementById('pat-grid-row');
   if(grow){
     grow.innerHTML='';
-    [[16,'16ths'],[12,'Triplets']].forEach(([v,label])=>{
+    [[16,tr('grid.16ths','16ths')],[12,tr('grid.triplets','Triplets')]].forEach(([v,label])=>{
       const b=document.createElement('button');
       b.className='pick-btn'+(state.custom.grid===v?' active':'');
       b.textContent=label;
@@ -4445,7 +4540,7 @@ function buildPatternEditor(){
   const pen=document.getElementById('pat-pen-row');
   if(pen){
     pen.innerHTML='';
-    [[1,'Ghost'],[2,'Mid'],[3,'Accent']].forEach(([v,label])=>{
+    [[1,tr('pen.ghost','Ghost')],[2,tr('pen.mid','Mid')],[3,tr('pen.accent','Accent')]].forEach(([v,label])=>{
       const b=document.createElement('button');
       b.className='pick-btn pen-btn'+((state.custom.pen||3)===v?' active':'');
       b.dataset.v=String(v);
@@ -4462,7 +4557,7 @@ function buildPatternEditor(){
     for(let i=0;i<bars;i++){
       const b=document.createElement('button');
       b.className='pick-btn'+(patBar===i?' active':'');
-      b.textContent='Bar '+(i+1);
+      b.textContent=tr('pat.bar','Bar {n}',{n:i+1});
       b.onclick=()=>{patBar=i;buildPatternEditor();};
       brow.appendChild(b);
     }
@@ -4483,7 +4578,7 @@ function buildPatternEditor(){
       const b=document.createElement('button');
       b.className='pick-btn';
       b.textContent=String(i+1);
-      b.setAttribute('aria-label','Copy bar '+(i+1)+' into bar '+(patBar+1));
+      b.setAttribute('aria-label',tr('pat.copyAria','Copy bar {from} into bar {to}',{from:i+1,to:patBar+1}));
       b.onclick=()=>{
         const span=4*GRID, from=i*span, to=patBar*span;
         const taken=state.custom.hits.filter(h=>h[0]>=from&&h[0]<from+span)
@@ -4506,8 +4601,8 @@ function buildPatternEditor(){
   }
   const from=document.getElementById('pat-from');
   if(from&&!from.options.length){
-    from.appendChild(new Option('a style',''));
-    Object.keys(GROOVES).forEach(k=>from.appendChild(new Option(GROOVES[k].label,k)));
+    from.appendChild(new Option(tr('pat.aStyle','a style'),''));
+    Object.keys(GROOVES).forEach(k=>from.appendChild(new Option(grooveLabel(k),k)));
     from.addEventListener('change',()=>{
       if(!from.value)return;
       patFromStyle(from.value);
@@ -4531,7 +4626,7 @@ function buildPatternEditor(){
     const count=Math.min(perRow,cells-start);
     PAT_VOICES.forEach(([voice,name])=>{
       const lane=document.createElement('div');lane.className='pat-lane';
-      const label=document.createElement('div');label.className='pat-name';label.textContent=name;
+      const label=document.createElement('div');label.className='pat-name';label.textContent=lab('patvoice',voice,name);
       const row=document.createElement('div');
       row.className='pat-cells';
       row.style.gridTemplateColumns='repeat('+count+',1fr)';
@@ -4544,12 +4639,12 @@ function buildPatternEditor(){
         cell.dataset.v=String(patLevel(patAt(voice,pos)));
         cell.dataset.pos=String(pos);
         cell.dataset.voice=voice;
-        cell.setAttribute('aria-label',name+', beat '+(Math.floor(c/perBeat)+1)+', cell '+(c%perBeat+1));
+        cell.setAttribute('aria-label',tr('pat.cellAria','{name}, beat {beat}, cell {cell}',{name:mixLabel(voice),beat:Math.floor(c/perBeat)+1,cell:c%perBeat+1}));
           cell.onclick=()=>{
           patToggle(voice,pos);
           cell.dataset.v=String(patLevel(patAt(voice,pos)));
           cell.classList.toggle('off',patOffGrid(voice,pos,pos+step));
-          cell.title=patOffGrid(voice,pos,pos+step)?'written on the other grid':'';
+          cell.title=patOffGrid(voice,pos,pos+step)?tr('pat.otherGrid','written on the other grid'):'';
           if(state.groove!=='custom')setGroove('custom');
           else{refreshSectionSummaries();restartIfPlaying();}
           patInfo();
@@ -4655,18 +4750,21 @@ function patInfo(){
   const n=state.custom.hits.length;
   const off=patOffGridCount();
   const bars=state.custom.bars;
-  const where='loops '+bars+(bars===1?' bar':' bars')+(bars>1?', editing bar '+(patBar+1):'');
+  const where=tr('pat.loops',{one:'loops {n} bar',other:'loops {n} bars'},{n:bars})
+    +(bars>1?tr('pat.editing',', editing bar {n}',{n:patBar+1}):'');
   el.textContent=n
-    ? where+' · '+n+' hit'+(n===1?'':'s')+' · tap writes at the level above, tap again to clear'
-      +(off?'\n'+off+' dot'+(off===1?'':'s')+': written on the '
-        +(state.custom.grid===12?'sixteenths':'triplets')
-        +' grid, between these cells. Tap a dot to remove it, or switch grid to move it.':'')
-    : where+' \u2014 pick a level and tap the grid, or start from a style';
+    ? where+' · '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})
+      +' · '+tr('pat.tapWrites','tap writes at the level above, tap again to clear')
+      +(off?'\n'+tr('pat.dots',{one:'{n} dot: written on the {grid} grid, between these cells. Tap a dot to remove it, or switch grid to move it.',
+                                other:'{n} dots: written on the {grid} grid, between these cells. Tap a dot to remove it, or switch grid to move it.'},
+          {n:off,grid:state.custom.grid===12?tr('fig.sixteenths','sixteenths'):tr('fig.triplets','triplets')}):'')
+    : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style');
   paintMixUsed();      // a voice written in just now must become movable
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=n
-    ? '· '+n+' hits, '+state.custom.bars+(state.custom.bars===1?' bar':' bars')
-    : '· empty';
+    ? '· '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})+', '
+      +tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:state.custom.bars})
+    : '· '+tr('pat.emptySum','empty');
 }
 /* The one thing worth remembering across launches: the app opens clean on
    purpose, but a pattern you wrote is your work, not a view setting. */
@@ -4701,7 +4799,7 @@ function buildDensityRow(){
   const applies=grooveOn()&&state.groove!=='custom';
   if(line)line.style.display=applies?'':'none';
   row.innerHTML='';
-  [['light','Light'],['normal','Normal'],['busy','Busy']].forEach(([k,label])=>{
+  [['light',tr('density.light','Light')],['normal',tr('density.normal','Normal')],['busy',tr('density.busy','Busy')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.density===k?' active':'');
     b.textContent=label;
@@ -4751,19 +4849,22 @@ function mixSummary(){
   if(!el)return;
   const moved=MIX_VOICES.filter(([k])=>Math.abs((state.mix[k]||1)-1)>0.01);
   el.textContent=moved.length
-    ? '· '+moved.map(([k,n])=>n.split(' ')[0].toLowerCase()+' '+Math.round(state.mix[k]*100)+'%').join(', ')
-    : '· even';
+    ? '· '+moved.map(([k])=>mixLabel(k).split(' ')[0].toLowerCase()+' '+Math.round(state.mix[k]*100)+'%').join(', ')
+    : '· '+tr('mix.even','even');
 }
 function buildMixer(){
   const host=document.getElementById('mix-rows');
   if(!host)return;
+  // the rows carry the drum names, so a change of language has to write them
+  // again; the levels live in state and are painted back below
+  if(host.dataset.lang!==LANG){host.innerHTML='';host.dataset.lang=LANG;}
   if(!host.children.length){
     MIX_VOICES.forEach(([k,name])=>{
       const row=document.createElement('div');row.className='mix-row';
-      const label=document.createElement('span');label.className='mix-name';label.textContent=name;
+      const label=document.createElement('span');label.className='mix-name';label.textContent=mixLabel(k);
       const sl=document.createElement('input');
       sl.type='range';sl.min='0';sl.max='150';sl.step='5';
-      sl.setAttribute('aria-label',name+' level');
+      sl.setAttribute('aria-label',tr('mix.level','{name} level',{name:mixLabel(k)}));
       const out=document.createElement('span');out.className='val';
       sl.oninput=()=>{
         state.mix[k]=parseInt(sl.value,10)/100;
@@ -4808,11 +4909,11 @@ function paintMixUsed(){
   });
   const note=document.getElementById('mix-note');
   if(!note)return;
-  if(!grooveOn())note.textContent='choose an accompaniment to hear these';
-  else if(state.groove==='custom')note.textContent='the faded ones are not in your pattern yet';
+  if(!grooveOn())note.textContent=tr('mix.pickStyle','choose an accompaniment to hear these');
+  else if(state.groove==='custom')note.textContent=tr('mix.notYours','the faded ones are not in your pattern yet');
   else{
     const G=grooveDef();
-    note.textContent='the faded ones are not in '+((G&&G.label)||'this pattern');
+    note.textContent=tr('mix.faded','the faded ones are not in {what}',{what:(G?grooveLabel(state.groove):tr('mix.thisPattern','this pattern'))});
   }
 }
 
@@ -4823,7 +4924,7 @@ function buildHatRow(){
   const line=document.getElementById('hat-line');
   if(line)line.style.display=(G&&G.brushes)?'':'none';
   row.innerHTML='';
-  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+  [[false,tr('common.off','Off')],[true,tr('common.on','On')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.balladHat===v?' active':'');
     b.textContent=label;
@@ -4839,7 +4940,7 @@ function buildKitRow(){
   const line=document.getElementById('kit-line');
   if(line)line.style.display=grooveOn()?'':'none';
   row.innerHTML='';
-  [['recorded','Recorded'],['machine','Machine']].forEach(([k,label])=>{
+  [['recorded',tr('kit.recorded','Recorded')],['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.kit===k?' active':'');
     b.textContent=label;
@@ -4880,7 +4981,7 @@ function buildMetroOnRow(){
   if(block)block.style.display=on?'':'none';
   document.querySelectorAll('#metro-section .metro-body').forEach(b=>b.classList.toggle('no-switch',!on));
   row.innerHTML='';
-  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+  [[false,tr('common.off','Off')],[true,tr('common.on','On')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.metroInDrone===v?' active':'');
     b.textContent=label;
@@ -4893,7 +4994,7 @@ function buildMetroOnRow(){
 function buildPolyModeRow(){
   const row=document.getElementById('polymode-row');if(!row)return;
   row.innerHTML='';
-  [[false,'Off'],[true,'On']].forEach(([v,label])=>{
+  [[false,tr('common.off','Off')],[true,tr('common.on','On')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.poly.on===v?' active':'');
     b.textContent=label;
@@ -4912,7 +5013,7 @@ function buildPolyNotesRow(){
   const block=document.getElementById('polynotes-block');
   if(block)block.style.display=(state.poly.on&&!notesSilent())?'':'none';
   row.innerHTML='';
-  [['a','the '+state.poly.a],['b','the '+state.poly.b]].forEach(([k,label])=>{
+  [['a',tr('poly.the','the {n}',{n:state.poly.a})],['b',tr('poly.the','the {n}',{n:state.poly.b})]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.poly.notesFollow===k?' active':'');
     b.textContent=label;
@@ -4961,7 +5062,7 @@ function updateSupersededControls(){
   if(clear)clear.style.display=styled?'none':'';
   if(hint){
     hint.style.display=on?'none':'';
-    hint.textContent=styled?'the style plays the accents'
+    hint.textContent=styled?tr('beats.styled','the style plays the accents')
                            :'tap a beat: accent it, then silence it';
   }
   // and in Metro the pulses take the place the bar has just left
@@ -5010,7 +5111,7 @@ function renderBeats(){
     const d=document.createElement('div');
     d.className='beat-dot acc-'+state.accents[i];
     d.id='beat-'+i;
-    d.title='Tap: accent → normal → silent';
+    d.title=tr('beat.tap','Tap: accent → normal → silent');
     d.onclick=()=>{
       state.accents[i]=ACCENT_CYCLE[(ACCENT_CYCLE.indexOf(state.accents[i])+1)%ACCENT_CYCLE.length];
       state.accentsTouched=true;
@@ -5024,78 +5125,94 @@ function renderBeats(){
 /* ---------- collapsible sections ---------- */
 // Closed sections carry a one-line summary of what is set inside them, so
 // folding a section away never hides what it is doing.
+/* The metronome's two summaries say the same things; the shorter one leaves out
+   what Metro already has on the screen. Written once so they cannot drift. */
+function metroBits(bits){
+  if(state.countBars>0)bits.push(
+    tr('sum.countIn',{one:'{n}-bar count-in',other:'{n}-bar count-in'},{n:state.countBars})
+    +(state.countWhen==='key'?tr('sum.countIn.key',', each new key')
+     :(state.countWhen==='change'?tr('sum.countIn.change',', each change'):'')));
+  if(state.poly.on)bits.push(tr('sum.against','{a} against {b}',{a:state.poly.a,b:state.poly.b}));
+  else if(grooveOn())bits.push(grooveLabel(state.groove));
+}
+function figureBit(){
+  return subdivListOn()&&subdivOrder().length>1
+    ? tr('sum.figures',{one:'{n} figure',other:'{n} figures'},{n:subdivOrder().length})
+    : subdivLabelPlain(currentSubdiv());
+}
+function beatBits(){
+  if(state.poly.on||grooveOn())return [];
+  return [tr('sum.beatsPerBar',{one:'{n} beat per bar',other:'{n} beats per bar'},{n:state.sig}),
+          figureBit()];
+}
+// the figure named as prose rather than as the note-head on its button
+function subdivLabelPlain(k){
+  return {1:tr('fig.quarters','quarters'),2:tr('fig.eighths','eighths'),
+          '2s':tr('fig.swing','swing'),3:tr('fig.triplets','triplets'),
+          4:tr('fig.sixteenths','sixteenths')}[k]||'';
+}
+
 const SECTIONS=[
   {id:'sec-root',     sum:'sum-root',
-   text:()=>bareName(NOTES.indexOf(state.root))+(useListOn()?' · study list':'')},
+   text:()=>bareName(NOTES.indexOf(state.root))+(useListOn()?' · '+tr('sum.studyList','study list'):'')},
   {id:'sec-freeroot', sum:'sum-freeroot',
    text:()=>bareName(NOTES.indexOf(state.freeRoot||state.root))},
   {id:'sec-scales',   sum:'sum-scales',group:'notes',
    text:()=>{
-     if(useListOn())return activeList().length?activeList().length+' in rotation':'nothing chosen';
+     if(useListOn())return activeList().length
+       ?tr('sum.inRotation',{one:'{n} in rotation',other:'{n} in rotation'},{n:activeList().length})
+       :tr('sum.nothingChosen','nothing chosen');
      const n=state.mode==='scale'?state.scaleName:state.chordName;
-     return n?bareName(NOTES.indexOf(state.root))+' '+n:'nothing chosen';
+     return n?bareName(NOTES.indexOf(state.root))+' '
+       +(state.mode==='arpeggio'?chordLabel(n):scaleLabel(n)):tr('sum.nothingChosen','nothing chosen');
    }},
   {id:'sec-range',    sum:'sum-range',group:'range',
-   text:()=>state.span+(state.span>1?' octaves':' octave')+' · '+
-        (DIRECTIONS.find(d=>d.k===state.direction)||{}).label+' · from octave '+state.rootOct},
+   text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.span})+' · '+
+        dirLabel(state.direction)+' · '+tr('sum.fromOctave','from octave {n}',{n:state.rootOct})},
   // Free's Range section shares a group with the Scale one: folding either
   // folds both, so the layout does not change under you when switching mode.
   {id:'sec-freenotes',sum:'sum-freenotes',group:'notes',
    text:()=>{
      const n=Object.keys(state.freeSelected).length;
-     if(!n)return 'none chosen';
+     if(!n)return tr('sum.noneChosen','none chosen');
      return Object.keys(state.freeSelected)
        .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b).map(nameOf).join(' ');
    }},
   {id:'sec-freerange',sum:'sum-freerange',group:'range',
-   text:()=>state.freeSpan+(state.freeSpan>1?' octaves':' octave')+' · '+
-        (DIRECTIONS.find(d=>d.k===state.freeDirection)||{}).label},
+   text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.freeSpan})+' · '+
+        dirLabel(state.freeDirection)},
   {id:'sec-sound',    sum:'sum-sound',
    text:()=>{
      const t=TIMBRES.find(x=>x.k===state.timbre);
-     return (t?t.label:state.timbre)+' · '+Math.round(state.volume*100)+'%';
+     return timbreLabel(state.timbre)+' · '+Math.round(state.volume*100)+'%';
    }},
   {id:'sec-progress', sum:'sum-progress',
    text:()=>{
      const b=[];
-     if(state.practice.rootMove==='fourths')b.push('cycle of 4ths');
-
-     return b.length?b.join(' · '):'off';
+     if(state.practice.rootMove==='fourths')b.push(tr('sum.fourths','cycle of 4ths'));
+     return b.length?b.join(' · '):tr('common.off.lower','off');
    }},
   {id:'metro-section',sum:'sum-metro',
    text:()=>{
-     const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
-     const bits=[state.bpm+' BPM'];
-     if(state.mode==='drone'&&!state.metroInDrone)return 'off';
-     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'
-       +(state.countWhen==='key'?', each new key':(state.countWhen==='change'?', each change':'')));
-     if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
-     else if(grooveOn())bits.push(GROOVES[state.groove].label);
-     else{
-       bits.push(state.sig+(state.sig===1?' beat':' beats')+' per bar');
-       bits.push(subdivListOn()&&subdivOrder().length>1
-         ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
-     }
+     const bits=[tr('sum.bpm','{n} BPM',{n:state.bpm})];
+     if(state.mode==='drone'&&!state.metroInDrone)return tr('common.off.lower','off');
+     metroBits(bits);
+     bits.push(...beatBits());
      return bits.join(' · ');
    }},
   /* The same reading, minus the two things Metro already has on the screen. */
   {id:'metro-more',   sum:'sum-metro-more',
    text:()=>{
-     const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
      const bits=[];
-     if(state.countBars>0)bits.push(state.countBars+'-bar count-in'
-       +(state.countWhen==='key'?', each new key':(state.countWhen==='change'?', each change':'')));
-     if(state.poly.on)bits.push(state.poly.a+' against '+state.poly.b);
-     else if(grooveOn())bits.push(GROOVES[state.groove].label);
-     else bits.push(subdivListOn()&&subdivOrder().length>1
-       ? subdivOrder().length+' figures' : nm[currentSubdiv()]);
+     metroBits(bits);
+     if(!state.poly.on&&!grooveOn())bits.push(figureBit());
      return bits.join(' · ');
    }},
   {id:'sec-rhythm',   sum:'sum-rhythm',
    text:()=>{
-     const nl={sub:'per figure',beat:'per beat',bar:'per bar'}[state.noteLen]||'';
-     const bits=[nl,state.alignPasses?'restarts each round':'drifts'];
-     if(state.poly.on)bits.push('following the '+state.poly[state.poly.notesFollow]);
+     const nl=lab('notelen',state.noteLen,{sub:'Per figure',beat:'Per beat',bar:'Per bar'}[state.noteLen]||'').toLowerCase();
+     const bits=[nl,state.alignPasses?tr('sum.restarts','restarts each round'):tr('sum.drifts','drifts')];
+     if(state.poly.on)bits.push(tr('sum.following','following the {n}',{n:state.poly[state.poly.notesFollow]}));
      return bits.join(' · ');
    }},
 ];
@@ -5414,7 +5531,7 @@ async function startTuner(){
     micStream=await navigator.mediaDevices.getUserMedia({audio:{
       echoCancellation:false,noiseSuppression:false,autoGainControl:true}});
   }catch(e){
-    setStatus('The tuner needs the microphone. Allow it and press Listen again.');
+    setStatus(tr('tuner.needMic','The tuner needs the microphone. Allow it and press Listen again.'));
     return false;
   }
   micNode=audioCtx.createMediaStreamSource(micStream);
@@ -5458,7 +5575,7 @@ function renderTuner(f){
   if(f===null){
     noteEl.textContent='—';noteEl.classList.remove('in-tune');
     centsEl.textContent='';
-    hzEl.textContent=micStream?'listening for a note':'press Listen';
+    hzEl.textContent=micStream?tr('tuner.listening','listening for a note'):tr('tuner.press','press Listen');
     needle.style.left='50%';needle.classList.remove('in-tune');
     drawStrobe(0,false);
     return;
@@ -5474,7 +5591,8 @@ function renderTuner(f){
   noteEl.classList.toggle('in-tune',inTune);
   centsEl.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents'+
     (Math.abs(cents)>50?'  ·  a long way off':'');
-  hzEl.textContent=f.toFixed(2)+' Hz   ·   '+target.toFixed(2)+' Hz wanted';
+  hzEl.textContent=tr('tuner.hzLine','{heard} Hz   ·   {wanted} Hz wanted',
+    {heard:f.toFixed(2),wanted:target.toFixed(2)});
   needle.style.left=(50+tuneSmooth)+'%';
   needle.classList.toggle('in-tune',inTune);
   drawStrobe(f-target,inTune);
@@ -5570,7 +5688,7 @@ function buildTunerControls(){
   const tsel=document.getElementById('tuner-temp');
   const ksel=document.getElementById('tuner-key');
   if(tsel&&!tsel.options.length){
-    TEMPERAMENTS.forEach(t=>tsel.appendChild(new Option(t.label,t.k)));
+    TEMPERAMENTS.forEach(x=>tsel.appendChild(new Option(lab('temp',x.k,x.label),x.k)));
     tsel.addEventListener('change',()=>{state.tunerTemp=tsel.value;buildTunerControls();});
     TUNER_NAMES.forEach((n,i)=>ksel.appendChild(new Option(n,i)));
     ksel.addEventListener('change',()=>{state.tunerKey=parseInt(ksel.value,10)||0;buildTunerControls();});
@@ -5591,7 +5709,7 @@ function buildTunerControls(){
       }
       // the words cost a line of their own on a phone; the signs say cents
       info.textContent=parts.length?parts.join('  '):'';
-      info.title='cents away from equal temperament';
+      info.title=tr('tuner.centsFromEqual','cents away from equal temperament');
     }
     // the deviations line changes the panel's height, so the room has to be
     // shared out again — without this the spread stayed as it was for equal
@@ -5704,12 +5822,28 @@ function setTheme(t){
 }
 
 /* ---------- settings ---------- */
-const NOTE_HINTS={
-  letters:'C D E F G A B — as written in English-language music.',
-  solfege:'Dó Ré Mi Fá Sol Lá Si — the note keeps its name in every key.',
-  german:'C D E F G A H — sharps take -is and flats -es: Fis, Des, Es. The seventh is H, and the note under it is B.',
-};
+function noteHint(){
+  return {
+    letters:tr('notes.hint.letters','C D E F G A B — as written in English-language music.'),
+    solfege:tr('notes.hint.solfege','Dó Ré Mi Fá Sol Lá Si — the note keeps its name in every key.'),
+    german: tr('notes.hint.german','C D E F G A H — sharps take -is and flats -es: Fis, Des, Es. The seventh is H, and the note under it is B.'),
+  }[state.noteNames]||'';
+}
 function buildSettings(){
+  const lr=document.getElementById('lang-row');
+  if(lr){
+    lr.innerHTML='';
+    LANGS.forEach(l=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(LANG===l.code?' active':'');
+      b.dataset.lang=l.code;b.textContent=l.label;
+      b.onclick=()=>{
+        [...lr.children].forEach(c=>c.classList.toggle('active',c===b));
+        setLang(l.code);
+      };
+      lr.appendChild(b);
+    });
+  }
   const nr=document.getElementById('notenames-row');
   if(nr){
     nr.innerHTML='';
@@ -5721,22 +5855,22 @@ function buildSettings(){
       nr.appendChild(b);
     });
   }
-  const tr=document.getElementById('theme-row');
-  if(tr){
-    tr.innerHTML='';
-    [['dark','Dark'],['light','Light']].forEach(([k,label])=>{
+  const themeRow=document.getElementById('theme-row');
+  if(themeRow){
+    themeRow.innerHTML='';
+    [['dark',tr('set.theme.dark','Dark')],['light',tr('set.theme.light','Light')]].forEach(([k,label])=>{
       const b=document.createElement('button');
       b.className='pick-btn'+(currentTheme()===k?' active':'');
       b.dataset.theme=k;b.textContent=label;
       b.onclick=()=>setTheme(k);
-      tr.appendChild(b);
+      themeRow.appendChild(b);
     });
   }
   paintNoteHint();
 }
 function paintNoteHint(){
   const h=document.getElementById('notenames-hint');
-  if(h)h.textContent=NOTE_HINTS[state.noteNames]||'';
+  if(h)h.textContent=noteHint();
 }
 function openSettings(){
   const o=document.getElementById('settings-overlay');
@@ -5753,11 +5887,104 @@ function closeSettings(){
 }
 function settingsOpen(){const o=document.getElementById('settings-overlay');return o&&!o.hidden;}
 
+/* ---------- language, applied ----------
+   The English in the markup is the source, so it is kept as written the first
+   time the page is read and put back whenever English is chosen again. A key
+   missing from a pack falls back to it rather than to a blank or to the key —
+   a half-finished translation should read as half English, not as a broken app. */
+const ORIGINAL=new Map();
+function snapshotMarkup(){
+  document.querySelectorAll('[data-t]').forEach(el=>ORIGINAL.set(el,el.innerHTML));
+  document.querySelectorAll('[data-ta]').forEach(el=>
+    ORIGINAL.set(el.dataset.ta+'@'+(el.id||''),el.getAttribute('aria-label')||''));
+}
+function applyMarkup(){
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const v=PACK&&PACK[el.dataset.t];
+    el.innerHTML=(v!=null)?v:(ORIGINAL.get(el)!=null?ORIGINAL.get(el):el.innerHTML);
+  });
+  document.querySelectorAll('[data-ta]').forEach(el=>{
+    const k=el.dataset.ta,v=PACK&&PACK[k];
+    const fall=ORIGINAL.get(k+'@'+(el.id||''));
+    el.setAttribute('aria-label',(v!=null)?v:(fall!=null?fall:el.getAttribute('aria-label')||''));
+  });
+}
+/* Every control whose words come from JS is built again. The rows are cheap and
+   there are no half-measures: a language that changes some labels and not
+   others is worse than one that takes a moment. */
+function rebuildEverything(){
+  buildTimbreRow();buildPitchLists();buildBlueRow();
+  buildDroneGrid();buildFreeGrid();
+  buildBeats();buildPolyBeats();updateSupersededControls();buildNoteLenRow();
+  buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
+  buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
+  buildAlignRow();buildSpeedControls();buildRootMoveRow();
+  renderPitchPickers();updateInfo();
+  refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
+  setMode(state.mode);
+}
+let langLoading=null;
+function setLang(code){
+  if(!LANGS.some(l=>l.code===code)||LANG===code)return Promise.resolve();
+  try{localStorage.setItem('scaletune-lang',code);}catch(e){}
+  return loadPack(code).then(()=>{
+    LANG=code;
+    document.documentElement.setAttribute('lang',code);
+    // a language proposes how notes are named; it never overrules a choice
+    if(!notesChosen){
+      const def=(LANGS.find(l=>l.code===code)||{}).notes;
+      if(def&&NOTE_STYLES[def])state.noteNames=def;
+    }
+    applyMarkup();rebuildEverything();buildSettings();
+  });
+}
+/* A pack read once is kept, so going back to a language is instant — and the
+   promise is remembered separately from the words, because a promise that has
+   already resolved does not run its work again: sharing one was how going
+   en → pt → en → pt left the second pt in English. */
+const PACKS={};
+function loadPack(code){
+  if(code==='en'){PACK=null;return Promise.resolve();}
+  if(PACKS[code]){PACK=PACKS[code];return Promise.resolve();}
+  if(langLoading&&langLoading.code===code)return langLoading.p;
+  // no cache mode of its own: the service worker holds it after the first fetch,
+  // which is what makes a language work offline, and drops it when a new build
+  // changes the cache name
+  const p=fetch('lang/'+code+'.json')
+    .then(r=>r.ok?r.json():null)
+    .then(j=>{
+      if(j){PACKS[code]=j;PACK=j;}
+      else{PACK=null;setStatus(tr('lang.failed','That language could not be loaded.'));}
+    })
+    .catch(()=>{PACK=null;setStatus(tr('lang.failed','That language could not be loaded.'));});
+  langLoading={code,p};
+  return p;
+}
+
 /* ---------- init ---------- */
-// before anything is drawn, so no note is ever written twice
+/* The English in the markup is kept before anything can overwrite it, so
+   choosing English again restores exactly what was written rather than a
+   round trip through a pack. */
+snapshotMarkup();
+/* A note-name choice is the reader's; a language only proposes one. Chosen once,
+   it stays whatever the language becomes — a Portuguese teacher who reads
+   letters keeps letters. */
+let notesChosen=false;
 try{
   const n=localStorage.getItem('scaletune-notes');
-  if(n&&NOTE_STYLES[n])state.noteNames=n;
+  if(n&&NOTE_STYLES[n]){state.noteNames=n;notesChosen=true;}
+}catch(e){}
+try{
+  const l=localStorage.getItem('scaletune-lang');
+  if(l&&LANGS.some(x=>x.code===l)&&l!=='en'){
+    // the pack arrives after the first paint; the app is readable in English until it does
+    LANG='en';
+    setTimeout(()=>{const want=l;LANG='en';setLang(want);},0);
+  }
+  if(!notesChosen){
+    const def=(LANGS.find(x=>x.code===(l||'en'))||{}).notes;
+    if(def&&NOTE_STYLES[def])state.noteNames=def;
+  }
 }catch(e){}
 applyTheme(currentTheme());
 initSections();
