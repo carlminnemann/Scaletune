@@ -108,23 +108,36 @@ html,body{height:var(--app-h,100dvh)}
    that or the name is written over. Below 400px the buttons come down to 30 —
    .header .theme-btn, because the plain .theme-btn rule comes later in the file
    and would otherwise win. */
-.header{display:grid;grid-template-columns:116px minmax(0,1fr) 116px;align-items:center;gap:6px;
-  margin-bottom:var(--s4);flex:0 0 auto}
+.header{display:grid;grid-template-columns:var(--headside) minmax(0,1fr) var(--headside);
+  align-items:center;gap:6px;margin-bottom:var(--s4);flex:0 0 auto;--headside:116px}
 .header h1.wordmark{min-width:0;white-space:nowrap}
 @media(max-width:400px){
-  .header{grid-template-columns:104px minmax(0,1fr) 104px}
+  .header{--headside:104px}
   .header .theme-btn{width:30px;height:30px;font-size:14px}
-  .header h1.wordmark{font-size:20px}
-  .header h1.wordmark .cap{font-size:32px}
+  .header{--wordmark:20px}
+}
+/* Below this the three buttons have to give the name room of its own, rather
+   than the name giving way to them. */
+@media(max-width:365px){
+  .header{--headside:88px;gap:4px}
+  .head-btns{gap:4px}
+  .header .theme-btn{width:28px;height:28px;font-size:13px}
+}
+/* The narrowest screen anyone actually carries is the folded Galaxy Fold. */
+@media(max-width:300px){
+  .header{--headside:76px}
+  .head-btns{gap:3px}
+  .header .theme-btn{width:24px;height:24px;font-size:12px}
 }
 /* Lowercase runs smaller so the two capitals carry the name. */
 /* Optima on Apple devices; Android has nothing like it, so it falls back
    through the nearest humanist faces to the system font. */
 h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS',sans-serif;
-  font-size:23px;font-weight:400;text-align:center;color:var(--text);
+  font-size:var(--wordmark,23px);font-weight:400;text-align:center;color:var(--text);
   letter-spacing:0.015em;line-height:1;white-space:nowrap}
-h1.wordmark .cap{font-size:38px;color:var(--brand)}
-@media(max-width:340px){h1.wordmark{font-size:19px}h1.wordmark .cap{font-size:31px}}
+/* The capitals are a proportion of the name, not a size of their own, so
+   shrinking the name keeps its shape instead of flattening it. */
+h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
 .theme-btn.armed{border-color:var(--text2);color:var(--text)}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
@@ -272,8 +285,13 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tighter .legend{display:none}
 .scroll.tightest details.sec .sec-body,.scroll.tightest #drone-section{padding:0.7rem}
 details.sec .sec-body{padding:1rem}
+/* The reading of a closed panel wraps rather than being cut short. An ellipsis
+   here hid exactly the part that changes — "4 tempos por compasso · semínimas"
+   ends where it matters — and a line that is one word too long for the screen
+   is a fact about the language, not a reason to stop showing it. */
 details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
-  color:var(--text3);font-style:italic;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  color:var(--text3);font-style:italic;font-size:11px;
+  min-width:0;flex:1 1 auto;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 details.sec[open] .sec-sum{display:none}
 .group-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
 /* only the label that opens a panel loses its top margin — one inside a wrapper
@@ -318,8 +336,12 @@ details.sec[open] .sec-sum{display:none}
 /* A label line: what the group is on the left, and on the right the switch that
    says HOW you choose within it. A modifier given the same size as the things it
    modifies reads as one of them; this is the fix for that, in one rule. */
+/* A label on the left and its control on the right, on one line while they fit.
+   A longer word in another language, or a narrow phone, and they take a line
+   each instead of the control being pushed off the edge. */
 .head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
-  min-height:26px;margin-bottom:var(--s3)}
+  flex-wrap:wrap;min-height:26px;margin-bottom:var(--s3)}
+.head>*{min-width:0}
 .head-btns{display:flex;gap:6px;justify-self:end}
 
 
@@ -352,7 +374,7 @@ details.sec[open] .sec-sum{display:none}
    nothing above it. Outside Drone the switch is not there and neither is that. */
 .metro-body.no-switch>#tempo-block{border-top:0}
 .mgroup>.head:last-child,.mgroup>*:last-child{margin-bottom:0}
-.bpm-row{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s3)}
+.bpm-row{display:flex;align-items:baseline;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
 /* Tap tempo is pushed to the far end of the number's own line, on its baseline. */
 .bpm-row .tap-btn{margin-left:auto;align-self:center}
 .bpm-row .bpm-big{width:auto;text-align:left}
@@ -365,8 +387,11 @@ details.sec[open] .sec-sum{display:none}
 .head .group-label,.head .section-label{margin:0}
 /* .seg has to out-rank .btn-wrap, which the builders also put on these rows:
    a switch is a switch whatever produced it, and must not stretch. */
+/* A switch keeps to its own width while it fits, and takes a second row rather
+   than running off the edge — which is what a longer set of words in another
+   language, on a narrow phone, would otherwise do. */
 .btn-wrap.seg,.seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px;
-  gap:2px;flex:0 0 auto;width:auto}
+  gap:2px;flex:0 1 auto;width:auto;flex-wrap:wrap;max-width:100%}
 .seg>button{height:26px;min-height:0;font-size:10px;padding:0 9px;border-radius:6px;
   color:var(--text3);background:none;border:1px solid transparent;cursor:pointer;
   white-space:nowrap;font-family:inherit;touch-action:manipulation;
@@ -392,7 +417,7 @@ details.fam[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
 details.fam[open]>summary{color:var(--text2)}
 details.fam>.btn-wrap{padding:0 12px 12px}
 .fam-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic;
-  color:var(--mode);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  color:var(--mode);min-width:0;flex:1 1 auto;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 details.fam[open] .fam-sum{display:none}
 /* What is sounding and what comes next. With the family boxes closed there is
    otherwise no way to see where you are in a rotation. */
@@ -3096,7 +3121,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23g';
+const APP_VERSION='2026-08-23h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5355,8 +5380,29 @@ function measureViewport(){
   const h=Math.round(vv?vv.height:window.innerHeight);
   if(h>200)document.documentElement.style.setProperty('--app-h',h+'px');
 }
+/* The name of the app is one word that cannot wrap and must not be cut, and no
+   set of breakpoints can promise that on a screen nobody has measured yet — a
+   longer system font, a larger text setting, a phone narrower than the ones on
+   the list. So it is measured: the CSS size is the size it wants, and this
+   takes it down only as far as it has to go, a point at a time. */
+const WORDMARK_MIN=13;
+function fitWordmark(){
+  const w=document.querySelector('.wordmark'),h=document.querySelector('.header');
+  if(!w||!h)return;
+  h.style.removeProperty('--wordmark-fit');
+  w.style.fontSize='';
+  const room=()=>w.clientWidth-w.scrollWidth;
+  if(room()>=0)return;                       // it already fits at its own size
+  let size=parseFloat(getComputedStyle(w).fontSize)||23;
+  while(size>WORDMARK_MIN&&room()<0){
+    size-=0.5;
+    w.style.fontSize=size+'px';
+  }
+}
+
 function relayoutViewport(){
   measureViewport();
+  fitWordmark();
   layoutAllBeats();
   gridifyAll();
   spreadPanels();
@@ -6179,7 +6225,11 @@ if('serviceWorker' in navigator){
 // A visible build stamp, so it is possible to tell at a glance which version a
 // device is actually running instead of guessing.
 document.getElementById('build-stamp').textContent='build '+APP_VERSION;
+fitWordmark();
 spreadPanelsSoon();
+// the name is set in a face that may not have arrived yet, and a fallback font
+// is a different width; measure again once the real one is in
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitWordmark).catch(()=>{});
 </script>
 </body>
 </html>
