@@ -626,7 +626,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <button class="theme-btn" id="clearall-btn" onclick="clearEverything()"
             aria-label="Clear every selection">✕</button>
     <button class="theme-btn" id="help-btn" onclick="openHelp()" aria-label="What everything does">?</button>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Switch theme">☀</button>
+    <button class="theme-btn" id="settings-btn" onclick="openSettings()" aria-label="Settings">⚙</button>
   </span>
 </div>
 
@@ -1271,12 +1271,42 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     of a line easy to hear. Both fade, so they are not offered as drones.</dd>
   </dl></div>
 
+  <div class="help-sec" id="help-settings"><h3>Settings — the ⚙ in the corner</h3><dl>
+    <dt>Note names</dt><dd>What the notes are called on the screen, and nothing else: no pitch moves.
+    <b>A B C</b> is the English convention. <b>Dó Ré Mi</b> is fixed do — the note keeps its name in
+    every key, as it is taught in Portugal, Spain, Italy and France. <b>Cis Des H</b> is the German one,
+    where a sharp is the suffix -is and a flat -es, the seventh letter is H, and the note a semitone
+    under it is called B rather than H flat.
+    The spelling still follows the key: in Db major you get Ré♭ — or Des — never Dó♯.</dd>
+    <dt>Theme</dt><dd>Dark or light. It used to be the sun in the header; it lives here now.</dd>
+  </dl></div>
+
   <div class="help-sec" id="help-transport"><h3>Playing</h3><dl>
     <dt>Start</dt><dd>Or the space bar, which works wherever you are — unless you are typing in a field.</dd>
     <dt>Offline</dt><dd>Once opened, the app runs with no network at all. Add it to your home screen
     and it behaves as an app.</dd>
   </dl></div>
   <p class="help-build" id="build-stamp"></p>
+ </div>
+</div>
+
+<!-- Settings: the handful of choices that are about reading rather than
+     playing, and that you set once. Kept off the panels for that reason. -->
+<div class="help-overlay" id="settings-overlay" hidden role="dialog" aria-modal="true" aria-label="Settings">
+ <button class="theme-btn help-close" onclick="closeSettings()" aria-label="Close">✕</button>
+ <div class="help-inner">
+  <div class="help-top"><h2>Settings</h2></div>
+
+  <div class="help-sec">
+    <h3>Note names</h3>
+    <div class="btn-wrap" id="notenames-row" style="--cols:3"></div>
+    <div class="info-line" id="notenames-hint"></div>
+  </div>
+
+  <div class="help-sec">
+    <h3>Theme</h3>
+    <div class="btn-wrap" id="theme-row" style="--cols:2"></div>
+  </div>
  </div>
 </div>
 <!-- Bundled locally: a packaged app must not fetch executable code at runtime
@@ -1302,6 +1332,42 @@ const OCT_MIN=1,OCT_MAX=6;
    time, which is what gives a diminished 7th its double-flat 7.            */
 const LETTERS=['C','D','E','F','G','A','B'];
 const NATURAL=[0,2,4,5,7,9,11];
+
+/* ---------- how a note reads ----------
+   The spelling engine works in letter indices and accidentals, so what a note
+   is called on the screen is a separate question from what it is: the same
+   seventh degree is B, Si or H depending only on who is reading. Every name
+   that reaches the screen is built here from (letterIdx, acc), never from a
+   stored string, so one choice changes all of them at once.
+
+   German is not just a different alphabet. Its seventh letter is H, and the
+   note a semitone below it is not "H flat" but B — a name of its own, which is
+   why the flat sign disappears there. */
+const GERMAN_LETTERS=['C','D','E','F','G','A','H'];
+/* German does not sign a note, it renames it: the sharp is the suffix -is and
+   the flat -es, contracted where the mouth wants it (A->As, E->Es) and replaced
+   outright at the seventh, where H a semitone down is B. Half of this — H with
+   a flat sign beside it — would be a language no one writes. */
+function germanNote(l,a){
+  const base=GERMAN_LETTERS[l];
+  if(a===0)return base;
+  if(a>0)return base+'is'.repeat(a);
+  if(l===6)return a===-1?'B':'Heses';       // H, B, then the double flat spelled out
+  if(l===2||l===5)return base+'s'+'es'.repeat(-a-1);   // Es, Eses · As, Ases
+  return base+'es'.repeat(-a);
+}
+const NOTE_STYLES={
+  letters:{label:'A B C', words:['C','D','E','F','G','A','B']},
+  solfege:{label:'Dó Ré Mi', words:['Dó','Ré','Mi','Fá','Sol','Lá','Si']},
+  german: {label:'Cis Des H', words:GERMAN_LETTERS, special:germanNote},
+};
+function noteStyle(){return NOTE_STYLES[state&&state.noteNames]||NOTE_STYLES.letters;}
+function noteText(letterIdx,acc){
+  const st=noteStyle();
+  const sp=st.special&&st.special(letterIdx,acc);
+  return sp!=null?sp:st.words[letterIdx]+accStr(acc);
+}
+function spelledText(e){return e?noteText(e.letterIdx,e.acc):'';}
 
 function accStr(a){return a<0?'b'.repeat(-a):(a>0?'#'.repeat(a):'');}
 // nearest signed distance from a letter's natural pitch, in [-6,5]
@@ -1448,29 +1514,31 @@ const CHORDS={
 // major both carry six accidentals) and players read F#. Scales and arpeggios
 // ignore this entirely and spell themselves from their own key.
 const DEFAULT_SPELL=[
-  {name:'C', letterIdx:0,acc: 0},
-  {name:'Db',letterIdx:1,acc:-1},
-  {name:'D', letterIdx:1,acc: 0},
-  {name:'Eb',letterIdx:2,acc:-1},
-  {name:'E', letterIdx:2,acc: 0},
-  {name:'F', letterIdx:3,acc: 0},
-  {name:'F#',letterIdx:3,acc: 1},
-  {name:'G', letterIdx:4,acc: 0},
-  {name:'Ab',letterIdx:5,acc:-1},
-  {name:'A', letterIdx:5,acc: 0},
-  {name:'Bb',letterIdx:6,acc:-1},
-  {name:'B', letterIdx:6,acc: 0},
+  {letterIdx:0,acc: 0},
+  {letterIdx:1,acc:-1},
+  {letterIdx:1,acc: 0},
+  {letterIdx:2,acc:-1},
+  {letterIdx:2,acc: 0},
+  {letterIdx:3,acc: 0},
+  {letterIdx:3,acc: 1},
+  {letterIdx:4,acc: 0},
+  {letterIdx:5,acc:-1},
+  {letterIdx:5,acc: 0},
+  {letterIdx:6,acc:-1},
+  {letterIdx:6,acc: 0},
 ];
 // How a given pitch class reads as the root of whatever is currently selected.
 function rootLabelFor(pc){
   const degrees=activeDegrees();
-  if(!degrees)return DEFAULT_SPELL[pc].name;
+  if(!degrees)return spelledText(DEFAULT_SPELL[pc]);
   const r=spell(pc,degrees,letterWalk());
-  return r?r.names[0]:DEFAULT_SPELL[pc].name;
+  return r?noteText(r.letters[0],r.accs[0]):spelledText(DEFAULT_SPELL[pc]);
 }
 
 let state={
   mode:'drone',
+  // what the notes are called on the screen; nothing about the sound
+  noteNames:'letters',
   droneSelected:{},          // pitch class -> octave; a drone may be a chord
   root:'C',rootOct:3,
   scaleGroup:null,scaleName:null,
@@ -1672,9 +1740,9 @@ let spellMap=null;
 function nameOf(s){
   const pc=((s%12)+12)%12;
   const e=(spellMap&&spellMap[pc])||DEFAULT_SPELL[pc];
-  return e.name+octForSpelled(s,e.letterIdx,e.acc);
+  return spelledText(e)+octForSpelled(s,e.letterIdx,e.acc);
 }
-function bareName(pc){return((spellMap&&spellMap[pc])||DEFAULT_SPELL[pc]).name;}
+function bareName(pc){return spelledText((spellMap&&spellMap[pc])||DEFAULT_SPELL[pc]);}
 
 function rebuildSpelling(){
   spellMap=null;
@@ -1684,7 +1752,7 @@ function rebuildSpelling(){
   if(!res)return;
   spellMap={};
   degrees.forEach((d,i)=>{
-    spellMap[(NOTES.indexOf(state.root)+d)%12]={name:res.names[i],letterIdx:res.letters[i],acc:res.accs[i]};
+    spellMap[(NOTES.indexOf(state.root)+d)%12]={letterIdx:res.letters[i],acc:res.accs[i]};
   });
 }
 function freqOf(s){return 440*Math.pow(2,(s-semitone('A',4))/12);}
@@ -2957,7 +3025,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23e';
+const APP_VERSION='2026-08-23f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3094,7 +3162,7 @@ function renderDroneNote(n){
   // the octave stepper only exists once the note is armed, so nudging it can
   // never add a note that was not chosen
   div.innerHTML=
-    '<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>'+
+    '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
     (sel
       ?'<div class="oct-controls">'+
          '<button class="oct-btn" data-oct="-1">−</button>'+
@@ -3156,7 +3224,7 @@ function buildPitchLists(){
   NOTES.forEach(n=>{
     const b=document.createElement('button');
     // label is replaced by renderPitchPickers with the spelling of the key in use
-    b.className='tonic-btn';b.dataset.root=n;b.textContent=DEFAULT_SPELL[NOTES.indexOf(n)].name;
+    b.className='tonic-btn';b.dataset.root=n;b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
     b.onclick=()=>{state.root=n;state.startDeg=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
     root.appendChild(b);
   });
@@ -3876,6 +3944,24 @@ function buildBlueRow(){
     : 'five notes, as written';
 }
 
+/* Changing what a note is called repaints every place one is written. Nothing
+   sounding is touched: the pitch did not move, only the word for it. */
+function setNoteNames(k){
+  if(!NOTE_STYLES[k]||state.noteNames===k)return;
+  state.noteNames=k;
+  try{localStorage.setItem('scaletune-notes',k);}catch(e){}
+  repaintNoteNames();
+}
+function repaintNoteNames(){
+  // the tonic row is re-labelled by renderPitchPickers, not rebuilt: building it
+  // again would append a second set of buttons
+  buildDroneGrid();buildFreeGrid();
+  renderPitchPickers();updateInfo();
+  refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
+  document.querySelectorAll('#notenames-row .pick-btn').forEach(b=>
+    b.classList.toggle('active',b.dataset.style===state.noteNames));
+}
+
 function familyMembers(fam){
   return SCALES[fam]?Object.keys(SCALES[fam]):(CHORDS[fam]?Object.keys(CHORDS[fam]):[]);
 }
@@ -4069,7 +4155,7 @@ function buildFreeGrid(){
   NOTES.forEach(n=>{
     const b=document.createElement('button');
     b.className='tonic-btn'+(n===state.freeRoot?' active':'');
-    b.textContent=DEFAULT_SPELL[NOTES.indexOf(n)].name;
+    b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
     // picking a new root starts a clean slate
     b.onclick=()=>{state.freeRoot=n;state.freeSelected={};buildFreeGrid();refreshSequence();restartIfPlaying();};
     rootRow.appendChild(b);
@@ -4111,7 +4197,7 @@ function renderFreeNote(n){
   // it would silently add a note the user never picked.
   div.innerHTML=
     (isRoot?'<span class="start-badge">root</span>':'')+
-    '<div class="note-name">'+DEFAULT_SPELL[NOTES.indexOf(n)].name+'</div>'+
+    '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
     (sel
       ?'<div class="oct-controls">'+
          '<button class="oct-btn" data-oct="-1">−</button>'+
@@ -5541,7 +5627,9 @@ function closeHelp(){
 function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o.hidden;}
 (function(){
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'&&helpOpen()){e.preventDefault();closeHelp();}
+    if(e.key!=='Escape')return;
+    if(settingsOpen()){e.preventDefault();closeSettings();return;}
+    if(helpOpen()){e.preventDefault();closeHelp();}
   });
 })();
 
@@ -5607,17 +5695,70 @@ function initSections(){
 function currentTheme(){return document.documentElement.getAttribute('data-theme')||'dark';}
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme',t);
-  const b=document.getElementById('theme-btn');
-  b.textContent=t==='dark'?'☀':'☾';
-  b.setAttribute('aria-label',t==='dark'?'Switch to light theme':'Switch to dark theme');
+  document.querySelectorAll('#theme-row .pick-btn').forEach(b=>
+    b.classList.toggle('active',b.dataset.theme===t));
 }
-function toggleTheme(){
-  const t=currentTheme()==='dark'?'light':'dark';
+function setTheme(t){
   applyTheme(t);
   try{localStorage.setItem('scaletune-theme',t);}catch(e){}
 }
 
+/* ---------- settings ---------- */
+const NOTE_HINTS={
+  letters:'C D E F G A B — as written in English-language music.',
+  solfege:'Dó Ré Mi Fá Sol Lá Si — the note keeps its name in every key.',
+  german:'C D E F G A H — sharps take -is and flats -es: Fis, Des, Es. The seventh is H, and the note under it is B.',
+};
+function buildSettings(){
+  const nr=document.getElementById('notenames-row');
+  if(nr){
+    nr.innerHTML='';
+    Object.keys(NOTE_STYLES).forEach(k=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(state.noteNames===k?' active':'');
+      b.dataset.style=k;b.textContent=NOTE_STYLES[k].label;
+      b.onclick=()=>{setNoteNames(k);paintNoteHint();};
+      nr.appendChild(b);
+    });
+  }
+  const tr=document.getElementById('theme-row');
+  if(tr){
+    tr.innerHTML='';
+    [['dark','Dark'],['light','Light']].forEach(([k,label])=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(currentTheme()===k?' active':'');
+      b.dataset.theme=k;b.textContent=label;
+      b.onclick=()=>setTheme(k);
+      tr.appendChild(b);
+    });
+  }
+  paintNoteHint();
+}
+function paintNoteHint(){
+  const h=document.getElementById('notenames-hint');
+  if(h)h.textContent=NOTE_HINTS[state.noteNames]||'';
+}
+function openSettings(){
+  const o=document.getElementById('settings-overlay');
+  if(!o)return;
+  buildSettings();
+  o.hidden=false;o.scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+function closeSettings(){
+  const o=document.getElementById('settings-overlay');
+  if(!o)return;
+  o.hidden=true;
+  if(!helpOpen())document.body.style.overflow='';
+}
+function settingsOpen(){const o=document.getElementById('settings-overlay');return o&&!o.hidden;}
+
 /* ---------- init ---------- */
+// before anything is drawn, so no note is ever written twice
+try{
+  const n=localStorage.getItem('scaletune-notes');
+  if(n&&NOTE_STYLES[n])state.noteNames=n;
+}catch(e){}
 applyTheme(currentTheme());
 initSections();
 initFamilies();
