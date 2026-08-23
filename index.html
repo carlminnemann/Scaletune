@@ -1452,14 +1452,27 @@ function germanNote(l,a){
 }
 const NOTE_STYLES={
   letters:{label:'A B C', words:['C','D','E','F','G','A','B']},
-  solfege:{label:'Dó Ré Mi', words:['Dó','Ré','Mi','Fá','Sol','Lá','Si']},
+  solfege:{label:'Do Re Mi', words:['Do','Re','Mi','Fa','Sol','La','Si']},
   german: {label:'Cis Des H', words:GERMAN_LETTERS, special:germanNote},
 };
+/* Fixed do is not spelled the same everywhere it is used: Portuguese writes
+   Dó Ré Mi Fá Sol Lá Si, French Do Ré Mi, Italian and Spanish no accents at
+   all. The seven words come from the language, so the style stays one choice
+   and reads right in each. */
+function solfegeWords(){
+  const w=tr('notes.solfege.words','Do Re Mi Fa Sol La Si').split(/\s+/);
+  return w.length===7?w:NOTE_STYLES.solfege.words;
+}
 function noteStyle(){return NOTE_STYLES[state&&state.noteNames]||NOTE_STYLES.letters;}
+function noteStyleLabel(k){
+  return k==='solfege'?solfegeWords().slice(0,3).join(' ')
+       : tr('notes.style.'+k,NOTE_STYLES[k].label);
+}
 function noteText(letterIdx,acc){
   const st=noteStyle();
   const sp=st.special&&st.special(letterIdx,acc);
-  return sp!=null?sp:st.words[letterIdx]+accStr(acc);
+  const words=(state&&state.noteNames==='solfege')?solfegeWords():st.words;
+  return sp!=null?sp:words[letterIdx]+accStr(acc);
 }
 function spelledText(e){return e?noteText(e.letterIdx,e.acc):'';}
 
@@ -3121,7 +3134,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23h';
+const APP_VERSION='2026-08-23i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4195,9 +4208,9 @@ function updateInfo(){
   if(!degrees){el.textContent='';return;}
   rebuildSpelling();
   const rootIdx=NOTES.indexOf(state.root);
-  const label=state.mode==='scale'?state.scaleName:state.chordName;
+  const name=state.mode==='scale'?scaleLabel(state.scaleName):chordLabel(state.chordName);
   el.textContent=tr('pitch.line','{key} {name} — {notes}',
-    {key:bareName(rootIdx),name:label,notes:degrees.map(d=>bareName((rootIdx+d)%12)).join(', ')});
+    {key:bareName(rootIdx),name:name,notes:degrees.map(d=>bareName((rootIdx+d)%12)).join(', ')});
 }
 
 function clearPitch(){
@@ -5896,7 +5909,7 @@ function buildSettings(){
     Object.keys(NOTE_STYLES).forEach(k=>{
       const b=document.createElement('button');
       b.className='pick-btn'+(state.noteNames===k?' active':'');
-      b.dataset.style=k;b.textContent=NOTE_STYLES[k].label;
+      b.dataset.style=k;b.textContent=noteStyleLabel(k);
       b.onclick=()=>{setNoteNames(k);paintNoteHint();};
       nr.appendChild(b);
     });
