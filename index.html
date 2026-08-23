@@ -31,6 +31,10 @@
      green, not the deep blood red it was. Its own tokens, because the bright red
      still flashes the accented beat and that mark is worth keeping. */
   --stop:#c98d86;--stop-bg:#6e3b38;--stop-fg:#f9efed;
+  /* The same hue at reading weight, for the things that take something
+     away. Stop is filled because the transport is running; a Clear is not
+     running, so it is written in the colour rather than wearing it. */
+  --wipe:#c98d86;--wipe-bd:#5e3f3b;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
   /* The selection colour, taken from the wordmark's own grey-green. --mode is
@@ -68,6 +72,10 @@
   /* On paper a pale tint reads as pink, so it is solid, the way the selected
      chip is. */
   --stop:#7d443d;--stop-bg:#9c5a52;--stop-fg:#faf0ee;
+  /* Darker than --stop: that tone was made to carry white on a fill, and
+     as ink on the paper it measured 4.43:1, just under the readable
+     minimum. At this shade it is 4.87:1. */
+  --wipe:#763e37;--wipe-bd:#b98f85;
   /* --mode also writes the italic line beside a closed family, which sits on the
      darkest paper, so the ink is a shade deeper than the fill. On the chip
      itself that shade is only the border, invisible against it. */
@@ -138,7 +146,13 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
 /* The capitals are a proportion of the name, not a size of their own, so
    shrinking the name keeps its shape instead of flattening it. */
 h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
-.theme-btn.armed{border-color:var(--text2);color:var(--text)}
+/* The ✕ in the header asks before it acts, and the second tap is the one
+   that empties everything. Armed, it stops being written in the colour and
+   starts wearing it — the same fill as Stop, for the same reason. */
+#clearall-btn{color:var(--wipe);border-color:var(--wipe-bd)}
+/* An id out-ranks a class, so the armed state has to be written at the same
+   weight or the rule above would quietly win and nothing would change. */
+#clearall-btn.armed,.theme-btn.armed{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
@@ -468,7 +482,10 @@ details.fam[open] .fam-sum{display:none}
 .pick-btn.numbered{padding-top:13px}
 .tonic-btn{height:var(--h);padding:0 6px;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);min-width:34px;text-align:center;touch-action:manipulation}
 .tonic-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
-.clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);margin-top:10px;touch-action:manipulation}
+/* Everything that takes something away wears one colour, at one weight:
+   the red of the transport, written rather than filled. Same size as
+   before — it is easier to find, not louder. */
+.clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--wipe-bd);border-radius:var(--r);background:var(--bg3);color:var(--wipe);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
 
 .legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
@@ -3134,7 +3151,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23i';
+const APP_VERSION='2026-08-23j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3615,7 +3632,9 @@ function updateRotationPanel(){
   panel.style.display=progressing?'':'none';
   if(!progressing)return;
   const p=rotationPreview();
-  document.getElementById('rot-clear').style.display=(useListOn()&&p.items.length)?'':'none';
+  const rc=document.getElementById('rot-clear');
+  rc.textContent=tr('rot.clearList','✕ Clear list');
+  rc.style.display=(useListOn()&&p.items.length)?'':'none';
   const chips=document.getElementById('rot-chips');chips.innerHTML='';
   const editable=useListOn()&&activeList().length>0;
   if(!editable)rotHold=null;
@@ -4630,6 +4649,7 @@ function buildPatternEditor(){
     gridify(cprow);
   }
   const clr=document.getElementById('pat-clear');
+  if(clr)clr.textContent=tr('pat.clear','✕ Clear');
   if(clr&&!clr.dataset.wired){
     clr.dataset.wired='1';
     clr.onclick=()=>{
@@ -4925,6 +4945,7 @@ function buildMixer(){
   paintMixUsed();
   wireFold('mix-head','mix-body');
   const reset=document.getElementById('mix-reset');
+  if(reset)reset.textContent=tr('mix.reset','✕ Level again');
   if(reset&&!reset.dataset.wired){
     reset.dataset.wired='1';
     reset.onclick=()=>{

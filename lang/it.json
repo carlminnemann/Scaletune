@@ -82,7 +82,10 @@
  "direction-2": "Direzione",
  "drone": "Bordone",
  "drone-2": "Bordone",
- "drone.sounding": { "one": "{n} nota che suona", "other": "{n} note che suonano" },
+ "drone.sounding": {
+  "one": "{n} nota che suona",
+  "other": "{n} note che suonano"
+ },
  "drum.d": "Ride",
  "drum.h": "Charleston",
  "drum.k": "Cassa",
@@ -207,15 +210,28 @@
  "pass.beats": "Movimenti",
  "pat.aStyle": "uno stile",
  "pat.bar": "Battuta {n}",
- "pat.bars": { "one": "{n} battuta", "other": "{n} battute" },
+ "pat.bars": {
+  "one": "{n} battuta",
+  "other": "{n} battute"
+ },
  "pat.cellAria": "{name}, movimento {beat}, cella {cell}",
+ "pat.clear": "✕ Svuota",
  "pat.copyAria": "Copia la battuta {from} nella battuta {to}",
- "pat.dots": { "one": "{n} punto: scritto sulla griglia di {grid}, tra queste celle. Tocca il punto per toglierlo, o cambia griglia per spostarlo.", "other": "{n} punti: scritti sulla griglia di {grid}, tra queste celle. Tocca un punto per toglierlo, o cambia griglia per spostarli." },
+ "pat.dots": {
+  "one": "{n} punto: scritto sulla griglia di {grid}, tra queste celle. Tocca il punto per toglierlo, o cambia griglia per spostarlo.",
+  "other": "{n} punti: scritti sulla griglia di {grid}, tra queste celle. Tocca un punto per toglierlo, o cambia griglia per spostarli."
+ },
  "pat.editing": ", stai scrivendo la battuta {n}",
  "pat.empty": "scegli un'intensità e tocca la griglia, oppure parti da uno stile",
  "pat.emptySum": "vuoto",
- "pat.hits": { "one": "{n} colpo", "other": "{n} colpi" },
- "pat.loops": { "one": "ripete {n} battuta", "other": "ripete {n} battute" },
+ "pat.hits": {
+  "one": "{n} colpo",
+  "other": "{n} colpi"
+ },
+ "pat.loops": {
+  "one": "ripete {n} battuta",
+  "other": "ripete {n} battute"
+ },
  "pat.otherGrid": "scritto sull'altra griglia",
  "pat.tapWrites": "ogni tocco scrive all'intensità qui sopra, tocca di nuovo per cancellare",
  "pattern": "Pattern",
@@ -249,7 +265,10 @@
  "ramp.min": "{n} min",
  "ramp.pass": "giro",
  "range-amp-direction": "Estensione &amp; Direzione",
- "range.octaves": { "one": "{n} ottava", "other": "{n} ottave" },
+ "range.octaves": {
+  "one": "{n} ottava",
+  "other": "{n} ottave"
+ },
  "range.tooHighFree": "Andrebbe sopra il C8 partendo da queste ottave",
  "range.tooHighSpan": "Andrebbe sopra il C8 con {n} ottave",
  "range.tooHighStart": "Andrebbe sopra il C8 partendo da questa ottava iniziale",
@@ -262,6 +281,7 @@
  "root-movement-2": "Movimento della fondamentale",
  "rootmove.fourths": "Ciclo di 4e",
  "rootmove.stay": "Resta",
+ "rot.clearList": "✕ Svuota la lista",
  "rot.move": "Sposta {name}",
  "rot.place": "Mettila qui: {name}",
  "rot.remove": "Togli dalla rotazione",
@@ -303,8 +323,8 @@
  "scale.Phrygian Dominant": "Frigio Dominante",
  "scale.Phrygian b4": "Frigio b4",
  "scale.Ultra Locrian": "Ultralocrio",
- "scaletune-is-for-instruments-whose": "ScaleTune è per strumenti la cui intonazione devi farla tu — archi, fiati, voce. Tutto qui è una referenza contro cui suonare, non una cosa da ascoltare.",
  "scales-and-chords": "Scale e accordi",
+ "scaletune-is-for-instruments-whose": "ScaleTune è per strumenti la cui intonazione devi farla tu — archi, fiati, voce. Tutto qui è una referenza contro cui suonare, non una cosa da ascoltare.",
  "sec.chords": "Accordi",
  "sec.metronome": "Metronomo",
  "sec.more": "Altro",
@@ -326,9 +346,15 @@
  "sevenths-in-one-octave": "Settime in un'ottava",
  "sig.styleIsFour": "gli stili di accompagnamento sono scritti in quattro",
  "single-or-study-list": "Singola o Lista di studio",
- "speed.everyMinutes": { "one": "ogni {n} minuto", "other": "ogni {n} minuti" },
+ "speed.everyMinutes": {
+  "one": "ogni {n} minuto",
+  "other": "ogni {n} minuti"
+ },
  "speed.everyPass": "ogni {what}",
- "speed.minutes": { "one": "{n} minuto", "other": "{n} minuti" },
+ "speed.minutes": {
+  "one": "{n} minuto",
+  "other": "{n} minuti"
+ },
  "speed.nowhere": "non c'è dove andare — scegli un altro tempo d'arrivo",
  "speed.ramp": "da {from} a {to} BPM lungo {mins}, un poco a ogni movimento",
  "speed.rampMode": "Rampa",
@@ -349,17 +375,29 @@
  "subdivision": "Suddivisione",
  "subdivision-2": "Suddivisione",
  "sum.against": "{a} contro {b}",
- "sum.beatsPerBar": { "one": "{n} movimento per battuta", "other": "{n} movimenti per battuta" },
+ "sum.beatsPerBar": {
+  "one": "{n} movimento per battuta",
+  "other": "{n} movimenti per battuta"
+ },
  "sum.bpm": "{n} BPM",
- "sum.countIn": { "one": "entrata di {n} battuta", "other": "entrata di {n} battute" },
+ "sum.countIn": {
+  "one": "entrata di {n} battuta",
+  "other": "entrata di {n} battute"
+ },
  "sum.countIn.change": ", a ogni cambio",
  "sum.countIn.key": ", a ogni nuova tonalità",
  "sum.drifts": "scorre",
- "sum.figures": { "one": "{n} figura", "other": "{n} figure" },
+ "sum.figures": {
+  "one": "{n} figura",
+  "other": "{n} figure"
+ },
  "sum.following": "segue il {n}",
  "sum.fourths": "ciclo di 4e",
  "sum.fromOctave": "dall'ottava {n}",
- "sum.inRotation": { "one": "{n} in rotazione", "other": "{n} in rotazione" },
+ "sum.inRotation": {
+  "one": "{n} in rotazione",
+  "other": "{n} in rotazione"
+ },
  "sum.noneChosen": "nessuna scelta",
  "sum.nothingChosen": "niente di scelto",
  "sum.restarts": "riparte a ogni giro",

@@ -215,6 +215,7 @@
   "other": "{n} Takte"
  },
  "pat.cellAria": "{name}, Schlag {beat}, Zelle {cell}",
+ "pat.clear": "✕ Leeren",
  "pat.copyAria": "Takt {from} in Takt {to} kopieren",
  "pat.dots": {
   "one": "{n} Punkt: auf dem {grid}-Raster geschrieben, zwischen diesen Zellen. Tippen Sie den Punkt an, um ihn zu entfernen, oder wechseln Sie das Raster, um ihn zu verschieben.",
@@ -280,6 +281,7 @@
  "root-movement-2": "Grundtonbewegung",
  "rootmove.fourths": "Quartenzirkel",
  "rootmove.stay": "Bleiben",
+ "rot.clearList": "✕ Liste leeren",
  "rot.move": "{name} bewegen",
  "rot.place": "Hierher setzen: {name}",
  "rot.remove": "Aus der Rotation nehmen",

@@ -215,6 +215,7 @@
   "other": "{n} compassos"
  },
  "pat.cellAria": "{name}, tempo {beat}, célula {cell}",
+ "pat.clear": "✕ Limpar",
  "pat.copyAria": "Copiar o compasso {from} para o compasso {to}",
  "pat.dots": {
   "one": "{n} ponto: escrito na grelha de {grid}, entre estas células. Toca no ponto para o tirares, ou muda de grelha para o mexeres.",
@@ -280,6 +281,7 @@
  "root-movement-2": "Movimento da tónica",
  "rootmove.fourths": "Ciclo de 4as",
  "rootmove.stay": "Fica",
+ "rot.clearList": "✕ Limpar lista",
  "rot.move": "Mover {name}",
  "rot.place": "Pôr aqui: {name}",
  "rot.remove": "Tirar da rotação",

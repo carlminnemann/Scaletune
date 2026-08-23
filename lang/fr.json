@@ -82,7 +82,10 @@
  "direction-2": "Sens",
  "drone": "Bourdon",
  "drone-2": "Bourdon",
- "drone.sounding": { "one": "{n} note qui sonne", "other": "{n} notes qui sonnent" },
+ "drone.sounding": {
+  "one": "{n} note qui sonne",
+  "other": "{n} notes qui sonnent"
+ },
  "drum.d": "Ride",
  "drum.h": "Charleston",
  "drum.k": "Grosse caisse",
@@ -207,15 +210,28 @@
  "pass.beats": "Temps",
  "pat.aStyle": "un style",
  "pat.bar": "Mesure {n}",
- "pat.bars": { "one": "{n} mesure", "other": "{n} mesures" },
+ "pat.bars": {
+  "one": "{n} mesure",
+  "other": "{n} mesures"
+ },
  "pat.cellAria": "{name}, temps {beat}, case {cell}",
+ "pat.clear": "✕ Vider",
  "pat.copyAria": "Copier la mesure {from} dans la mesure {to}",
- "pat.dots": { "one": "{n} point : écrit sur la grille de {grid}, entre ces cases. Touchez le point pour le retirer, ou changez de grille pour le déplacer.", "other": "{n} points : écrits sur la grille de {grid}, entre ces cases. Touchez un point pour le retirer, ou changez de grille pour les déplacer." },
+ "pat.dots": {
+  "one": "{n} point : écrit sur la grille de {grid}, entre ces cases. Touchez le point pour le retirer, ou changez de grille pour le déplacer.",
+  "other": "{n} points : écrits sur la grille de {grid}, entre ces cases. Touchez un point pour le retirer, ou changez de grille pour les déplacer."
+ },
  "pat.editing": ", mesure {n} en cours",
  "pat.empty": "choisissez une intensité et touchez la grille, ou partez d'un style",
  "pat.emptySum": "vide",
- "pat.hits": { "one": "{n} frappe", "other": "{n} frappes" },
- "pat.loops": { "one": "répète {n} mesure", "other": "répète {n} mesures" },
+ "pat.hits": {
+  "one": "{n} frappe",
+  "other": "{n} frappes"
+ },
+ "pat.loops": {
+  "one": "répète {n} mesure",
+  "other": "répète {n} mesures"
+ },
  "pat.otherGrid": "écrit sur l'autre grille",
  "pat.tapWrites": "chaque touche écrit à l'intensité ci-dessus, touchez encore pour effacer",
  "pattern": "Motif",
@@ -249,7 +265,10 @@
  "ramp.min": "{n} min",
  "ramp.pass": "tour",
  "range-amp-direction": "Étendue &amp; Sens",
- "range.octaves": { "one": "{n} octave", "other": "{n} octaves" },
+ "range.octaves": {
+  "one": "{n} octave",
+  "other": "{n} octaves"
+ },
  "range.tooHighFree": "Dépasserait le do8 depuis ces octaves",
  "range.tooHighSpan": "Dépasserait le do8 avec {n} octaves",
  "range.tooHighStart": "Dépasserait le do8 depuis cette octave de départ",
@@ -262,6 +281,7 @@
  "root-movement-2": "Mouvement de la fondamentale",
  "rootmove.fourths": "Cycle de 4tes",
  "rootmove.stay": "Reste",
+ "rot.clearList": "✕ Vider la liste",
  "rot.move": "Déplacer {name}",
  "rot.place": "La mettre ici : {name}",
  "rot.remove": "Retirer de la rotation",
@@ -303,8 +323,8 @@
  "scale.Phrygian Dominant": "Phrygien Dominant",
  "scale.Phrygian b4": "Phrygien b4",
  "scale.Ultra Locrian": "Ultralocrien",
- "scaletune-is-for-instruments-whose": "ScaleTune est fait pour les instruments dont il faut faire soi-même la justesse — cordes, vents, voix. Tout ici est une référence contre laquelle jouer, non une chose à écouter.",
  "scales-and-chords": "Gammes et accords",
+ "scaletune-is-for-instruments-whose": "ScaleTune est fait pour les instruments dont il faut faire soi-même la justesse — cordes, vents, voix. Tout ici est une référence contre laquelle jouer, non une chose à écouter.",
  "sec.chords": "Accords",
  "sec.metronome": "Métronome",
  "sec.more": "Plus",
@@ -326,9 +346,15 @@
  "sevenths-in-one-octave": "Les septièmes sur une octave",
  "sig.styleIsFour": "les styles d'accompagnement sont écrits à quatre temps",
  "single-or-study-list": "Seule ou Liste de travail",
- "speed.everyMinutes": { "one": "toutes les {n} minute", "other": "toutes les {n} minutes" },
+ "speed.everyMinutes": {
+  "one": "toutes les {n} minute",
+  "other": "toutes les {n} minutes"
+ },
  "speed.everyPass": "à chaque {what}",
- "speed.minutes": { "one": "{n} minute", "other": "{n} minutes" },
+ "speed.minutes": {
+  "one": "{n} minute",
+  "other": "{n} minutes"
+ },
  "speed.nowhere": "nulle part où aller — choisissez un autre tempo d'arrivée",
  "speed.ramp": "de {from} à {to} BPM sur {mins}, un peu à chaque temps",
  "speed.rampMode": "Rampe",
@@ -349,17 +375,29 @@
  "subdivision": "Subdivision",
  "subdivision-2": "Subdivision",
  "sum.against": "{a} contre {b}",
- "sum.beatsPerBar": { "one": "{n} temps par mesure", "other": "{n} temps par mesure" },
+ "sum.beatsPerBar": {
+  "one": "{n} temps par mesure",
+  "other": "{n} temps par mesure"
+ },
  "sum.bpm": "{n} BPM",
- "sum.countIn": { "one": "entrée de {n} mesure", "other": "entrée de {n} mesures" },
+ "sum.countIn": {
+  "one": "entrée de {n} mesure",
+  "other": "entrée de {n} mesures"
+ },
  "sum.countIn.change": ", à chaque changement",
  "sum.countIn.key": ", à chaque nouvelle tonalité",
  "sum.drifts": "dérive",
- "sum.figures": { "one": "{n} figure", "other": "{n} figures" },
+ "sum.figures": {
+  "one": "{n} figure",
+  "other": "{n} figures"
+ },
  "sum.following": "suit le {n}",
  "sum.fourths": "cycle de 4tes",
  "sum.fromOctave": "depuis l'octave {n}",
- "sum.inRotation": { "one": "{n} en rotation", "other": "{n} en rotation" },
+ "sum.inRotation": {
+  "one": "{n} en rotation",
+  "other": "{n} en rotation"
+ },
  "sum.noneChosen": "aucune choisie",
  "sum.nothingChosen": "rien de choisi",
  "sum.restarts": "repart à chaque tour",
