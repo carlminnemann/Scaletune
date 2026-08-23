@@ -3151,7 +3151,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23j';
+const APP_VERSION='2026-08-23k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5121,8 +5121,11 @@ function updateSupersededControls(){
   if(clear)clear.style.display=styled?'none':'';
   if(hint){
     hint.style.display=on?'none':'';
+    /* The hint is written in the markup and also written here, so both have to
+       say it the same way — this line held the English on its own, and whichever
+       ran last won. It reads from the same key the markup carries. */
     hint.textContent=styled?tr('beats.styled','the style plays the accents')
-                           :'tap a beat: accent it, then silence it';
+                           :tr('tap-a-beat-accent-it','tap a beat: accent it, then silence it');
   }
   // and in Metro the pulses take the place the bar has just left
   if(state.mode==='metro')splitMetro(true);
