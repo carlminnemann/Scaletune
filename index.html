@@ -2790,7 +2790,14 @@ function brushNoiseBuf(dur){
    first version made a separate wash per beat, which pulsed like a wave machine
    and was rightly called horrible. */
 let brushBed=null;
-function brushBedLevel(){return 0.42*state.clickVol*mixLevel('w');}
+/* A sweep is a continuous sound and a drum is a transient, and the two cannot be
+   set against each other by peak: noise sitting at −7dB is far louder to the ear
+   than a snare peaking at −1dB and gone. Levelled by loudness instead, measured
+   over four bars — at the old figure the ballad came out at −22.6dB, the loudest
+   of every style, when it is meant to be the quietest thing here. At this one it
+   sits at −33.5dB, just under the jazz swing, and the fader is a trim again
+   rather than the only thing standing between the sweep and the room. */
+function brushBedLevel(){return 0.105*state.clickVol*mixLevel('w');}
 function startBrushBed(t){
   if(brushBed)return;
   const src=audioCtx.createBufferSource();
@@ -2824,7 +2831,7 @@ function brushSwirl(t,v,spb){
      multiplying by it again made the lean almost invisible. It is added, not
      multiplied: a lean of about half as much again on the beat asked for. */
   const g=brushBed.g.gain, base=brushBedLevel();
-  g.setTargetAtTime(base+0.55*v,t,0.030);
+  g.setTargetAtTime(base+0.14*v,t,0.030);
   g.setTargetAtTime(base,t+Math.min(0.22,(spb||0.6)*0.4),0.10);
 }
 function brushTap(t,v){
@@ -3403,7 +3410,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24j';
+const APP_VERSION='2026-08-24k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
