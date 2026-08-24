@@ -3413,7 +3413,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24l';
+const APP_VERSION='2026-08-24m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4522,7 +4522,11 @@ function revealActiveFamily(){
   const fam=playingKind()==='chord'?state.chordGroup:state.scaleGroup;
   if(!fam)return;
   const d=document.querySelector('details.fam[data-fam="'+fam+'"]');
-  if(d&&!d.open&&d.offsetParent!==null)d.open=true;
+  if(!d||d.open||d.offsetParent===null)return;
+  // the app opening it, following the rotation: it opens where it is
+  selfOpening=true;
+  d.open=true;
+  setTimeout(()=>{selfOpening=false;},0);
 }
 
 function paintSetButtons(selector,attr,forMode){
@@ -5175,8 +5179,15 @@ function buildPatternEditor(){
    for a moment and re-aimed at whenever the layout is worked out again — the end
    of spreadPanels, which is the last thing to touch it — until it settles. */
 let revealFor=null,revealUntil=0;
+/* Set while the app itself opens something, as against a finger doing it.
+   Bringing a panel into view is a courtesy to whoever just tapped it; doing the
+   same because the rotation moved to a new family is the app taking the page
+   away from someone in the middle of playing. Whether it is playing does not
+   come into it — a panel you open yourself is still brought to you. */
+let selfOpening=false;
 function revealPanel(el){
   if(!el)return;
+  if(selfOpening)return;
   revealFor=el;
   revealUntil=(performance&&performance.now?performance.now():Date.now())+1200;
   const sc0=document.getElementById('scroll-area');
@@ -5816,6 +5827,13 @@ function spreadPanels(){shareOutRoom();bringRevealed();}
 function shareOutRoom(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
+  /* Where the reader is looking is not this function's business. Clearing and
+     re-setting the margins moves boxes above the viewport, and the browser
+     compensates by nudging the scroll — a few pixels each time, which was
+     nothing until the note readout started calling this on every note and the
+     page walked upwards while somebody was playing. Put back exactly where it
+     was, unless the content genuinely got shorter than the position. */
+  const wasAt=sc.scrollTop;
   // the tuner's two blocks are panels rather than folding sections, and they
   // should share the room the same way
   // folding sections, the tuner's two blocks, and the drone's grid of notes:
@@ -5825,8 +5843,13 @@ function shareOutRoom(){
   cards.forEach(c=>c.style.marginBottom='');
   // Metro centres itself instead; adding margins there would push it off centre
   centreMetro();
-  if(sc.classList.contains('centred'))return;
-  if(cards.length<2)return;
+  const keepPlace=()=>{
+    const most=Math.max(0,sc.scrollHeight-sc.clientHeight);
+    const want=Math.min(wasAt,most);
+    if(Math.abs(sc.scrollTop-want)>0.5)sc.scrollTop=want;
+  };
+  if(sc.classList.contains('centred')){keepPlace();return;}
+  if(cards.length<2){keepPlace();return;}
   /* Where the content really ends is a harder question than it looks: the last
      margin sits outside every box, and a margin inside a plain wrapper collapses
      through it, so no element's bottom edge is the answer. An empty line at the
@@ -5847,11 +5870,12 @@ function shareOutRoom(){
     last.style.marginBottom=Math.max(0,mb+spare)+'px';
     spare=floor-reach()-2;
   }
-  if(spare<=1)return;
+  if(spare<=1){keepPlace();return;}
   const extra=Math.min(SPREAD_MAX,spare/(cards.length-1));
   cards.slice(0,-1).forEach(c=>{
     c.style.marginBottom=(parseFloat(getComputedStyle(c).marginBottom)+extra)+'px';
   });
+  keepPlace();
 }
 /* Turning the phone changes the height, the width, which layout the media
    queries choose and — on iOS — when the browser's own bars come and go. The
@@ -6311,14 +6335,30 @@ function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o
 // after the browser has laid the panel out, not before
 /* The note readout is part of the frame, so when it appears it takes its height
    from the panels — and nothing was telling them. Same trap as the status line:
-   the frame changed and no one re-measured. */
+   the frame changed and no one re-measured.
+
+   What matters is whether it is there, not what it says. Re-measuring on every
+   change meant re-measuring on every note — several times a second, each one
+   clearing and re-setting margins — and the panels were being laid out again
+   under someone who was only trying to read the note. */
 (function(){
   const watch=['current-note','current-freq'];
-  const obs=new MutationObserver(()=>spreadPanelsSoon());
+  let had=null;
+  const check=()=>{
+    const now=watch.some(id=>{
+      const el=document.getElementById(id);
+      return el&&el.textContent.trim()!=='';
+    });
+    if(now===had)return;
+    had=now;
+    spreadPanelsSoon();
+  };
+  const obs=new MutationObserver(check);
   watch.forEach(id=>{
     const el=document.getElementById(id);
     if(el)obs.observe(el,{childList:true,characterData:true,subtree:true});
   });
+  check();
 })();
 
 function spreadPanelsSoon(){
