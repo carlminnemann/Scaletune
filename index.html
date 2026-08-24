@@ -1302,8 +1302,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     in four, so the bar goes to four while one plays and comes back to what it was when the click
     returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
-    synthesised. The bass drum and snare were recorded here; the three cymbals are from the
-    Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
+    synthesised, and the whole kit was recorded here — bass drum, snare, three hi-hats, ride
+    and clave. The bass drum and the snare come in two takes each, loud and soft, so an accent and a ghost
+    note are different strokes rather than one stroke at two volumes.</dd>
     <dt data-t="mixer-2">Mixer</dt><dd data-t="a-level-for-each-drum">A level for each drum, over whatever the pattern asks for — the one thing that
     can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
     not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
@@ -2515,15 +2516,21 @@ function playClickBuffer(buf,time,gain){
 /* The kit is recorded, not synthesised. The first version made its own sounds —
    a sine falling for a kick, filtered noise for a snare and hats — and on a
    phone speaker that came to nothing: a 50Hz kick is below what the speaker can
-   move, and a 7kHz hiss is barely there. The bass drum and snare are Carl's own
-   drums; the three cymbals are hits from the Muldjord
-   Kit (FreePats, CC-BY 4.0), trimmed to length, tapered so the cut cannot click,
-   and normalised. 180KB for the whole kit.
+   move, and a 7kHz hiss is barely there. All of it is Carl's own kit now, one
+   stroke cut from a longer take, trimmed, tapered so the cut cannot click, and
+   normalised — with a loud and a soft take of the bass drum and of the snare,
+   because a ghost note is a different stroke and not a quieter one. 584KB.
 
    Until they are decoded the accompaniment falls back to the click, because a
    metronome that has gone quiet is worse than one that is not the sound you
    asked for. */
-const DRUM_FILES={kick:'kick',snare:'snare',hhc:'hhc',hho:'hho',ride:'ride'};
+/* Two takes of the bass drum and of the snare, loud and soft, because that is
+   how they were recorded: an accent and a ghost note are two different strokes,
+   not one stroke at two volumes. A soft stroke played softly barely moves the
+   head and does not sound like a loud one turned down. */
+const DRUM_FILES={kick:'kick','kick-soft':'kick-soft',
+                  snare:'snare','snare-soft':'snare-soft',
+                  hhc:'hhc',hho:'hho',hhp:'hhp',ride:'ride',clave:'clave'};
 let drumBufs=null,drumsLoading=false,drumsFailed=false;
 function currentDrums(){return drumBufs;}
 function loadDrums(){
@@ -2626,19 +2633,28 @@ const MACHINE={
   r:(t,v)=>{woodClick(t,0.9*v);return true;},
   w:(t,v,spb)=>{brushSwirl(t,v,spb);return true;},
   x:(t,v)=>{brushTap(t,v);return true;},
+  // the machine has no separate foot hat; its closed hat, played shorter
+  p:(t,v)=>MACHINE.h(t,0.8*v),
   b:(t,v)=>{drumTone(t,{f0:96,f1:52,dur:0.34,gain:0.80*v,bend:0.06});return true;},
 };
+/* Which take a written velocity asks for. The line is where the player stopped
+   leaning on the drum, not a round number: below it the soft take, above it the
+   loud one. */
+function layer(hard,soft,v){return v<0.55?soft:hard;}
 const RECORDED={
-  k:(t,v)=>drumHit('kick', t,0.95*v),
-  s:(t,v)=>drumHit('snare',t,0.80*v),
-  g:(t,v)=>drumHit('snare',t,0.16*v),
+  k:(t,v)=>drumHit(layer('kick','kick-soft',v), t,0.95*v),
+  s:(t,v)=>drumHit(layer('snare','snare-soft',v),t,0.80*v),
+  // a ghost note is always the soft take: that is what a ghost note is
+  g:(t,v)=>drumHit('snare-soft',t,0.42*v),
   h:(t,v)=>drumHit('hhc',  t,0.42*v),
   o:(t,v)=>drumHit('hho',  t,0.34*v),
+  // the foot on two and four, a stroke of its own rather than a quiet closed hat
+  p:(t,v)=>drumHit('hhp',  t,0.55*v),
   d:(t,v)=>drumHit('ride', t,0.80*v),
-  r:(t,v)=>{woodClick(t,0.9*v);return true;},
+  r:(t,v)=>drumHit('clave',t,0.9*v),
   w:(t,v,spb)=>{brushSwirl(t,v,spb);return true;},
   x:(t,v)=>{brushTap(t,v);return true;},
-  b:(t,v)=>drumHit('kick', t,0.85*v),
+  b:(t,v)=>drumHit(layer('kick','kick-soft',v), t,0.85*v),
 };
 // Which kit the letters mean right now.
 function kitVoices(){return state.kit==='machine'?MACHINE:RECORDED;}
@@ -2716,7 +2732,7 @@ function grooveDef(){
      half of the answer. A hat every bar, wherever the bar happens to be. */
   if(G.brushes&&state.balladHat){
     const add=[];
-    for(let b=0;b<G.bars;b++)add.push([b*4*GRID+GRID,'h',.55],[b*4*GRID+3*GRID,'h',.55]);
+    for(let b=0;b<G.bars;b++)add.push([b*4*GRID+GRID,'p',.55],[b*4*GRID+3*GRID,'p',.55]);
     hits=hits.concat(add);
   }
   if(hits===G.hits)return G;
@@ -3387,7 +3403,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24i';
+const APP_VERSION='2026-08-24j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5291,7 +5307,7 @@ const MIX_VOICES=[['k','Bass drum'],['s','Snare'],['h','Hi-hat'],['o','Open hat'
    drum, so they answer to those faders — without this the snare fader left the
    funk's ghosts where they were and the bass fader did nothing at all under a
    bossa, which is what "some of them do nothing" was. */
-const MIX_OF={g:'s',b:'k'};
+const MIX_OF={g:'s',b:'k',p:'h'};
 function mixLevel(voice){
   const k=MIX_OF[voice]||voice;
   const v=state.mix&&state.mix[k];
@@ -5304,6 +5320,7 @@ function mixUsed(){
   const set=new Set();
   if(G)G.hits.forEach(h=>set.add(MIX_OF[h[1]]||h[1]));
   if(GROOVES[state.groove]&&GROOVES[state.groove].brushes&&state.balladHat)set.add('h');
+
   return set;
 }
 function mixOpen(){const b=document.getElementById('mix-body');return b&&!b.hidden;}

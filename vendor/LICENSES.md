@@ -37,35 +37,25 @@ MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.
 License: MIT
 Source: https://github.com/gleitz/midi-js-soundfonts
 
-## Carl Minnemann — bass drum and snare
-`vendor/drums/kick.wav` · `snare.wav` — 61 KB together
+## Carl Minnemann — the whole drum kit
+`vendor/drums/*.wav` — 584 KB together
 
 Recorded by Carl Minnemann in his own room, from his own kit, and owned by him:
-no third-party licence applies to these two. They replaced the borrowed kick and
-snare. Each is one stroke cut from a longer take, trimmed so the transient is at
-the front, tapered and normalised the same way as the rest.
+no third-party licence applies to any of these. Nine samples — bass drum loud
+and soft, snare loud and soft, closed hi-hat, open hi-hat, foot hi-hat, ride,
+clave. The two pairs are two takes rather than one take at two volumes: a soft
+stroke barely moves the head and does not sound like a loud one turned down,
+which is why an accent and a ghost note are different files here.
 
-## Muldjord Kit — cymbals
-`vendor/drums/hhc.wav` · `hho.wav` · `ride.wav` — 261 KB together
+Each is one stroke cut from a longer take, moved so the transient is at the
+front, tapered so the cut cannot click, and normalised. The loudest two snare
+strokes in the session are clipped — twenty-seven samples pinned flat at full
+scale — so the loudest clean one is used instead. The bass drum is shaped the
+way the borrowed one was: a high-pass and a high shelf, lifting the beater end
+to where a small speaker can reproduce it.
 
-Three hits from a recorded acoustic kit, used by the metronome's accompaniment
-styles: closed hi-hat, open hi-hat, ride. The clave in the
-bossa is not among them — it is synthesised, two short partials and no body,
-because the kit has no rim and a soft snare hit gave a thud where a bossa wants
-a piece of wood. Each is one velocity layer of the original,
-trimmed to length, tapered over its last third so the cut cannot click, and
-normalised to a peak of 0.95. The originals are 24-bit 44.1kHz FLAC, several
-hundred kilobytes each and up to fifty velocity layers per drum; what is
-bundled is a small selection at 16-bit, which is what a practice tool needs.
-
-Recorded by Lars Muldjord. Published by the FreePats project.
-License: Creative Commons Attribution 4.0 (CC-BY 4.0)
-Source: https://freepats.zenvoid.org/Percussion/acoustic-drum-kit.html
-        https://github.com/freepats/muldjordkit
-
-**Attribution required.** Any distribution of the app must credit "Muldjord Kit
-by Lars Muldjord (FreePats), CC-BY 4.0" where users can find it — the app's
-guide, an About screen, or the store listing.
+The brushes are still synthesised: a sweep that never stops is a continuous
+sound, not a sample.
 
 ---
 

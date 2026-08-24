@@ -28,13 +28,30 @@ TMP='.drum-build'
 # that session rather than one fetched from the kit, and it is a take rather
 # than a one-shot — several strokes in one file — so it also says which stroke
 # to take.
+# The whole kit is Carl's own now, recorded in his room, and recorded with
+# dynamics on purpose: a loud and a soft take of the bass drum and of the snare,
+# so an accent and a ghost note are two different strokes rather than one stroke
+# at two volumes. A soft stroke played softly is not a loud one turned down —
+# the head barely moves and the tone is different — which is the whole reason to
+# record both.
+#
+# The hi-hat comes three ways: closed, open, and the foot on two and four, which
+# is what a ballad wants under the brushes.
+#
 # name          source                              secs  shaping  taper  rate
 SPEC=[
- ('kick',  'mine:bombo forte.wav#1',               0.50, 'kick',  0.30, 44100),
- ('snare', 'mine:snare forte.wav#1',               0.40, None,    0.30, 44100),
- ('hhc',   'HihatClosed/20-HihatClosed.flac',      0.22, None,    0.34, 44100),
- ('hho',   'HihatOpen/20-HihatOpen.flac',          1.00, None,    0.18, 44100),
- ('ride',  'RideR/9-RideR.flac',                   2.40, None,    0.15, 32000),
+ ('kick',      'mine:bombo forte.wav#4',            0.50, 'kick',  0.30, 44100),
+ ('kick-soft', 'mine:bombo fraco.wav#2',            0.50, 'kick',  0.30, 44100),
+ # stroke 1 is the loudest that is not clipped: the two at 0dBFS have 27 samples
+ # pinned flat at the top, which is a distorted attack, not a loud one
+ ('snare',     'mine:snare dinamic .wav#1',         0.45, None,    0.30, 44100),
+ ('snare-soft','mine:snare dinamic .wav#5',         0.45, None,    0.30, 44100),
+ ('hhc',       'mine:hihat closed.wav#8',           0.30, None,    0.34, 44100),
+ ('hho',       'mine:hihat open.wav#4',             1.60, None,    0.18, 44100),
+ ('hhp',       'mine:hihat pedal 2 e 4.wav#4',      0.30, None,    0.34, 44100),
+ # six seconds of room before the next stroke: the ride can ring out at last
+ ('ride',      'mine:ride.wav#1',                   3.20, None,    0.12, 32000),
+ ('clave',     'mine:clave.wav#4',                  0.30, None,    0.30, 44100),
 ]
 MINE=('/Users/carlminnemann/Library/CloudStorage/OneDrive-JOBRA/'
       'Carl Minnemann/Claude/bateria')
@@ -107,9 +124,17 @@ def nth_stroke(d,sr,which):
     return starts[min(which,len(starts))-1]*blk
 
 def phone_peak(d,sr):
-    """Roughly what a phone speaker lets out: two poles at 400Hz."""
-    f=hp(hp(d,sr,400),sr,400)
-    return max(abs(x) for x in f)
+    """Roughly what a phone speaker lets out: two poles at 400Hz.
+
+    The filter is given a lead-in that holds the first sample, and its first
+    25ms of output are thrown away. A biquad starts from zero state, so without
+    that its very first output is a step from silence to whatever the signal is
+    — and that step, not the drum, was what this returned. On one kick it read
+    2.5% or 54% depending only on where the slice happened to begin."""
+    lead=int(0.2*sr)
+    y=hp(hp([d[0]]*lead+list(d),sr,400),sr,400)
+    start=lead+int(0.025*sr)
+    return max(abs(x) for x in y[start:]) if start<len(y) else 0.0
 
 def main():
     os.makedirs(OUT,exist_ok=True);os.makedirs(TMP,exist_ok=True)
