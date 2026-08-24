@@ -1267,9 +1267,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <em>Light</em> takes the ghost notes out and leaves the cymbals on the beat. A pattern of your own
     is never thinned or filled: it is exactly as full as you made it.</dd>
     <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
-    <dt data-t="kit-2">Kit</dt><dd data-t="two-of-them-recorded-is">Two of them. <em>Recorded</em> is a real acoustic kit, warm and big. <em>Machine</em>
-    is made rather than recorded — dry, tight, and it cuts through a small speaker. Switch it while
-    something is playing; that is the only way to hear the difference.</dd>
+    <dt data-t="kit-2">Kit</dt><dd data-t="two-of-them-recorded-is">Three. <em>Recorded</em> is a real acoustic kit, warm and big.
+    <em>Mine</em> is a kit recorded here, in this room. <em>Machine</em> is made rather than
+    recorded — dry, tight, and it cuts through a small speaker. Switch between them while something
+    is playing; that is the only way to hear the difference.</dd>
     <dt data-t="pattern-2">Pattern</dt><dd data-t="write-your-own-six-voices">Write your own. Six voices down the side and a bar across. <em>Loop</em> is how
     many bars go round: set it to one and the bar you write repeats, set it to four and you have four
     to fill, with tabs to move between them. Pick a
@@ -2365,27 +2366,41 @@ function playClickBuffer(buf,time,gain){
    metronome that has gone quiet is worse than one that is not the sound you
    asked for. */
 const DRUM_FILES={kick:'kick',snare:'snare',hhc:'hhc',hho:'hho',ride:'ride'};
-let drumBufs=null,drumsLoading=false,drumsFailed=false;
+/* Two recorded kits live side by side, so switching between them is the only
+   way to judge one against the other: what a drum sounds like on its own tells
+   you almost nothing. Each is decoded once and then kept. */
+const KIT_DIRS={recorded:'vendor/drums',mine:'vendor/drums-mine'};
+// the clave is synthesised for the borrowed kit and recorded for the other
+const KIT_EXTRA={mine:['clave']};
+const kitBufs={};
+let drumsLoading=false,drumsFailed=false;
+function kitDir(){return KIT_DIRS[state.kit]||KIT_DIRS.recorded;}
+function currentDrums(){return kitBufs[state.kit]||null;}
 function loadDrums(){
-  if(drumBufs||drumsLoading||drumsFailed)return;
+  const kit=state.kit;
+  if(kitBufs[kit]||drumsLoading||drumsFailed)return;
   if(!audioCtx)return;
   drumsLoading=true;
-  const names=Object.keys(DRUM_FILES);
-  Promise.all(names.map(n=>fetch('vendor/drums/'+DRUM_FILES[n]+'.wav')
+  const names=Object.keys(DRUM_FILES).concat(KIT_EXTRA[kit]||[]);
+  const dir=kitDir();
+  Promise.all(names.map(n=>fetch(dir+'/'+(DRUM_FILES[n]||n)+'.wav')
     .then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();})
     .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))))
   .then(bufs=>{
     const out={};names.forEach((n,i)=>out[n]=bufs[i]);
-    drumBufs=out;drumsLoading=false;
+    kitBufs[kit]=out;drumsLoading=false;
     if(grooveOn())setStatus(tr('drums.ready','Drums loaded \u2713')),setTimeout(()=>setStatus(''),1500);
   })
   .catch(()=>{
-    drumsLoading=false;drumsFailed=true;
+    drumsLoading=false;
+    // only this kit failed; another may still load
+    drumsFailed=Object.keys(kitBufs).length===0;
     setStatus(tr('drums.failed','The drums could not load \u2014 the accompaniment is clicking instead.'));
   });
 }
 function drumHit(name,t,gain){
-  const buf=drumBufs&&drumBufs[name];
+  const bufs=currentDrums();
+  const buf=bufs&&bufs[name];
   if(!buf)return false;
   const src=audioCtx.createBufferSource();
   const g=audioCtx.createGain();
@@ -2474,7 +2489,8 @@ const RECORDED={
   h:(t,v)=>drumHit('hhc',  t,0.42*v),
   o:(t,v)=>drumHit('hho',  t,0.34*v),
   d:(t,v)=>drumHit('ride', t,0.80*v),
-  r:(t,v)=>{woodClick(t,0.9*v);return true;},
+  // a recorded clave if this kit brought one, the synthesised block if not
+  r:(t,v)=>drumHit('clave',t,0.9*v)||(woodClick(t,0.9*v),true),
   w:(t,v,spb)=>{brushSwirl(t,v,spb);return true;},
   x:(t,v)=>{brushTap(t,v);return true;},
   b:(t,v)=>drumHit('kick', t,0.85*v),
@@ -2665,7 +2681,7 @@ function scheduleGrooveBeat(t0,beat){
   const G=grooveDef();
   if(!G||!G.hits.length)return false;
   // the machine makes its own sounds; the recorded kit has to arrive first
-  if(state.kit!=='machine'&&!drumBufs){loadDrums();return false;}
+  if(state.kit!=='machine'&&!currentDrums()){loadDrums();return false;}
   const voices=kitVoices();
   const unit=(60/state.bpm)/GRID;
   const from=(beat%(G.bars*4))*GRID;
@@ -3003,7 +3019,7 @@ function schedulerTick(){
       if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(!(groove&&(drumBufs||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
+    } else if(!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
@@ -3151,7 +3167,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-23k';
+const APP_VERSION='2026-08-24a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4841,7 +4857,7 @@ function loadPattern(){
       state.custom.bars=Math.max(1,Math.min(4,parseInt(p.bars,10)||1));
       state.custom.grid=p.grid===12?12:16;
     }
-    if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;
+    if(p&&(p.kit==='machine'||p.kit==='recorded'||p.kit==='mine'))state.kit=p.kit;
     if(p&&p.mix)Object.keys(state.mix).forEach(k=>{
       const v=parseFloat(p.mix[k]);
       if(!isNaN(v)&&v>=0&&v<=1.5)state.mix[k]=v;
@@ -4999,7 +5015,8 @@ function buildKitRow(){
   const line=document.getElementById('kit-line');
   if(line)line.style.display=grooveOn()?'':'none';
   row.innerHTML='';
-  [['recorded',tr('kit.recorded','Recorded')],['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
+  [['recorded',tr('kit.recorded','Recorded')],['mine',tr('kit.mine','Mine')],
+   ['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.kit===k?' active':'');
     b.textContent=label;
