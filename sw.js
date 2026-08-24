@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v133';
+const CACHE = 'scaletune-v134';
 const ASSETS = [
   './',
   './index.html',
@@ -68,9 +68,32 @@ const isDocument = req =>
   req.mode === 'navigate' ||
   (req.headers.get('accept') || '').includes('text/html');
 
+/* A language pack belongs to the build that asks for it, so it is fetched the
+   way the page is: network first, past the browser's own cache, falling back to
+   what we hold when there is no network. Cache-first pinned a stale pack for a
+   whole cache generation — the host serves these with max-age=600, so a worker
+   installing just after a deploy could fill its brand-new cache with the files
+   it was meant to replace, and keep serving them until the next version. */
+const isLangPack = req => new URL(req.url).pathname.includes('/lang/');
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
+
+  if (isLangPack(req)) {
+    e.respondWith(
+      fetch(req, { cache: 'reload' })
+        .then(res => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(req, { ignoreSearch: true }))
+    );
+    return;
+  }
 
   if (isDocument(req)) {
     // 'reload' bypasses the browser's own HTTP cache for this one request. The
