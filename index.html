@@ -750,19 +750,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
 <div id="pitch-section" style="display:none">
-  <!-- The root folds like the rest. Left open it was the one panel that could
-       not be put away, and with everything else closed it stood between the
-       modes and the Start button. -->
-  <details class="sec" id="sec-root">
-    <summary><span data-t="sec.root">Root</span><span class="sec-sum" id="sum-root"></span></summary>
-    <div class="sec-body">
-      <div class="btn-wrap" id="root-row"></div>
-    </div>
-  </details>
-
+  <!-- "C dorian" is one choice made of two halves, and it was two panels. The
+       key sits at the top of the panel that names it, and the closed summary
+       already read as one thing: "C Dorian". -->
   <details class="sec" id="sec-scales">
     <summary><span id="sec-scales-title">Scales</span><span class="sec-sum" id="sum-scales"></span></summary>
     <div class="sec-body">
+      <div class="group-label" data-t="sec.root">Root</div>
+      <div class="btn-wrap" id="root-row" style="margin-bottom:var(--s4)"></div>
       <div id="scale-lists">
         <details class="fam" data-fam="gregorian">
           <summary><span data-t="fam.major-scale">Major Scale</span><span class="fam-sum"></span></summary>
@@ -826,30 +821,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     </div>
   </details>
 
-  <details class="sec" id="sec-progress">
-    <summary><span data-t="sec.practice-progressions">Practice Progressions</span><span class="sec-sum" id="sum-progress"></span></summary>
-    <div class="sec-body">
-      <div id="rootmove-block">
-      <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
-        <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
-      </div>
-      <div class="info-line" id="practice-info"></div>
-    </div>
-  </details>
 </div>
 
 <!-- ============ FREE ============ -->
 <div id="free-section" style="display:none">
   <!-- folds like the one in Scale, so it is not the last panel left standing open -->
-  <details class="sec" id="sec-freeroot">
-    <summary><span data-t="sec.root">Root</span><span class="sec-sum" id="sum-freeroot"></span></summary>
-    <div class="sec-body">
-      <div class="btn-wrap" id="free-root-row"></div>
-    </div>
-  </details>
+
   <details class="sec" id="sec-freenotes">
     <summary><span data-t="sec.notes">Notes</span><span class="sec-sum" id="sum-freenotes"></span></summary>
     <div class="sec-body">
+      <div class="group-label" data-t="sec.root">Root</div>
+      <div class="btn-wrap" id="free-root-row" style="margin-bottom:var(--s4)"></div>
       <div class="legend" data-t="tap-toggle-note-on-off">
         <span>tap — toggle note on/off</span>
         <span>+/− — octave</span>
@@ -870,6 +852,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </div>
 
 <hr class="divider" id="metro-divider" style="display:none">
+  <details class="sec" id="sec-progress">
+    <summary><span data-t="sec.practice-progressions">Practice Progressions</span><span class="sec-sum" id="sum-progress"></span></summary>
+    <div class="sec-body" id="progress-body">
+      <div id="rootmove-block">
+      <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
+        <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
+      </div>
+      <div class="info-line" id="practice-info" data-tail="1"></div>
+    </div>
+  </details>
+
 <details class="sec" id="metro-section" style="display:none">
   <summary><span data-t="sec.metronome">Metronome</span><span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body metro-body">
@@ -1079,14 +1072,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      panel goes away in Metro, where there is no phrase. -->
 <details class="sec" id="sec-rhythm" style="display:none">
   <summary><span data-t="sec.phrasing">Phrasing</span><span class="sec-sum" id="sum-rhythm"></span></summary>
-  <div class="sec-body">
+  <div class="sec-body" id="rhythm-body">
     <div id="notelen-block">
     <div class="head"><span class="group-label" data-t="note-length">Note Length</span>
       <span class="btn-wrap seg" id="notelen-row" data-cols="fixed"></span></div>
     </div>
     <div class="head"><span class="group-label" data-t="phrase-alignment">Phrase Alignment</span>
       <span class="btn-wrap seg" id="align-row" data-cols="fixed"></span></div>
-    <div class="info-line" id="align-info"></div>
+    <div class="info-line" id="align-info" data-tail="1"></div>
   </div>
 </details>
 
@@ -1869,6 +1862,25 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
    once the pattern is written rather than before. */
 const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block',
                   'groove-block','pattern-block','mixer-block'];
+/* Where each movable block belongs when Metro is not the mode. Most of them are
+   the metronome's own; three are not, and were only living there because Metro
+   had no other way to reach them.
+
+   The tempo moving between passes is the same kind of thing as the key moving
+   between passes, and how long a pass is is the definition both rest on — so
+   those two go with the progressions. The subdivision governs the notes as much
+   as the click: "note length: per figure" only means anything because of it, so
+   it goes with the other two settings about how the notes sit in time. What is
+   left in the metronome is a metronome. */
+const BLOCK_HOME={
+  'speed-block':'progress-body',
+  'pass-block':'progress-body',
+  'subdiv-block':'rhythm-body',
+};
+function homeFor(id,main){
+  const h=BLOCK_HOME[id]&&document.getElementById(BLOCK_HOME[id]);
+  return h||main;
+}
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -1882,8 +1894,11 @@ function splitMetro(on){
        like and leaves the four beats where they were, so it stays where it
        lives — a control that moves about on its own reads as a fault. */
     const front=id==='poly-block'&&state.poly.on;
-    const host=(on&&!front)?body:main;
+    const host=(on&&!front)?body:homeFor(id,main);
     if(el.parentNode!==host)host.appendChild(el);
+    // a panel's closing line stays last however much is put above it
+    const tail=host.querySelector(':scope > [data-tail]');
+    if(tail&&tail!==host.lastElementChild)host.appendChild(tail);
   });
   more.style.display=on?'':'none';
   if(!on)more.open=false;
@@ -3489,7 +3504,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24s';
+const APP_VERSION='2026-08-24t';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3586,7 +3601,9 @@ function setMode(m){
   }
   document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner)?'none':'';
   document.getElementById('sec-sound').style.display=(isMetro||isTuner)?'none':'';
-  document.getElementById('sec-progress').style.display=isTuner?'none':'';
+  /* In Metro these live in More, with the rest of what the metronome can do, so
+     the panel that holds them elsewhere would stand there empty. */
+  document.getElementById('sec-progress').style.display=(isTuner||isMetro)?'none':'';
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
   state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
@@ -4423,7 +4440,9 @@ function buildSpeedControls(){
 
   // there is no root to move when the metronome plays alone
   const rb=document.getElementById('rootmove-block');
-  if(rb)rb.style.display=notesSilent()?'none':'';
+  // moving the key a fourth at a time is a thing scales and arpeggios do; in
+  // Free there is no key to move, and it was offered there doing nothing
+  if(rb)rb.style.display=(state.mode==='scale'||state.mode==='arpeggio')?'':'none';
 }
 // The whole setting in one line, because none of it is obvious from the fields
 function speedSentence(){
@@ -5777,15 +5796,11 @@ function subdivLabelPlain(k){
 }
 
 const SECTIONS=[
-  {id:'sec-root',     sum:'sum-root',
-   text:()=>bareName(NOTES.indexOf(state.root))+(useListOn()?' · '+tr('sum.studyList','study list'):'')},
-  {id:'sec-freeroot', sum:'sum-freeroot',
-   text:()=>bareName(NOTES.indexOf(state.freeRoot||state.root))},
   {id:'sec-scales',   sum:'sum-scales',group:'notes',
    text:()=>{
-     if(useListOn())return activeList().length
+     if(useListOn())return bareName(NOTES.indexOf(state.root))+' · '+(activeList().length
        ?tr('sum.inRotation',{one:'{n} in rotation',other:'{n} in rotation'},{n:activeList().length})
-       :tr('sum.nothingChosen','nothing chosen');
+       :tr('sum.nothingChosen','nothing chosen'));
      const n=state.mode==='scale'?state.scaleName:state.chordName;
      return n?bareName(NOTES.indexOf(state.root))+' '
        +(state.mode==='arpeggio'?chordLabel(n):scaleLabel(n)):tr('sum.nothingChosen','nothing chosen');
@@ -5797,10 +5812,12 @@ const SECTIONS=[
   // folds both, so the layout does not change under you when switching mode.
   {id:'sec-freenotes',sum:'sum-freenotes',group:'notes',
    text:()=>{
+     const root=bareName(NOTES.indexOf(state.freeRoot||state.root));
      const n=Object.keys(state.freeSelected).length;
-     if(!n)return tr('sum.noneChosen','none chosen');
+     if(!n)return root+' · '+tr('sum.noneChosen','none chosen');
      return Object.keys(state.freeSelected)
        .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b).map(nameOf).join(' ');
+
    }},
   {id:'sec-freerange',sum:'sum-freerange',group:'range',
    text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.freeSpan})+' · '+
