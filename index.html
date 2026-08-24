@@ -1336,7 +1336,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     bar one as readily as bar one into bar three — for when a bar is a variation of another rather
     than something new. Up to four bars, for
     a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
-    cells stay wide enough to hit. What you write is kept for next time — it is your work, not a setting —
+    cells stay wide enough to hit. All of it can be written while it plays: the pattern, the kit, the density
+    and the levels are read fresh on every beat, so a cell goes in or comes out at the next one and the pulse
+    never moves under your hands. What you write is kept for next time — it is your work, not a setting —
     and it plays under <em>Accompaniment &rarr; Custom</em>.</dd>
     <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="two-pulses-at-once-any">Two pulses at once, any two numbers. The cycle shown is how long until they
     meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
@@ -3297,12 +3299,25 @@ function togglePlay(){
 }
 
 function restartIfPlaying(){
-  // clearing the notes mid-playback should stop, not leave a bare metronome
-  if(state.playing&&state.mode!=='drone'&&!buildSequence().length){
+  /* Clearing the notes mid-playback should stop, not leave a bare metronome —
+     except in Metro, where a bare metronome is the whole mode. That rule was
+     written for the note modes and it was stopping the metronome every time a
+     cell was tapped in the pattern editor, because Metro has no notes to have
+     cleared. */
+  if(state.playing&&state.mode!=='drone'&&state.mode!=='metro'&&!buildSequence().length){
     state.playing=false;setPlayUI(false);stopPlayback();return;
   }
   if(state.playing){stopPlayback();startPlayback();}
 }
+
+/* What the accompaniment is made of is read fresh on every beat — the pattern,
+   the kit, the density, the bar length — so changing any of it while the
+   metronome runs takes effect at the next beat on its own. Restarting the
+   transport for these was not just unnecessary but worse than nothing: it
+   re-anchors the pulse and sends the bar back to its first beat, so writing a
+   cell moved the beat under the player's hands. Nothing to do, and saying so
+   here is the point. */
+function liveChange(){}
 
 /* ---------- simple controls ---------- */
 function updateBPM(v){
@@ -3362,7 +3377,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24g';
+const APP_VERSION='2026-08-24h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4958,7 +4973,7 @@ function buildPatternEditor(){
       state.custom.bars=Math.max(1,Math.min(4,parseInt(bsel.value,10)||1));
       const span=state.custom.bars*patBarSpan();
       state.custom.hits=state.custom.hits.filter(h=>h[0]<span);
-      savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
+      savePattern();buildPatternEditor();refreshSectionSummaries();liveChange();
     });
   }
   if(bsel)bsel.value=String(bars);
@@ -5023,7 +5038,7 @@ function buildPatternEditor(){
           .map(h=>[h[0]-from+to,h[1],h[2]]);
         state.custom.hits=state.custom.hits.filter(h=>h[0]<to||h[0]>=to+span).concat(taken);
         state.custom.hits.sort((a,b)=>a[0]-b[0]);
-        savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
+        savePattern();buildPatternEditor();refreshSectionSummaries();liveChange();
       };
       cprow.appendChild(b);
     }
@@ -5035,7 +5050,7 @@ function buildPatternEditor(){
     clr.dataset.wired='1';
     clr.onclick=()=>{
       state.custom.hits=[];savePattern();buildPatternEditor();
-      buildGrooveRow();refreshSectionSummaries();restartIfPlaying();
+      buildGrooveRow();refreshSectionSummaries();liveChange();
     };
   }
   const from=document.getElementById('pat-from');
@@ -5091,7 +5106,7 @@ function buildPatternEditor(){
           cell.classList.toggle('off',patOffGrid(voice,pos,pos+step));
           cell.title=patOffGrid(voice,pos,pos+step)?tr('pat.otherGrid','written on the other grid'):'';
           if(state.groove!=='custom')setGroove('custom');
-          else{refreshSectionSummaries();restartIfPlaying();}
+          else{refreshSectionSummaries();liveChange();}
           patInfo();
         };
         row.appendChild(cell);
@@ -5250,7 +5265,7 @@ function buildDensityRow(){
     b.textContent=label;
     b.onclick=()=>{
       state.density=k;buildDensityRow();buildGrooveRow();
-      refreshSectionSummaries();restartIfPlaying();
+      refreshSectionSummaries();liveChange();
     };
     row.appendChild(b);
   });
@@ -5374,7 +5389,7 @@ function buildHatRow(){
     const b=document.createElement('button');
     b.className='pick-btn'+(state.balladHat===v?' active':'');
     b.textContent=label;
-    b.onclick=()=>{state.balladHat=v;buildHatRow();buildGrooveRow();buildMixer();refreshSectionSummaries();restartIfPlaying();};
+    b.onclick=()=>{state.balladHat=v;buildHatRow();buildGrooveRow();buildMixer();refreshSectionSummaries();liveChange();};
     row.appendChild(b);
   });
   gridify(row);
@@ -5402,6 +5417,7 @@ function buildKitRow(){
 
 function setGroove(k){
   const hadWritten=grooveOn()&&state.groove!=='custom';
+  const sigBefore=state.sig;
   state.groove=k;
   /* The written styles are in four. Rather than let one run against a bar it was
      not written for, the bar goes to four while a style plays and comes back to
@@ -5417,7 +5433,12 @@ function setGroove(k){
   // context to decode them into
   if(grooveOn()&&state.kit!=='machine')Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
   buildGrooveRow();updateSupersededControls();splitMetro(state.mode==='metro');
-  refreshSectionSummaries();restartIfPlaying();
+  refreshSectionSummaries();
+  /* What is playing is read fresh every beat, so a style can be swapped under a
+     running metronome without touching the transport. The one thing that cannot
+     change quietly is the length of the bar — the pulse has to be re-anchored
+     for that — so the transport is only disturbed when the bar actually moved. */
+  if(state.sig!==sigBefore)restartIfPlaying();
 }
 
 // Drone: a click over a held note is a choice, so it is asked for and starts off.
