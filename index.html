@@ -1231,9 +1231,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     plays 1–3, then 2–4, then 3–5; <em>1 2 3</em> plays 1-2-3, then 2-3-4. Fourths through sevenths
     are the same idea with a wider reach. The steps are counted in degrees of the scale, not
     semitones, so thirds are thirds in any mode — and over the chromatic, where a degree is a
-    semitone, the name is the shape rather than the interval. Coming down the shapes come down with
-    it: ascending thirds 1–3 2–4 read backwards as 5–3 4–2, each pair falling. The line under the
-    buttons spells out what the one you picked does in the key you are in.</dd>
+    semitone, the name is the shape rather than the interval. The turn happens at the octave, on a note
+    that starts a shape, and it is the shape that inverts: going up you play C–E, D–F, up to B–D, and
+    the C above turns it over into C–A, a third <em>below</em>, which is the descent begun. Coming
+    down the shape keeps reaching under, so D–B passes below the C you started from before the next C
+    turns back into C–E. The line under the buttons spells out what the one you picked does in the key
+    you are in.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-progress"><h3 data-t="practice-progressions">Practice Progressions</h3><dl>
@@ -3024,28 +3027,39 @@ function seqPatternSentence(){
   for(let i=0;i<3&&i<n;i++)groups.push(steps.map(sp=>name(i+sp)).join(' '));
   return groups.join(', ')+'…';
 }
+/* The line is a walk over the degrees: a starting degree, and a shape played
+   from it. Which degree it starts on walks up or down; the shape reaches up or
+   down with it, and both turn together at the ends.
+
+   Reversing the finished run was not the same thing, and in thirds it showed.
+   Going up you play C-E, D-F, up to B-D; the C above is the top, and there the
+   shape turns over — C-A, a third BELOW — and the descent has begun. Coming
+   down the shape keeps reaching under, so D-B passes below the C you started
+   from, and the C after it turns back over into C-E. The turn happens at the
+   octave, on a note that starts a shape, and the shape is what inverts. */
 function walk(baseAbs,startIdx,span,appendTop,direction){
   const n=baseAbs.length;
   if(!n)return[];
-  const total=n*span+(appendTop?1:0);
   const steps=seqSteps();
+  const top=n*span+(appendTop?1:0)-1;      // the last degree a run starts on
   const at=k=>baseAbs[((k%n)+n)%n]+Math.floor(k/n)*12;
-  const up=[];
-  for(let i=0;i<total;i++){
-    const k=startIdx+i;
-    for(let j=0;j<steps.length;j++)up.push(at(k+steps[j]));
-  }
-  /* Reversing the whole run reverses the shapes with it, which is how these are
-     played coming down: ascending thirds 1-3 2-4 3-5 read backwards as
-     5-3 4-2 3-1, each pair falling and the starts walking down. */
-  if(direction==='down')return up.slice().reverse();
-  // up-down: the turnaround notes sound once, not twice
-  if(direction==='updown')return up.concat(up.slice(1,-1).reverse());
-  if(direction==='downup'){
-    const d=up.slice().reverse();
-    return d.concat(d.slice(1,-1).reverse());
-  }
-  return up;
+  const out=[];
+  // one shape, from degree i, reaching up (+1) or down (-1)
+  const shape=(i,dir)=>{
+    for(let j=0;j<steps.length;j++)out.push(at(startIdx+i+dir*steps[j]));
+  };
+  const climb=(from,to,dir)=>{
+    if(from<=to)for(let i=from;i<=to;i++)shape(i,dir);
+    else for(let i=from;i>=to;i--)shape(i,dir);
+  };
+  if(direction==='down'){climb(top,0,-1);return out;}
+  /* There and back. The degree at each end starts a shape once — going up it is
+     the one that turns the shape over, and the far end does the same on the way
+     back, so nothing is played twice at the join. */
+  if(direction==='updown'){climb(0,top-1,1);climb(top,1,-1);return out;}
+  if(direction==='downup'){climb(top,1,-1);climb(0,top-1,1);return out;}
+  climb(0,top,1);
+  return out;
 }
 
 function buildSequence(){
@@ -3466,7 +3480,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24q';
+const APP_VERSION='2026-08-24r';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
