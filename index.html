@@ -445,6 +445,12 @@ details.fam[open] .fam-sum{display:none}
 .rot-chip.drop{cursor:pointer;font:inherit;gap:5px}
 .rot-chip.drop:hover{border-color:var(--text3)}
 .rot-chip .chip-x{font-size:10px;opacity:.55;padding:2px 1px 2px 3px;cursor:pointer}
+/* Sits before the name, where a direction mark belongs on a line of music. It is
+   a faint dot while the item follows the panel and the arrow itself once it does
+   not, so a rotation with one item going the other way shows exactly one mark. */
+.rot-chip .chip-dir{font-size:10px;opacity:.35;padding:2px 3px 2px 1px;cursor:pointer;order:-1}
+.rot-chip .chip-dir.set{opacity:1;color:var(--mode)}
+.rot-chip.drop:hover .chip-dir{opacity:.8}
 .rot-chip.held{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
 .rot-chip.drop:hover .chip-x{opacity:1}
 .rot-chip.now .chip-x,.rot-chip.next .chip-x{opacity:.75}
@@ -782,6 +788,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
           <summary><span data-t="fam.harmonic-major">Harmonic Major</span><span class="fam-sum"></span></summary>
           <div class="btn-wrap" id="harmonicmajor-btns"></div>
         </details>
+        <details class="fam" data-fam="symmetric">
+          <summary><span data-t="fam.symmetric">Symmetric</span><span class="fam-sum"></span></summary>
+          <div class="btn-wrap" id="symmetric-btns"></div>
+        </details>
       </div>
 
       <div id="arp-lists" style="display:none">
@@ -810,6 +820,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="btn-wrap" id="rootoct-row"></div>
       <div class="group-label" data-t="start-on">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
+      <div class="group-label" data-t="seq.pattern">Pattern</div>
+      <div class="btn-wrap" id="seqpat-row"></div>
+      <div class="info-line" id="seqpat-info"></div>
     </div>
   </details>
 
@@ -1168,6 +1181,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     mixer, the tempo and the metronome's settings.</dd>
     <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="one-opens-at-a-time">One opens at a time and the others fold away. A closed box still says
     what is chosen inside it, so folding one never hides a selection.</dd>
+    <dt data-t="symmetric-scales">Symmetric</dt><dd data-t="three-scales-that-do-not">Three that do not have seven notes. The <em>whole tone</em> has six and no
+    semitone anywhere, so nothing in it points home and any note could be the tonic. The two
+    <em>diminished</em> scales have eight and alternate their steps — whole-half is the classical one,
+    half-whole the one played over a dominant chord. The <em>chromatic</em> has all twelve. None can be
+    spelled with one letter each, so they are written the way players write them rather than the way
+    the rule would force: a rising chromatic in sharps, the diminished without the double flat.</dd>
     <dt data-t="pentatonic-and-the-blue-notes">Pentatonic and the blue notes</dt><dd data-t="five-notes-and-what-is">Five notes, and what is missing is the point: the major
     has no fourth and no seventh, the minor no second and no sixth, so neither leans anywhere.
     <em>Blue notes</em> adds one note to each — a flat third over the major, a flat fifth over the
@@ -1179,6 +1198,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     chord at a time; Study list collects several and takes them in turn, one per pass, so a whole
     family can be worked without stopping. It governs every panel below it, which is why it sits
     above them rather than inside the Root panel where it used to hide.</dd>
+    <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="the-mark-before-a-name">The mark before a name in the rotation is that
+    item's direction, and tapping it goes round up, down, up-and-back, and off again. Off — a faint
+    dot — means it follows Direction like everything else, which is what a rotation usually wants;
+    set it on one item and only that one changes. "The dorian up, then the same arpeggio down" is one
+    exercise in two halves, and this is where that is written. It sits on the chip rather than on the
+    scale's own button because a button that chooses a scale should not also, on some hidden press,
+    choose how it goes.</dd>
     <dt data-t="the-study-list">The study list</dt><dd data-t="one-list-holding-scales-and">One list, holding scales and chords together: pick scales in Scale and
     chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
     same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
@@ -1201,6 +1227,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="direction-2">Direction</dt><dd data-t="up-down-or-up-then">Up, down, or up then back down.</dd>
     <dt data-t="start-on-2">Start On</dt><dd data-t="which-degree-of-the-scale">Which degree of the scale the line starts from — the way a mode is practised
     from each of its own notes.</dd>
+    <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="the-shape-walked-from-every">The shape walked from every degree, rather than straight up. <em>Thirds</em>
+    plays 1–3, then 2–4, then 3–5; <em>1 2 3</em> plays 1-2-3, then 2-3-4. Fourths through sevenths
+    are the same idea with a wider reach. The steps are counted in degrees of the scale, not
+    semitones, so thirds are thirds in any mode — and over the chromatic, where a degree is a
+    semitone, the name is the shape rather than the interval. Coming down the shapes come down with
+    it: ascending thirds 1–3 2–4 read backwards as 5–3 4–2, each pair falling. The line under the
+    buttons spells out what the one you picked does in the key you are in.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-progress"><h3 data-t="practice-progressions">Practice Progressions</h3><dl>
@@ -1577,6 +1610,18 @@ const SCALES={
     'Major Pentatonic':[0,2,4,7,9],
     'Minor Pentatonic':[0,3,5,7,10],
   },
+  /* Scales that do not have seven notes and do not repeat at the octave the way
+     the others do. The whole tone has six and no semitone anywhere, so every
+     note could be the tonic; the two diminished scales have eight and alternate
+     their steps — whole-half is the classical one, half-whole the one played
+     over a dominant; the chromatic has all twelve and is a scale only in the
+     sense that it is what you practise when you practise everything. */
+  symmetric:{
+    'Whole Tone':[0,2,4,6,8,10],
+    'Diminished W-H':[0,2,3,5,6,8,9,11],
+    'Diminished H-W':[0,1,3,4,6,7,9,10],
+    'Chromatic':[0,1,2,3,4,5,6,7,8,9,10,11],
+  },
   // Modes of the harmonic major, verified as rotations of [0,2,4,5,7,8,11].
   // Natural Minor was dropped: it is note-for-note the Aeolian already listed.
   harmonicMajor:{
@@ -1600,7 +1645,19 @@ const LETTER_PLANS={
   'Major Pentatonic':{plain:[0,1,2,4,5],blue:[0,1,2,2,4,5]},
   'Minor Pentatonic':{plain:[0,2,3,4,6],blue:[0,2,3,4,4,6]},
 };
+/* Seven letters and not seven notes, so the rule that each letter is used once
+   cannot hold. Six notes leave a letter out; eight and twelve use one twice.
+   Written the way players write them: the whole tone as C D E F# G# A#, the
+   diminished without the double flat that strict spelling would force, the
+   chromatic sharp going up because that is how a rising chromatic is read. */
+const SYMMETRIC_PLANS={
+  'Whole Tone':      [0,1,2,3,4,5],
+  'Diminished W-H':  [0,1,2,3,4,5,5,6],
+  'Diminished H-W':  [0,1,2,2,4,4,5,6],
+  'Chromatic':       [0,0,1,1,2,3,3,4,4,5,5,6],
+};
 function letterPlanFor(group,name){
+  if(group==='symmetric')return SYMMETRIC_PLANS[name]||null;
   const p=LETTER_PLANS[name];
   if(!p||group!=='pentatonic')return null;
   return (state.blueNotes&&BLUE_NOTE[name]!=null)?p.blue:p.plain;
@@ -1674,6 +1731,7 @@ let state={
   // span/rootOct are what is playing now; the "Wanted" values are what the user
   // asked for, so a range clamp can be undone once the key allows it again
   span:1,spanWanted:1,rootOctWanted:3,direction:'up',startDeg:0,
+  seqPattern:'plain',      // the shape walked from each degree; see SEQ_PATTERNS
   blueNotes:false,           // the added note in the two pentatonics
 
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
@@ -1881,6 +1939,16 @@ function rebuildSpelling(){
   if(!degrees||(state.mode!=='scale'&&state.mode!=='arpeggio'))return;
   const res=spell(NOTES.indexOf(state.root),degrees,letterWalk());
   if(!res)return;
+  /* A scale with more notes than letters is spelled to a plan, and a plan that
+     reads well from C can force a double flat from Eb — the whole-half
+     diminished came out "Eb F Gb Ab Bbb Cb C D". Nobody writes that to practise
+     from. Where the plan costs a double accidental it is dropped and the plain
+     spelling used instead, which is what an edition prints. */
+  if(playingKind()!=='chord'&&res.accs.some(a=>Math.abs(a)>1))return;
+  /* Same reasoning for Cb and Fb, which the chromatic's plan forces from a flat
+     root — a rising chromatic from Gb read "...Bb Cb C..." where every player
+     reads B. There is no semitone under C or F to flatten into. */
+  if(playingKind()!=='chord'&&res.letters.some((l,i)=>(l===0||l===3)&&res.accs[i]<0))return;
   spellMap={};
   degrees.forEach((d,i)=>{
     spellMap[(NOTES.indexOf(state.root)+d)%12]={letterIdx:res.letters[i],acc:res.accs[i]};
@@ -2790,15 +2858,56 @@ function activeDegrees(){
 
 // Walks an ascending, octave-repeating set. A scale and an arpeggio are the
 // same walk — only the interval list is shorter.
+/* How a scale is walked, beyond straight up it. Every one of these is the same
+   idea — start on a degree, play a small shape from it, move up one degree and
+   play it again — so they are one list rather than two features. Thirds is the
+   shape [1st, 3rd]; "1 2 3" is [1st, 2nd, 3rd]. The steps are degrees of the
+   scale, not semitones, which is what makes thirds thirds in any mode; over the
+   chromatic, where every degree is a semitone, two degrees are a whole tone and
+   the name is the shape rather than the interval. */
+const SEQ_PATTERNS=[
+  {k:'plain',steps:[0],          label:'As written'},
+  {k:'3rds', steps:[0,2],        label:'Thirds'},
+  {k:'4ths', steps:[0,3],        label:'Fourths'},
+  {k:'5ths', steps:[0,4],        label:'Fifths'},
+  {k:'6ths', steps:[0,5],        label:'Sixths'},
+  {k:'7ths', steps:[0,6],        label:'Sevenths'},
+  {k:'g3',   steps:[0,1,2],      label:'1 2 3'},
+  {k:'g4',   steps:[0,1,2,3],    label:'1 2 3 4'},
+  {k:'g5',   steps:[0,1,2,3,4],  label:'1 2 3 4 5'},
+];
+function seqSteps(){
+  const p=SEQ_PATTERNS.find(x=>x.k===state.seqPattern);
+  return p?p.steps:[0];
+}
+/* The shape spelled out in the notes it actually produces, from whatever is
+   selected — a row of buttons called "Thirds" does not tell a student that in
+   C that means C E, D F, E G. */
+function seqPatternSentence(){
+  if(state.seqPattern==='plain')return '';
+  const degrees=activeDegrees();
+  if(!degrees||!degrees.length)return '';
+  const rootPc=NOTES.indexOf(state.root),n=degrees.length;
+  const steps=seqSteps();
+  const name=k=>bareName((rootPc+degrees[((k%n)+n)%n])%12);
+  const groups=[];
+  for(let i=0;i<3&&i<n;i++)groups.push(steps.map(sp=>name(i+sp)).join(' '));
+  return groups.join(', ')+'…';
+}
 function walk(baseAbs,startIdx,span,appendTop,direction){
   const n=baseAbs.length;
   if(!n)return[];
   const total=n*span+(appendTop?1:0);
+  const steps=seqSteps();
+  const at=k=>baseAbs[((k%n)+n)%n]+Math.floor(k/n)*12;
   const up=[];
   for(let i=0;i<total;i++){
     const k=startIdx+i;
-    up.push(baseAbs[((k%n)+n)%n]+Math.floor(k/n)*12);
+    for(let j=0;j<steps.length;j++)up.push(at(k+steps[j]));
   }
+  /* Reversing the whole run reverses the shapes with it, which is how these are
+     played coming down: ascending thirds 1-3 2-4 3-5 read backwards as
+     5-3 4-2 3-1, each pair falling and the starts walking down. */
   if(direction==='down')return up.slice().reverse();
   // up-down: the turnaround notes sound once, not twice
   if(direction==='updown')return up.concat(up.slice(1,-1).reverse());
@@ -2823,7 +2932,7 @@ function buildSequence(){
   // octaves it does land back on the starting note.
   const seventh=playingKind()==='chord'&&state.chordGroup==='seventh';
   const appendTop=!(seventh&&state.span===1);
-  return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,state.direction);
+  return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,activeDirection());
 }
 
 // C8 is the top of the piano and the top of the sampled range; above it the
@@ -3205,7 +3314,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24c';
+const APP_VERSION='2026-08-24d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3404,7 +3513,7 @@ function buildPitchLists(){
   // built again whenever the language changes, so it must start from empty
   root.innerHTML='';
   ['gregorian-btns','pentatonic-btns','melodic-btns','harmonic-btns',
-   'harmonicmajor-btns','triad-btns','seventh-btns'].forEach(id=>{
+   'harmonicmajor-btns','symmetric-btns','triad-btns','seventh-btns'].forEach(id=>{
     const c=document.getElementById(id);if(c)c.innerHTML='';
   });
   NOTES.forEach(n=>{
@@ -3415,7 +3524,8 @@ function buildPitchLists(){
     root.appendChild(b);
   });
   const scaleGroups={gregorian:'gregorian-btns',pentatonic:'pentatonic-btns',
-                     melodic:'melodic-btns',harmonic:'harmonic-btns',harmonicMajor:'harmonicmajor-btns'};
+                     melodic:'melodic-btns',harmonic:'harmonic-btns',harmonicMajor:'harmonicmajor-btns',
+                     symmetric:'symmetric-btns'};
   Object.entries(scaleGroups).forEach(([gk,cid])=>{
     const c=document.getElementById(cid);
     Object.keys(SCALES[gk]).forEach(sn=>{
@@ -3458,6 +3568,19 @@ function playingKind(){
   return state.mode==='arpeggio'?'chord':'scale';
 }
 function listEnabled(){return useListOn()&&activeList().length>0;}
+/* A rotation is a sequence of exercises, and "the dorian up, then the same
+   arpeggio down" is one exercise in two halves — so the direction belongs to the
+   item, not only to the panel. An item that has not been asked follows the
+   panel, which is what everything did before and what most rotations want. */
+const ITEM_DIRS=['up','down','updown'];
+const DIR_MARK={up:'\u2191',down:'\u2193',updown:'\u2195'};
+function activeDirection(){
+  if(listEnabled()){
+    const it=activeList()[studyIdx];
+    if(it&&it.dir)return it.dir;
+  }
+  return state.direction;
+}
 
 // The degree list changes size between scales (7) and chords (3-4), so a
 // "Start On" index from one can point past the end of the other.
@@ -3706,6 +3829,25 @@ function updateRotationPanel(){
       if(i===rotHold)d.classList.add('held');
       d.innerHTML='';
       d.append(document.createTextNode((i+1)+'. '+itemLabel(it)));
+      /* Its own direction, cycled by tapping it — the same shape of control as
+         the cross beside it, so there is no gesture to discover. Blank while it
+         follows the panel: a mark on every chip saying what the panel already
+         says would be noise on eight of them to be useful on one. */
+      const dirBtn=document.createElement('span');
+      dirBtn.className='chip-dir'+(it.dir?' set':'');
+      dirBtn.textContent=it.dir?DIR_MARK[it.dir]:'\u00b7';
+      dirBtn.setAttribute('role','button');
+      dirBtn.title=tr('rot.dir','Up, down, or up and back — this one only');
+      dirBtn.setAttribute('aria-label',tr('rot.dirName','Direction of {name}',{name:itemLabel(it)}));
+      dirBtn.onclick=e=>{
+        e.stopPropagation();
+        const list=activeList();
+        if(i>=list.length)return;
+        const at=it.dir?ITEM_DIRS.indexOf(it.dir)+1:0;
+        list[i].dir=at>=ITEM_DIRS.length?null:ITEM_DIRS[at];
+        updateRotationPanel();refreshSequence();restartIfPlaying();
+      };
+      d.appendChild(dirBtn);
       const x=document.createElement('span');x.className='chip-x';x.textContent='✕';
       x.title=tr('rot.remove','Remove from the rotation');
       x.setAttribute('role','button');
@@ -4246,6 +4388,25 @@ function renderPitchPickers(){
     else b.onclick=()=>{state.rootOct=o;state.rootOctWanted=o;renderPitchPickers();refreshSequence();restartIfPlaying();};
     octRow.appendChild(b);
   });
+
+  const patRow=document.getElementById('seqpat-row');
+  if(patRow){
+    patRow.innerHTML='';
+    SEQ_PATTERNS.forEach(sp=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(state.seqPattern===sp.k?' active':'');
+      b.textContent=lab('seqpat',sp.k,sp.label);
+      b.onclick=()=>{
+        state.seqPattern=sp.k;
+        clampRange();renderPitchPickers();refreshSequence();
+        refreshSectionSummaries();restartIfPlaying();
+      };
+      patRow.appendChild(b);
+    });
+    gridify(patRow);
+  }
+  const patInfoEl=document.getElementById('seqpat-info');
+  if(patInfoEl)patInfoEl.textContent=seqPatternSentence();
 
   const dirRow=document.getElementById('dir-row');dirRow.innerHTML='';
   DIRECTIONS.forEach(d=>{
