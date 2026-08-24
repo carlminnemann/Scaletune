@@ -3272,6 +3272,10 @@ function togglePlay(){
     return;
   }
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();return;}
+  /* A run through the modes is one exercise, first mode to last. Stopping part
+     way through and pressing Start again means starting it again, not resuming
+     where it happened to be — the seven only make sense from the top. */
+  restartModesRun();
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
   initAudio();
@@ -3358,7 +3362,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24f';
+const APP_VERSION='2026-08-24g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3564,7 +3568,7 @@ function buildPitchLists(){
     const b=document.createElement('button');
     // label is replaced by renderPitchPickers with the spelling of the key in use
     b.className='tonic-btn';b.dataset.root=n;b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
-    b.onclick=()=>{state.root=n;state.startDeg=0;modesStep=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
+    b.onclick=()=>{state.root=n;state.startDeg=0;markModesHome();renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
     root.appendChild(b);
   });
   const scaleGroups={gregorian:'gregorian-btns',pentatonic:'pentatonic-btns',
@@ -3578,7 +3582,7 @@ function buildPitchLists(){
       b.onclick=()=>{
         if(useListOn()){toggleListItem('scale',gk,sn);return;}
         state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
-        modesStep=0;                       // a chosen scale is the start of the run
+        markModesHome();                   // a chosen scale is the start of the run
         renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
       };
       c.appendChild(b);
@@ -3631,6 +3635,26 @@ function activeDirection(){
 /* How many modes into the run we are. Only its parity matters — it says which
    way this one goes when the run snakes. */
 let modesStep=0;
+/* Where the run set off from. A run through the modes is one exercise from the
+   first mode to the last, not a place in a cycle you resume: stopping in the
+   middle of it and pressing Start means starting it again. Remembered whenever
+   the run, the scale or the tonic is chosen. */
+let modesHome=null;
+function markModesHome(){
+  modesHome=(state.mode==='scale'&&state.scaleName)
+    ?{root:state.root,group:state.scaleGroup,name:state.scaleName}:null;
+  modesStep=0;
+}
+function restartModesRun(){
+  if(!modesRunOn())return;
+  modesStep=0;
+  if(!modesHome||modesHome.group!==state.scaleGroup)return;
+  if(state.root===modesHome.root&&state.scaleName===modesHome.name)return;
+  state.root=modesHome.root;
+  state.scaleName=modesHome.name;
+  state.startDeg=0;
+  renderPitchPickers();updateInfo();refreshSequence();updateRotationPanel();
+}
 /* Up-Down and Down-Up, during a run through the modes, mean the run itself
    turns: C ionian up to the C above, and the D above that is where D dorian
    starts, coming all the way down to its own D — from which E is one step up
@@ -4024,7 +4048,7 @@ function buildRootMoveRow(){
          thread. */
       // a run always sets off the way Direction says, not half way through the
       // snake it was in when it was last switched off
-      modesStep=0;
+      markModesHome();
       if(m.k==='modes'){state.span=1;state.spanWanted=1;renderPitchPickers();refreshSequence();}
       buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
     };
