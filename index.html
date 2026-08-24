@@ -918,19 +918,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="info-line" id="groove-info" style="display:none"></div>
   </div>
 
-  <div class="mgroup" id="mixer-block">
-    <div class="head pat-head" id="mix-head" role="button" tabindex="0"
-         aria-expanded="false" aria-controls="mix-body" style="margin-bottom:0">
-      <span class="section-label" data-t="mixer">Mixer</span>
-      <span class="pat-sum" id="mix-sum"></span>
-    </div>
-    <div id="mix-body" hidden>
-      <div id="mix-rows" style="margin-top:var(--s3)"></div>
-      <div class="info-line" id="mix-note"></div>
-      <button class="clear-btn" id="mix-reset" style="margin-top:var(--s2)">✕ Level again</button>
-    </div>
-  </div>
-
   <!-- The pattern itself, writable. Six voices down the side, a bar across, and
        a cell that goes round soft, middling, hard and off again — which is how a
        ghost note and an accent are written without a row each. -->
@@ -963,6 +950,19 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
       </div>
       <div class="info-line" id="pat-info"></div>
+    </div>
+  </div>
+
+  <div class="mgroup" id="mixer-block">
+    <div class="head pat-head" id="mix-head" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="mix-body" style="margin-bottom:0">
+      <span class="section-label" data-t="mixer">Mixer</span>
+      <span class="pat-sum" id="mix-sum"></span>
+    </div>
+    <div id="mix-body" hidden>
+      <div id="mix-rows" style="margin-top:var(--s3)"></div>
+      <div class="info-line" id="mix-note"></div>
+      <button class="clear-btn" id="mix-reset" style="margin-top:var(--s2)">✕ Level again</button>
     </div>
   </div>
 
@@ -1272,7 +1272,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <em>Mine</em> is a kit recorded here, in this room. <em>Machine</em> is made rather than
     recorded — dry, tight, and it cuts through a small speaker. Switch between them while something
     is playing; that is the only way to hear the difference.</dd>
-    <dt data-t="pattern-2">Pattern</dt><dd data-t="write-your-own-six-voices">Write your own. Six voices down the side and a bar across. <em>Loop</em> is how
+    <dt data-t="pattern-2">Pattern</dt><dd data-t="write-your-own-six-voices">Write your own. Six voices down the side and a bar across — the bar you chose, so setting
+    Beats to three gives you three to write in, and the pattern loops in three. A written style is
+    still in four and still says so; this one is yours. <em>Loop</em> is how
     many bars go round: set it to one and the bar you write repeats, set it to four and you have four
     to fill, with tabs to move between them. Pick a
     <em>Level</em> — ghost, middling or accented — and every tap writes at it; tapping a cell that
@@ -1750,8 +1752,11 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
 /* Metro opens on the tempo and the bar alone. The four groups under them are not
    hidden — they are moved, into a folded panel of their own — so nothing about
    them changes and every other mode still gets the one whole metronome. */
+/* The order the More panel is filled in. The mixer comes last, after the
+   pattern: it balances whatever is playing, so it is the thing you reach for
+   once the pattern is written rather than before. */
 const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block',
-                  'groove-block','mixer-block','pattern-block'];
+                  'groove-block','pattern-block','mixer-block'];
 function splitMetro(on){
   const more=document.getElementById('metro-more');
   const main=document.querySelector('#metro-section .metro-body');
@@ -1898,23 +1903,54 @@ function setStatus(m){
 // While suspended, currentTime never advances, so the lookahead scheduler sees
 // every beat as "not due yet" and deadlocks after the first click. Always
 // resume, and wait for it before reading the clock.
+/* A phone plays web audio through its "ambient" session unless it is told
+   otherwise, and ambient means two things a practice tool cannot live with: the
+   ring/silent switch silences it, and another app's alert can take the session
+   away and not hand it back. In a lesson the phone is on silent — that is the
+   whole point of it being on silent — and a mail arriving must not end the
+   metronome. Asking for "playback" says this is the audio the user came for.
+   Safari has honoured it since 16.4; where it is missing the call does nothing
+   and the old behaviour stands. */
+function claimAudioSession(){
+  try{
+    const s=navigator.audioSession;
+    if(s&&s.type!=='playback')s.type='playback';
+  }catch(e){}
+}
+
+/* An interruption does not end when it is announced. Asking once, at the moment
+   the context is taken away, is asking while the alert is still playing — the
+   resume is refused and the app stays silent with nothing more scheduled. So it
+   keeps asking, and stops the moment it is running again. */
+let resumeTimer=0;
+function keepRunning(){
+  clearTimeout(resumeTimer);
+  if(!audioCtx||!state.playing)return;
+  if(audioCtx.state==='running')return;
+  claimAudioSession();
+  try{audioCtx.resume();}catch(e){}
+  resumeTimer=setTimeout(keepRunning,400);
+}
+
 function initAudio(){
   if(!audioCtx){
+    claimAudioSession();
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     masterGain=audioCtx.createGain();
     masterGain.gain.value=state.volume*0.4;
     masterGain.connect(audioCtx.destination);
     // iOS suspends the context on a phone call or when backgrounded and never
     // restarts it on its own.
-    audioCtx.onstatechange=()=>{
-      if(audioCtx.state!=='running'&&state.playing)
-        try{audioCtx.resume();}catch(e){}
-    };
+    audioCtx.onstatechange=keepRunning;
     document.addEventListener('visibilitychange',()=>{
-      if(!document.hidden&&audioCtx&&audioCtx.state!=='running'&&state.playing)
-        try{audioCtx.resume();}catch(e){}
+      if(!document.hidden)keepRunning();
     });
+    /* A gesture is the one thing iOS never refuses, so any touch while the
+       sound is meant to be running is taken as permission to have it back. */
+    ['pointerdown','keydown','touchend'].forEach(ev=>
+      document.addEventListener(ev,keepRunning,{passive:true}));
   }
+  claimAudioSession();
   if(audioCtx.state==='running')return Promise.resolve();
   let p;
   try{p=audioCtx.resume();}catch(e){}
@@ -2577,6 +2613,10 @@ function grooveOn(){
   return !!(G&&G.hits.length);
 }
 function grooveBars(){const G=grooveDef();return G?G.bars:1;}
+/* The written styles are in four and say so; a pattern of your own is yours, so
+   its bar is the bar you chose. Every place that walks a pattern — the scheduler,
+   the editor, the copy between bars — counts with this rather than with a 4. */
+function grooveBeatsPerBar(){return state.groove==='custom'?Math.max(1,state.sig):4;}
 /* Several drums land on the same sixteenth — a kick, a hat and a ghost snare all
    at once in the funk — and at full volume that summed to 1.30 on the output,
    which clips. The whole kit is scaled to bring the loudest bar under one, and
@@ -2673,7 +2713,7 @@ function scheduleGrooveBeat(t0,beat){
   if(state.kit!=='machine'&&!currentDrums()){loadDrums();return false;}
   const voices=kitVoices();
   const unit=(60/state.bpm)/GRID;
-  const from=(beat%(G.bars*4))*GRID;
+  const from=(beat%(G.bars*grooveBeatsPerBar()))*GRID;
   G.hits.forEach(h=>{
     if(h[0]<from||h[0]>=from+GRID)return;
     const voice=voices[h[1]];
@@ -3016,7 +3056,7 @@ function schedulerTick(){
     subIdx++;
     if(subIdx>=subTicks(sub)){
       subIdx=0;beatIdx=(beatIdx+1)%state.sig;
-      if(!counting)grooveBeat=(grooveBeat+1)%(grooveBars()*4);
+      if(!counting)grooveBeat=(grooveBeat+1)%(grooveBars()*grooveBeatsPerBar());
       if(pulseOnly()){
         metroBeats++;
         if(beatIdx===0)metroBars++;
@@ -3132,6 +3172,15 @@ function updateClickVol(v){state.clickVol=parseFloat(v);document.getElementById(
 function setSig(n){
   state.sig=Math.max(1,Math.min(SIG_MAX,Math.round(n)||1));
   renderSigFields();
+  /* A pattern of your own is written in bars of this length, so a shorter bar
+     leaves hits past its end with nowhere to be. They are dropped rather than
+     kept invisible: a hit you cannot see and cannot reach is worse than one
+     that is gone. A longer bar simply has room to spare. */
+  const span=state.custom.bars*patBarSpan();
+  const before=state.custom.hits.length;
+  state.custom.hits=state.custom.hits.filter(h=>h[0]<span);
+  if(state.custom.hits.length!==before)savePattern();
+  buildPatternEditor();
   buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
 }
 
@@ -3156,7 +3205,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24b';
+const APP_VERSION='2026-08-24c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4467,8 +4516,9 @@ function buildGrooveRow(){
   // the bar is the style's while one is playing, so it cannot be typed over
   const q=document.getElementById('sig-4');
   if(q){
-    q.disabled=grooveOn();
-    q.title=grooveOn()?tr('sig.styleIsFour','the accompaniment styles are written in four'):'';
+    const locked=grooveOn()&&state.groove!=='custom';
+    q.disabled=locked;
+    q.title=locked?tr('sig.styleIsFour','the accompaniment styles are written in four'):'';
   }
   const info=document.getElementById('groove-info');
   if(info){
@@ -4500,7 +4550,9 @@ const PAT_VOICES=[['k','BD'],['s','SN'],['h','HH'],['o','OH'],['d','RD'],['r','C
 const PAT_VELS=[0,0.2,0.55,1.0];        // off, ghost, middling, accented
 let patBar=0;                            // which bar of the pattern is on screen
 const patStep=()=>state.custom.grid===12?4:3;    // twelfths per cell
-const patCells=()=>state.custom.grid===12?12:16; // cells per bar
+const patPerBeat=()=>state.custom.grid===12?3:4; // cells per beat
+const patCells=()=>patPerBeat()*Math.max(1,state.sig);   // cells per bar
+const patBarSpan=()=>Math.max(1,state.sig)*GRID;         // twelfths per bar
 
 function patAt(voice,pos){
   return state.custom.hits.find(h=>h[1]===voice&&h[0]===pos);
@@ -4521,7 +4573,9 @@ function patFromStyle(key){
      it is laid down repeatedly instead, up to the length you have, so four bars
      of rock is four bars of rock to work on. */
   if(state.custom.bars<G.bars)state.custom.bars=G.bars;
-  const span=state.custom.bars*4*GRID, styleSpan=G.bars*4*GRID;
+  // the style is written in four; anything past the end of a shorter bar is left
+  // behind rather than folded somewhere it was never meant to be
+  const span=state.custom.bars*patBarSpan(), styleSpan=G.bars*4*GRID;
   const hits=[];
   for(let at=0;at<span;at+=styleSpan){
     G.hits.forEach(h=>{
@@ -4580,7 +4634,7 @@ function buildPatternEditor(){
     [1,2,3,4].forEach(n=>bsel.appendChild(new Option(n,n)));
     bsel.addEventListener('change',()=>{
       state.custom.bars=Math.max(1,Math.min(4,parseInt(bsel.value,10)||1));
-      const span=state.custom.bars*4*GRID;
+      const span=state.custom.bars*patBarSpan();
       state.custom.hits=state.custom.hits.filter(h=>h[0]<span);
       savePattern();buildPatternEditor();refreshSectionSummaries();restartIfPlaying();
     });
@@ -4642,7 +4696,7 @@ function buildPatternEditor(){
       b.textContent=String(i+1);
       b.setAttribute('aria-label',tr('pat.copyAria','Copy bar {from} into bar {to}',{from:i+1,to:patBar+1}));
       b.onclick=()=>{
-        const span=4*GRID, from=i*span, to=patBar*span;
+        const span=patBarSpan(), from=i*span, to=patBar*span;
         const taken=state.custom.hits.filter(h=>h[0]>=from&&h[0]<from+span)
           .map(h=>[h[0]-from+to,h[1],h[2]]);
         state.custom.hits=state.custom.hits.filter(h=>h[0]<to||h[0]>=to+span).concat(taken);
@@ -4676,13 +4730,20 @@ function buildPatternEditor(){
   }
 
   grid.innerHTML='';
-  const offset=patBar*4*GRID;
+  const offset=patBar*patBarSpan();
   /* A finger needs about 24px. On a phone held upright sixteen cells cannot have
      that between them, so the bar is cut in half and stacked: two beats to a
      row, twice the width each. On anything wider the bar stays one line. */
   const room=(grid.parentElement?grid.parentElement.clientWidth:320)-36;
-  const perRow=(room/cells<24)?Math.ceil(cells/2):cells;
-  const beatsPerRow=perRow/(cells/4);
+  /* A row breaks on a beat, never inside one. Splitting sixteen cells in half
+     gives two beats a row and reads right; splitting twenty-eight in half gave
+     three and a half, and the second row began mid-beat with the numbers under
+     it lying about which beat that was. So the split is counted in beats and
+     the cells follow. */
+  const perBeat=patPerBeat(),beats=Math.max(1,Math.ceil(cells/perBeat));
+  const rowBeats=(room/cells<24)?Math.ceil(beats/2):beats;
+  const perRow=rowBeats*perBeat;
+  const beatsPerRow=rowBeats;
 
   for(let start=0;start<cells;start+=perRow){
     const half=document.createElement('div');half.className='pat-half';
@@ -4696,7 +4757,6 @@ function buildPatternEditor(){
       for(let c=start;c<start+count;c++){
         const pos=offset+c*step;
         const cell=document.createElement('button');
-        const perBeat=cells/4;
         const off=patOffGrid(voice,pos,pos+step);
         cell.className='pat-cell'+(c%perBeat===0?' beat':'')+(off?' off':'');
         cell.dataset.v=String(patLevel(patAt(voice,pos)));
@@ -4721,9 +4781,9 @@ function buildPatternEditor(){
     const spacer=document.createElement('div');
     const marks=document.createElement('div');
     marks.className='pat-ruler-cells';
-    marks.style.gridTemplateColumns='repeat('+(count/(cells/4))+',1fr)';
-    const firstBeat=Math.floor(start/(cells/4))+1;
-    for(let b=0;b<count/(cells/4);b++){
+    marks.style.gridTemplateColumns='repeat('+Math.ceil(count/patPerBeat())+',1fr)';
+    const firstBeat=Math.floor(start/patPerBeat())+1;
+    for(let b=0;b<Math.ceil(count/patPerBeat());b++){
       const sp=document.createElement('span');sp.textContent=String(firstBeat+b);marks.appendChild(sp);
     }
     ruler.append(spacer,marks);
@@ -5019,14 +5079,16 @@ function buildKitRow(){
 }
 
 function setGroove(k){
-  const had=grooveOn();
+  const hadWritten=grooveOn()&&state.groove!=='custom';
   state.groove=k;
-  // The styles are written in four. Rather than let one run against a bar it was
-  // not written for, the bar goes to four while a style plays and comes back to
-  // what it was when the click returns.
-  if(grooveOn()){
-    if(state.sig!==4){if(!had)state.sigBeforeGroove=state.sig;setSig(4);}
-  } else if(had&&state.sigBeforeGroove){
+  /* The written styles are in four. Rather than let one run against a bar it was
+     not written for, the bar goes to four while a style plays and comes back to
+     what it was when the click returns. A pattern of your own is not written in
+     anything until you write it, so it takes the bar it finds and keeps it. */
+  const written=grooveOn()&&state.groove!=='custom';
+  if(written){
+    if(state.sig!==4){if(!hadWritten)state.sigBeforeGroove=state.sig;setSig(4);}
+  } else if(hadWritten&&state.sigBeforeGroove){
     const back=state.sigBeforeGroove;state.sigBeforeGroove=null;setSig(back);
   }
   // fetch them now rather than on the first beat, and only once there is a
