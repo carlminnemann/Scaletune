@@ -1255,7 +1255,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     in four, so the bar goes to four while one plays and comes back to what it was when the click
     returns. The count-in still clicks: there you want a beat and
     nothing else. The Click slider is its volume. The kit is recorded, not
-    synthesised: five hits from the Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
+    synthesised. The bass drum and snare were recorded here; the three cymbals are from the
+    Muldjord Kit by Lars Muldjord (FreePats), under CC-BY 4.0.</dd>
     <dt data-t="mixer-2">Mixer</dt><dd data-t="a-level-for-each-drum">A level for each drum, over whatever the pattern asks for — the one thing that
     can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
     not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
@@ -2358,7 +2359,8 @@ function playClickBuffer(buf,time,gain){
 /* The kit is recorded, not synthesised. The first version made its own sounds —
    a sine falling for a kick, filtered noise for a snare and hats — and on a
    phone speaker that came to nothing: a 50Hz kick is below what the speaker can
-   move, and a 7kHz hiss is barely there. These are five hits from the Muldjord
+   move, and a 7kHz hiss is barely there. The bass drum and snare are Carl's own
+   drums; the three cymbals are hits from the Muldjord
    Kit (FreePats, CC-BY 4.0), trimmed to length, tapered so the cut cannot click,
    and normalised. 180KB for the whole kit.
 
@@ -2366,35 +2368,23 @@ function playClickBuffer(buf,time,gain){
    metronome that has gone quiet is worse than one that is not the sound you
    asked for. */
 const DRUM_FILES={kick:'kick',snare:'snare',hhc:'hhc',hho:'hho',ride:'ride'};
-/* Two recorded kits live side by side, so switching between them is the only
-   way to judge one against the other: what a drum sounds like on its own tells
-   you almost nothing. Each is decoded once and then kept. */
-const KIT_DIRS={recorded:'vendor/drums',mine:'vendor/drums-mine'};
-// the clave is synthesised for the borrowed kit and recorded for the other
-const KIT_EXTRA={mine:['clave']};
-const kitBufs={};
-let drumsLoading=false,drumsFailed=false;
-function kitDir(){return KIT_DIRS[state.kit]||KIT_DIRS.recorded;}
-function currentDrums(){return kitBufs[state.kit]||null;}
+let drumBufs=null,drumsLoading=false,drumsFailed=false;
+function currentDrums(){return drumBufs;}
 function loadDrums(){
-  const kit=state.kit;
-  if(kitBufs[kit]||drumsLoading||drumsFailed)return;
+  if(drumBufs||drumsLoading||drumsFailed)return;
   if(!audioCtx)return;
   drumsLoading=true;
-  const names=Object.keys(DRUM_FILES).concat(KIT_EXTRA[kit]||[]);
-  const dir=kitDir();
-  Promise.all(names.map(n=>fetch(dir+'/'+(DRUM_FILES[n]||n)+'.wav')
+  const names=Object.keys(DRUM_FILES);
+  Promise.all(names.map(n=>fetch('vendor/drums/'+DRUM_FILES[n]+'.wav')
     .then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();})
     .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))))
   .then(bufs=>{
     const out={};names.forEach((n,i)=>out[n]=bufs[i]);
-    kitBufs[kit]=out;drumsLoading=false;
+    drumBufs=out;drumsLoading=false;
     if(grooveOn())setStatus(tr('drums.ready','Drums loaded \u2713')),setTimeout(()=>setStatus(''),1500);
   })
   .catch(()=>{
-    drumsLoading=false;
-    // only this kit failed; another may still load
-    drumsFailed=Object.keys(kitBufs).length===0;
+    drumsLoading=false;drumsFailed=true;
     setStatus(tr('drums.failed','The drums could not load \u2014 the accompaniment is clicking instead.'));
   });
 }
@@ -2489,8 +2479,7 @@ const RECORDED={
   h:(t,v)=>drumHit('hhc',  t,0.42*v),
   o:(t,v)=>drumHit('hho',  t,0.34*v),
   d:(t,v)=>drumHit('ride', t,0.80*v),
-  // a recorded clave if this kit brought one, the synthesised block if not
-  r:(t,v)=>drumHit('clave',t,0.9*v)||(woodClick(t,0.9*v),true),
+  r:(t,v)=>{woodClick(t,0.9*v);return true;},
   w:(t,v,spb)=>{brushSwirl(t,v,spb);return true;},
   x:(t,v)=>{brushTap(t,v);return true;},
   b:(t,v)=>drumHit('kick', t,0.85*v),
@@ -3167,7 +3156,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24a';
+const APP_VERSION='2026-08-24b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4857,7 +4846,7 @@ function loadPattern(){
       state.custom.bars=Math.max(1,Math.min(4,parseInt(p.bars,10)||1));
       state.custom.grid=p.grid===12?12:16;
     }
-    if(p&&(p.kit==='machine'||p.kit==='recorded'||p.kit==='mine'))state.kit=p.kit;
+    if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;
     if(p&&p.mix)Object.keys(state.mix).forEach(k=>{
       const v=parseFloat(p.mix[k]);
       if(!isNaN(v)&&v>=0&&v<=1.5)state.mix[k]=v;
@@ -5015,8 +5004,7 @@ function buildKitRow(){
   const line=document.getElementById('kit-line');
   if(line)line.style.display=grooveOn()?'':'none';
   row.innerHTML='';
-  [['recorded',tr('kit.recorded','Recorded')],['mine',tr('kit.mine','Mine')],
-   ['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
+  [['recorded',tr('kit.recorded','Recorded')],['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.kit===k?' active':'');
     b.textContent=label;

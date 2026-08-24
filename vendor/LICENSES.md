@@ -37,11 +37,19 @@ MP3/JS conversion by Benjamin Gleitzman — midi-js-soundfonts.
 License: MIT
 Source: https://github.com/gleitz/midi-js-soundfonts
 
-## Muldjord Kit — drum samples
-`vendor/drums/kick.wav` · `snare.wav` · `hhc.wav` · `hho.wav` · `ride.wav` — 220 KB together
+## Carl Minnemann — bass drum and snare
+`vendor/drums/kick.wav` · `snare.wav` — 61 KB together
 
-Five hits from a recorded acoustic kit, used by the metronome's accompaniment
-styles: bass drum, snare, closed hi-hat, open hi-hat, ride. The clave in the
+Recorded by Carl Minnemann in his own room, from his own kit, and owned by him:
+no third-party licence applies to these two. They replaced the borrowed kick and
+snare. Each is one stroke cut from a longer take, trimmed so the transient is at
+the front, tapered and normalised the same way as the rest.
+
+## Muldjord Kit — cymbals
+`vendor/drums/hhc.wav` · `hho.wav` · `ride.wav` — 261 KB together
+
+Three hits from a recorded acoustic kit, used by the metronome's accompaniment
+styles: closed hi-hat, open hi-hat, ride. The clave in the
 bossa is not among them — it is synthesised, two short partials and no body,
 because the kit has no rim and a soft snare hit gave a thud where a bossa wants
 a piece of wood. Each is one velocity layer of the original,

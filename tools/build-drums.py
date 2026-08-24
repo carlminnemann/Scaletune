@@ -21,15 +21,23 @@ TMP='.drum-build'
 # beat at any slow tempo, which is what a ride must never do, so it runs 2.4s
 # now with only a short taper at the end and the natural decay doing the work.
 # It is the one sample kept at 32kHz: its tail is all shimmer, and 32k holds
-# everything under 16kHz for two thirds of the bytes. 
-# name          source file                        secs  shaping  taper  rate
+# everything under 16kHz for two thirds of the bytes.
+#
+# The kick and the snare are Carl's own drums, recorded in his room; the cymbals
+# are still the borrowed ones. A source beginning with "mine:" is a file from
+# that session rather than one fetched from the kit, and it is a take rather
+# than a one-shot — several strokes in one file — so it also says which stroke
+# to take.
+# name          source                              secs  shaping  taper  rate
 SPEC=[
- ('kick',  'KdrumL/20-KdrumL.flac',                0.55, 'kick',  0.34, 44100),
- ('snare', 'Snare1/40-Snare.flac',                 0.45, None,    0.34, 44100),
+ ('kick',  'mine:bombo forte.wav#1',               0.50, 'kick',  0.30, 44100),
+ ('snare', 'mine:snare forte.wav#1',               0.40, None,    0.30, 44100),
  ('hhc',   'HihatClosed/20-HihatClosed.flac',      0.22, None,    0.34, 44100),
  ('hho',   'HihatOpen/20-HihatOpen.flac',          1.00, None,    0.18, 44100),
  ('ride',  'RideR/9-RideR.flac',                   2.40, None,    0.15, 32000),
 ]
+MINE=('/Users/carlminnemann/Library/CloudStorage/OneDrive-JOBRA/'
+      'Carl Minnemann/Claude/bateria')
 
 def biquad(d,b0,b1,b2,a1,a2):
     out=[];x1=x2=y1=y2=0.0
@@ -66,6 +74,38 @@ def read(p):
     d=struct.unpack('<%dh'%n,w.readframes(n));w.close()
     return [x/32768 for x in d],sr
 
+def read_any(p):
+    """Carl's files are 24-bit and some are stereo; folded to mono floats."""
+    w=wave.open(p)
+    n,sr,ch,sw=w.getnframes(),w.getframerate(),w.getnchannels(),w.getsampwidth()
+    raw=w.readframes(n);w.close()
+    out=[0.0]*n;step=sw*ch
+    for i in range(n):
+        b=i*step;acc=0.0
+        for c in range(ch):
+            o=b+c*sw
+            if sw==3:
+                v=raw[o]|(raw[o+1]<<8)|(raw[o+2]<<16)
+                if v&0x800000: v-=0x1000000
+                acc+=v/8388608.0
+            else:
+                v=raw[o]|(raw[o+1]<<8)
+                if v&0x8000: v-=0x10000
+                acc+=v/32768.0
+        out[i]=acc/ch
+    return out,sr
+
+def nth_stroke(d,sr,which):
+    """Where stroke number `which` begins, in a file holding several."""
+    blk=256
+    env=[max(abs(v) for v in d[i:i+blk]) or 0.0 for i in range(0,len(d)-blk,blk)]
+    pk=max(env);starts=[];armed=True
+    for i,v in enumerate(env):
+        if armed and v>pk*0.35: starts.append(i);armed=False
+        elif not armed and v<pk*0.08: armed=True
+    if not starts: return 0
+    return starts[min(which,len(starts))-1]*blk
+
 def phone_peak(d,sr):
     """Roughly what a phone speaker lets out: two poles at 400Hz."""
     f=hp(hp(d,sr,400),sr,400)
@@ -74,18 +114,35 @@ def phone_peak(d,sr):
 def main():
     os.makedirs(OUT,exist_ok=True);os.makedirs(TMP,exist_ok=True)
     for name,src,dur,shape,taper,rate in SPEC:
-        flac=os.path.join(TMP,name+'.flac');wav=os.path.join(TMP,name+'.wav')
-        if not os.path.exists(flac):
-            subprocess.run(['curl','-sL','-o',flac,BASE+'/'+src],check=True)
-        decode(flac,wav,rate)
-        d,sr=read(wav)
-        pk=max(abs(x) for x in d)
-        start=next(i for i,x in enumerate(d) if abs(x)>pk*0.02)
-        start=max(0,start-int(0.002*sr))
+        if src.startswith('mine:'):
+            fn,_,which=src[5:].partition('#')
+            d,sr=read_any(os.path.join(MINE,fn))
+            at=nth_stroke(d,sr,int(which or 1))
+            pk=max(abs(x) for x in d)
+            back=at
+            while back>0 and abs(d[back])>pk*0.02: back-=1
+            start=max(0,back-int(0.002*sr))
+        else:
+            flac=os.path.join(TMP,name+'.flac');wav=os.path.join(TMP,name+'.wav')
+            if not os.path.exists(flac):
+                subprocess.run(['curl','-sL','-o',flac,BASE+'/'+src],check=True)
+            decode(flac,wav,rate)
+            d,sr=read(wav)
+            pk=max(abs(x) for x in d)
+            start=next(i for i,x in enumerate(d) if abs(x)>pk*0.02)
+            start=max(0,start-int(0.002*sr))
         cut=list(d[start:start+int(dur*sr)])
         tail=int(len(cut)*taper)         # a cosine taper over the end
         for i in range(tail):
             cut[len(cut)-tail+i]*=0.5*(1+math.cos(math.pi*(i/tail)))
+        if sr!=rate:
+            n=int(len(cut)*rate/sr);rs=[0.0]*n
+            for i in range(n):
+                x=i*sr/rate;j=int(x);f=x-j
+                a=cut[j] if j<len(cut) else 0.0
+                b=cut[j+1] if j+1<len(cut) else 0.0
+                rs[i]=a+(b-a)*f
+            cut=rs;sr=rate
         if shape:cut=SHAPE[shape](cut,sr)
         g=0.95/(max(abs(x) for x in cut) or 1)
         frames=[max(-32768,min(32767,int(x*g*32767))) for x in cut]
