@@ -2902,10 +2902,14 @@ function subdivOrder(){
   const l=state.practice.subdivList;
   if(l.length<2)return l.slice();
   if(state.practice.subdivDir==='down')return l.slice().reverse();
-  // Unlike the notes, the return to the FIRST figure is kept: the point of a
-  // table of time is to come back to where it started before the key moves on.
-  // Eighths, triplets, eighths — and only then the next fourth.
-  if(state.practice.subdivDir==='updown')return l.concat(l.slice(0,-1).reverse());
+  /* There and back, with the figure at each end sounding once. The list used to
+     end on the first figure as well as begin on it, so that eighths, triplets,
+     eighths came round — but the list loops, and looping a list that starts and
+     ends on the same figure plays it twice in a row at the join, which reads as
+     having stuck. Eighths, triplets, sixteenths, triplets — and the next eighths
+     is the one that starts the round again. The return is still there; it is
+     just not written twice. */
+  if(state.practice.subdivDir==='updown')return l.concat(l.slice(1,-1).reverse());
   return l.slice();
 }
 function currentSubdiv(){
@@ -3413,7 +3417,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24m';
+const APP_VERSION='2026-08-24n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4216,10 +4220,16 @@ function tapTempo(){
   },2200);
 }
 
+/* A scale runs once, from one end to the other, so which end it sets off from is
+   a real choice. A table of time goes round and round, and on a loop Down-Up is
+   Up-Down entered at a different point — the same cycle described twice. It is
+   offered for the notes and not here. */
+const SUBDIV_DIRS=DIRECTIONS.filter(d=>d.k!=='downup');
 function buildSubdivDirRow(){
   const row=document.getElementById('subdivdir-row');row.innerHTML='';
   if(!state.practice.useSubdivList)return;          // only meaningful for a sequence
-  DIRECTIONS.forEach(d=>{
+  if(state.practice.subdivDir==='downup')state.practice.subdivDir='updown';
+  SUBDIV_DIRS.forEach(d=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.practice.subdivDir?' active':'');
     b.textContent=lab('subdivdir',d.k,d.label);
