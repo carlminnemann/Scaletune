@@ -1243,8 +1243,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="through-the-modes">Through the modes</dt><dd data-t="the-seven-modes-of-one">The seven modes of one scale, each from its own note and each one
     octave: C ionian, then D dorian, then E phrygian, round to B locrian and back to C. The key never
     changes — the tonic steps up to the next degree and the mode steps with it, which is the same
-    thing said twice — so the whole run is in one key and there is not an accidental in it. Direction
-    applies inside each mode, so <em>Down-Up</em> takes every one of them down and back. It wants one
+    thing said twice — so the whole run is in one key and there is not an accidental in it.
+    <em>Up</em> and <em>Down</em> take every mode the same way. <em>Up-Down</em> and <em>Down-Up</em>
+    make the run itself turn, which is how this is practised: C ionian up to the C above, and the D
+    above that is where D dorian starts, coming all the way down to its own D — from which E is one
+    step up and it turns again. Every handover but one is a single step, and the run stays between
+    the octave you chose and the one above it. The exception is the wrap from the last mode back to
+    the first, where you would take a breath anyway. It wants one
     seven-note scale chosen on its own: the modes are that scale's own rotations, which a pentatonic,
     a chord and a symmetric scale do not have. One octave each, because over two the next mode would
     begin where the ear has lost the thread of the one before — and between them there is a drop back
@@ -3353,7 +3358,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24e';
+const APP_VERSION='2026-08-24f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3559,7 +3564,7 @@ function buildPitchLists(){
     const b=document.createElement('button');
     // label is replaced by renderPitchPickers with the spelling of the key in use
     b.className='tonic-btn';b.dataset.root=n;b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
-    b.onclick=()=>{state.root=n;state.startDeg=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
+    b.onclick=()=>{state.root=n;state.startDeg=0;modesStep=0;renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
     root.appendChild(b);
   });
   const scaleGroups={gregorian:'gregorian-btns',pentatonic:'pentatonic-btns',
@@ -3573,6 +3578,7 @@ function buildPitchLists(){
       b.onclick=()=>{
         if(useListOn()){toggleListItem('scale',gk,sn);return;}
         state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
+        modesStep=0;                       // a chosen scale is the start of the run
         renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
       };
       c.appendChild(b);
@@ -3614,12 +3620,43 @@ function listEnabled(){return useListOn()&&activeList().length>0;}
 const ITEM_DIRS=['up','down','updown'];
 const DIR_MARK={up:'\u2191',down:'\u2193',updown:'\u2195'};
 function activeDirection(){
+  if(modesRunOn())return modeRunDir();
   if(listEnabled()){
     const it=activeList()[studyIdx];
     if(it&&it.dir)return it.dir;
   }
   return state.direction;
 }
+
+/* How many modes into the run we are. Only its parity matters — it says which
+   way this one goes when the run snakes. */
+let modesStep=0;
+/* Up-Down and Down-Up, during a run through the modes, mean the run itself
+   turns: C ionian up to the C above, and the D above that is where D dorian
+   starts, coming all the way down to its own D — from which E is one step up
+   and the snake turns again. Each mode is still one octave; what changes is
+   that consecutive modes join a step apart instead of leaping back, and the
+   whole run stays between the octave you chose and the one above it. Seven is
+   odd, so the eighth mode is the ionian coming down, landing exactly where the
+   first one set off. */
+function modesSnake(){
+  return modesRunOn()&&(state.direction==='updown'||state.direction==='downup');
+}
+/* A descending mode is the ascending one read backwards, so its tonic is
+   already the note it ends on and the octave above is already where it begins:
+   no shift is wanted anywhere. Every mode of the run therefore lives between
+   the octave you chose and the one above it, and the run cannot walk off the
+   top — which the strict "each mode starts one degree above the last note"
+   rule would do, an octave every seven modes. The price is a single leap, at
+   the wrap from the last mode back to the first, which is where you would take
+   a breath anyway. */
+function modeRunDir(){
+  if(!modesSnake())return state.direction;
+  const first=state.direction==='updown'?'up':'down';
+  const turned=(modesStep%2)===1;
+  return turned?(first==='up'?'down':'up'):first;
+}
+
 
 // The degree list changes size between scales (7) and chords (3-4), so a
 // "Start On" index from one can point past the end of the other.
@@ -3786,6 +3823,7 @@ function advancePass(){
       state.root=NOTES[(NOTES.indexOf(state.root)+degrees[1])%12];
       state.scaleName=names[(at+1)%names.length];
       state.startDeg=0;
+      modesStep++;
       itemChange=true;
     }
   }
@@ -3984,6 +4022,9 @@ function buildRootMoveRow(){
       /* Each mode runs one octave from its own note: that is the exercise, and
          over two octaves the next mode would start where the ear has lost the
          thread. */
+      // a run always sets off the way Direction says, not half way through the
+      // snake it was in when it was last switched off
+      modesStep=0;
       if(m.k==='modes'){state.span=1;state.spanWanted=1;renderPitchPickers();refreshSequence();}
       buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
     };
