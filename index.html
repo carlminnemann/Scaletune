@@ -1240,6 +1240,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="root-movement-2">Root Movement</dt><dd data-t="stay-in-one-key-or">Stay in one key, or move up a fourth each time everything else has been
     round once — the cycle of fourths.</dd>
 
+    <dt data-t="through-the-modes">Through the modes</dt><dd data-t="the-seven-modes-of-one">The seven modes of one scale, each from its own note and each one
+    octave: C ionian, then D dorian, then E phrygian, round to B locrian and back to C. The key never
+    changes — the tonic steps up to the next degree and the mode steps with it, which is the same
+    thing said twice — so the whole run is in one key and there is not an accidental in it. Direction
+    applies inside each mode, so <em>Down-Up</em> takes every one of them down and back. It wants one
+    seven-note scale chosen on its own: the modes are that scale's own rotations, which a pentatonic,
+    a chord and a symmetric scale do not have. One octave each, because over two the next mode would
+    begin where the ear has lost the thread of the one before — and between them there is a drop back
+    down, which is what your hand does anyway.</dd>
     <dt data-t="what-a-pass-is">What a pass is</dt><dd data-t="one-round-of-the-notes">One round of the notes. The order is: the rhythmic figure first, then the
     mode or chord, then the key — so one mode goes through every figure before the next mode starts.</dd>
   </dl></div>
@@ -1571,7 +1580,8 @@ function spell(rootPc,intervals,letterStep){
 function octForSpelled(sem,letterIdx,acc){return(sem-acc-NATURAL[letterIdx])/12;}
 const SPANS=[1,2,3];
 const ROOT_OCTS=[1,2,3,4,5];
-const DIRECTIONS=[{k:'up',label:'Up'},{k:'down',label:'Down'},{k:'updown',label:'Up-Down'}];
+const DIRECTIONS=[{k:'up',label:'Up'},{k:'down',label:'Down'},
+                  {k:'updown',label:'Up-Down'},{k:'downup',label:'Down-Up'}];
 
 const SCALES={
   gregorian:{
@@ -1780,7 +1790,32 @@ let state={
   playing:false,tunerA4:440,tunerTemp:'equal',tunerKey:0,
   listKind:null,             // which kind the rotation is on right now
 };
-const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'}];
+/* Three ways the key can move between passes. "Through the modes" is the one
+   that does not move the key at all: it moves the tonic up to the next degree
+   and takes the next mode with it, so C ionian hands over to D dorian and the
+   seven of them are one exercise in one key. It needs a family whose members
+   are the rotations of one scale, which is what the seven-note families are and
+   what a pentatonic, a chord or a symmetric scale is not. */
+const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'},
+                  {k:'modes',label:'Through the modes'}];
+const MODE_FAMILIES=['gregorian','melodic','harmonic','harmonicMajor'];
+function modesRunPossible(){
+  return state.mode==='scale'&&MODE_FAMILIES.indexOf(state.scaleGroup)>=0
+         &&!useListOn();
+}
+function modesRunOn(){return state.practice.rootMove==='modes'&&modesRunPossible();}
+/* Which key the run is in, whichever of its modes is playing: the first mode in
+   the family is the parent, so the parent's tonic is this many degrees back. */
+function modesKeyName(){
+  const fam=SCALES[state.scaleGroup];
+  if(!fam)return bareName(NOTES.indexOf(state.root));
+  const names=Object.keys(fam);
+  const at=names.indexOf(state.scaleName);
+  const parent=fam[names[0]];
+  if(at<0||!parent||at>=parent.length)return bareName(NOTES.indexOf(state.root));
+  const pc=((NOTES.indexOf(state.root)-parent[at])%12+12)%12;
+  return DEFAULT_SPELL[pc]?spelledText(DEFAULT_SPELL[pc]):NOTES[pc];
+}
 const TEMPO_STEP_MAX=60;   // beyond this a "gradual" ramp stops being gradual
 // Clicks per beat. The beat itself never moves — only how finely it is divided.
 /* A figure is normally an even division of the beat, and its key is simply how
@@ -2911,6 +2946,10 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
   if(direction==='down')return up.slice().reverse();
   // up-down: the turnaround notes sound once, not twice
   if(direction==='updown')return up.concat(up.slice(1,-1).reverse());
+  if(direction==='downup'){
+    const d=up.slice().reverse();
+    return d.concat(d.slice(1,-1).reverse());
+  }
   return up;
 }
 
@@ -3314,7 +3353,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24d';
+const APP_VERSION='2026-08-24e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3734,6 +3773,22 @@ function advancePass(){
     state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
     keyChange=true;                        // a different key
   }
+  /* The modes of one scale, each from its own note. The tonic moves up by the
+     scale's own second degree and the next mode comes with it — D is a tone
+     above C in ionian, E a semitone above D in dorian — so the key never
+     changes and the seven of them come back to where they began. Counted as a
+     change of mode rather than of key, because that is what it is. */
+  if(wrapped&&modesRunOn()){
+    const names=Object.keys(SCALES[state.scaleGroup]);
+    const at=names.indexOf(state.scaleName);
+    const degrees=SCALES[state.scaleGroup][state.scaleName];
+    if(at>=0&&degrees&&degrees.length>1){
+      state.root=NOTES[(NOTES.indexOf(state.root)+degrees[1])%12];
+      state.scaleName=names[(at+1)%names.length];
+      state.startDeg=0;
+      itemChange=true;
+    }
+  }
   /* A new key or a new mode is where you need a moment to find the first note,
      so the count-in can be asked for there — not between rounds of the same
      thing, which would break the very drift the app is built around. Which of
@@ -3764,25 +3819,36 @@ function rotationPreview(){
   const figs=subdivListOn()?subdivOrder():null;
   const needed=state.alignPasses?1:alignmentRounds();
   const roundsLeft=Math.max(0,needed-roundsInFigure);
-  let sIdx=studyIdx,dIdx=subdivIdx,root=state.root,moved=false;
+  let sIdx=studyIdx,dIdx=subdivIdx,root=state.root,moved=false,nextName=null;
   if(roundsLeft<=1){                 // this pass finishes the drift, so things move
     let wrapped=true;moved=true;
     if(figs&&figs.length>1){dIdx=(dIdx+1)%figs.length;wrapped=(dIdx===0);}
     if(wrapped&&useListOn()&&list.length>1){sIdx=(sIdx+1)%list.length;wrapped=(sIdx===0);}
     if(wrapped&&state.practice.rootMove==='fourths')root=NOTES[(NOTES.indexOf(root)+5)%12];
+    // mirroring advancePass: the tonic steps to the next degree and the mode
+    // steps with it, so the reading says "D Dorian" before it is playing
+    if(wrapped&&modesRunOn()){
+      const names=Object.keys(SCALES[state.scaleGroup]);
+      const at=names.indexOf(state.scaleName);
+      const degrees=SCALES[state.scaleGroup][state.scaleName];
+      if(at>=0&&degrees&&degrees.length>1){
+        root=NOTES[(NOTES.indexOf(root)+degrees[1])%12];
+        nextName=names[(at+1)%names.length];
+      }
+    }
   }
   const figName=v=>({1:tr('fig.quarters','quarters'),2:tr('fig.eighths','eighths'),
     '2s':tr('fig.swing','swing'),3:tr('fig.triplets','triplets'),4:tr('fig.sixteenths','sixteenths')})[v]||'';
-  const describe=(item,fig,rt)=>{
+  const describe=(item,fig,rt,name)=>{
     const bits=[];
     bits.push(bareName(NOTES.indexOf(rt))+' '+(item?itemLabel(item)
-      :(state.mode==='scale'?scaleLabel(state.scaleName):chordLabel(state.chordName))||'—'));
+      :(state.mode==='scale'?scaleLabel(name||state.scaleName):chordLabel(state.chordName))||'—'));
     if(figs||state.subdiv!==1)bits.push(figName(fig));
     return bits.filter(Boolean).join(' · ');
   };
   return {
     now:describe(list[studyIdx],figs?figs[subdivIdx%figs.length]:state.subdiv,state.root),
-    next:describe(list[sIdx],figs?figs[dIdx%figs.length]:state.subdiv,root),
+    next:describe(list[sIdx],figs?figs[dIdx%figs.length]:state.subdiv,root,nextName),
     roundsLeft, needed, moved,
     items:list, currentIdx:studyIdx, nextIdx:sIdx
   };
@@ -3904,12 +3970,26 @@ function updateRotationPanel(){
 function buildRootMoveRow(){
   const row=document.getElementById('rootmove-row');row.innerHTML='';
   ROOT_MOVES.forEach(m=>{
+    /* Running the modes needs a family whose members are rotations of one
+       scale. Offered greyed rather than hidden where it cannot work, so it is
+       clear the app has it and clear what it wants: a seven-note scale, chosen
+       one at a time. */
+    const off=(m.k==='modes')&&!modesRunPossible();
     const b=document.createElement('button');
-    b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'');
+    b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'')+(off?' disabled':'');
     b.textContent=lab('rootmove',m.k,m.label);
-    b.onclick=()=>{state.practice.rootMove=m.k;buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();};
+    if(off)b.title=tr('modes.needs','Pick one seven-note scale — the modes are its own rotations');
+    else b.onclick=()=>{
+      state.practice.rootMove=m.k;
+      /* Each mode runs one octave from its own note: that is the exercise, and
+         over two octaves the next mode would start where the ear has lost the
+         thread. */
+      if(m.k==='modes'){state.span=1;state.spanWanted=1;renderPitchPickers();refreshSequence();}
+      buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
+    };
     row.appendChild(b);
   });
+  gridify(row);
   updatePracticeInfo();
 }
 
@@ -4230,6 +4310,8 @@ function updatePracticeInfo(){
   const bits=[];
   if(listEnabled())bits.push(activeList().length+' items in rotation');
   if(state.practice.rootMove==='fourths')bits.push('root up a 4th'+((listEnabled()||subdivListOn())?' after the full cycle':' each pass'));
+  if(modesRunOn())bits.push(tr('modes.running','{n} modes of {key}, one octave each',
+    {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
 
@@ -4364,16 +4446,24 @@ function renderPitchPickers(){
   paintSetButtons('[data-scale]','scale','scale');
   paintSetButtons('[data-chord]','chord','arpeggio');
   buildListModeRow();
+  /* Running the modes is only possible for some choices, so the row that offers
+     it has to be built again whenever the choice changes — otherwise it stays
+     greyed out from before the scale was picked. */
+  buildRootMoveRow();
   refreshFamilySummaries();
   updateRotationPanel();
 
   const spanRow=document.getElementById('span-row');spanRow.innerHTML='';
   SPANS.forEach(s=>{
     const b=document.createElement('button');
-    const off=exceedsRange({span:s});
+    // one octave each is the exercise; over two the next mode would begin where
+    // the ear has lost the thread of the one before
+    const off=exceedsRange({span:s})||(modesRunOn()&&s!==1);
     b.className='pick-btn'+(s===state.span?' active':'')+(off?' disabled':'');
     b.textContent=tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:s});
-    if(off)b.title=tr('range.tooHighStart','Would go above C8 from this start octave');
+    if(off)b.title=modesRunOn()&&!exceedsRange({span:s})
+      ?tr('modes.oneOctave','Each mode runs one octave from its own note')
+      :tr('range.tooHighStart','Would go above C8 from this start octave');
     else b.onclick=()=>{state.span=s;state.spanWanted=s;renderPitchPickers();refreshSequence();restartIfPlaying();};
     spanRow.appendChild(b);
   });
@@ -4422,11 +4512,17 @@ function renderPitchPickers(){
   if(degrees){
     rebuildSpelling();
     const rootIdx=NOTES.indexOf(state.root);
+    /* During a run through the modes each one starts on its own tonic, which is
+       the whole point of it — so this says so rather than accepting a choice it
+       would overwrite at the next handover. */
+    const locked=modesRunOn();
     degrees.forEach((d,i)=>{
       const b=document.createElement('button');
-      b.className='pick-btn'+(i===state.startDeg?' active':'');
+      const off=locked&&i!==0;
+      b.className='pick-btn'+(i===state.startDeg?' active':'')+(off?' disabled':'');
       b.textContent=bareName((rootIdx+d)%12);
-      b.onclick=()=>{state.startDeg=i;renderPitchPickers();refreshSequence();restartIfPlaying();};
+      if(off)b.title=tr('modes.ownTonic','Each mode starts on its own tonic');
+      else b.onclick=()=>{state.startDeg=i;renderPitchPickers();refreshSequence();restartIfPlaying();};
       degRow.appendChild(b);
     });
   }
@@ -5480,6 +5576,7 @@ const SECTIONS=[
    text:()=>{
      const b=[];
      if(state.practice.rootMove==='fourths')b.push(tr('sum.fourths','cycle of 4ths'));
+     if(modesRunOn())b.push(tr('sum.modes','through the modes of {key}',{key:modesKeyName()}));
      return b.length?b.join(' · '):tr('common.off.lower','off');
    }},
   {id:'metro-section',sum:'sum-metro',
