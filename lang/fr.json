@@ -1,6 +1,7 @@
 {
  "10-to-300-bpm-type": "De 10 à 300 BPM. Tapez-le, faites-le glisser, ou battez-le — Battre le tempo fait la moyenne des dernières frappes.",
  "415-to-466-moving-every": "De 415 à 466, en emmenant chaque note avec lui. 415 pour le diapason baroque, 442 ou 443 là où l'orchestre joue haut.",
+ "a-bar-is-undercut-so": "Une lame est creusée jusqu'à ce que ses modes tombent sur 1 : 4 : 10 — la note, deux octaves au-dessus, et un peu plus de trois. C'est ce rapport qui se lit comme du métal frappé et non comme un son quelconque : les partiels d'un piano forment une série harmonique et se fondent, ces trois-là restent distincts. Chacun s'éteint à son rythme, le plus vite en haut, si bien qu'il passe d'un ping à un bourdonnement. Pas de moteur — les ventilateurs qui donnent son nom au vibraphone ne bougent que le volume, mais une oscillation est la dernière chose dont a besoin une app pour entendre la justesse, et jouer moteur coupé est courant.",
  "a-fold-like-the-pattern": "Un volet, comme le motif et la console, qui dit sur quoi il est réglé tant qu'il est fermé. En quoi chaque temps se divise. Le swing, ce sont deux impulsions partagées deux pour une — la sensation de triolet avec laquelle une paire de croches écrites se joue réellement. Seule prend une figure ; Séquence prend tour à tour celles que vous choisissez, une par tour.",
  "a-level-for-each-drum": "Un niveau pour chaque fût, par-dessus ce que le motif demande — la seule chose qui puisse répondre à « le charleston est trop faible contre les balais », puisque ce qui s'équilibre au casque ne s'équilibre pas sur un téléphone. Cela vaut pour les deux batteries et pour un motif à vous, et c'est gardé pour la fois suivante. Une note fantôme répond à la caisse claire et la grosse caisse de la bossa à la grosse caisse, car c'est ce qu'elles sont ; les curseurs qu'un style n'utilise pas sont estompés, pour qu'un curseur qui ne peut rien faire le dise. <em>Remettre les niveaux</em> remet chaque curseur en place.",
  "a-seventh-arpeggio-over-one": "Un arpège de septième sur une octave s'arrête sous sa note du haut, comme on travaille les renversements. Sur plus d'une octave, il y arrive.",
@@ -477,6 +478,7 @@
  "timbre.piano-real": "Piano réel",
  "timbre.piano-synth": "Piano synthétique",
  "timbre.sine": "Sinusoïde",
+ "timbre.vibraphone": "Vibraphone",
  "to": "à",
  "tuner": "Accordeur",
  "tuner-2": "Accordeur",
@@ -490,6 +492,7 @@
  "two-pulses-at-once-any": "Deux pulsations à la fois, deux nombres quelconques. Le cycle affiché est le temps qu'il leur faut pour se retrouver. Une mesure et une subdivision ne veulent rien dire contre deux pulsations, elles sont donc rangées tant que c'est actif.",
  "under-a-polyrhythm-which-of": "Sous une polyrythmie, laquelle des deux couches les notes suivent.",
  "up-down-or-up-then": "En montant, en descendant, ou en montant puis en redescendant.",
+ "vibraphone-2": "Vibraphone",
  "volume": "Volume",
  "wait.samples": "Cela démarre dès que les échantillons sont prêts...",
  "what-a-pass-is": "Ce qu'est un tour",

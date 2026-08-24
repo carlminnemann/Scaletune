@@ -1,6 +1,7 @@
 {
  "10-to-300-bpm-type": "De 10 a 300 BPM. Escreve-o, arrasta-o, ou bate-o — Bater o andamento faz a média dos últimos toques.",
  "415-to-466-moving-every": "De 415 a 466, arrastando todas as notas com ele. 415 para diapasão barroco, 442 ou 443 onde a orquestra toca alto.",
+ "a-bar-is-undercut-so": "Uma lâmina é escavada até os seus modos caírem em 1 : 4 : 10 — a nota, duas oitavas acima dela, e um pouco mais de três. É essa relação que se lê como metal percutido e não como um som afinado qualquer: os parciais de um piano são uma série harmónica e fundem-se, enquanto estes três ficam separados. Cada um apaga-se ao seu ritmo, mais depressa em cima, por isso passa de um ping a um zumbido. Sem motor — as ventoinhas que dão o nome ao vibrafone só mexem no volume, mas uma oscilação é a última coisa de que precisa uma app para ouvir afinação, e tocar com o motor desligado é normal.",
  "a-fold-like-the-pattern": "Uma aba, como o padrão e a mesa de mistura, que diz em que está posta enquanto está fechada. Em que cada tempo se divide. O swing são dois toques repartidos dois para um — a sensação de tercina com que um par de colcheias escrito é realmente tocado. Único usa uma figura; Sequência leva à vez as que escolheres, uma por volta.",
  "a-level-for-each-drum": "Um nível para cada peça, por cima do que o padrão pedir — a única coisa que consegue responder a «o choque está baixo demais contra as vassouras», já que o que equilibra em auscultadores não equilibra num telemóvel. Aplica-se às duas baterias e a um padrão teu, e fica guardado para a próxima vez. Uma nota fantasma responde à tarola e o bombo da bossa ao bombo, porque é isso que são; os cursores que um estilo não usa ficam esbatidos, para que um cursor que não pode fazer nada o diga. <em>Repor níveis</em> põe todos os cursores no sítio.",
  "a-seventh-arpeggio-over-one": "Um arpejo de sétima ao longo de uma oitava pára abaixo da nota de cima, como se praticam as inversões. Em mais do que uma oitava, cai nela.",
@@ -477,6 +478,7 @@
  "timbre.piano-real": "Piano real",
  "timbre.piano-synth": "Piano sintetizado",
  "timbre.sine": "Sinusoide",
+ "timbre.vibraphone": "Vibrafone",
  "to": "até",
  "tuner": "Afinador",
  "tuner-2": "Afinador",
@@ -490,6 +492,7 @@
  "two-pulses-at-once-any": "Duas pulsações ao mesmo tempo, dois números quaisquer. O ciclo mostrado é quanto falta até se voltarem a encontrar. Um compasso e uma subdivisão não querem dizer nada contra duas pulsações, por isso são arrumados enquanto isto está ligado.",
  "under-a-polyrhythm-which-of": "Numa polirritmia, qual das duas camadas as notas acompanham.",
  "up-down-or-up-then": "A subir, a descer, ou a subir e depois a descer.",
+ "vibraphone-2": "Vibrafone",
  "volume": "Volume",
  "wait.samples": "Começa assim que as amostras estiverem prontas...",
  "what-a-pass-is": "O que é uma volta",

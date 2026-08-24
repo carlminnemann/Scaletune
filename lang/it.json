@@ -1,6 +1,7 @@
 {
  "10-to-300-bpm-type": "Da 10 a 300 BPM. Scrivilo, trascinalo, o battilo — Batti il tempo fa la media degli ultimi colpi.",
  "415-to-466-moving-every": "Da 415 a 466, portando con sé ogni nota. 415 per il diapason barocco, 442 o 443 dove l'orchestra sta alta.",
+ "a-bar-is-undercut-so": "Una lama viene scavata finché i suoi modi cadono su 1 : 4 : 10 — la nota, due ottave sopra, e poco più di tre. È questo rapporto che si legge come metallo percosso e non come un suono qualunque: le parziali di un pianoforte sono una serie armonica e si fondono, queste tre restano separate. Ognuna si spegne al proprio ritmo, più in fretta in alto, così passa da un ping a un ronzio. Niente motore — le ventole da cui il vibrafono prende il nome muovono solo il volume, ma un'oscillazione è l'ultima cosa che serve a un'app per sentire l'intonazione, e suonare col motore spento è normale.",
  "a-fold-like-the-pattern": "Una linguetta, come il pattern e il mixer, che da chiusa dice su cosa è impostata. In cosa si divide ogni movimento. Lo swing sono due colpi divisi due a uno — la sensazione di terzina con cui una coppia di crome scritte viene davvero suonata. Singola usa una figura; Sequenza prende a turno quelle che scegli, una per giro.",
  "a-level-for-each-drum": "Un livello per ogni pezzo, sopra a quello che il pattern chiede — l'unica cosa che può rispondere a «il charleston è troppo debole contro le spazzole», visto che quel che sta in equilibrio in cuffia non ci sta su un telefono. Vale per entrambe le batterie e per un pattern tuo, e resta per la volta dopo. Una nota fantasma risponde al rullante e la cassa della bossa alla cassa, perché è quello che sono; i cursori che uno stile non usa restano sbiaditi, così un cursore che non può fare nulla lo dice. <em>Rimetti i livelli</em> riporta ogni cursore a posto.",
  "a-seventh-arpeggio-over-one": "Un arpeggio di settima su un'ottava si ferma sotto la nota più alta, come si praticano i rivolti. Su più di un'ottava ci arriva.",
@@ -477,6 +478,7 @@
  "timbre.piano-real": "Pianoforte vero",
  "timbre.piano-synth": "Pianoforte sintetico",
  "timbre.sine": "Sinusoide",
+ "timbre.vibraphone": "Vibrafono",
  "to": "a",
  "tuner": "Accordatore",
  "tuner-2": "Accordatore",
@@ -490,6 +492,7 @@
  "two-pulses-at-once-any": "Due pulsazioni insieme, due numeri qualsiasi. Il ciclo mostrato è quanto manca perché si ritrovino. Una battuta e una suddivisione non vogliono dire niente contro due pulsazioni, perciò vengono messe via mentre è acceso.",
  "under-a-polyrhythm-which-of": "Sotto una poliritmia, quale dei due strati seguono le note.",
  "up-down-or-up-then": "In su, in giù, o in su e poi di nuovo in giù.",
+ "vibraphone-2": "Vibrafono",
  "volume": "Volume",
  "wait.samples": "Comincia appena i campioni sono pronti...",
  "what-a-pass-is": "Cos'è un giro",
