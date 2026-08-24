@@ -2021,10 +2021,20 @@ function setStatus(m){
    metronome. Asking for "playback" says this is the audio the user came for.
    Safari has honoured it since 16.4; where it is missing the call does nothing
    and the old behaviour stands. */
+/* Which session the app needs right now. "playback" is output only — asking for
+   it is what makes the sound survive the ring/silent switch, and it is also what
+   stops the microphone dead: iOS will not open a capture device inside a
+   playback session, so the tuner asked for the mic, was refused without ever
+   showing a prompt, and reported that it needed permission it could not be
+   given. The tuner wants "play-and-record", and nothing else plays while the
+   tuner is open anyway. */
+let wantMic=false;
+function wantedSession(){return wantMic?'play-and-record':'playback';}
 function claimAudioSession(){
   try{
     const s=navigator.audioSession;
-    if(s&&s.type!=='playback')s.type='playback';
+    const want=wantedSession();
+    if(s&&s.type!==want)s.type=want;
   }catch(e){}
 }
 
@@ -3377,7 +3387,7 @@ const TIMBRES=[
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24h';
+const APP_VERSION='2026-08-24i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6016,15 +6026,31 @@ function refineLag(d,n,lag0,band){
 
 async function startTuner(){
   try{
+    // said before the context is touched, so nothing claims playback first
+    wantMic=true;
     initAudio();
     /* Noise suppression and echo cancellation are refused: both reshape the
        spectrum, and a sustained note is exactly what they are built to treat as
        something to remove. Automatic gain is allowed, and was not before — it
        only scales, and this measurement does not care how loud you are, so it
        can lift a quiet instrument without touching the answer. */
-    micStream=await navigator.mediaDevices.getUserMedia({audio:{
-      echoCancellation:false,noiseSuppression:false,autoGainControl:true}});
+    const want={audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:true}};
+    try{
+      micStream=await navigator.mediaDevices.getUserMedia(want);
+    }catch(first){
+      /* One more try with no session asked for at all. Setting a session type is
+         what broke this in the first place, and a browser that refuses capture
+         inside the one we asked for may still allow it inside the one it would
+         have chosen itself. Cheap, and it is the difference between a tuner that
+         works and a message the player cannot act on. */
+      try{
+        const sess=navigator.audioSession;
+        if(sess)sess.type='auto';
+      }catch(e2){}
+      micStream=await navigator.mediaDevices.getUserMedia(want);
+    }
   }catch(e){
+    wantMic=false;claimAudioSession();
     setStatus(tr('tuner.needMic','The tuner needs the microphone. Allow it and press Listen again.'));
     return false;
   }
@@ -6043,6 +6069,8 @@ function stopTuner(){
   if(micRaf)cancelAnimationFrame(micRaf);micRaf=0;
   if(micStream)micStream.getTracks().forEach(t=>t.stop());
   micStream=null;micNode=null;micAnalyser=null;
+  // give the output-only session back, so the drone is heard on a silent phone
+  wantMic=false;claimAudioSession();
   renderTuner(null);
 }
 
