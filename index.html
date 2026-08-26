@@ -3535,7 +3535,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-26c';
+const APP_VERSION='2026-08-26d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4093,12 +4093,19 @@ let passesDone=0;
    nothing more is scheduled from the seam, and the tick that finds the clock
    past that time takes it down. */
 let runEnding=false,runEndAt=0;
+/* Set on the pass that completes a round, read by whatever is asked to happen
+   at the top of the next one. A round that is not the last one starts counting
+   again from nothing, which is what makes "each round" a thing the count-in can
+   be hung on. */
+let roundJustWrapped=false;
 // true when the round that has just finished was the last one
 function markPassDone(){
+  roundJustWrapped=false;
   passesDone++;
-  if(!runsOnce()||passesDone<roundPasses())return false;
-  runEnding=true;
-  return true;
+  if(passesDone<roundPasses())return false;
+  if(runsOnce()){runEnding=true;return true;}
+  passesDone=0;roundJustWrapped=true;
+  return false;
 }
 function endRunNow(){
   runEnding=false;runEndAt=0;
@@ -4178,7 +4185,8 @@ function advancePass(){
      phrase had got. So the count is set up after that, from where the pulse
      actually is. */
   const want=state.countWhen;
-  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange)){
+  if((want==='change'&&(itemChange||keyChange))||(want==='key'&&keyChange)
+     ||(want==='round'&&roundJustWrapped)){
     pendingCount=true;pendingLanding=landing;
   }
   stepTempo();
@@ -4665,7 +4673,12 @@ function buildCountRow(){
   line.style.display=canBetween?'':'none';
   row.innerHTML='';
   if(!canBetween)return;
-  [['off',tr('common.off','Off')],['key',tr('count.newKey','New key')],['change',tr('count.anyChange','Any change')]].forEach(([v,label])=>{
+  /* Three of these are about the exercise changing under you. The fourth is
+     about it coming round again unchanged — a scale on its own never changes,
+     so nothing else here can give it a count-in, and looping one for half an
+     hour with no bar line to come in on is exactly when you want one. */
+  [['off',tr('common.off','Off')],['round',tr('count.eachRound','Each round')],
+   ['key',tr('count.newKey','New key')],['change',tr('count.anyChange','Any change')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+((state.countWhen||'off')===v?' active':'');
     b.textContent=label;
@@ -5962,7 +5975,8 @@ function metroBits(bits){
   if(state.countBars>0)bits.push(
     tr('sum.countIn',{one:'{n}-bar count-in',other:'{n}-bar count-in'},{n:state.countBars})
     +(state.countWhen==='key'?tr('sum.countIn.key',', each new key')
-     :(state.countWhen==='change'?tr('sum.countIn.change',', each change'):'')));
+     :(state.countWhen==='change'?tr('sum.countIn.change',', each change')
+     :(state.countWhen==='round'?tr('sum.countIn.round',', each round'):''))));
   if(state.poly.on)bits.push(tr('sum.against','{a} against {b}',{a:state.poly.a,b:state.poly.b}));
   else if(grooveOn())bits.push(grooveLabel(state.groove));
 }

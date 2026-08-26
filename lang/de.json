@@ -527,5 +527,7 @@
  "practice.onceOf": "hält nach allen {n} Durchgängen an",
  "practice.onceOne": "hält nach einem Durchgang an",
  "sum.once": "eine Runde",
- "run.done": "Runde beendet."
+ "run.done": "Runde beendet.",
+ "count.eachRound": "Jede Runde",
+ "sum.countIn.round": ", bei jeder Runde"
 }

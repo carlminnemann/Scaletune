@@ -527,5 +527,7 @@
  "practice.onceOf": "si ferma dopo tutti i {n} passaggi",
  "practice.onceOne": "si ferma dopo un passaggio",
  "sum.once": "un giro",
- "run.done": "Giro terminato."
+ "run.done": "Giro terminato.",
+ "count.eachRound": "Ogni giro",
+ "sum.countIn.round": ", a ogni giro"
 }

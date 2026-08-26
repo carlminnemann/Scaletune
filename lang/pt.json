@@ -527,5 +527,7 @@
  "practice.onceOf": "pára ao fim das {n} passagens",
  "practice.onceOne": "pára ao fim de uma passagem",
  "sum.once": "uma volta",
- "run.done": "Volta terminada."
+ "run.done": "Volta terminada.",
+ "count.eachRound": "Cada volta",
+ "sum.countIn.round": ", em cada volta"
 }
