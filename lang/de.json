@@ -184,7 +184,7 @@
  "modes.needs": "Wählen Sie eine einzelne siebentönige Tonleiter — die Modi sind ihre Rotationen",
  "modes.oneOctave": "Jeder Modus läuft eine Oktave von seinem eigenen Ton aus",
  "modes.ownTonic": "Jeder Modus beginnt auf seinem eigenen Grundton",
- "modes.running": "{n} Modi von {key}, je eine Oktave",
+ "modes.running": "{n} Modi von {key}, je eine Oktave, zum Schluss der erste eine Oktave höher",
  "modes.tour": "{n} Modi von {key} und zurück, je eine Oktave",
  "need.note": "Wählen Sie zuerst mindestens einen Ton.",
  "need.notes": "Wählen Sie zuerst einige Töne.",

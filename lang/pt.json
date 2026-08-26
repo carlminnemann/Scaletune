@@ -184,7 +184,7 @@
  "modes.needs": "Escolhe uma só escala de sete notas — os modos são as rotações dela",
  "modes.oneOctave": "Cada modo corre uma oitava a partir da sua própria nota",
  "modes.ownTonic": "Cada modo começa na sua própria tónica",
- "modes.running": "{n} modos de {key}, uma oitava cada",
+ "modes.running": "{n} modos de {key}, uma oitava cada, a fechar no primeiro uma oitava acima",
  "modes.tour": "{n} modos de {key} e de volta, uma oitava cada",
  "need.note": "Escolhe primeiro pelo menos uma nota.",
  "need.notes": "Escolhe primeiro algumas notas.",

@@ -3535,7 +3535,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-26b';
+const APP_VERSION='2026-08-26c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3871,7 +3871,12 @@ function modesTour(){
   const n=Object.keys(SCALES[state.scaleGroup]||{}).length;
   if(!n)return[0];
   const up=Array.from({length:n},(_,i)=>i);
-  if(!modesSnake())return up;              // no snake, no turn: each mode stands alone
+  /* Degree n is the tonic again, an octave on. Seven modes going the same way
+     climb an octave and stop one degree short of closing it; the eighth pass is
+     the first mode once more, up where the seventh left off, and that is what
+     makes the octave whole. It is the same note the turn is built on when the
+     run snakes — there it comes back down from it, here it ends on it. */
+  if(!modesSnake())return up.concat([n]);
   const back=[];for(let i=n-1;i>=1;i--)back.push(i);
   return up.concat([n],back);
 }
@@ -4719,7 +4724,7 @@ function updatePracticeInfo(){
   if(modesRunOn())bits.push(modesSnake()
     ? tr('modes.tour','{n} modes of {key} and back, one octave each',
          {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
-    : tr('modes.running','{n} modes of {key}, one octave each',
+    : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
          {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(tr('practice.figures',

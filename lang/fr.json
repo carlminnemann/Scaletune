@@ -184,7 +184,7 @@
  "modes.needs": "Choisissez une seule gamme de sept notes — les modes en sont les rotations",
  "modes.oneOctave": "Chaque mode parcourt une octave depuis sa propre note",
  "modes.ownTonic": "Chaque mode commence sur sa propre tonique",
- "modes.running": "{n} modes de {key}, une octave chacun",
+ "modes.running": "{n} modes de {key}, une octave chacun, terminant sur le premier une octave plus haut",
  "modes.tour": "{n} modes de {key} et retour, une octave chacun",
  "need.note": "Choisissez d'abord au moins une note.",
  "need.notes": "Choisissez d'abord quelques notes.",
