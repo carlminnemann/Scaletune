@@ -529,5 +529,6 @@
  "sum.once": "uma volta",
  "run.done": "Volta terminada.",
  "count.eachRound": "Cada volta",
- "sum.countIn.round": ", em cada volta"
+ "sum.countIn.round": ", em cada volta",
+ "modes.runningDown": "{n} modos de {key}, uma oitava cada, a fechar no primeiro uma oitava abaixo"
 }

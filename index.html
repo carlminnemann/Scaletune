@@ -3535,7 +3535,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-26d';
+const APP_VERSION='2026-08-26e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3876,7 +3876,14 @@ function modesTour(){
      the first mode once more, up where the seventh left off, and that is what
      makes the octave whole. It is the same note the turn is built on when the
      run snakes — there it comes back down from it, here it ends on it. */
-  if(!modesSnake())return up.concat([n]);
+  /* Descending, the same eight passes are taken from the other end: the run
+     starts on the tonic at the top and the tonics walk back down through the
+     scale, each mode still falling its own octave. Same window, same joins
+     mirrored — a seventh up between passes instead of a seventh down. */
+  if(!modesSnake()){
+    const whole=up.concat([n]);
+    return state.direction==='down'?whole.reverse():whole;
+  }
   const back=[];for(let i=n-1;i>=1;i--)back.push(i);
   return up.concat([n],back);
 }
@@ -3895,7 +3902,7 @@ function modesRise(off){
   const n=Object.keys(fam).length;
   const degrees=fam[modesHomeNow().name];
   if(!degrees)return 0;
-  return degrees[off%n]+12*Math.floor(off/n);
+  return degrees[((off%n)+n)%n]+12*Math.floor(off/n);
 }
 function modesAt(step){
   const fam=SCALES[state.scaleGroup];if(!fam)return null;
@@ -3905,7 +3912,7 @@ function modesAt(step){
   if(!fam[home.name]||hi<0)return null;
   const tour=modesTour();
   const off=tour[((step%tour.length)+tour.length)%tour.length];
-  return {off,name:names[(hi+off)%n],
+  return {off,name:names[(((hi+off)%n)+n)%n],
           root:NOTES[((NOTES.indexOf(home.root)+modesRise(off))%12+12)%12]};
 }
 /* A tonic is stored as a pitch class and sounded in the chosen octave, which
@@ -4737,8 +4744,11 @@ function updatePracticeInfo(){
   if(modesRunOn())bits.push(modesSnake()
     ? tr('modes.tour','{n} modes of {key} and back, one octave each',
          {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
-    : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
-         {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()}));
+    : (state.direction==='down'
+        ? tr('modes.runningDown','{n} modes of {key}, one octave each, closing on the first an octave down',
+             {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
+        : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
+             {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(tr('practice.figures',
       {one:'{n} rhythmic figure ({dir}) within each mode',
