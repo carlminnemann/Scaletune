@@ -874,6 +874,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <details class="sec" id="sec-progress">
     <summary><span data-t="sec.practice-progressions">Practice Progressions</span><span class="sec-sum" id="sum-progress"></span></summary>
     <div class="sec-body" id="progress-body">
+      <div id="repeat-block">
+      <div class="head"><span class="group-label" data-t="repeat">Repeat</span>
+        <span class="btn-wrap seg" id="repeat-row" data-cols="fixed"></span></div>
+      </div>
       <div id="rootmove-block">
       <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
@@ -1811,7 +1815,7 @@ let state={
      dorian, then a minor seventh on the same root" is a real exercise and there
      was no way to ask for it. Each item says which it is, and what is playing
      follows the item rather than the panel you happen to be looking at. */
-  practice:{rootMove:'stay',useList:false,list:[],
+  practice:{rootMove:'stay',repeat:'loop',useList:false,list:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
@@ -1831,6 +1835,11 @@ let state={
    what a pentatonic, a chord or a symmetric scale is not. */
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'},
                   {k:'modes',label:'Through the modes'}];
+/* Whether the exercise comes round again or stops when it has been through
+   everything once. Everything the app can put in rotation nests: the figures
+   inside the modes, the modes inside the keys — a round is one traversal of
+   the whole of it, however deep it happens to be. */
+const REPEATS=[{k:'loop',label:'Loop'},{k:'once',label:'Once'}];
 const MODE_FAMILIES=['gregorian','melodic','harmonic','harmonicMajor'];
 function modesRunPossible(){
   return state.mode==='scale'&&MODE_FAMILIES.indexOf(state.scaleGroup)>=0
@@ -3178,6 +3187,7 @@ function startPlayback(){
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
+    passesDone=0;runEnding=false;runEndAt=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
     beginCount();
@@ -3261,6 +3271,7 @@ function schedulePolyCycle(t0){
   const n=P.notesFollow==='a'?P.a:P.b, dur=len/n;
   for(let i=0;i<n;i++){
     if(seqIdx>=sequence.length){seqIdx=0;advancePass();}
+    if(runEnding){runEndAt=t0+len;return;}
     if(!sequence.length)return;
     scheduleTone(sequence[seqIdx],t0+dur*i,dur);
     seqIdx++;
@@ -3269,6 +3280,7 @@ function schedulePolyCycle(t0){
 
 function polySchedulerTick(){
   if(!audioCtx||audioCtx.state!=='running')return;
+  if(runEnding){if(audioCtx.currentTime>=runEndAt)endRunNow();return;}
   if(nextBeatTime<audioCtx.currentTime-0.5)nextBeatTime=audioCtx.currentTime+0.05;
   let guard=0;
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<8){
@@ -3277,6 +3289,7 @@ function polySchedulerTick(){
     schedulePolyCycle(nextBeatTime);
     nextBeatTime+=len;
     if(notesSilent()&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
+    if(runEnding){runEndAt=nextBeatTime;break;}
   }
   pruneFinishedNodes();
 }
@@ -3286,6 +3299,7 @@ function schedulerTick(){
   // A suspended context has a frozen currentTime: every beat would test as
   // "not due yet" and the scheduler would deadlock after the first one.
   if(!audioCtx||audioCtx.state!=='running')return;
+  if(runEnding){if(audioCtx.currentTime>=runEndAt)endRunNow();return;}
   // If the phone slept or the tab was backgrounded the audio clock jumps far
   // ahead. Without this the loop would fire a burst of catch-up beats, running
   // several passes at once and skipping whole keys of the cycle. Resync instead.
@@ -3321,6 +3335,7 @@ function schedulerTick(){
           activeSubdiv=currentSubdiv();
           subIdx=0;beatIdx=0;tickCount=0;
         }
+        if(runEnding){runEndAt=nextBeatTime+60/state.bpm;break;}
         if(pendingCount){pendingCount=false;beginCount(pendingLanding);pendingLanding=null;}
         /* If that armed a count-in, this tick is the first of it: the note it
            was about to play is the one you are being counted into, so it waits.
@@ -3358,6 +3373,7 @@ function schedulerTick(){
         if(beatIdx===0)metroBars++;
         const done=state.practice.passUnit==='beat'?metroBeats:metroBars;
         if(done>=passCount()){metroBeats=0;metroBars=0;metroPass();}
+        if(runEnding){runEndAt=nextBeatTime;break;}
       }
     }
   }
@@ -3519,7 +3535,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-26a';
+const APP_VERSION='2026-08-26b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3616,8 +3632,12 @@ function setMode(m){
   }
   document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner)?'none':'';
   document.getElementById('sec-sound').style.display=(isMetro||isTuner)?'none':'';
-  // Root Movement is all it holds, and that is a scale's or an arpeggio's
-  document.getElementById('sec-progress').style.display=isPitch?'':'none';
+  /* Whether the exercise stops after one round applies wherever there is a
+     round, so the panel is there for all of them — but the drone has no rounds
+     and the tuner nothing to run, and Root Movement inside it is a scale's or
+     an arpeggio's alone. */
+  document.getElementById('sec-progress').style.display=(isDrone||isTuner)?'none':'';
+  document.getElementById('repeat-block').style.display=isDrone?'none':'';
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
   state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
@@ -4044,7 +4064,46 @@ function passLabel(){
 }
 
 // One pass of the metronome on its own: the figure moves on, then the tempo.
+/* How many passes make one round: one traversal of everything in rotation.
+   The rhythmic figures sit inside the modes or the study list, and the key
+   moves only once those have been through — so the length is the product, not
+   the sum. Nothing in rotation at all still makes a round: the sequence itself,
+   played once. */
+function roundPasses(){
+  let n=1;
+  if(subdivListOn()&&subdivOrder().length>1)n*=subdivOrder().length;
+  if(useListOn()&&activeList().length>1)n*=activeList().length;
+  if(modesRunOn())n*=modesTour().length;
+  else if(state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio'))n*=12;
+  return n;
+}
+/* The drone is a note to hold for as long as you need it, so a round means
+   nothing there and the setting does not reach it — otherwise choosing "once"
+   for a scale would silently cut the drone off eight bars in, three modes
+   later, with nothing on the screen to explain it. */
+function runsOnce(){return state.practice.repeat==='once'&&state.mode!=='drone';}
+let passesDone=0;
+/* A round that has finished is not stopped on the spot: the note that ends it
+   is still sounding. The transport is asked to come down at a time instead —
+   nothing more is scheduled from the seam, and the tick that finds the clock
+   past that time takes it down. */
+let runEnding=false,runEndAt=0;
+// true when the round that has just finished was the last one
+function markPassDone(){
+  passesDone++;
+  if(!runsOnce()||passesDone<roundPasses())return false;
+  runEnding=true;
+  return true;
+}
+function endRunNow(){
+  runEnding=false;runEndAt=0;
+  state.playing=false;setPlayUI(false);stopPlayback();
+  setStatus(tr('run.done','Round finished.'));
+  setTimeout(()=>setStatus(''),2000);
+}
+
 function metroPass(){
+  if(markPassDone())return;
   if(subdivListOn()&&subdivOrder().length>1){
     subdivIdx=(subdivIdx+1)%subdivOrder().length;
     buildSubdivRow();
@@ -4063,6 +4122,7 @@ function advancePass(){
   const needed=state.alignPasses?1:alignmentRounds();
   if(roundsInFigure<needed)return false;
   roundsInFigure=0;
+  if(markPassDone())return false;
 
   // Then the outer loops: modes, then the figure, then the key.
   let wrapped=true,figureChanged=false;
@@ -4273,6 +4333,30 @@ function updateRotationPanel(){
   document.getElementById('rot-next').textContent=
     p.moved?'Next: '+p.next
            :'Next: same, '+(p.roundsLeft-1)+' more round'+(p.roundsLeft-1===1?'':'s')+' before it moves on';
+}
+
+function buildRepeatRow(){
+  const row=document.getElementById('repeat-row');if(!row)return;
+  row.innerHTML='';
+  REPEATS.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(m.k===state.practice.repeat?' active':'');
+    b.textContent=lab('repeat',m.k,m.label);
+    b.title=m.k==='once'
+      ? tr('repeat.onceHint','Stops when everything in rotation has been through once')
+      : tr('repeat.loopHint','Comes round again until you stop it');
+    b.onclick=()=>{
+      state.practice.repeat=m.k;
+      buildRepeatRow();updatePracticeInfo();refreshSectionSummaries();
+      /* Not restartIfPlaying: this says what happens at the END of the round,
+         and taking the run back to the top to tell it that would undo the round
+         you are in the middle of. It is read at the seam, so it applies from
+         the next one. */
+      passesDone=Math.min(passesDone,roundPasses());
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
 }
 
 function buildRootMoveRow(){
@@ -4643,6 +4727,9 @@ function updatePracticeInfo(){
        other:'{n} rhythmic figures ({dir}) within each mode'},
       {n:subdivOrder().length,dir:dirLabel(state.practice.subdivDir).toLowerCase()}));
 
+  if(runsOnce())bits.push(roundPasses()>1
+    ? tr('practice.onceOf','stops after all {n} passes',{n:roundPasses()})
+    : tr('practice.onceOne','stops after one pass'));
   el.textContent=bits.length?bits.join(' · '):tr('practice.unchanged','Repeats unchanged.');
 }
 
@@ -5928,6 +6015,7 @@ const SECTIONS=[
      const b=[];
      if(state.practice.rootMove==='fourths')b.push(tr('sum.fourths','cycle of 4ths'));
      if(modesRunOn())b.push(tr('sum.modes','through the modes of {key}',{key:modesKeyName()}));
+     if(runsOnce())b.push(tr('sum.once','one round'));
      return b.length?b.join(' · '):tr('common.off.lower','off');
    }},
   {id:'metro-section',sum:'sum-metro',
@@ -6725,7 +6813,7 @@ function rebuildEverything(){
   buildBeats();buildPolyBeats();updateSupersededControls();buildNoteLenRow();
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
-  buildAlignRow();buildSpeedControls();buildRootMoveRow();
+  buildAlignRow();buildSpeedControls();buildRootMoveRow();buildRepeatRow();
   renderPitchPickers();updateInfo();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
   setMode(state.mode);
@@ -6821,6 +6909,7 @@ buildClickModeRow();
 buildAlignRow();
 buildSpeedControls();
 buildRootMoveRow();
+buildRepeatRow();
 renderPitchPickers();
 /* Everything above builds the controls; this puts the app into the mode it says
    it is in. Without it the opening mode kept whatever the markup happened to
