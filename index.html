@@ -3111,7 +3111,7 @@ function buildSequence(){
   }
   const degrees=activeDegrees();
   if(!degrees)return[];
-  const rootS=semitone(state.root,state.rootOct);
+  const rootS=semitone(state.root,state.rootOct)+modesLift();
   // A single-octave seventh arpeggio is four notes and stops there — adding the
   // octave on top would make five and blur the inversion. Across two or more
   // octaves it does land back on the starting note.
@@ -3127,7 +3127,9 @@ const MAX_SEM=semitone('C',8);
 function seqTopWith(overrides){
   const saved={span:state.span,rootOct:state.rootOct,freeSpan:state.freeSpan};
   Object.assign(state,overrides);
+  const wasTop=modesTopReach;modesTopReach=true;
   const seq=buildSequence();
+  modesTopReach=wasTop;
   Object.assign(state,saved);
   return seq.length?Math.max.apply(null,seq):0;
 }
@@ -3517,7 +3519,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-24u';
+const APP_VERSION='2026-08-26a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3827,9 +3829,89 @@ function modesSnake(){
    no shift is wanted anywhere. Every mode of the run therefore lives between
    the octave you chose and the one above it, and the run cannot walk off the
    top — which the strict "each mode starts one degree above the last note"
-   rule would do, an octave every seven modes. The price is a single leap, at
-   the wrap from the last mode back to the first, which is where you would take
-   a breath anyway. */
+   rule would do, an octave every seven modes.
+
+   Going up through the modes that works out: each one begins a step above where
+   the last one ended. Coming back to the first is where it broke. The seventh
+   ends on the leading note at the top, and the ionian was then taken from the
+   bottom of the same window — a seventh downwards, in a run whose whole idea is
+   that consecutive modes touch.
+
+   So the run turns instead of wrapping. It goes up through the seven, and at
+   the top the tonic comes back one octave higher and descends; then the same
+   seven in reverse bring it home, each one now a step BELOW where the last
+   ended. Fourteen passes, every join a single step of the scale, and the
+   fourteenth hands back to the first the same way — the exercise closes on
+   itself with no leap anywhere in it.
+
+   The tour is written as the scale degrees the tonic visits. The 7 is what
+   makes the turn work: it is degree 0 again, an octave up, which is the note a
+   step above the leading note the seventh mode just ended on. */
+function modesTour(){
+  const n=Object.keys(SCALES[state.scaleGroup]||{}).length;
+  if(!n)return[0];
+  const up=Array.from({length:n},(_,i)=>i);
+  if(!modesSnake())return up;              // no snake, no turn: each mode stands alone
+  const back=[];for(let i=n-1;i>=1;i--)back.push(i);
+  return up.concat([n],back);
+}
+/* The run set off from a mode and a tonic, and every pass is measured from
+   there rather than stepped off the one before — a chain of local steps has
+   nowhere to turn round. */
+function modesHomeNow(){
+  return (modesHome&&modesHome.group===state.scaleGroup)
+    ? modesHome : {root:state.root,group:state.scaleGroup,name:state.scaleName};
+}
+/* How far above the run's own starting note each pass sets off from, counted in
+   semitones: the degree the tonic has reached, plus an octave for the turn.
+   Everything else about the run is read off this one number. */
+function modesRise(off){
+  const fam=SCALES[state.scaleGroup];if(!fam)return 0;
+  const n=Object.keys(fam).length;
+  const degrees=fam[modesHomeNow().name];
+  if(!degrees)return 0;
+  return degrees[off%n]+12*Math.floor(off/n);
+}
+function modesAt(step){
+  const fam=SCALES[state.scaleGroup];if(!fam)return null;
+  const names=Object.keys(fam),n=names.length;
+  const home=modesHomeNow();
+  const hi=names.indexOf(home.name);
+  if(!fam[home.name]||hi<0)return null;
+  const tour=modesTour();
+  const off=tour[((step%tour.length)+tour.length)%tour.length];
+  return {off,name:names[(hi+off)%n],
+          root:NOTES[((NOTES.indexOf(home.root)+modesRise(off))%12+12)%12]};
+}
+/* A tonic is stored as a pitch class and sounded in the chosen octave, which
+   is fine while the run climbs within one octave and wrong the moment it does
+   not. Starting on D, the seventh mode's tonic is C — a pitch class that sorts
+   BELOW D, so it sounded an octave down and the run fell through the floor
+   instead of stepping up to it. The lift is the difference between where the
+   pass actually belongs, counted from the note the run set off on, and where
+   the pitch class alone would have put it. */
+function modesLiftOff(off){
+  const home=modesHomeNow();
+  const rise=modesRise(off);
+  const pc=((NOTES.indexOf(home.root)+rise)%12+12)%12;
+  return NOTES.indexOf(home.root)+rise-pc;
+}
+/* The turn reaches higher than every other pass. The range is judged against
+   the highest the run will ever go, every time, rather than against whichever
+   pass happens to be playing — otherwise arriving at the top would clamp the
+   whole exercise down an octave, mid-run, which is the one place a shift would
+   be unmissable. */
+let modesTopReach=false;
+function modesLift(){
+  if(!modesRunOn())return 0;
+  const m=modesAt(modesStep);
+  if(!modesTopReach)return m?modesLiftOff(m.off):0;
+  // the highest tonic of the tour, expressed against whichever one is loaded
+  const home=modesHomeNow();
+  let top=0;
+  modesTour().forEach(o=>{top=Math.max(top,modesRise(o));});
+  return NOTES.indexOf(home.root)+top-NOTES.indexOf(state.root);
+}
 function modeRunDir(){
   if(!modesSnake())return state.direction;
   const first=state.direction==='updown'?'up':'down';
@@ -4011,14 +4093,12 @@ function advancePass(){
      changes and the seven of them come back to where they began. Counted as a
      change of mode rather than of key, because that is what it is. */
   if(wrapped&&modesRunOn()){
-    const names=Object.keys(SCALES[state.scaleGroup]);
-    const at=names.indexOf(state.scaleName);
-    const degrees=SCALES[state.scaleGroup][state.scaleName];
-    if(at>=0&&degrees&&degrees.length>1){
-      state.root=NOTES[(NOTES.indexOf(state.root)+degrees[1])%12];
-      state.scaleName=names[(at+1)%names.length];
+    const next=modesAt(modesStep+1);
+    if(next){
+      modesStep=(modesStep+1)%modesTour().length;
+      state.root=next.root;
+      state.scaleName=next.name;
       state.startDeg=0;
-      modesStep++;
       itemChange=true;
     }
   }
@@ -4061,13 +4141,8 @@ function rotationPreview(){
     // mirroring advancePass: the tonic steps to the next degree and the mode
     // steps with it, so the reading says "D Dorian" before it is playing
     if(wrapped&&modesRunOn()){
-      const names=Object.keys(SCALES[state.scaleGroup]);
-      const at=names.indexOf(state.scaleName);
-      const degrees=SCALES[state.scaleGroup][state.scaleName];
-      if(at>=0&&degrees&&degrees.length>1){
-        root=NOTES[(NOTES.indexOf(root)+degrees[1])%12];
-        nextName=names[(at+1)%names.length];
-      }
+      const next=modesAt(modesStep+1);
+      if(next){root=next.root;nextName=next.name;}
     }
   }
   const figName=v=>({1:tr('fig.quarters','quarters'),2:tr('fig.eighths','eighths'),
@@ -4552,12 +4627,21 @@ function setRampTo(n){
 function updatePracticeInfo(){
   const el=document.getElementById('practice-info');if(!el)return;
   const bits=[];
-  if(listEnabled())bits.push(activeList().length+' items in rotation');
-  if(state.practice.rootMove==='fourths')bits.push('root up a 4th'+((listEnabled()||subdivListOn())?' after the full cycle':' each pass'));
-  if(modesRunOn())bits.push(tr('modes.running','{n} modes of {key}, one octave each',
-    {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()}));
+  if(listEnabled())bits.push(tr('practice.items',
+    {one:'{n} item in rotation',other:'{n} items in rotation'},{n:activeList().length}));
+  if(state.practice.rootMove==='fourths')bits.push((listEnabled()||subdivListOn())
+    ? tr('practice.fourthsCycle','root up a 4th after the full cycle')
+    : tr('practice.fourthsPass','root up a 4th each pass'));
+  if(modesRunOn())bits.push(modesSnake()
+    ? tr('modes.tour','{n} modes of {key} and back, one octave each',
+         {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
+    : tr('modes.running','{n} modes of {key}, one octave each',
+         {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
-    bits.push(subdivOrder().length+' rhythmic figures ('+state.practice.subdivDir+') within each mode');
+    bits.push(tr('practice.figures',
+      {one:'{n} rhythmic figure ({dir}) within each mode',
+       other:'{n} rhythmic figures ({dir}) within each mode'},
+      {n:subdivOrder().length,dir:dirLabel(state.practice.subdivDir).toLowerCase()}));
 
   el.textContent=bits.length?bits.join(' · '):tr('practice.unchanged','Repeats unchanged.');
 }
@@ -6670,10 +6754,13 @@ function loadPack(code){
   if(code==='en'){PACK=null;return Promise.resolve();}
   if(PACKS[code]){PACK=PACKS[code];return Promise.resolve();}
   if(langLoading&&langLoading.code===code)return langLoading.p;
-  // no cache mode of its own: the service worker holds it after the first fetch,
-  // which is what makes a language work offline, and drops it when a new build
-  // changes the cache name
-  const p=fetch('lang/'+code+'.json')
+  /* The service worker holds it after the first fetch, which is what makes a
+     language work offline, and drops it when a new build changes the cache
+     name. The build stamp on the URL is for the layer underneath: the browser's
+     own HTTP cache, which no service worker sits in front of on a first visit,
+     and which will otherwise hand back yesterday's pack for as long as it likes
+     — a whole language silently one build behind. A new build, a new URL. */
+  const p=fetch('lang/'+code+'.json?v='+APP_VERSION)
     .then(r=>r.ok?r.json():null)
     .then(j=>{
       if(j){PACKS[code]=j;PACK=j;}

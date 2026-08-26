@@ -185,6 +185,7 @@
  "modes.oneOctave": "Ogni modo percorre un'ottava dalla sua nota",
  "modes.ownTonic": "Ogni modo comincia dalla sua tonica",
  "modes.running": "{n} modi di {key}, un'ottava ciascuno",
+ "modes.tour": "{n} modi di {key} e ritorno, un’ottava ciascuno",
  "need.note": "Scegli prima almeno una nota.",
  "need.notes": "Scegli prima qualche nota.",
  "need.scale": "Scegli prima una scala o un accordo.",
@@ -270,6 +271,16 @@
  "polyrhythm-2": "Poliritmia",
  "practice-progressions": "Progressioni di studio",
  "practice.unchanged": "Ripete senza cambiare.",
+ "practice.items": {
+  "one": "{n} elemento nella rotazione",
+  "other": "{n} elementi nella rotazione"
+ },
+ "practice.fourthsCycle": "tonica su di una 4ª dopo tutto il ciclo",
+ "practice.fourthsPass": "tonica su di una 4ª a ogni passaggio",
+ "practice.figures": {
+  "one": "{n} figura ritmica ({dir}) in ogni modo",
+  "other": "{n} figure ritmiche ({dir}) in ogni modo"
+ },
  "ramp.min": "{n} min",
  "ramp.pass": "giro",
  "range-amp-direction": "Estensione &amp; Direzione",
