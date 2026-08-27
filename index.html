@@ -146,6 +146,14 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
 /* The capitals are a proportion of the name, not a size of their own, so
    shrinking the name keeps its shape instead of flattening it. */
 h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
+/* The T's crossbar hangs over whatever follows it, so the u sits in a void the
+   S never makes. Sidebearings say the two pairs are evenly spaced — and they
+   are, measured across the whole letter — but the eye reads the white area at
+   the height the lowercase actually occupies, and there the gap after the T was
+   1.75 times the one after the S. Hence a tuck, in em of the capital so it
+   holds at both sizes of the wordmark. Measured at startup for the face the
+   device really has; this value is Optima's, and the fallback. */
+h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
 /* The ✕ in the header asks before it acts, and the second tap is the one
    that empties everything. Armed, it stops being written in the colour and
    starts wearing it — the same fill as Stop, for the same reason. */
@@ -689,7 +697,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <div class="container">
 <div class="header">
   <span></span>
-  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap">T</span>une</h1>
+  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
   <span class="head-btns">
     <button class="theme-btn" id="clearall-btn" onclick="clearEverything()"
             aria-label="Clear every selection">✕</button>
@@ -1517,6 +1525,59 @@ function mixLabel(k){const v=MIX_VOICES.find(v=>v[0]===k);return lab('drum',k,v?
 
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const OCT_MIN=1,OCT_MAX=6;
+
+/* The tuck under the T, measured rather than guessed: how far the crossbar
+   reaches is a property of whichever face the device turns out to have, and the
+   list runs from Optima to whatever the system calls sans-serif. Both pairs are
+   drawn at the wordmark's own proportions, the white between them is measured
+   row by row across the x-height — where the lowercase is, which is the only
+   place the gap is read from — and the tuck is the one that makes the two
+   averages meet. Silently leaves the CSS default if anything is missing. */
+function tuckWordmark(){
+  try{
+    const h=document.querySelector('h1.wordmark');if(!h)return;
+    const fam=getComputedStyle(h).fontFamily;
+    const CAP=160,BODY=CAP/1.65,LS=0.015*BODY,W=1400,H=460,BASE=340;
+    const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    const c=cv.getContext('2d');if(!c)return;
+    c.textBaseline='alphabetic';
+    c.font='400 '+BODY+'px '+fam;
+    const xh=c.measureText('u').actualBoundingBoxAscent;
+    if(!xh)return;                      // no ink metrics: leave the default
+    const meanGap=(a,b,kern)=>{
+      c.clearRect(0,0,W,H);c.fillStyle='#fff';
+      c.font='400 '+CAP+'px '+fam;
+      c.fillText(a,80,BASE);
+      const adv=c.measureText(a).width;
+      c.font='400 '+BODY+'px '+fam;
+      c.fillText(b,80+adv+LS+kern,BASE);
+      const d=c.getImageData(0,0,W,H).data;
+      let sum=0,n=0;
+      for(let y=Math.round(BASE-xh);y<BASE;y++){
+        let best=0,lastEnd=-1,inRun=false;
+        for(let x=0;x<W;x++){
+          const on=d[(y*W+x)*4+3]>40;
+          if(on&&!inRun){if(lastEnd>=0)best=Math.max(best,x-lastEnd);inRun=true;}
+          else if(!on&&inRun){lastEnd=x;inRun=false;}
+        }
+        if(best>0){sum+=best;n++;}
+      }
+      return n?sum/n:null;
+    };
+    const want=meanGap('S','c',0);
+    if(!want)return;
+    let best=null;
+    for(let k=0;k>=-0.30*CAP;k-=0.5){
+      const g=meanGap('T','u',k);
+      if(g==null)continue;
+      if(!best||Math.abs(g-want)<Math.abs(best.g-want))best={k,g};
+    }
+    if(!best||best.k>0)return;
+    const em=best.k/CAP;
+    if(em<-0.30)return;                 // nothing sane asks for more than that
+    h.style.setProperty('--tuck',em.toFixed(4)+'em');
+  }catch(e){}
+}
 
 /* ---------- enharmonic spelling ----------
    A 7-note scale must use each letter A-G exactly once; the accidental then
@@ -3535,7 +3596,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-26e';
+const APP_VERSION='2026-08-26f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6939,6 +7000,7 @@ buildAlignRow();
 buildSpeedControls();
 buildRootMoveRow();
 buildRepeatRow();
+tuckWordmark();
 renderPitchPickers();
 /* Everything above builds the controls; this puts the app into the mode it says
    it is in. Without it the opening mode kept whatever the markup happened to
