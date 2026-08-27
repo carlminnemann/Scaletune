@@ -527,5 +527,25 @@
  "sum.countIn.round": ", a ogni giro",
  "modes.runningDown": "{n} modi di {key}, un’ottava ciascuno, chiudendo sul primo un’ottava sotto",
  "free.rootBadge": "tonica",
- "oct.short": "Ott"
+ "oct.short": "Ott",
+ "sec.exercises": "Esercizi",
+ "ex.save": "Salva",
+ "ex.placeholder": "Dai un nome a questo esercizio",
+ "ex.info": "Salvare con un nome che hai già lo sostituisce. Un esercizio porta con sé la pratica, non il volume né il tema.",
+ "ex.infoEmpty": "Imposta l’app come vuoi studiare, dalle un nome, e sarà qui la prossima volta.",
+ "ex.count": {
+  "one": "{n} salvato",
+  "other": "{n} salvati"
+ },
+ "ex.none": "ancora nessuno",
+ "ex.saved": "Salvato come «{n}».",
+ "ex.replaced": "«{n}» sostituito.",
+ "ex.loaded": "«{n}» aperto.",
+ "ex.deleted": "«{n}» eliminato.",
+ "ex.deleteName": "Elimina {n}",
+ "ex.loadHint": "Rimette tutto com’era quando l’hai salvato",
+ "ex.needName": "Dagli prima un nome.",
+ "ex.full": "Non c’è spazio per salvarlo.",
+ "saved-exercises": "Esercizi salvati",
+ "the-panel-at-the-top": "Il pannello in cima. Imposta l’app come vuoi studiare — la scala o l’accordo, l’estensione e il senso, la lista di studio, ciò che cambia tra un passaggio e l’altro, il tempo, la battuta, l’entrata, l’accompagnamento e il pattern — dagli un nome, e sarà lì la prossima volta che apri. Una settimana di studio si prepara in una sola volta e si prende dallo scaffale ogni mattina. Salvare con un nome che hai già lo sostituisce, così un esercizio si corregge invece di duplicarsi; la ✕ accanto lo elimina. Ciò che un esercizio salvato porta con sé è la pratica, non la stanza: il volume, il tema, la lingua e i nomi delle note sono il modo in cui stai ascoltando oggi e restano come sono. Viene riletto campo per campo e verificato con ciò che l’app ha adesso, così un esercizio salvato prima di un cambiamento perde quel campo invece di comportarsi male."
 }

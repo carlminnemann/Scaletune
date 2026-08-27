@@ -516,6 +516,25 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 /* Everything that takes something away wears one colour, at one weight:
    the red of the transport, written rather than filled. Same size as
    before — it is easier to find, not louder. */
+.ex-name{flex:1 1 auto;min-width:0;height:var(--h);padding:0 10px;font-size:13px;
+  border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text);
+  font-family:inherit}
+.ex-name:focus{outline:none;border-color:var(--blue)}
+.ex-new{display:flex;align-items:stretch;gap:8px}
+.ex-new .ex-save{flex:0 0 auto;width:auto;min-width:0;padding:0 14px}
+/* A saved exercise is a wide button with the cross at its right end: the button
+   is the whole row so it is easy to hit, and the cross has its own box beside
+   it so deleting is never a mis-tap of opening. A column of its own rather than
+   the button grid the rest of the app uses — those size themselves to their
+   shortest label, and a name like "Monday, altered scales" is not a label. */
+.ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--s4)}
+.ex-list:empty{display:none}
+.ex-row{display:flex;align-items:stretch;gap:6px}
+.ex-row .pick-btn{flex:1 1 auto;min-width:0;width:auto;text-align:left;justify-content:flex-start;
+  padding:8px 12px;white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+/* The cross is a pick-btn too, so the rule above would stretch it as well. */
+.ex-row .pick-btn.ex-del{flex:0 0 34px;width:34px;min-width:34px;padding:0;
+  color:var(--wipe);border-color:var(--wipe-bd);justify-content:center;text-align:center}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--wipe-bd);border-radius:var(--r);background:var(--bg3);color:var(--wipe);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
 
@@ -531,6 +550,15 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 .oct-controls{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
 .oct-btn{width:22px;height:22px;border:1px solid var(--border2);border-radius:4px;background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
 .oct-val{font-size:11px;color:var(--text3);min-width:30px;text-align:center}
+/* On a narrow phone the stepper is what decides how many notes fit across: at
+   its full size only two columns fit, which turns twelve notes into six rows in
+   the very mode you scroll least. Trimmed, three fit — and because the column
+   count is measured rather than written down, nothing else has to be told. */
+@media (max-width:400px){
+  .oct-val{min-width:22px;font-size:10px}
+  .oct-btn{width:19px;height:19px;font-size:11px}
+  .oct-controls{gap:3px}
+}
 .note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
 .note-btn.active .oct-val{color:var(--blue)}
 .note-btn.start .oct-btn{border-color:var(--green);color:var(--green-hi)}
@@ -720,6 +748,24 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      sits above them all rather than inside the Root panel, where it was easy to
      miss. Two boxes, the width of the modes — but inside the scrolling part, or
      it takes its height from the panels and Scale stops fitting on a phone. -->
+<!-- Preparing a week of practice is a real thing a teacher does, and setting
+     the app up from scratch each morning is not. A saved exercise is the whole
+     setup under a name: open the app and either start clean, as before, or take
+     one off the shelf. It sits at the very top because it is how a session
+     begins, and it is closed unless you have something in it. -->
+<details class="sec" id="sec-exercises" style="display:none">
+  <summary><span data-t="sec.exercises">Exercises</span><span class="sec-sum" id="sum-exercises"></span></summary>
+  <div class="sec-body">
+    <div class="ex-list" id="ex-list"></div>
+    <div class="ex-new">
+      <input class="ex-name" id="ex-name" type="text" maxlength="40"
+             autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="pick-btn ex-save" id="ex-save" onclick="saveExercise()"></button>
+    </div>
+    <div class="info-line" id="ex-info"></div>
+  </div>
+</details>
+
 <div class="mode-row two" id="listmode-row" style="display:none"></div>
 
 <!-- ============ DRONE ============ -->
@@ -1210,6 +1256,17 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
     <dt data-t="sevenths-in-one-octave">Sevenths in one octave</dt><dd data-t="a-seventh-arpeggio-over-one">A seventh arpeggio over one octave stops below its top note, the
     way inversions are practised. Over more than one octave it lands on it.</dd>
+    <dt id="help-exercises" data-t="saved-exercises">Saved exercises</dt><dd data-t="the-panel-at-the-top">The panel
+    at the top. Set the app up the way you want to practise — the scale or the chord, the range and
+    direction, the study list, what moves between passes, the tempo, the bar, the count-in, the
+    accompaniment and the pattern — give it a name, and it is there next time you open the app. A
+    week of practice can be prepared in one sitting and taken off the shelf each morning. Saving
+    under a name you already have replaces it, so an exercise is corrected rather than duplicated;
+    the ✕ beside one removes it. What a saved exercise carries is the practice, not the room: the
+    volume, the theme, the language and the note names are how you happen to be listening today and
+    are left exactly as they are. It is read back one field at a time and checked against what the
+    app has now, so an exercise saved before something changed loses that field rather than
+    misbehaving.</dd>
     <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="the-two-boxes-under-the">The two boxes under the modes. Single works on one scale or
     chord at a time; Study list collects several and takes them in turn, one per pass, so a whole
     family can be worked without stopping. It governs every panel below it, which is why it sits
@@ -3595,7 +3652,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27c';
+const APP_VERSION='2026-08-27d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3655,6 +3712,8 @@ function setMode(m){
    ['free','btn-mode-free'],['metro','btn-mode-metro'],['tuner','btn-mode-tuner']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('tuner-section').style.display=isTuner?'':'none';
+  // the tuner has no setup to save, and nothing saved would mean anything in it
+  document.getElementById('sec-exercises').style.display=isTuner?'none':'';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   if(isDrone)setTimeout(fitNoteGrids,0);
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
@@ -5622,6 +5681,221 @@ function patInfo(){
       +tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:state.custom.bars})
     : '· '+tr('pat.emptySum','empty');
 }
+/* ---------- saved exercises ----------
+   A saved exercise is the practice, not the app: what is being played, how it
+   moves, and what it is played against. Deliberately NOT the volume, the
+   theme, the language, the note names or the tuner — those are how you happen
+   to be listening today, and a exercise from last week has no business
+   changing them.
+
+   Every field is copied out by name rather than the whole state being cloned.
+   That is the point: a preset written today has to survive the app growing new
+   state, and it does so by carrying only what this list says. Anything not
+   here is simply not part of an exercise. */
+const EX_KEYS=[
+  'mode','root','rootOct','rootOctWanted','scaleGroup','scaleName',
+  'chordGroup','chordName','span','spanWanted','direction','startDeg',
+  'seqPattern','blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
+  'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv',
+  'alignPasses','clickFollowsFigure','countBars','countWhen','groove','kit',
+  'density','balladHat','metroInDrone','accentsTouched',
+];
+// the ones that are objects and have to be copied rather than referenced
+const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','practice'];
+const EX_MAX=60;                 // a shelf, not an archive
+let exercises=[];
+
+function snapshotExercise(){
+  const out={};
+  EX_KEYS.forEach(k=>{out[k]=state[k];});
+  EX_DEEP.forEach(k=>{try{out[k]=JSON.parse(JSON.stringify(state[k]));}catch(e){}});
+  return out;
+}
+/* Read back defensively, one field at a time, against what the app has now.
+   A saved exercise is data from another day: it may name a scale that has been
+   renamed, an octave out of range, a groove that no longer exists. Every value
+   is checked against the live tables and dropped if it does not fit, so a bad
+   preset costs you that field rather than the app. */
+function applyExercise(x){
+  if(!x||typeof x!=='object')return false;
+  const num=(v,lo,hi)=>{const n=Number(v);return isFinite(n)&&n>=lo&&n<=hi?n:null;};
+  const oneOf=(v,list)=>list.indexOf(v)>=0?v:null;
+  const set=(k,v)=>{if(v!==null&&v!==undefined)state[k]=v;};
+
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+
+  set('mode',oneOf(x.mode,['drone','scale','arpeggio','free','metro','tuner']));
+  set('root',oneOf(x.root,NOTES));
+  set('rootOct',num(x.rootOct,OCT_MIN,OCT_MAX));
+  set('rootOctWanted',num(x.rootOctWanted,OCT_MIN,OCT_MAX));
+  if(x.scaleGroup&&SCALES[x.scaleGroup]&&SCALES[x.scaleGroup][x.scaleName]){
+    state.scaleGroup=x.scaleGroup;state.scaleName=x.scaleName;
+  } else {state.scaleGroup=null;state.scaleName=null;}
+  if(x.chordGroup&&CHORDS[x.chordGroup]&&CHORDS[x.chordGroup][x.chordName]){
+    state.chordGroup=x.chordGroup;state.chordName=x.chordName;
+  } else {state.chordGroup=null;state.chordName=null;}
+  set('span',num(x.span,1,4));set('spanWanted',num(x.spanWanted,1,4));
+  set('direction',oneOf(x.direction,DIRECTIONS.map(d=>d.k)));
+  set('startDeg',num(x.startDeg,0,11));
+  set('seqPattern',oneOf(x.seqPattern,SEQ_PATTERNS.map(p=>p.k)));
+  state.blueNotes=!!x.blueNotes;
+  set('freeRoot',oneOf(x.freeRoot,NOTES));
+  set('freeSpan',num(x.freeSpan,1,4));set('freeSpanWanted',num(x.freeSpanWanted,1,4));
+  set('freeDirection',oneOf(x.freeDirection,DIRECTIONS.map(d=>d.k)));
+  const timbres=TIMBRES.map(t=>t.k);
+  set('timbre',oneOf(x.timbre,timbres));
+  set('droneTimbre',oneOf(x.droneTimbre,timbres));
+  set('seqTimbre',oneOf(x.seqTimbre,timbres));
+  set('bpm',num(x.bpm,BPM_MIN,BPM_MAX));
+  set('sig',num(x.sig,1,16));
+  set('noteLen',oneOf(x.noteLen,['sub','beat','bar']));
+  set('subdiv',oneOf(x.subdiv,SUBDIVS.map(d=>d.k)));
+  state.alignPasses=!!x.alignPasses;
+  state.clickFollowsFigure=x.clickFollowsFigure!==false;
+  set('countBars',num(x.countBars,0,COUNT_MAX));
+  set('countWhen',oneOf(x.countWhen,['off','round','key','change']));
+  set('groove',oneOf(x.groove,Object.keys(GROOVES)));
+  set('kit',oneOf(x.kit,['recorded','machine']));
+  set('density',oneOf(x.density,['light','normal','busy']));
+  state.balladHat=!!x.balladHat;
+  state.metroInDrone=!!x.metroInDrone;
+  state.accentsTouched=!!x.accentsTouched;
+
+  // the notes picked in Drone and in Free: pitch class -> octave
+  const notes=o=>{
+    const out={};
+    if(o&&typeof o==='object')Object.keys(o).forEach(k=>{
+      const v=num(o[k],OCT_MIN,OCT_MAX);
+      if(NOTES.indexOf(k)>=0&&v!==null)out[k]=v;
+    });
+    return out;
+  };
+  state.droneSelected=notes(x.droneSelected);
+  state.freeSelected=notes(x.freeSelected);
+
+  if(Array.isArray(x.accents))
+    state.accents=x.accents.slice(0,16).map(a=>oneOf(a,['low','high','off'])||'high');
+  if(x.mix&&typeof x.mix==='object')Object.keys(state.mix).forEach(k=>{
+    const v=num(x.mix[k],0,1.5); if(v!==null)state.mix[k]=v;
+  });
+  if(x.poly&&typeof x.poly==='object'){
+    state.poly.on=!!x.poly.on;state.poly.touched=!!x.poly.touched;
+    const a=num(x.poly.a,2,16),b=num(x.poly.b,2,16);
+    if(a)state.poly.a=a; if(b)state.poly.b=b;
+    state.poly.notesFollow=oneOf(x.poly.notesFollow,['a','b'])||'a';
+    ['accA','accB'].forEach(k=>{
+      if(Array.isArray(x.poly[k]))
+        state.poly[k]=x.poly[k].slice(0,16).map(v=>oneOf(v,['low','high','off'])||'high');
+    });
+  }
+  if(x.custom&&Array.isArray(x.custom.hits)){
+    state.custom.hits=x.custom.hits.filter(h=>Array.isArray(h)&&h.length===3);
+    state.custom.bars=num(x.custom.bars,1,4)||1;
+    state.custom.grid=x.custom.grid===12?12:16;
+  }
+  const p=x.practice;
+  if(p&&typeof p==='object'){
+    state.practice.rootMove=oneOf(p.rootMove,ROOT_MOVES.map(m=>m.k))||'stay';
+    state.practice.repeat=oneOf(p.repeat,REPEATS.map(m=>m.k))||'loop';
+    state.practice.useList=!!p.useList;
+    state.practice.list=Array.isArray(p.list)?p.list.filter(it=>
+      it&&((it.kind==='chord'&&CHORDS[it.group]&&CHORDS[it.group][it.name])||
+           (it.kind!=='chord'&&SCALES[it.group]&&SCALES[it.group][it.name]))
+    ).slice(0,64).map(it=>({kind:it.kind==='chord'?'chord':'scale',group:it.group,name:it.name,
+                            dir:ITEM_DIRS.indexOf(it.dir)>=0?it.dir:undefined})):[];
+    state.practice.useSubdivList=!!p.useSubdivList;
+    state.practice.subdivList=Array.isArray(p.subdivList)
+      ? p.subdivList.filter(k=>SUBDIVS.some(d=>d.k===k)).slice(0,8) : [];
+    state.practice.subdivDir=oneOf(p.subdivDir,SUBDIV_DIRS.map(d=>d.k))||'up';
+    state.practice.tempoMode=oneOf(p.tempoMode,['off','up','down','ramp'])||'off';
+    const st=num(p.tempoStep,1,TEMPO_STEP_MAX); if(st)state.practice.tempoStep=st;
+    state.practice.tempoEvery=(p.tempoEvery==='pass')?'pass':(num(p.tempoEvery,1,30)||'pass');
+    const rt=num(p.rampTo,BPM_MIN,BPM_MAX); if(rt)state.practice.rampTo=rt;
+    const rm=num(p.rampMinutes,1,60); if(rm)state.practice.rampMinutes=rm;
+    state.practice.rampFrom=null;
+    const pc=num(p.passCount,1,PASS_MAX); if(pc)state.practice.passCount=pc;
+    state.practice.passUnit=oneOf(p.passUnit,['bar','beat'])||'bar';
+  }
+  state.listKind=null;studyIdx=0;subdivIdx=0;
+  if(state.practice.list.length)applyListItem(state.practice.list[0]);
+  markModesHome();
+  return true;
+}
+
+function readExercises(){
+  try{
+    const raw=localStorage.getItem('scaletune-exercises');
+    const a=raw?JSON.parse(raw):[];
+    exercises=Array.isArray(a)?a.filter(e=>e&&typeof e.n==='string'&&e.s).slice(0,EX_MAX):[];
+  }catch(e){exercises=[];}
+}
+function writeExercises(){
+  try{localStorage.setItem('scaletune-exercises',JSON.stringify(exercises));return true;}
+  catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
+}
+/* The name is the identity: saving over a name you already have replaces it,
+   which is how you correct an exercise without collecting near-duplicates. */
+function saveExercise(){
+  const field=document.getElementById('ex-name');
+  const name=(field.value||'').trim().slice(0,40);
+  if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
+  const at=exercises.findIndex(e=>e.n.toLowerCase()===name.toLowerCase());
+  const entry={n:name,v:1,s:snapshotExercise()};
+  if(at>=0)exercises[at]=entry; else exercises.unshift(entry);
+  if(exercises.length>EX_MAX)exercises.length=EX_MAX;
+  if(!writeExercises())return;
+  field.blur();
+  buildExercises();
+  setStatus(at>=0?tr('ex.replaced','Replaced "{n}".',{n:name})
+                 :tr('ex.saved','Saved as "{n}".',{n:name}));
+  setTimeout(()=>setStatus(''),2000);
+}
+function loadExercise(i){
+  const e=exercises[i];if(!e)return;
+  if(!applyExercise(e.s))return;
+  document.getElementById('ex-name').value=e.n;
+  rebuildEverything();
+  setStatus(tr('ex.loaded','Opened "{n}".',{n:e.n}));
+  setTimeout(()=>setStatus(''),2000);
+}
+function deleteExercise(i){
+  const e=exercises[i];if(!e)return;
+  exercises.splice(i,1);
+  writeExercises();buildExercises();
+  setStatus(tr('ex.deleted','Deleted "{n}".',{n:e.n}));
+  setTimeout(()=>setStatus(''),1800);
+}
+function buildExercises(){
+  const list=document.getElementById('ex-list');
+  if(!list)return;
+  list.innerHTML='';
+  exercises.forEach((e,i)=>{
+    const row=document.createElement('div');row.className='ex-row';
+    const b=document.createElement('button');
+    b.className='pick-btn';b.textContent=e.n;
+    b.title=tr('ex.loadHint','Set everything up as it was saved');
+    b.onclick=()=>loadExercise(i);
+    const d=document.createElement('button');
+    d.className='pick-btn ex-del';d.textContent='✕';
+    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:e.n}));
+    d.onclick=()=>deleteExercise(i);
+    row.appendChild(b);row.appendChild(d);
+    list.appendChild(row);
+  });
+  const f=document.getElementById('ex-name');
+  if(f)f.placeholder=tr('ex.placeholder','Name this exercise');
+  const sv=document.getElementById('ex-save');
+  if(sv)sv.textContent=tr('ex.save','Save');
+  const info=document.getElementById('ex-info');
+  if(info)info.textContent=exercises.length
+    ? tr('ex.info','Saving under a name you already have replaces it. An exercise carries the practice, not the volume or the theme.')
+    : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.');
+  const sum=document.getElementById('sum-exercises');
+  if(sum)sum.textContent='· '+(exercises.length
+    ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})
+    : tr('ex.none','none yet'));
+}
+
 /* The one thing worth remembering across launches: the app opens clean on
    purpose, but a pattern you wrote is your work, not a view setting. */
 function savePattern(){
@@ -6046,6 +6320,10 @@ const SECTIONS=[
      const t=TIMBRES.find(x=>x.k===state.timbre);
      return timbreLabel(state.timbre)+' · '+Math.round(state.volume*100)+'%';
    }},
+  {id:'sec-exercises',sum:'sum-exercises',
+   text:()=>exercises.length
+     ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})
+     : tr('ex.none','none yet')},
   {id:'sec-progress', sum:'sum-progress',
    text:()=>{
      const b=[];
@@ -6688,6 +6966,7 @@ function buildTunerControls(){
    The ? in the header opens it. The map below ties a panel to its entry, and is
    what openHelp() is given when something wants to land on a particular one. */
 const HELP_FOR={
+  'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
   'sec-freenotes':'help-root','sec-freerange':'help-range',
   'metro-section':'help-metro','metro-more':'help-metro',
@@ -6903,6 +7182,7 @@ function rebuildEverything(){
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
   buildAlignRow();buildSpeedControls();buildRootMoveRow();buildRepeatRow();
+  buildExercises();
   renderPitchPickers();updateInfo();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
   setMode(state.mode);
@@ -6999,6 +7279,16 @@ buildAlignRow();
 buildSpeedControls();
 buildRootMoveRow();
 buildRepeatRow();
+readExercises();
+buildExercises();
+(function(){
+  const f=document.getElementById('ex-name');
+  // Enter saves, the way Enter does in a name field. The space bar already
+  // types rather than starting the app: swallowsSpace() covers text inputs.
+  if(f)f.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();saveExercise();}
+  });
+})();
 tuckWordmark();
 renderPitchPickers();
 /* Everything above builds the controls; this puts the app into the mode it says

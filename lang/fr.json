@@ -527,5 +527,25 @@
  "sum.countIn.round": ", à chaque tour",
  "modes.runningDown": "{n} modes de {key}, une octave chacun, terminant sur le premier une octave plus bas",
  "free.rootBadge": "tonique",
- "oct.short": "Oct"
+ "oct.short": "Oct",
+ "sec.exercises": "Exercices",
+ "ex.save": "Enregistrer",
+ "ex.placeholder": "Donne un nom à cet exercice",
+ "ex.info": "Enregistrer sous un nom que tu as déjà le remplace. Un exercice emporte la pratique, pas le volume ni le thème.",
+ "ex.infoEmpty": "Règle l’app comme tu veux travailler, donne-lui un nom, et elle sera là la prochaine fois.",
+ "ex.count": {
+  "one": "{n} enregistré",
+  "other": "{n} enregistrés"
+ },
+ "ex.none": "aucun pour l’instant",
+ "ex.saved": "Enregistré sous « {n} ».",
+ "ex.replaced": "« {n} » remplacé.",
+ "ex.loaded": "« {n} » ouvert.",
+ "ex.deleted": "« {n} » supprimé.",
+ "ex.deleteName": "Supprimer {n}",
+ "ex.loadHint": "Remet tout comme au moment de l’enregistrement",
+ "ex.needName": "Donne-lui d’abord un nom.",
+ "ex.full": "Pas de place pour enregistrer ça.",
+ "saved-exercises": "Exercices enregistrés",
+ "the-panel-at-the-top": "Le panneau du haut. Règle l’app comme tu veux travailler — la gamme ou l’accord, l’étendue et le sens, la liste de travail, ce qui change entre les passages, le tempo, la mesure, le décompte, l’accompagnement et le motif — donne-lui un nom, et il sera là à la prochaine ouverture. Une semaine de travail se prépare d’un coup et se prend sur l’étagère chaque matin. Enregistrer sous un nom que tu as déjà le remplace, si bien qu’un exercice se corrige au lieu de se dupliquer ; la ✕ à côté le supprime. Ce qu’un exercice emporte, c’est la pratique, pas la pièce : le volume, le thème, la langue et les noms de notes sont ta façon d’écouter aujourd’hui et restent tels quels. Il est relu champ par champ et vérifié contre ce que l’app contient maintenant, de sorte qu’un exercice enregistré avant un changement perd ce champ plutôt que de mal se comporter."
 }

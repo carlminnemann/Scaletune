@@ -527,5 +527,25 @@
  "sum.countIn.round": ", bei jeder Runde",
  "modes.runningDown": "{n} Modi von {key}, je eine Oktave, zum Schluss der erste eine Oktave tiefer",
  "free.rootBadge": "Grundton",
- "oct.short": "Okt"
+ "oct.short": "Okt",
+ "sec.exercises": "Übungen",
+ "ex.save": "Sichern",
+ "ex.placeholder": "Gib dieser Übung einen Namen",
+ "ex.info": "Unter einem vorhandenen Namen zu sichern ersetzt ihn. Eine Übung trägt das Üben, nicht die Lautstärke und nicht das Aussehen.",
+ "ex.infoEmpty": "Stell die App so ein, wie du üben willst, gib ihr einen Namen — dann ist sie beim nächsten Mal hier.",
+ "ex.count": {
+  "one": "{n} gesichert",
+  "other": "{n} gesichert"
+ },
+ "ex.none": "noch keine",
+ "ex.saved": "Als „{n}“ gesichert.",
+ "ex.replaced": "„{n}“ ersetzt.",
+ "ex.loaded": "„{n}“ geöffnet.",
+ "ex.deleted": "„{n}“ gelöscht.",
+ "ex.deleteName": "{n} löschen",
+ "ex.loadHint": "Stellt alles so ein, wie es gesichert wurde",
+ "ex.needName": "Gib ihr zuerst einen Namen.",
+ "ex.full": "Dafür ist kein Platz mehr.",
+ "saved-exercises": "Gesicherte Übungen",
+ "the-panel-at-the-top": "Das Feld ganz oben. Stell die App so ein, wie du üben willst — die Tonleiter oder den Akkord, Umfang und Richtung, die Arbeitsliste, was sich zwischen den Durchgängen bewegt, das Tempo, den Takt, den Einzähler, die Begleitung und das Pattern — gib ihr einen Namen, und beim nächsten Öffnen ist sie da. Eine Übungswoche lässt sich in einem Zug vorbereiten und jeden Morgen aus dem Regal nehmen. Unter einem schon vorhandenen Namen zu sichern ersetzt ihn, sodass eine Übung korrigiert und nicht verdoppelt wird; das ✕ daneben löscht sie. Was eine gesicherte Übung mitnimmt, ist das Üben, nicht der Raum: Lautstärke, Aussehen, Sprache und Notennamen sind, wie du heute gerade hörst, und bleiben genau so. Sie wird Feld für Feld zurückgelesen und gegen das geprüft, was die App jetzt hat — eine Übung, die vor einer Änderung gesichert wurde, verliert also dieses Feld, statt sich falsch zu verhalten."
 }

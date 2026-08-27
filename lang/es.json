@@ -527,5 +527,25 @@
  "sum.countIn.round": ", en cada vuelta",
  "modes.runningDown": "{n} modos de {key}, una octava cada uno, cerrando en el primero una octava abajo",
  "free.rootBadge": "tónica",
- "oct.short": "Oct"
+ "oct.short": "Oct",
+ "sec.exercises": "Ejercicios",
+ "ex.save": "Guardar",
+ "ex.placeholder": "Ponle un nombre a este ejercicio",
+ "ex.info": "Guardar con un nombre que ya tengas lo sustituye. Un ejercicio lleva la práctica, no el volumen ni el tema.",
+ "ex.infoEmpty": "Deja la app como quieres estudiar, ponle un nombre, y aquí estará la próxima vez.",
+ "ex.count": {
+  "one": "{n} guardado",
+  "other": "{n} guardados"
+ },
+ "ex.none": "ninguno todavía",
+ "ex.saved": "Guardado como «{n}».",
+ "ex.replaced": "«{n}» sustituido.",
+ "ex.loaded": "«{n}» abierto.",
+ "ex.deleted": "«{n}» borrado.",
+ "ex.deleteName": "Borrar {n}",
+ "ex.loadHint": "Deja todo como estaba al guardarlo",
+ "ex.needName": "Ponle un nombre primero.",
+ "ex.full": "No hay sitio para guardar eso.",
+ "saved-exercises": "Ejercicios guardados",
+ "the-panel-at-the-top": "El panel de arriba. Deja la app como quieres estudiar — la escala o el acorde, la extensión y el sentido, la lista de estudio, lo que se mueve entre pasadas, el tempo, el compás, la claqueta, el acompañamiento y el patrón — ponle un nombre, y estará ahí la próxima vez que abras. Una semana de estudio se prepara de una sentada y se toma del estante cada mañana. Guardar con un nombre que ya tienes lo sustituye, de modo que un ejercicio se corrige en vez de duplicarse; la ✕ de al lado lo borra. Lo que lleva un ejercicio guardado es la práctica, no la sala: el volumen, el tema, el idioma y los nombres de las notas son cómo estás escuchando hoy y quedan tal cual. Se lee de vuelta campo a campo y se comprueba contra lo que la app tiene ahora, así que un ejercicio guardado antes de un cambio pierde ese campo en lugar de portarse mal."
 }

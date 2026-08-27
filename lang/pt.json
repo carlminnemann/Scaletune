@@ -527,5 +527,25 @@
  "sum.countIn.round": ", em cada volta",
  "modes.runningDown": "{n} modos de {key}, uma oitava cada, a fechar no primeiro uma oitava abaixo",
  "free.rootBadge": "tónica",
- "oct.short": "Oit"
+ "oct.short": "Oit",
+ "sec.exercises": "Exercícios",
+ "ex.save": "Guardar",
+ "ex.placeholder": "Dá um nome a este exercício",
+ "ex.info": "Guardar com um nome que já tenhas substitui-o. Um exercício leva a prática, não o volume nem o tema.",
+ "ex.infoEmpty": "Põe a app como queres estudar, dá-lhe um nome, e fica aqui para a próxima.",
+ "ex.count": {
+  "one": "{n} guardado",
+  "other": "{n} guardados"
+ },
+ "ex.none": "ainda nenhum",
+ "ex.saved": "Guardado como «{n}».",
+ "ex.replaced": "«{n}» substituído.",
+ "ex.loaded": "«{n}» aberto.",
+ "ex.deleted": "«{n}» apagado.",
+ "ex.deleteName": "Apagar {n}",
+ "ex.loadHint": "Põe tudo como estava quando guardaste",
+ "ex.needName": "Dá-lhe um nome primeiro.",
+ "ex.full": "Não há espaço para guardar isso.",
+ "saved-exercises": "Exercícios guardados",
+ "the-panel-at-the-top": "O painel do topo. Põe a app como queres estudar — a escala ou o acorde, o âmbito e o sentido, a lista de estudo, o que muda entre passagens, o andamento, o compasso, a entrada, o acompanhamento e o padrão — dá-lhe um nome, e está lá da próxima vez que abrires. Uma semana de estudo prepara-se de uma assentada e tira-se da prateleira cada manhã. Guardar com um nome que já tens substitui-o, para que um exercício se corrija em vez de se duplicar; o ✕ ao lado apaga-o. O que um exercício guardado leva é a prática, não a sala: o volume, o tema, a língua e os nomes das notas são a maneira como estás a ouvir hoje e ficam exatamente como estão. É lido de volta campo a campo e verificado contra o que a app tem agora, para que um exercício guardado antes de alguma coisa mudar perca esse campo em vez de se portar mal."
 }
