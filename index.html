@@ -531,7 +531,11 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 .ex-list:empty{display:none}
 .ex-row{display:flex;align-items:stretch;gap:6px}
 .ex-row .pick-btn{flex:1 1 auto;min-width:0;width:auto;text-align:left;justify-content:flex-start;
-  padding:8px 12px;white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+  padding:8px 12px;white-space:normal;line-height:1.25;overflow-wrap:anywhere;
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+/* What is in a saved pattern, under its name: two patterns called "funk" and
+   "funk 2" tell you nothing, "8 hits · 1 bar" tells you which is which. */
+.ex-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
 /* The cross is a pick-btn too, so the rule above would stretch it as well. */
 .ex-row .pick-btn.ex-del{flex:0 0 34px;width:34px;min-width:34px;padding:0;
   color:var(--wipe);border-color:var(--wipe-bd);justify-content:center;text-align:center}
@@ -1007,6 +1011,20 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <span class="pat-sum" id="pat-sum"></span>
     </div>
     <div id="pat-body" hidden>
+      <!-- Your own patterns, under Custom rather than beside the styles: the
+           styles are what the app brings and these are what you wrote, and a
+           list that mixes the two makes you read to tell them apart. Picking one
+           loads it into the pattern you are editing and switches the
+           accompaniment to Custom, which is where it plays. -->
+      <div class="head" style="margin-top:var(--s3);margin-bottom:var(--s2)">
+        <span class="section-label" data-t="pat.mine">My patterns</span></div>
+      <div class="ex-list" id="pat-list"></div>
+      <div class="ex-new" style="margin-bottom:var(--s2)">
+        <input class="ex-name" id="pat-name" type="text" maxlength="40"
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="pick-btn ex-save" id="pat-save" onclick="savePatternAs()"></button>
+      </div>
+      <div class="info-line" id="pat-mine-info" style="margin-bottom:var(--s3)"></div>
       <div class="head" style="margin-top:var(--s3)">
         <span class="sig-fields">
           <span class="sig-unit" data-t="loop">loop</span>
@@ -1409,7 +1427,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     hit on, and moves nothing that is already there. Sixteenths for straight things, triplets for
     swung ones, and both can live in the same pattern — straight sixteenths under a swung ride, both
     playing. A hit written on the grid you are not looking at shows as a dot in the cell it falls
-    inside; tap the dot to remove it, or switch grid to move it. Starting from a style copies that
+    inside; tap the dot to remove it, or switch grid to move it. Your own patterns are kept under My patterns, at the top
+    of this panel: name one and it is there next time, and taking one loads it into the pattern you
+    are editing and switches the accompaniment to Custom, where it plays. What you write after that
+    changes the pattern and not the saved copy, until you save over the name again — so a pattern
+    can be tried without losing what it was. Starting from a style copies that
     style in and leaves the original untouched, so the styles never get spoiled. With more than one bar
     there is <em>Copy into this bar</em>, which takes any other bar and puts it here — bar three into
     bar one as readily as bar one into bar three — for when a bar is a variation of another rather
@@ -3652,7 +3674,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27d';
+const APP_VERSION='2026-08-27e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5414,6 +5436,7 @@ function patToggle(voice,pos){
   savePattern();
 }
 function buildPatternEditor(){
+  buildPatternList();
   const grid=document.getElementById('pat-grid');
   if(!grid)return;
   const bars=state.custom.bars,cells=patCells(),step=patStep();
@@ -5894,6 +5917,97 @@ function buildExercises(){
   if(sum)sum.textContent='· '+(exercises.length
     ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})
     : tr('ex.none','none yet'));
+}
+
+/* ---------- patterns you have named ----------
+   The working pattern is one slot, saved across launches, and that is what
+   Custom plays. These are copies of it under names: taking one loads it into
+   that slot, the way opening a document loads it into the editor. Editing after
+   that changes the slot and not the saved copy until you save over the name
+   again — which is the only model that lets you try something without losing
+   what you had. */
+const PAT_MAX=40;
+let patterns=[];
+function readPatterns(){
+  try{
+    const raw=localStorage.getItem('scaletune-patterns');
+    const a=raw?JSON.parse(raw):[];
+    patterns=Array.isArray(a)?a.filter(x=>x&&typeof x.n==='string'&&Array.isArray(x.hits)).slice(0,PAT_MAX):[];
+  }catch(e){patterns=[];}
+}
+function writePatterns(){
+  try{localStorage.setItem('scaletune-patterns',JSON.stringify(patterns));return true;}
+  catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
+}
+function savePatternAs(){
+  const field=document.getElementById('pat-name');
+  const name=(field.value||'').trim().slice(0,40);
+  if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
+  const entry={n:name,bars:state.custom.bars,grid:state.custom.grid,
+               hits:JSON.parse(JSON.stringify(state.custom.hits))};
+  const at=patterns.findIndex(x=>x.n.toLowerCase()===name.toLowerCase());
+  if(at>=0)patterns[at]=entry; else patterns.unshift(entry);
+  if(patterns.length>PAT_MAX)patterns.length=PAT_MAX;
+  if(!writePatterns())return;
+  field.blur();buildPatternList();
+  setStatus(at>=0?tr('ex.replaced','Replaced "{n}".',{n:name})
+                 :tr('ex.saved','Saved as "{n}".',{n:name}));
+  setTimeout(()=>setStatus(''),2000);
+}
+function loadPatternNamed(i){
+  const x=patterns[i];if(!x)return;
+  state.custom.hits=(x.hits||[]).filter(h=>Array.isArray(h)&&h.length===3);
+  state.custom.bars=Math.max(1,Math.min(4,parseInt(x.bars,10)||1));
+  state.custom.grid=x.grid===12?12:16;
+  document.getElementById('pat-name').value=x.n;
+  savePattern();                       // the working slot is what Custom plays
+  /* Straight into the accompaniment, because a pattern you just chose and
+     cannot hear reads as one that did not load. Nothing stops: the pattern is
+     read fresh on every beat. */
+  if(state.groove!=='custom')setGroove('custom');
+  else {buildPatternEditor();buildGrooveRow();refreshSectionSummaries();}
+  buildPatternList();
+  setStatus(tr('ex.loaded','Opened "{n}".',{n:x.n}));
+  setTimeout(()=>setStatus(''),1800);
+}
+function deletePatternNamed(i){
+  const x=patterns[i];if(!x)return;
+  patterns.splice(i,1);writePatterns();buildPatternList();
+  setStatus(tr('ex.deleted','Deleted "{n}".',{n:x.n}));
+  setTimeout(()=>setStatus(''),1600);
+}
+function buildPatternList(){
+  const list=document.getElementById('pat-list');
+  if(!list)return;
+  list.innerHTML='';
+  patterns.forEach((x,i)=>{
+    const row=document.createElement('div');row.className='ex-row';
+    const b=document.createElement('button');
+    b.className='pick-btn';
+    const n=(x.hits||[]).length;
+    b.innerHTML='';
+    b.append(document.createTextNode(x.n));
+    const sub=document.createElement('span');
+    sub.className='ex-sub';
+    sub.textContent=tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})+' · '+
+                    tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:x.bars||1});
+    b.appendChild(sub);
+    b.onclick=()=>loadPatternNamed(i);
+    const d=document.createElement('button');
+    d.className='pick-btn ex-del';d.textContent='✕';
+    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:x.n}));
+    d.onclick=()=>deletePatternNamed(i);
+    row.appendChild(b);row.appendChild(d);
+    list.appendChild(row);
+  });
+  const f=document.getElementById('pat-name');
+  if(f)f.placeholder=tr('pat.namePlaceholder','Name this pattern');
+  const sv=document.getElementById('pat-save');
+  if(sv)sv.textContent=tr('ex.save','Save');
+  const info=document.getElementById('pat-mine-info');
+  if(info)info.textContent=patterns.length
+    ? tr('pat.mineInfo','Taking one loads it into the pattern below. What you write after that changes the pattern, not the saved copy, until you save over the name again.')
+    : tr('pat.mineEmpty','Write a pattern below, give it a name, and it will be here next time.');
 }
 
 /* The one thing worth remembering across launches: the app opens clean on
@@ -7281,12 +7395,18 @@ buildRootMoveRow();
 buildRepeatRow();
 readExercises();
 buildExercises();
+readPatterns();
+buildPatternList();
 (function(){
   const f=document.getElementById('ex-name');
   // Enter saves, the way Enter does in a name field. The space bar already
   // types rather than starting the app: swallowsSpace() covers text inputs.
   if(f)f.addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();saveExercise();}
+  });
+  const g=document.getElementById('pat-name');
+  if(g)g.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();savePatternAs();}
   });
 })();
 tuckWordmark();
