@@ -2091,16 +2091,25 @@ function rebuildSpelling(){
   if(!degrees||(state.mode!=='scale'&&state.mode!=='arpeggio'))return;
   const res=spell(NOTES.indexOf(state.root),degrees,letterWalk());
   if(!res)return;
-  /* A scale with more notes than letters is spelled to a plan, and a plan that
-     reads well from C can force a double flat from Eb — the whole-half
-     diminished came out "Eb F Gb Ab Bbb Cb C D". Nobody writes that to practise
-     from. Where the plan costs a double accidental it is dropped and the plain
-     spelling used instead, which is what an edition prints. */
-  if(playingKind()!=='chord'&&res.accs.some(a=>Math.abs(a)>1))return;
-  /* Same reasoning for Cb and Fb, which the chromatic's plan forces from a flat
-     root — a rising chromatic from Gb read "...Bb Cb C..." where every player
-     reads B. There is no semitone under C or F to flatten into. */
-  if(playingKind()!=='chord'&&res.letters.some((l,i)=>(l===0||l===3)&&res.accs[i]<0))return;
+  /* Both rules below belong to the plans, and only to them. A scale with more
+     notes than letters cannot use each letter once, so it is spelled to a plan
+     — and a plan that reads well from C can force a double flat from Eb: the
+     whole-half diminished came out "Eb F Gb Ab Bbb Cb C D", which nobody writes
+     to practise from. The same for Cb and Fb, which the chromatic's plan forces
+     from a flat root: a rising chromatic from Gb read "...Bb Cb C..." where
+     every player reads B.
+
+     A seven-note scale has no plan. It walks one letter per degree, so its
+     spelling is right by construction however many accidentals it costs, and
+     that is what an edition prints: Ab melodic minor IS "Ab Bb Cb Db Eb F G",
+     the altered scale IS "C Db Eb Fb Gb Ab Bb", C ultra locrian IS "C Db Eb Fb
+     Gb Ab Bbb". Refusing those sent 43 of them back to a plain spelling that
+     used one letter twice and left another out — F locrian read "F F# Ab Bb B
+     Db Eb", with two F's and two B's in a seven-note scale. Worse than the
+     double flat it was avoiding, and wrong. */
+  const planned=playingKind()!=='chord'&&!!letterPlanFor(state.scaleGroup,state.scaleName);
+  if(planned&&res.accs.some(a=>Math.abs(a)>1))return;
+  if(planned&&res.letters.some((l,i)=>(l===0||l===3)&&res.accs[i]<0))return;
   spellMap={};
   degrees.forEach((d,i)=>{
     spellMap[(NOTES.indexOf(state.root)+d)%12]={letterIdx:res.letters[i],acc:res.accs[i]};
@@ -3657,8 +3666,10 @@ function setMode(m){
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('tuner-section').style.display=isTuner?'':'none';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
+  if(isDrone)setTimeout(fitNoteGrids,0);
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
   document.getElementById('free-section').style.display=m==='free'?'':'none';
+  if(m==='free')setTimeout(fitNoteGrids,0);
   document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales');
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
@@ -3728,6 +3739,7 @@ function buildDroneGrid(){
     grid.appendChild(d);
   });
   NOTES.forEach(renderDroneNote);
+  fitNoteGrids();
   updateDroneReadout();
 }
 
@@ -3739,13 +3751,7 @@ function renderDroneNote(n){
   // never add a note that was not chosen
   div.innerHTML=
     '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
-    (sel
-      ?'<div class="oct-controls">'+
-         '<button class="oct-btn" data-oct="-1">−</button>'+
-         '<span class="oct-val">Oct '+state.droneSelected[n]+'</span>'+
-         '<button class="oct-btn" data-oct="1">+</button>'+
-       '</div>'
-      :'<div class="oct-controls"><span class="oct-val">—</span></div>');
+    octControlsHTML(sel,state.droneSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
       e.stopPropagation();e.preventDefault();
@@ -5136,6 +5142,7 @@ function buildFreeGrid(){
   const order=freeOrder();
   order.forEach(n=>{const d=document.createElement('div');d.id='free-'+n.replace('#','s');grid.appendChild(d);});
   order.forEach(renderFreeNote);
+  fitNoteGrids();
   buildFreeRangeRows();
   refreshSectionSummaries();
 }
@@ -5170,13 +5177,7 @@ function renderFreeNote(n){
   div.innerHTML=
     (isRoot?'<span class="start-badge">root</span>':'')+
     '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
-    (sel
-      ?'<div class="oct-controls">'+
-         '<button class="oct-btn" data-oct="-1">−</button>'+
-         '<span class="oct-val">Oct '+state.freeSelected[n]+'</span>'+
-         '<button class="oct-btn" data-oct="1">+</button>'+
-       '</div>'
-      :'<div class="oct-controls"><span class="oct-val">—</span></div>');
+    octControlsHTML(sel,state.freeSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
       e.stopPropagation();e.preventDefault();
@@ -5641,11 +5642,6 @@ function wireFold(headId,bodyId,after){
   head.onclick=toggle;
   head.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
 }
-function patOpen(){return foldOpen('pat-body');}
-function setPatOpen(on){
-  setFold('pat-head','pat-body',on,buildPatternEditor);
-  patInfo();
-}
 function patInfo(){
   const el=document.getElementById('pat-info');
   if(!el)return;
@@ -5738,14 +5734,6 @@ function mixUsed(){
   if(GROOVES[state.groove]&&GROOVES[state.groove].brushes&&state.balladHat)set.add('h');
 
   return set;
-}
-function mixOpen(){const b=document.getElementById('mix-body');return b&&!b.hidden;}
-function setMixOpen(on){
-  const body=document.getElementById('mix-body'),head=document.getElementById('mix-head');
-  if(!body||!head)return;
-  body.hidden=!on;
-  head.setAttribute('aria-expanded',String(!!on));
-  spreadPanelsSoon();
 }
 function mixSummary(){
   const el=document.getElementById('mix-sum');
@@ -6228,6 +6216,7 @@ function shareOutRoom(){
      nothing until the note readout started calling this on every note and the
      page walked upwards while somebody was playing. Put back exactly where it
      was, unless the content genuinely got shorter than the position. */
+  fitNoteGrids();                  // a grid just unfolded has a width for the first time
   const wasAt=sc.scrollTop;
   // the tuner's two blocks are panels rather than folding sections, and they
   // should share the room the same way
@@ -6304,11 +6293,58 @@ function fitWordmark(){
   }
 }
 
+/* The octave stepper, in one place, because how wide it is decides how many
+   notes fit across and that has to be measured from the real thing. */
+function octControlsHTML(on,val){
+  return on
+    ? '<div class="oct-controls">'+
+        '<button class="oct-btn" data-oct="-1">−</button>'+
+        '<span class="oct-val">Oct '+val+'</span>'+
+        '<button class="oct-btn" data-oct="1">+</button>'+
+      '</div>'
+    : '<div class="oct-controls"><span class="oct-val">—</span></div>';
+}
+/* How wide a note needs to be once it is ON. A note that is off is 40px; the
+   moment it is armed the stepper appears and it becomes 92, and four of those
+   do not fit a 320px phone. The grid was laid out for the narrow version and
+   then clipped as soon as two notes were lit — worst in the drone, where notes
+   are lit by definition. Measured, not written down: the width depends on the
+   font, the language and the tier of padding in force. */
+let noteCellNeed=0;
+function measureNoteCell(force){
+  if(noteCellNeed&&!force)return noteCellNeed;      // only the tier or the font can change it
+  const g=document.querySelector('.note-grid');
+  if(!g||!g.children.length)return noteCellNeed;
+  const p=g.children[0].cloneNode(false);
+  p.className='note-btn active';
+  p.innerHTML='<div class="note-name">C#</div>'+octControlsHTML(true,3);
+  p.style.cssText='position:absolute;left:-9999px;top:0;width:max-content';
+  g.appendChild(p);
+  noteCellNeed=Math.ceil(p.getBoundingClientRect().width);
+  p.remove();
+  return noteCellNeed;
+}
+/* Four across where four across fits, fewer where it does not. minmax(0,1fr)
+   so a track may be narrower than its contents rather than pushing the grid
+   past the panel — belt as well as braces, since the count already prevents it. */
+function fitNoteGrids(force){
+  const need=measureNoteCell(force);
+  if(!need)return;
+  document.querySelectorAll('.note-grid').forEach(g=>{
+    const room=g.clientWidth;
+    if(!room)return;                 // inside a panel that is still folded away
+    const gap=parseFloat(getComputedStyle(g).gap)||7;
+    const cols=Math.max(2,Math.min(4,Math.floor((room+gap)/(need+gap))));
+    g.style.gridTemplateColumns='repeat('+cols+',minmax(0,1fr))';
+  });
+}
+
 function relayoutViewport(){
   measureViewport();
   fitWordmark();
   layoutAllBeats();
   gridifyAll();
+  fitNoteGrids(true);
   spreadPanels();
   const sc=document.getElementById('scroll-area');
   if(sc){sc.style.overflowY='hidden';void sc.offsetHeight;sc.style.overflowY='';}
