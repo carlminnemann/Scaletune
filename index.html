@@ -919,7 +919,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <div class="bpm-row">
       <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" aria-label="Beats per minute">
       <span class="bpm-label" data-t="bpm">BPM</span>
-      <button class="tap-btn" id="tap-btn" onclick="tapTempo()">Tap tempo</button>
+      <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
@@ -3605,7 +3605,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27a';
+const APP_VERSION='2026-08-27b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4509,10 +4509,11 @@ function buildSubdivModeRow(){
 function subdivSummary(){
   const el=document.getElementById('subdiv-sum');
   if(!el)return;
-  const nm={1:'quarters',2:'eighths','2s':'swing',3:'triplets',4:'sixteenths'};
-  el.textContent=subdivListOn()&&subdivOrder().length>1
-    ? '· '+subdivOrder().length+' figures'
-    : '· '+(nm[currentSubdiv()]||'');
+  /* The same words the rest of the app uses for these, rather than a second
+     copy written here — a table of English next to keys that already exist is
+     how a panel ends up in one language while everything around it is in
+     another. */
+  el.textContent='· '+figureBit();
 }
 
 function buildSubdivRow(){
@@ -5175,7 +5176,7 @@ function renderFreeNote(n){
   // The octave stepper only exists once the note is armed — otherwise nudging
   // it would silently add a note the user never picked.
   div.innerHTML=
-    (isRoot?'<span class="start-badge">root</span>':'')+
+    (isRoot?'<span class="start-badge">'+tr('free.rootBadge','root')+'</span>':'')+
     '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
     octControlsHTML(sel,state.freeSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
@@ -6299,7 +6300,7 @@ function octControlsHTML(on,val){
   return on
     ? '<div class="oct-controls">'+
         '<button class="oct-btn" data-oct="-1">−</button>'+
-        '<span class="oct-val">Oct '+val+'</span>'+
+        '<span class="oct-val">'+tr('oct.short','Oct')+' '+val+'</span>'+
         '<button class="oct-btn" data-oct="1">+</button>'+
       '</div>'
     : '<div class="oct-controls"><span class="oct-val">—</span></div>';
@@ -6313,7 +6314,12 @@ function octControlsHTML(on,val){
 let noteCellNeed=0;
 function measureNoteCell(force){
   if(noteCellNeed&&!force)return noteCellNeed;      // only the tier or the font can change it
-  const g=document.querySelector('.note-grid');
+  /* A hidden grid measures as nothing. Free's own grid sits after the drone's
+     in the document, so measuring "the first one" from Free measured the
+     drone's, found it hidden, and returned a zero that then said "no room to
+     work with" and left the columns wherever they were. Measure one that is
+     actually on the screen, and if none is, keep what was measured last. */
+  const g=[...document.querySelectorAll('.note-grid')].find(x=>x.getClientRects().length);
   if(!g||!g.children.length)return noteCellNeed;
   const p=g.children[0].cloneNode(false);
   p.className='note-btn active';

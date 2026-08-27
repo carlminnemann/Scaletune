@@ -530,5 +530,7 @@
  "run.done": "Giro terminato.",
  "count.eachRound": "Ogni giro",
  "sum.countIn.round": ", a ogni giro",
- "modes.runningDown": "{n} modi di {key}, un’ottava ciascuno, chiudendo sul primo un’ottava sotto"
+ "modes.runningDown": "{n} modi di {key}, un’ottava ciascuno, chiudendo sul primo un’ottava sotto",
+ "free.rootBadge": "tonica",
+ "oct.short": "Ott"
 }

@@ -530,5 +530,7 @@
  "run.done": "Runde beendet.",
  "count.eachRound": "Jede Runde",
  "sum.countIn.round": ", bei jeder Runde",
- "modes.runningDown": "{n} Modi von {key}, je eine Oktave, zum Schluss der erste eine Oktave tiefer"
+ "modes.runningDown": "{n} Modi von {key}, je eine Oktave, zum Schluss der erste eine Oktave tiefer",
+ "free.rootBadge": "Grundton",
+ "oct.short": "Okt"
 }

@@ -530,5 +530,7 @@
  "run.done": "Tour terminé.",
  "count.eachRound": "Chaque tour",
  "sum.countIn.round": ", à chaque tour",
- "modes.runningDown": "{n} modes de {key}, une octave chacun, terminant sur le premier une octave plus bas"
+ "modes.runningDown": "{n} modes de {key}, une octave chacun, terminant sur le premier une octave plus bas",
+ "free.rootBadge": "tonique",
+ "oct.short": "Oct"
 }

@@ -516,5 +516,7 @@
  "run.done": "这一轮结束。",
  "count.eachRound": "每一轮",
  "sum.countIn.round": "，每一轮",
- "modes.runningDown": "{key} 的 {n} 个调式，各一个八度，最后回到第一个、低一个八度"
+ "modes.runningDown": "{key} 的 {n} 个调式，各一个八度，最后回到第一个、低一个八度",
+ "free.rootBadge": "根音",
+ "oct.short": "八度"
 }
