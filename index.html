@@ -536,9 +536,13 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 /* What is in a saved pattern, under its name: two patterns called "funk" and
    "funk 2" tell you nothing, "8 hits · 1 bar" tells you which is which. */
 .ex-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
-/* The cross is a pick-btn too, so the rule above would stretch it as well. */
+/* The cross is a pick-btn too, so the rule above would stretch it as well —
+   and that rule stacks a name over a subtitle, which makes align-items the
+   horizontal axis. Left-aligned, the cross sat 1px from one edge and 24 from
+   the other; it needs centring on both axes, said in the terms of a column. */
 .ex-row .pick-btn.ex-del{flex:0 0 34px;width:34px;min-width:34px;padding:0;
-  color:var(--wipe);border-color:var(--wipe-bd);justify-content:center;text-align:center}
+  color:var(--wipe);border-color:var(--wipe-bd);
+  align-items:center;justify-content:center;text-align:center}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--wipe-bd);border-radius:var(--r);background:var(--bg3);color:var(--wipe);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
 
@@ -1380,9 +1384,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="the-tempo-moving-on-its">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
     BPM — every pass, or every so many minutes up to thirty. <em>Ramp</em> slides instead: from the
     tempo you set to the one you name, a little on every beat, over as long as you choose, so there
-    is no moment where it jumps. A ramp starts again from your tempo every time you press Start,
-    because otherwise the second run would have nowhere to go; steps stay where they got to. Either
-    way it stops at 10 and at 300.</dd>
+    is no moment where it jumps. Either kind starts again from your
+    tempo every time you press Start: "start at 80 and climb" is the exercise, and pressing Start
+    plays the exercise rather than the place you happened to stop in the middle of it. Where the
+    beginning is, is what your own hand says — move the tempo and you move it. Either way it stops
+    at 10 and at 300.</dd>
     <dt data-t="where-the-accompaniment-lives">Where the accompaniment lives</dt><dd data-t="in-metro-and-only-there">In Metro, and only there. In the other modes the
     metronome is something to play against, so it clicks and nothing more — a kit, a mixer and a
     pattern editor were six controls deep in a panel you open to set a tempo. Choose a style in Metro
@@ -3674,7 +3680,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27e';
+const APP_VERSION='2026-08-27f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4156,7 +4162,7 @@ function stepTempo(){
 function tempoOverTime(when,counting){
   const P=state.practice;
   if(counting){
-    if(P.tempoMode==='ramp'&&P.rampFrom!=null)setBpmAuto(P.rampFrom);
+    if(P.tempoMode!=='off'&&P.rampFrom!=null)setBpmAuto(P.rampFrom);
     rampT0=when;                 // the ramp begins where the count ends
     nextStepAt=0;
     return;
@@ -4178,13 +4184,22 @@ function tempoOverTime(when,counting){
 }
 // Every run of a ramp starts from the tempo you set, not from wherever the last
 // run left off — otherwise the second run has nowhere to go.
+/* Where a tempo change starts from. "Start at 80 and climb" is the exercise,
+   so pressing Start plays the exercise — not the place you happened to stop in
+   the middle of it. This used to be true of the ramp alone; steps kept whatever
+   they had climbed to, which meant the same exercise was a different exercise
+   the second time you ran it, and a longer one every time after that.
+
+   The hand decides where the beginning is: moving the tempo yourself moves it,
+   and choosing a tempo change takes the tempo you are on. */
 function armTempoOverTime(t0){
   const P=state.practice;
   rampT0=t0;nextStepAt=0;
-  if(P.tempoMode==='ramp'){
+  if(P.tempoMode!=='off'){
     if(P.rampFrom==null)P.rampFrom=state.bpm;
     setBpmAuto(P.rampFrom);
-  } else if(tempoStepping()&&P.tempoEvery!=='pass'){
+  }
+  if(tempoStepping()&&P.tempoEvery!=='pass'){
     // left at zero when a count-in is coming: the first beat of the music sets it
     nextStepAt=countTicks>0?0:t0+P.tempoEvery*60;
   }
@@ -4729,7 +4744,8 @@ function buildSpeedControls(){
     b.textContent=label;
     b.onclick=()=>{
       P.tempoMode=k;
-      if(k==='ramp'&&P.rampFrom==null)P.rampFrom=state.bpm;
+      // whichever kind, it begins from the tempo you are looking at
+      P.rampFrom=(k==='off')?null:state.bpm;
       buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
     };
     row.appendChild(b);
