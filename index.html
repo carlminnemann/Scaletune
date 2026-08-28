@@ -1331,11 +1331,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     turns there, and it is the shape that inverts. Going up you play C–E, D–F, on to B–D, and the C
     above turns it over into C–A, a third <em>below</em>: the descent has begun. Coming down the shape
     keeps reaching under, so D–B passes below the C you set off from before the next C turns it back
-    into C–E. Direction therefore says which end you start at rather than whether it comes back; only
-    a plain scale can run one way and leap back to begin again. A run that turns stops one degree short
-    of where it set off, so that looping does not sound that note twice at the seam — the next round
-    begins on it. Set to run once it has no next round, and a scale that finishes on its second
-    degree has not finished, so the last pass closes on the note it started from. The line under the buttons spells out
+    into C–E. Turning the shape and coming back down are two different things,
+    though, so Direction means here what it means everywhere: Up runs the shape up the octave and
+    stops where the shape runs out — thirds end on B–D, which is how they are written — and Up-Down
+    comes back. A run that comes back stops one degree short of where it set off, so that looping
+    does not sound that note twice at the seam: the next round begins on it. Set to run once there
+    is no next round, and a scale that finishes on its second degree has not finished, so the last
+    pass closes on the tonic — the one it set off from if it came back, the one at the end it
+    arrived at if it did not. The line under the buttons spells out
     what the one you picked does in the key you are in.</dd>
   </dl></div>
 
@@ -3254,9 +3257,20 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      on its second degree has not finished. So the last pass of a run that stops
      closes on the note it set off from, and only that pass. */
   const close=()=>{if(closesOnTonic()&&out.length)out.push(out[0]);return out;};
+  /* A run that does not come back ends on the tonic at the end it arrived at,
+     the way a plain scale does — a shape stops on its own second note, which is
+     no more an ending for thirds than the second degree is for a scale. */
+  const closeAt=k=>{if(closesOnTonic())out.push(at(startIdx+k));return out;};
   if(direction==='down'&&!turns){climb(top,0,-1);return out;}
-  if(turns&&(direction==='down'||direction==='downup')){climb(top,1,-1);climb(0,top-1,1);return close();}
-  if(turns&&(direction==='up'||direction==='updown')){climb(0,top-1,1);climb(top,1,-1);return close();}
+  /* A pattern turns at the end because a shape has nowhere to go past it — but
+     turning and coming back are two different things, and only Up-Down and
+     Down-Up asked for the second. Up runs the shape up and stops where the shape
+     runs out; Down runs it down. The last shape reaches a little past the octave,
+     which is how thirds are written. */
+  if(turns&&direction==='up'){climb(0,top-1,1);return closeAt(top);}
+  if(turns&&direction==='down'){climb(top,1,-1);return closeAt(0);}
+  if(turns&&direction==='downup'){climb(top,1,-1);climb(0,top-1,1);return close();}
+  if(turns&&direction==='updown'){climb(0,top-1,1);climb(top,1,-1);return close();}
   /* There and back. The degree at each end starts a shape once — going up it is
      the one that turns the shape over, and the far end does the same on the way
      back, so nothing is played twice at the join. */
@@ -3699,7 +3713,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27j';
+const APP_VERSION='2026-08-27k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5151,14 +5165,13 @@ function renderPitchPickers(){
   if(patInfoEl)patInfoEl.textContent=seqPatternSentence();
 
   const dirRow=document.getElementById('dir-row');dirRow.innerHTML='';
-  /* With a pattern the run turns at the end whatever you choose, so Up-Down and
-     Down-Up would be two more ways of saying Up and Down. They go, and the two
-     that remain mean which end you set off from. */
-  const dirs=(state.seqPattern&&state.seqPattern!=='plain')
-    ?DIRECTIONS.filter(d=>d.k==='up'||d.k==='down'):DIRECTIONS;
-  if(!dirs.some(d=>d.k===state.direction))
-    state.direction=(state.direction==='downup')?'down':'up';
-  dirs.forEach(d=>{
+  /* All four, whatever is being played. A pattern turns at the end of the
+     exercise because the shape has nowhere to go past it, and for a while that
+     was taken to mean the run itself must come back — so Up-Down and Down-Up
+     were hidden and Up came back anyway. Turning the shape and coming back
+     down are two different things: thirds up the octave and stop is as real an
+     exercise as thirds up and back. */
+  DIRECTIONS.forEach(d=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.direction?' active':'');
     b.textContent=dirLabel(d.k);
