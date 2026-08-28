@@ -3684,7 +3684,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27h';
+const APP_VERSION='2026-08-27i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5776,7 +5776,13 @@ const EX_KEYS=[
 ];
 // the ones that are objects and have to be copied rather than referenced
 const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','practice'];
-const EX_MAX=60;                 // a shelf, not an archive
+/* Measured rather than guessed: an exercise is 1.2 KB, a loaded one with a
+   study list and a four-bar pattern 1.8, and the drawer they go in holds tens
+   of megabytes — the samples and the language packs live somewhere else and do
+   not compete. Two hundred of each is a term's worth and still under half a
+   megabyte; the number is here to stop a runaway loop filling the drawer, not
+   to ration a teacher. */
+const EX_MAX=200;
 let exercises=[];
 
 /* An exercise is where it starts, not where it happens to be. Run the modes
@@ -5936,9 +5942,16 @@ function saveExercise(){
   const name=(field.value||'').trim().slice(0,40);
   if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
   const at=exercises.findIndex(e=>e.n.toLowerCase()===name.toLowerCase());
+  /* Full means full. Truncating the list would have thrown away the oldest one
+     to make room for this one, without saying so — losing work quietly is worse
+     than refusing to take it. */
+  if(at<0&&exercises.length>=EX_MAX){
+    setStatus(tr('ex.tooMany','{n} is as many as fit. Delete one first.',{n:EX_MAX}));
+    setTimeout(()=>setStatus(''),3000);
+    return;
+  }
   const entry={n:name,v:1,s:snapshotExercise()};
   if(at>=0)exercises[at]=entry; else exercises.unshift(entry);
-  if(exercises.length>EX_MAX)exercises.length=EX_MAX;
   if(!writeExercises())return;
   field.blur();
   buildExercises();
@@ -5999,7 +6012,7 @@ function buildExercises(){
    that changes the slot and not the saved copy until you save over the name
    again — which is the only model that lets you try something without losing
    what you had. */
-const PAT_MAX=40;
+const PAT_MAX=200;
 let patterns=[];
 function readPatterns(){
   try{
@@ -6019,8 +6032,12 @@ function savePatternAs(){
   const entry={n:name,bars:state.custom.bars,grid:state.custom.grid,
                hits:JSON.parse(JSON.stringify(state.custom.hits))};
   const at=patterns.findIndex(x=>x.n.toLowerCase()===name.toLowerCase());
+  if(at<0&&patterns.length>=PAT_MAX){
+    setStatus(tr('ex.tooMany','{n} is as many as fit. Delete one first.',{n:PAT_MAX}));
+    setTimeout(()=>setStatus(''),3000);
+    return;
+  }
   if(at>=0)patterns[at]=entry; else patterns.unshift(entry);
-  if(patterns.length>PAT_MAX)patterns.length=PAT_MAX;
   if(!writePatterns())return;
   field.blur();buildPatternList();
   setStatus(at>=0?tr('ex.replaced','Replaced "{n}".',{n:name})

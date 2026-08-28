@@ -552,5 +552,6 @@
  "pat.namePlaceholder": "Dai un nome a questo pattern",
  "pat.mineInfo": "Sceglierne uno lo carica nel pattern qui sotto. Quello che scrivi dopo cambia il pattern, non la copia salvata, finché non salvi di nuovo con lo stesso nome.",
  "pat.mineEmpty": "Scrivi un pattern qui sotto, dagli un nome, e sarà qui la prossima volta.",
- "ramp.round": "giro"
+ "ramp.round": "giro",
+ "ex.tooMany": "{n} è tutto quello che ci sta. Elimina prima uno."
 }

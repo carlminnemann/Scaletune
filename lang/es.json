@@ -552,5 +552,6 @@
  "pat.namePlaceholder": "Ponle un nombre a este patrón",
  "pat.mineInfo": "Elegir uno lo carga en el patrón de abajo. Lo que escribas después cambia el patrón, no la copia guardada, hasta que vuelvas a guardar con el mismo nombre.",
  "pat.mineEmpty": "Escribe un patrón aquí abajo, ponle un nombre, y estará aquí la próxima vez.",
- "ramp.round": "vuelta"
+ "ramp.round": "vuelta",
+ "ex.tooMany": "{n} es todo lo que cabe. Borra uno primero."
 }

@@ -552,5 +552,6 @@
  "pat.namePlaceholder": "Dá um nome a este padrão",
  "pat.mineInfo": "Escolher um carrega-o no padrão abaixo. O que escreveres depois muda o padrão, não a cópia guardada, até voltares a guardar com o mesmo nome.",
  "pat.mineEmpty": "Escreve um padrão aqui em baixo, dá-lhe um nome, e fica aqui para a próxima.",
- "ramp.round": "volta"
+ "ramp.round": "volta",
+ "ex.tooMany": "{n} é tudo o que cabe. Apaga um primeiro."
 }

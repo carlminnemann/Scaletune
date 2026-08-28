@@ -552,5 +552,6 @@
  "pat.namePlaceholder": "Donne un nom à ce motif",
  "pat.mineInfo": "En choisir un le charge dans le motif ci-dessous. Ce que tu écris ensuite change le motif, pas la copie enregistrée, jusqu’à ce que tu réenregistres sous le même nom.",
  "pat.mineEmpty": "Écris un motif ci-dessous, donne-lui un nom, et il sera là la prochaine fois.",
- "ramp.round": "tour"
+ "ramp.round": "tour",
+ "ex.tooMany": "{n}, c’est tout ce qui tient. Supprimes-en un d’abord."
 }

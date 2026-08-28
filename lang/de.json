@@ -552,5 +552,6 @@
  "pat.namePlaceholder": "Gib diesem Pattern einen Namen",
  "pat.mineInfo": "Eines auszuwählen lädt es in das Pattern darunter. Was du danach schreibst, ändert das Pattern und nicht die gesicherte Kopie — bis du wieder unter demselben Namen sicherst.",
  "pat.mineEmpty": "Schreib unten ein Pattern, gib ihm einen Namen, und beim nächsten Mal ist es hier.",
- "ramp.round": "Runde"
+ "ramp.round": "Runde",
+ "ex.tooMany": "{n} ist alles, was hineinpasst. Lösch zuerst eine."
 }
