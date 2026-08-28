@@ -3357,6 +3357,7 @@ function startPlayback(){
       if(droneSemitones().length){startContinuous();updateDroneReadout();}
       if(!state.metroInDrone)return;   // the drone alone, as it has always been
     }
+    resetRun();                  // before the sequence, which reads it
     if(!notesSilent()){
       // every run starts at the top of the study list
       if(listEnabled()){studyIdx=0;applyListItem(activeList()[0]);renderPitchPickers();}
@@ -3365,7 +3366,6 @@ function startPlayback(){
     nextBeatTime=audioCtx.currentTime+0.12;
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
-    passesDone=0;runEnding=false;runEndAt=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
     beginCount();
@@ -3608,7 +3608,12 @@ function togglePlay(){
     startTuner().then(ok=>{if(!ok)setPlayUI(false);});
     return;
   }
-  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();return;}
+  if(state.playing){
+    state.playing=false;setPlayUI(false);stopPlayback();
+    // stopped by hand: the exercise goes back to its beginning, same as ending
+    resetRun();if(!notesSilent())refreshSequence();
+    return;
+  }
   /* A run through the modes is one exercise, first mode to last. Stopping part
      way through and pressing Start again means starting it again, not resuming
      where it happened to be — the seven only make sense from the top. */
@@ -3713,7 +3718,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27k';
+const APP_VERSION='2026-08-29a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4305,6 +4310,12 @@ let passesDone=0;
    nothing more is scheduled from the seam, and the tick that finds the clock
    past that time takes it down. */
 let runEnding=false,runEndAt=0;
+/* Back to the top of the exercise. This has to happen BEFORE the sequence is
+   built, not after: whether the last pass closes on the tonic is decided while
+   the notes are being worked out, and a counter left standing at the end of the
+   last run made every run after the first build itself as though it were
+   already finished. The first one closed, the rest did not. */
+function resetRun(){passesDone=0;runEnding=false;runEndAt=0;roundJustWrapped=false;}
 /* Set on the pass that completes a round, read by whatever is asked to happen
    at the top of the next one. A round that is not the last one starts counting
    again from nothing, which is what makes "each round" a thing the count-in can
@@ -4320,8 +4331,8 @@ function markPassDone(){
   return false;
 }
 function endRunNow(){
-  runEnding=false;runEndAt=0;
   state.playing=false;setPlayUI(false);stopPlayback();
+  resetRun();refreshSequence();
   setStatus(tr('run.done','Round finished.'));
   setTimeout(()=>setStatus(''),2000);
 }
