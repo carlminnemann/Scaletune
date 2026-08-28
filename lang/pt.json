@@ -553,5 +553,15 @@
  "pat.mineInfo": "Escolher um carrega-o no padrão abaixo. O que escreveres depois muda o padrão, não a cópia guardada, até voltares a guardar com o mesmo nome.",
  "pat.mineEmpty": "Escreve um padrão aqui em baixo, dá-lhe um nome, e fica aqui para a próxima.",
  "ramp.round": "volta",
- "ex.tooMany": "{n} é tudo o que cabe. Apaga um primeiro."
+ "ex.tooMany": "{n} é tudo o que cabe. Apaga um primeiro.",
+ "rot.now": "Agora:",
+ "rot.startsOn": "Começa em:",
+ "rot.roundOf": "volta {n} de {total}",
+ "rot.next": "A seguir: {what}",
+ "rot.nextSame": {
+  "one": "A seguir: o mesmo, falta {n} volta para mudar",
+  "other": "A seguir: o mesmo, faltam {n} voltas para mudar"
+ },
+ "rot.hintPick": "toca num para o mover, ou no ✕ para o tirar",
+ "rot.hintPlace": "toca onde deve ficar, ou no mesmo para o deixar onde estava"
 }

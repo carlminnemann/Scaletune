@@ -553,5 +553,15 @@
  "pat.mineInfo": "Sceglierne uno lo carica nel pattern qui sotto. Quello che scrivi dopo cambia il pattern, non la copia salvata, finché non salvi di nuovo con lo stesso nome.",
  "pat.mineEmpty": "Scrivi un pattern qui sotto, dagli un nome, e sarà qui la prossima volta.",
  "ramp.round": "giro",
- "ex.tooMany": "{n} è tutto quello che ci sta. Elimina prima uno."
+ "ex.tooMany": "{n} è tutto quello che ci sta. Elimina prima uno.",
+ "rot.now": "Adesso:",
+ "rot.startsOn": "Comincia da:",
+ "rot.roundOf": "giro {n} di {total}",
+ "rot.next": "Poi: {what}",
+ "rot.nextSame": {
+  "one": "Poi: lo stesso, manca {n} giro per cambiare",
+  "other": "Poi: lo stesso, mancano {n} giri per cambiare"
+ },
+ "rot.hintPick": "tocca uno per spostarlo, o la sua ✕ per toglierlo",
+ "rot.hintPlace": "tocca dove deve andare, o lo stesso per lasciarlo dov’era"
 }

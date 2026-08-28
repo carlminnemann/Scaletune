@@ -553,5 +553,15 @@
  "pat.mineInfo": "Elegir uno lo carga en el patrón de abajo. Lo que escribas después cambia el patrón, no la copia guardada, hasta que vuelvas a guardar con el mismo nombre.",
  "pat.mineEmpty": "Escribe un patrón aquí abajo, ponle un nombre, y estará aquí la próxima vez.",
  "ramp.round": "vuelta",
- "ex.tooMany": "{n} es todo lo que cabe. Borra uno primero."
+ "ex.tooMany": "{n} es todo lo que cabe. Borra uno primero.",
+ "rot.now": "Ahora:",
+ "rot.startsOn": "Empieza en:",
+ "rot.roundOf": "vuelta {n} de {total}",
+ "rot.next": "Después: {what}",
+ "rot.nextSame": {
+  "one": "Después: lo mismo, falta {n} vuelta para cambiar",
+  "other": "Después: lo mismo, faltan {n} vueltas para cambiar"
+ },
+ "rot.hintPick": "toca uno para moverlo, o su ✕ para quitarlo",
+ "rot.hintPlace": "toca dónde debe ir, o el mismo para dejarlo donde estaba"
 }

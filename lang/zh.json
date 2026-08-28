@@ -538,5 +538,14 @@
  "pat.mineInfo": "选一个会把它载入下面的节奏型。之后你写的东西改的是那个节奏型，不是已保存的副本，直到你再用同一个名字保存。",
  "pat.mineEmpty": "在下面写一个节奏型，起个名字，下次它就在这里。",
  "ramp.round": "轮",
- "ex.tooMany": "{n} 个就是上限了。先删掉一个。"
+ "ex.tooMany": "{n} 个就是上限了。先删掉一个。",
+ "rot.now": "当前：",
+ "rot.startsOn": "从这里开始：",
+ "rot.roundOf": "第 {n} 轮，共 {total} 轮",
+ "rot.next": "接下来：{what}",
+ "rot.nextSame": {
+  "other": "接下来：还是它，再过 {n} 轮才换"
+ },
+ "rot.hintPick": "点一个来移动它，或点它的 ✕ 移除",
+ "rot.hintPlace": "点它该去的位置，或再点它本身保持原位"
 }

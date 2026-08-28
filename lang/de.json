@@ -553,5 +553,15 @@
  "pat.mineInfo": "Eines auszuwählen lädt es in das Pattern darunter. Was du danach schreibst, ändert das Pattern und nicht die gesicherte Kopie — bis du wieder unter demselben Namen sicherst.",
  "pat.mineEmpty": "Schreib unten ein Pattern, gib ihm einen Namen, und beim nächsten Mal ist es hier.",
  "ramp.round": "Runde",
- "ex.tooMany": "{n} ist alles, was hineinpasst. Lösch zuerst eine."
+ "ex.tooMany": "{n} ist alles, was hineinpasst. Lösch zuerst eine.",
+ "rot.now": "Jetzt:",
+ "rot.startsOn": "Beginnt mit:",
+ "rot.roundOf": "Runde {n} von {total}",
+ "rot.next": "Danach: {what}",
+ "rot.nextSame": {
+  "one": "Danach: dasselbe, noch {n} Runde bis zum Wechsel",
+  "other": "Danach: dasselbe, noch {n} Runden bis zum Wechsel"
+ },
+ "rot.hintPick": "tippe eines an, um es zu verschieben, oder sein ✕, um es zu entfernen",
+ "rot.hintPlace": "tippe an, wohin es soll, oder dasselbe, um es zu lassen"
 }

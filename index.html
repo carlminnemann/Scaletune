@@ -3154,7 +3154,11 @@ function subdivOrder(){
      having stuck. Eighths, triplets, sixteenths, triplets — and the next eighths
      is the one that starts the round again. The return is still there; it is
      just not written twice. */
-  if(state.practice.subdivDir==='updown')return l.concat(l.slice(1,-1).reverse());
+  /* Ending on the first figure as well as beginning on it plays it twice in a
+     row at the join — but only if there is a join. Running once there is none,
+     and a there-and-back that never gets back has not been there and back. */
+  if(state.practice.subdivDir==='updown')
+    return l.concat(l.slice(runsOnce()?0:1,-1).reverse());
   return l.slice();
 }
 function currentSubdiv(){
@@ -3256,11 +3260,11 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      it. A run that is about to END has no next round, and a scale that finishes
      on its second degree has not finished. So the last pass of a run that stops
      closes on the note it set off from, and only that pass. */
-  const close=()=>{if(closesOnTonic()&&out.length)out.push(out[0]);return out;};
+  const close=()=>{if(closesOnTonic()&&out.length){out.push(out[0]);seqCloses=true;}return out;};
   /* A run that does not come back ends on the tonic at the end it arrived at,
      the way a plain scale does — a shape stops on its own second note, which is
      no more an ending for thirds than the second degree is for a scale. */
-  const closeAt=k=>{if(closesOnTonic())out.push(at(startIdx+k));return out;};
+  const closeAt=k=>{if(closesOnTonic()){out.push(at(startIdx+k));seqCloses=true;}return out;};
   if(direction==='down'&&!turns){climb(top,0,-1);return out;}
   /* A pattern turns at the end because a shape has nowhere to go past it — but
      turning and coming back are two different things, and only Up-Down and
@@ -3284,7 +3288,12 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
    end of it. The counter is raised at the seam before the pass is built, so
    during the final pass it stands one short of the round. */
 function closesOnTonic(){
-  return runsOnce()&&passesDone===roundPasses()-1;
+  if(!runsOnce()||passesDone!==roundPasses()-1)return false;
+  /* And only on the last time round. Letting the phrase drift repeats the pass
+     until it lands on a bar head again; putting the ending on every one of those
+     sounded the tonic, then the tonic again as the repeat began. */
+  const needed=state.alignPasses?1:alignmentRounds();
+  return roundsInFigure>=needed-1;
 }
 function buildSequence(){
   if(state.mode==='free'){
@@ -3342,6 +3351,7 @@ function refreshSequence(){
   rebuildSpelling();
   clampStartDeg();
   clampRange();
+  seqCloses=false;
   sequence=buildSequence();
   updateAlignInfo();
   refreshSectionSummaries();
@@ -3406,17 +3416,23 @@ function gcd(a,b){while(b){const t=b;b=a%b;a=t;}return a;}
 // subdivision group again. When the pattern length is not a whole number of
 // groups the phrase precesses against the pulse — and that displacement is
 // the exercise, so the metronome is never resynchronised to it.
+/* The phrase, for the purpose of drifting against the bar, is the phrase — not
+   the tonic tacked on the end of the last pass to finish it. Counting that note
+   would change how many rounds the drift takes, and it is added because the run
+   is ending, which is no time to change the arithmetic. */
+let seqCloses=false;
+function driftLength(){return sequence.length-(seqCloses?1:0);}
 function alignmentRounds(){
-  if(!sequence.length)return 1;
+  if(!driftLength())return 1;
   const t=subTicks(currentSubdiv());
-  const patternTicks=sequence.length*ticksPerNote(currentSubdiv());
+  const patternTicks=driftLength()*ticksPerNote(currentSubdiv());
   return t/gcd(patternTicks,t);
 }
 
 // Where inside the subdivision group each successive round begins.
 function alignmentOffsets(){
   const sub=currentSubdiv(),n=alignmentRounds(),t=subTicks(sub);
-  const patternTicks=sequence.length*ticksPerNote(sub);
+  const patternTicks=driftLength()*ticksPerNote(sub);
   const out=[];
   for(let k=0;k<n;k++)out.push((patternTicks*k)%t);
   return out;
@@ -3718,7 +3734,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29c';
+const APP_VERSION='2026-08-29d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4355,7 +4371,11 @@ function advancePass(){
   // changes before the displacement has had time to resolve.
   roundsInFigure++;
   const needed=state.alignPasses?1:alignmentRounds();
-  if(roundsInFigure<needed)return false;
+  if(roundsInFigure<needed){
+    // the next time round is the last one: build it with its ending
+    if(runsOnce()&&roundsInFigure===needed-1&&!seqCloses)refreshSequence();
+    return false;
+  }
   roundsInFigure=0;
   if(markPassDone())return false;
 
@@ -4559,16 +4579,19 @@ function updateRotationPanel(){
   if(hint){
     hint.style.display=editable?'':'none';
     hint.textContent=rotHold==null
-      ? 'tap one to move it, or its \u2715 to take it out'
-      : 'tap where it should go, or the same one to leave it';
+      ? tr('rot.hintPick','tap one to move it, or its \u2715 to take it out')
+      : tr('rot.hintPlace','tap where it should go, or the same one to leave it');
   }
   const playing=state.playing;
   document.getElementById('rot-now').innerHTML=
-    (playing?'Now: ':'Starts on: ')+'<b>'+p.now+'</b>'+
-    (p.needed>1?'  · round '+Math.min(p.needed,roundsInFigure+1)+' of '+p.needed:'');
+    (playing?tr('rot.now','Now:'):tr('rot.startsOn','Starts on:'))+' <b>'+p.now+'</b>'+
+    (p.needed>1?'  · '+tr('rot.roundOf','round {n} of {total}',
+        {n:Math.min(p.needed,roundsInFigure+1),total:p.needed}):'');
   document.getElementById('rot-next').textContent=
-    p.moved?'Next: '+p.next
-           :'Next: same, '+(p.roundsLeft-1)+' more round'+(p.roundsLeft-1===1?'':'s')+' before it moves on';
+    p.moved?tr('rot.next','Next: {what}',{what:p.next})
+           :tr('rot.nextSame',{one:'Next: same, {n} more round before it moves on',
+                               other:'Next: same, {n} more rounds before it moves on'},
+               {n:p.roundsLeft-1});
 }
 
 function buildRepeatRow(){
