@@ -1382,7 +1382,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
     that.</dd>
     <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="the-tempo-moving-on-its">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
-    BPM — every pass, or every so many minutes up to thirty. <em>Ramp</em> slides instead: from the
+    BPM — every round, or every so many minutes up to thirty. A round is the whole of what is in
+    rotation, which is the same thing Repeat means by one: with a study list of four scales the
+    tempo moves once the four have been through, not once for each of them, and with the cycle of
+    fourths once all twelve keys have. Where nothing is in rotation a round is one pass of the
+    notes, and the word above the box says which it is. <em>Ramp</em> slides instead: from the
     tempo you set to the one you name, a little on every beat, over as long as you choose, so there
     is no moment where it jumps. Either kind starts again from your
     tempo every time you press Start: "start at 80 and climb" is the exercise, and pressing Start
@@ -3680,7 +3684,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27f';
+const APP_VERSION='2026-08-27g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4147,8 +4151,15 @@ function tempoStepping(){
 function tempoStepSign(){return state.practice.tempoMode==='down'?-1:1;}
 // One notch, at the seam between passes. A step measured in minutes does not
 // come through here — it has a clock of its own.
+/* One notch, once the exercise has been all the way round. With a study list
+   of four, "so many BPM per pass" used to mean per item: four notches before
+   the list had been through once, so eighty became a hundred and twenty before
+   you had played each scale a single time. A pass is the whole of what is in
+   rotation — the same thing the key already waits for, and the same thing
+   Repeat means by one round. */
 function stepTempo(){
   if(!tempoStepping()||state.practice.tempoEvery!=='pass')return;
+  if(!roundJustWrapped)return;
   setBpmAuto(state.bpm+tempoStepSign()*state.practice.tempoStep);
 }
 /* The two that run on the clock rather than on the music. Called once a beat,
@@ -4222,9 +4233,15 @@ function passCount(){
   if(!pulseOnly()||state.poly.on)return 1;
   return Math.max(1,state.practice.passCount|0);
 }
+/* One word for what the tempo waits for. Where something is in rotation that
+   is the whole rotation, so it says round — the word Repeat uses for the same
+   thing; where nothing is, a pass and a round are the same and it says pass. */
+function passWord(){
+  return roundPasses()>1?tr('ramp.round','round'):tr('ramp.pass','pass');
+}
 function passLabel(){
   const u=passUnit(),n=passCount();
-  if(u==='pass')return 'pass';
+  if(u==='pass')return passWord();
   return n===1?u:(n+' '+u+'s');
 }
 
@@ -4754,12 +4771,24 @@ function buildSpeedControls(){
 
   const every=document.getElementById('speed-every');
   if(every&&!every.options.length){
-    every.appendChild(new Option(tr('ramp.pass','pass'),'pass'));
+    every.appendChild(new Option(passWord(),'pass'));
     for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(tr('ramp.min','{n} min',{n:i}),String(i)));
     every.addEventListener('change',()=>{
       P.tempoEvery=every.value==='pass'?'pass':parseInt(every.value,10);
       buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
     });
+  }
+  /* Built once, but the first option's word is not fixed: it says pass or round
+     depending on what is in rotation, and that changes while the app is open —
+     and again when the language does. */
+  if(every&&every.options.length){
+    const w=passWord();
+    if(every.options[0].textContent!==w)every.options[0].textContent=w;
+    if(every.dataset.lang!==LANG){
+      every.dataset.lang=LANG;
+      for(let i=1;i<every.options.length;i++)
+        every.options[i].textContent=tr('ramp.min','{n} min',{n:i});
+    }
   }
   const rmin=document.getElementById('ramp-min');
   if(rmin&&!rmin.options.length){

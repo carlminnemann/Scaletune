@@ -278,7 +278,7 @@
   "other": "{n} figure ritmiche ({dir}) in ogni modo"
  },
  "ramp.min": "{n} min",
- "ramp.pass": "giro",
+ "ramp.pass": "passaggio",
  "range-amp-direction": "Estensione &amp; Direzione",
  "range.octaves": {
   "one": "{n} ottava",
@@ -471,7 +471,7 @@
  "the-shape-walked-from-every": "La figura percorsa da ogni grado, invece di salire dritto. <em>Terze</em> suona 1–3, poi 2–4, poi 3–5; <em>1 2 3</em> suona 1-2-3, poi 2-3-4. Quarte fino a settime sono la stessa idea con più ampiezza. I passi si contano in gradi della scala, non in semitoni, così le terze sono terze in qualsiasi modo — e sulla cromatica, dove un grado è un semitono, il nome è la figura e non l'intervallo. Una figura non ha dove andare oltre la fine dell'esercizio — una terza sopra il do acuto sta fuori dall'ottava che hai chiesto — perciò un modello gira sempre lì, ed è la figura a rovesciarsi: salendo suoni Do–Mi, Re–Fa, fino a Si–Re, e il do sopra la rovescia in Do–La, una terza <em>sotto</em>, che è la discesa cominciata. Scendendo la figura continua ad arrivare sotto, così Re–Si passa sotto il do da cui sei partito, prima che il do successivo la rovesci di nuovo in Do–Mi. La riga sotto i pulsanti scrive per esteso quel che fa quella che hai scelto nella tonalità in cui sei. La Direzione dice quindi da quale estremo parti, non se torna indietro; solo una scala semplice può correre in un senso e saltare all'inizio.",
  "the-strobe": "Lo stroboscopio",
  "the-study-list": "La lista di studio",
- "the-tempo-moving-on-its": "Il tempo che si muove da solo. <em>Sale</em> e <em>Scende</em> lo spostano di tanti BPM — a ogni giro, o ogni tot minuti fino a trenta. La <em>Rampa</em> invece scivola: dal tempo che hai messo a quello che indichi, un poco a ogni movimento, lungo il tempo che scegli, così non c'è un momento in cui salta. L’una e l’altra ripartono dal tuo tempo ogni volta che premi Avvia: «partire da 80 e salire» è l’esercizio, e premere Avvia suona l’esercizio, non il punto in cui ti sei fermato a metà. Dov’è l’inizio lo dice la tua mano: sposti il tempo e lo sposti. In ogni caso si ferma a 10 e a 300.",
+ "the-tempo-moving-on-its": "Il tempo che si muove da solo. <em>Sale</em> e <em>Scende</em> lo spostano di tanti BPM — a ogni giro, o ogni tot minuti fino a trenta. Un giro è tutto ciò che è in rotazione, lo stesso che la Ripetizione intende per uno: con una lista di studio di quattro scale il tempo sale dopo che tutte e quattro sono passate, e non una volta per ciascuna; con il ciclo di quarte, dopo tutte e dodici le tonalità. Dove non c’è nulla in rotazione, un giro è un passaggio delle note, e la parola sopra la casella dice quale dei due sia. La <em>Rampa</em> invece scivola: dal tempo che hai messo a quello che indichi, un poco a ogni movimento, lungo il tempo che scegli, così non c'è un momento in cui salta. L’una e l’altra ripartono dal tuo tempo ogni volta che premi Avvia: «partire da 80 e salire» è l’esercizio, e premere Avvia suona l’esercizio, non il punto in cui ti sei fermato a metà. Dov’è l’inizio lo dice la tua mano: sposti il tempo e lo sposti. In ogni caso si ferma a 10 e a 300.",
  "the-twelve-notes": "Le dodici note",
  "the-two-boxes-under-the": "Le due scatole sotto i modi. Singola lavora su una scala o un accordo per volta; Lista di studio ne raccoglie parecchi e li prende a turno, uno per giro, così un'intera famiglia si può lavorare senza fermarsi. Governa ogni pannello sotto di sé, ed è per questo che sta sopra di loro invece che nascosta dentro il pannello Fondamentale.",
  "theme": "Tema",
@@ -551,5 +551,6 @@
  "pat.mine": "I miei pattern",
  "pat.namePlaceholder": "Dai un nome a questo pattern",
  "pat.mineInfo": "Sceglierne uno lo carica nel pattern qui sotto. Quello che scrivi dopo cambia il pattern, non la copia salvata, finché non salvi di nuovo con lo stesso nome.",
- "pat.mineEmpty": "Scrivi un pattern qui sotto, dagli un nome, e sarà qui la prossima volta."
+ "pat.mineEmpty": "Scrivi un pattern qui sotto, dagli un nome, e sarà qui la prossima volta.",
+ "ramp.round": "giro"
 }
