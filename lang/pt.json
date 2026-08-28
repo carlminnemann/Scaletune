@@ -155,7 +155,7 @@
  "kit.machine": "Máquina",
  "kit.recorded": "Gravada",
  "lang.failed": "Não foi possível carregar essa língua.",
- "let-it-drift-is-the": "Deixar andar é o exercício: uma frase cujo comprimento não divide o compasso caminha contra a pulsação e só volta ao princípio ao fim de várias voltas, e o metrónomo nunca é ressincronizado com ela. Recomeçar a cada volta põe a nota um outra vez no primeiro tempo, sempre. Posta a dar uma volta só, também não se espera por ele: uma volta é uma volta, e quinze notas em colcheias davam duas antes, em semicolcheias quatro, só por causa de onde o compasso calhava cair. A frase continua a andar contra o pulso; apenas não fica à espera de voltar a casa.",
+ "let-it-drift-is-the": "Deixar andar é o exercício: uma frase cujo comprimento não divide o compasso caminha contra a pulsação e só volta ao princípio ao fim de várias voltas, e o metrónomo nunca é ressincronizado com ela. Recomeçar a cada volta põe a nota um outra vez no primeiro tempo, sempre.",
  "level": "Intensidade",
  "list.single": "Único",
  "list.study": "Lista de estudo",
@@ -553,6 +553,5 @@
  "pat.mineInfo": "Escolher um carrega-o no padrão abaixo. O que escreveres depois muda o padrão, não a cópia guardada, até voltares a guardar com o mesmo nome.",
  "pat.mineEmpty": "Escreve um padrão aqui em baixo, dá-lhe um nome, e fica aqui para a próxima.",
  "ramp.round": "volta",
- "ex.tooMany": "{n} é tudo o que cabe. Apaga um primeiro.",
- "align.onceOnly": "{notes} notas · toca uma vez, caia onde cair"
+ "ex.tooMany": "{n} é tudo o que cabe. Apaga um primeiro."
 }

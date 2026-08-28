@@ -155,7 +155,7 @@
  "kit.machine": "Máquina",
  "kit.recorded": "Grabado",
  "lang.failed": "No se pudo cargar ese idioma.",
- "let-it-drift-is-the": "Dejar que se desplace es el ejercicio: una frase cuya duración no divide el compás va girando contra el pulso y solo vuelve al cabo de varias vueltas, y el metrónomo nunca se resincroniza con ella. Reiniciar cada vuelta devuelve la nota uno al pulso uno cada vez. Puesta a dar una sola vuelta tampoco se espera: una vuelta es una vuelta, y quince notas en corcheas daban dos antes, en semicorcheas cuatro, solo por dónde caía el compás. La frase sigue desplazándose contra el pulso; simplemente no se la retiene hasta que vuelve a casa.",
+ "let-it-drift-is-the": "Dejar que se desplace es el ejercicio: una frase cuya duración no divide el compás va girando contra el pulso y solo vuelve al cabo de varias vueltas, y el metrónomo nunca se resincroniza con ella. Reiniciar cada vuelta devuelve la nota uno al pulso uno cada vez.",
  "level": "Nivel",
  "list.single": "Única",
  "list.study": "Lista de estudio",
@@ -553,6 +553,5 @@
  "pat.mineInfo": "Elegir uno lo carga en el patrón de abajo. Lo que escribas después cambia el patrón, no la copia guardada, hasta que vuelvas a guardar con el mismo nombre.",
  "pat.mineEmpty": "Escribe un patrón aquí abajo, ponle un nombre, y estará aquí la próxima vez.",
  "ramp.round": "vuelta",
- "ex.tooMany": "{n} es todo lo que cabe. Borra uno primero.",
- "align.onceOnly": "{notes} notas · suena una vez, caiga donde caiga"
+ "ex.tooMany": "{n} es todo lo que cabe. Borra uno primero."
 }

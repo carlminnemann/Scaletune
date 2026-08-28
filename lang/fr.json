@@ -155,7 +155,7 @@
  "kit.machine": "Machine",
  "kit.recorded": "Enregistrée",
  "lang.failed": "Cette langue n'a pas pu être chargée.",
- "let-it-drift-is-the": "Laisser dériver est l'exercice : une phrase dont la longueur ne divise pas la mesure marche contre la pulsation et ne revient qu'après plusieurs tours, et le métronome n'est jamais resynchronisé sur elle. Repartir à chaque tour remet la note un sur le premier temps à chaque fois. Réglé sur un seul tour, on ne l’attend pas non plus : un tour est un tour, et quinze notes en croches en donnaient deux auparavant, en doubles croches quatre, seulement à cause de l’endroit où tombait la mesure. La phrase continue de dériver contre la pulsation ; elle n’est simplement plus retenue jusqu’à son retour.",
+ "let-it-drift-is-the": "Laisser dériver est l'exercice : une phrase dont la longueur ne divise pas la mesure marche contre la pulsation et ne revient qu'après plusieurs tours, et le métronome n'est jamais resynchronisé sur elle. Repartir à chaque tour remet la note un sur le premier temps à chaque fois.",
  "level": "Intensité",
  "list.single": "Seule",
  "list.study": "Liste de travail",
@@ -553,6 +553,5 @@
  "pat.mineInfo": "En choisir un le charge dans le motif ci-dessous. Ce que tu écris ensuite change le motif, pas la copie enregistrée, jusqu’à ce que tu réenregistres sous le même nom.",
  "pat.mineEmpty": "Écris un motif ci-dessous, donne-lui un nom, et il sera là la prochaine fois.",
  "ramp.round": "tour",
- "ex.tooMany": "{n}, c’est tout ce qui tient. Supprimes-en un d’abord.",
- "align.onceOnly": "{notes} notes · joué une fois, où que ça tombe"
+ "ex.tooMany": "{n}, c’est tout ce qui tient. Supprimes-en un d’abord."
 }
