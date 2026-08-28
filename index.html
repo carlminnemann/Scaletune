@@ -3684,7 +3684,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-27g';
+const APP_VERSION='2026-08-27h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3966,9 +3966,15 @@ let modesStep=0;
    middle of it and pressing Start means starting it again. Remembered whenever
    the run, the scale or the tonic is chosen. */
 let modesHome=null;
+/* The key an exercise sets off from, whatever moves it afterwards. The cycle of
+   fourths walks the tonic through twelve keys and keeps no record of where it
+   began; this is that record, kept at the same three moments as the modes' —
+   you pick a tonic, you pick a scale, you choose what moves between passes. */
+let keyHome=null;
 function markModesHome(){
   modesHome=(state.mode==='scale'&&state.scaleName)
     ?{root:state.root,group:state.scaleGroup,name:state.scaleName}:null;
+  keyHome=(state.mode==='scale'||state.mode==='arpeggio')?state.root:null;
   modesStep=0;
 }
 function restartModesRun(){
@@ -5773,10 +5779,32 @@ const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','p
 const EX_MAX=60;                 // a shelf, not an archive
 let exercises=[];
 
+/* An exercise is where it starts, not where it happens to be. Run the modes
+   from C ionian, stop on E phrygian, save: what you meant to keep is C ionian.
+   Three things walk away from their starting point while an exercise runs — the
+   tonic under the modes, the tonic under the cycle of fourths, and the tempo
+   under a tempo change — and each of them already remembers where it set off
+   from, because each already has to go back there. Saving reads those rather
+   than the live values. Everything else is either not moved by playing, or is
+   an index that is put back to the top on opening. */
+function exerciseStart(){
+  const out={};
+  const P=state.practice;
+  if(modesRunOn()&&modesHome){
+    out.root=modesHome.root;out.scaleGroup=modesHome.group;out.scaleName=modesHome.name;
+  } else if(P.rootMove==='fourths'&&keyHome){
+    out.root=keyHome;
+  }
+  if(P.tempoMode!=='off'&&P.rampFrom!=null)out.bpm=P.rampFrom;
+  return out;
+}
 function snapshotExercise(){
   const out={};
   EX_KEYS.forEach(k=>{out[k]=state[k];});
   EX_DEEP.forEach(k=>{try{out[k]=JSON.parse(JSON.stringify(state[k]));}catch(e){}});
+  Object.assign(out,exerciseStart());
+  // the beginning is what a saved tempo change runs from, next time too
+  if(out.practice)out.practice.rampFrom=null;
   return out;
 }
 /* Read back defensively, one field at a time, against what the app has now.
@@ -5884,9 +5912,9 @@ function applyExercise(x){
     const pc=num(p.passCount,1,PASS_MAX); if(pc)state.practice.passCount=pc;
     state.practice.passUnit=oneOf(p.passUnit,['bar','beat'])||'bar';
   }
-  state.listKind=null;studyIdx=0;subdivIdx=0;
+  state.listKind=null;studyIdx=0;subdivIdx=0;passesDone=0;
   if(state.practice.list.length)applyListItem(state.practice.list[0]);
-  markModesHome();
+  markModesHome();          // this key and this mode are where it sets off from
   return true;
 }
 
