@@ -155,7 +155,7 @@
  "kit.machine": "Macchina",
  "kit.recorded": "Registrata",
  "lang.failed": "Non è stato possibile caricare questa lingua.",
- "let-it-drift-is-the": "Lascia scorrere è l'esercizio: una frase la cui lunghezza non divide la battuta cammina contro la pulsazione e torna a posto solo dopo parecchi giri, e il metronomo non le viene mai risincronizzato. Riparti a ogni giro rimette la nota uno sul primo movimento ogni volta.",
+ "let-it-drift-is-the": "Lascia scorrere è l'esercizio: una frase la cui lunghezza non divide la battuta cammina contro la pulsazione e torna a posto solo dopo parecchi giri, e il metronomo non le viene mai risincronizzato. Riparti a ogni giro rimette la nota uno sul primo movimento ogni volta. Impostato su un giro solo non lo si aspetta nemmeno: un giro è un giro, e quindici note in crome ne davano due prima, in semicrome quattro, solo per dove capitava la battuta. La frase continua a scorrere contro il pulso; semplicemente non viene trattenuta finché non torna a casa.",
  "level": "Intensità",
  "list.single": "Singola",
  "list.study": "Lista di studio",
@@ -553,5 +553,6 @@
  "pat.mineInfo": "Sceglierne uno lo carica nel pattern qui sotto. Quello che scrivi dopo cambia il pattern, non la copia salvata, finché non salvi di nuovo con lo stesso nome.",
  "pat.mineEmpty": "Scrivi un pattern qui sotto, dagli un nome, e sarà qui la prossima volta.",
  "ramp.round": "giro",
- "ex.tooMany": "{n} è tutto quello che ci sta. Elimina prima uno."
+ "ex.tooMany": "{n} è tutto quello che ci sta. Elimina prima uno.",
+ "align.onceOnly": "{notes} note · suona una volta, dove capita"
 }

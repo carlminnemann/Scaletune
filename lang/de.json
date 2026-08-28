@@ -155,7 +155,7 @@
  "kit.machine": "Maschine",
  "kit.recorded": "Aufgenommen",
  "lang.failed": "Diese Sprache konnte nicht geladen werden.",
- "let-it-drift-is-the": "Wandern lassen ist die Übung: eine Phrase, deren Länge den Takt nicht teilt, wandert gegen den Puls und kommt erst nach mehreren Runden zurück, und das Metronom wird nie neu auf sie ausgerichtet. Jede Runde neu setzt Ton eins jedes Mal wieder auf Schlag eins.",
+ "let-it-drift-is-the": "Wandern lassen ist die Übung: eine Phrase, deren Länge den Takt nicht teilt, wandert gegen den Puls und kommt erst nach mehreren Runden zurück, und das Metronom wird nie neu auf sie ausgerichtet. Jede Runde neu setzt Ton eins jedes Mal wieder auf Schlag eins. Auf eine Runde gestellt wird auch nicht darauf gewartet: eine Runde ist eine Runde, und fünfzehn Töne in Achteln ergaben vorher zwei, in Sechzehnteln vier — nur weil der Takt gerade so fiel. Die Phrase wandert weiterhin gegen den Puls; sie wird bloß nicht mehr aufgehalten, bis sie heimkommt.",
  "level": "Stärke",
  "list.single": "Einzeln",
  "list.study": "Übungsliste",
@@ -553,5 +553,6 @@
  "pat.mineInfo": "Eines auszuwählen lädt es in das Pattern darunter. Was du danach schreibst, ändert das Pattern und nicht die gesicherte Kopie — bis du wieder unter demselben Namen sicherst.",
  "pat.mineEmpty": "Schreib unten ein Pattern, gib ihm einen Namen, und beim nächsten Mal ist es hier.",
  "ramp.round": "Runde",
- "ex.tooMany": "{n} ist alles, was hineinpasst. Lösch zuerst eine."
+ "ex.tooMany": "{n} ist alles, was hineinpasst. Lösch zuerst eine.",
+ "align.onceOnly": "{notes} Töne · einmal gespielt, wo immer es hinfällt"
 }

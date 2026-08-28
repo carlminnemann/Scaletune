@@ -1467,7 +1467,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     Per bar one note a bar. Under swing the notes take the swing too, long then short.</dd>
     <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="let-it-drift-is-the">Let it drift is the exercise: a phrase whose length does not divide the
     bar walks round against the pulse and only comes back after several rounds, and the metronome is
-    never resynchronised to it. Restart each round puts note one back on beat one every time.</dd>
+    never resynchronised to it. Restart each round puts note one back on beat one every time.
+    Set to run once it is not waited for either: one round means one round, and fifteen notes in
+    eighths took two before, in sixteenths four, because of where the bar happened to fall. The
+    phrase still drifts against the pulse; it is simply not held back until it comes home.</dd>
 
   </dl></div>
 
@@ -3718,7 +3721,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29a';
+const APP_VERSION='2026-08-29b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4354,7 +4357,13 @@ function advancePass(){
   // round against the pulse, nothing else may move — otherwise the figure
   // changes before the displacement has had time to resolve.
   roundsInFigure++;
-  const needed=state.alignPasses?1:alignmentRounds();
+  /* Letting the phrase drift means repeating it until it lands on a bar head
+     again — the exercise, while it loops. Asked for one round, one round is what
+     it should be: fifteen notes in eighths took two, in sixteenths four, and
+     nobody who says "once" means twice because of where the bar happens to fall.
+     The phrase still drifts against the pulse; it just is not held back waiting
+     to come home. */
+  const needed=(state.alignPasses||runsOnce())?1:alignmentRounds();
   if(roundsInFigure<needed)return false;
   roundsInFigure=0;
   if(markPassDone())return false;
@@ -4779,13 +4788,16 @@ function updateAlignInfo(){
   if(state.alignPasses){
     el.textContent=tr('align.restart','Every round restarts on beat 1.');return;
   }
-  const n=alignmentRounds(),sub=currentSubdiv();
+  const n=(runsOnce()?1:alignmentRounds()),sub=currentSubdiv();
   const group={1:tr('group.beat','beat'),2:tr('group.eighthPair','eighth pair'),
     '2s':tr('group.swungPair','swung pair'),3:tr('group.triplet','triplet'),
     4:tr('group.sixteenthGroup','sixteenth group')}[sub]||'';
   el.textContent=n===1
-    ? tr('align.lands','{notes} notes · lands on the head of every {group}',
-        {notes:sequence.length,group:group})
+    ? (runsOnce()&&alignmentRounds()>1
+        ? tr('align.onceOnly','{notes} notes · played once, wherever it lands',
+            {notes:sequence.length})
+        : tr('align.lands','{notes} notes · lands on the head of every {group}',
+            {notes:sequence.length,group:group}))
     : tr('align.rounds','{notes} notes · {n} rounds before note 1 falls on the head of a {group} again (offsets {list})',
         {notes:sequence.length,n:n,group:group,list:alignmentOffsets().join(', ')});
 }
