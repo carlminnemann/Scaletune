@@ -3755,7 +3755,8 @@ function togglePlay(){
   if(state.playing){
     state.playing=false;setPlayUI(false);stopPlayback();
     // stopped by hand: the exercise goes back to its beginning, same as ending
-    resetRun();if(!notesSilent())refreshSequence();
+    resetRun();restartModesRun();
+    if(!notesSilent())refreshSequence();
     return;
   }
   /* A run through the modes is one exercise, first mode to last. Stopping part
@@ -3862,7 +3863,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29s';
+const APP_VERSION='2026-08-29t';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4168,7 +4169,7 @@ function markModesHome(){
 }
 function restartModesRun(){
   if(!modesRunOn())return;
-  modesStep=0;
+  modesStep=0;passTick=0;
   if(!modesHome||modesHome.group!==state.scaleGroup)return;
   if(state.root===modesHome.root&&state.scaleName===modesHome.name)return;
   state.root=modesHome.root;
@@ -4515,7 +4516,13 @@ function markPassDone(){
 }
 function endRunNow(){
   state.playing=false;setPlayUI(false);stopPlayback();
-  resetRun();refreshSequence();
+  resetRun();
+  /* Back to the top as soon as it stops, not on the next Start. Left standing on
+     the last mode, everything you touch in between sees that mode as where you
+     are — and one of those things wrote down where you are as where the run
+     begins. */
+  restartModesRun();
+  refreshSequence();
   setStatus(tr('run.done','Round finished.'));
   setTimeout(()=>setStatus(''),2000);
 }
@@ -4860,7 +4867,9 @@ function buildModesTourRow(){
         : tr('modes.thereBackHint','Climbs through them and comes back down through them');
       b.onclick=()=>{
         state.practice.modesTour=v;
-        buildModesTourRow();markModesHome();resetRun();
+        /* How far the run goes is not a choice of scale, so it does not move
+           where the run begins — only back to the beginning of it. */
+        buildModesTourRow();resetRun();restartModesRun();
         updatePracticeInfo();refreshSectionSummaries();refreshSequence();restartIfPlaying();
       };
       row.appendChild(b);
