@@ -397,15 +397,15 @@ details.sec[open] .sec-sum{display:none}
    the box IS the group, the heading sits on it, and a chevron is the only thing
    that says this one opens. */
 #metro-more-body{padding:var(--s4)}
-#metro-more-body>.mgroup{
+#metro-more-body>.mgroup,#metro-more-body>#repeat-block{
   background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
   padding:10px 12px;margin-bottom:8px}
-#metro-more-body>.mgroup:last-child{margin-bottom:0}
+#metro-more-body>.mgroup:last-child,#metro-more-body>#repeat-block:last-child{margin-bottom:0}
 #metro-more-body>.mgroup+.mgroup{border-top:1px solid var(--border)}
 /* a heading belongs to what is under it: near its own controls, far from the
    next group */
-#metro-more-body>.mgroup .section-label{margin-bottom:6px}
-#metro-more-body>.mgroup>.head:first-child{margin-bottom:0}
+#metro-more-body>.mgroup .section-label,#metro-more-body>#repeat-block .group-label{margin-bottom:6px}
+#metro-more-body>.mgroup>.head:first-child,#metro-more-body>#repeat-block>.head{margin-bottom:0}
 /* the fold heading gives up its own box — the card is the box now */
 #metro-more-body>.mgroup>.pat-head{background:none;border:0;padding:0}
 #metro-more-body>.mgroup>.pat-head .section-label{margin-bottom:0}
@@ -915,9 +915,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="btn-wrap" id="rootoct-row"></div>
       <div class="group-label" data-t="start-on">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
-      <div class="group-label" data-t="seq.pattern">Pattern</div>
-      <div class="btn-wrap" id="seqpat-row"></div>
-      <div class="info-line" id="seqpat-info"></div>
     </div>
   </details>
 
@@ -954,13 +951,21 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <details class="sec" id="sec-progress">
     <summary><span data-t="sec.practice-progressions">Practice Progressions</span><span class="sec-sum" id="sum-progress"></span></summary>
     <div class="sec-body" id="progress-body">
-      <div id="repeat-block">
-      <div class="head"><span class="group-label" data-t="repeat">Repeat</span>
-        <span class="btn-wrap seg" id="repeat-row" data-cols="fixed"></span></div>
+      <!-- The shape belongs to how the scale is practised, not to how far it
+           reaches: thirds and 1 2 3 are exercises, and Range & Direction is a
+           measurement. -->
+      <div id="seqpat-block">
+        <div class="group-label" data-t="seq.pattern">Pattern</div>
+        <div class="btn-wrap" id="seqpat-row"></div>
+        <div class="info-line" id="seqpat-info"></div>
       </div>
       <div id="rootmove-block">
       <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
+      </div>
+      <div id="repeat-block">
+      <div class="head"><span class="group-label" data-t="repeat">Repeat</span>
+        <span class="btn-wrap seg" id="repeat-row" data-cols="fixed"></span></div>
       </div>
       <div class="info-line" id="practice-info"></div>
     </div>
@@ -1362,7 +1367,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     is no next round, and a scale that finishes on its second degree has not finished, so the last
     pass closes on the tonic — the one it set off from if it came back, the one at the end it
     arrived at if it did not. The line under the buttons spells out
-    what the one you picked does in the key you are in.</dd>
+    what the one you picked does in the key you are in. It sits in Practice Progressions, with the
+    rest of what makes a scale an exercise, rather than in Range &amp; Direction, which is a
+    measurement.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-progress"><h3 data-t="practice-progressions">Practice Progressions</h3><dl>
@@ -3757,7 +3764,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29e';
+const APP_VERSION='2026-08-29f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3862,8 +3869,12 @@ function setMode(m){
      round, so the panel is there for all of them — but the drone has no rounds
      and the tuner nothing to run, and Root Movement inside it is a scale's or
      an arpeggio's alone. */
-  document.getElementById('sec-progress').style.display=(isDrone||isTuner)?'none':'';
-  document.getElementById('repeat-block').style.display=isDrone?'none':'';
+  /* Practice Progressions is about what moves between passes of a line of
+     notes, and Metro has no notes — the panel stood there holding one control
+     that had nothing to do with its name. */
+  document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner)?'none':'';
+  document.getElementById('seqpat-block').style.display=isPitch?'':'none';
+  placeRepeat(isMetro);
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
   state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
@@ -4615,6 +4626,25 @@ function updateRotationPanel(){
            :tr('rot.nextSame',{one:'Next: same, {n} more round before it moves on',
                                other:'Next: same, {n} more rounds before it moves on'},
                {n:p.roundsLeft-1});
+}
+
+/* Whether the exercise stops after one round is worth having in Metro too —
+   there a round is the pass you set, so Once means "give me eight bars and
+   stop". With its panel gone from Metro it moves next to the thing that says
+   what a pass is, which is where it belongs anyway. */
+function placeRepeat(inMetro){
+  const b=document.getElementById('repeat-block');
+  if(!b)return;
+  const home=document.getElementById('progress-body');
+  const pass=document.getElementById('pass-block');
+  const want=inMetro?(pass&&pass.parentNode):home;
+  if(!want)return;
+  if(inMetro){
+    if(b.parentNode!==want||b.previousElementSibling!==pass)pass.after(b);
+  } else if(b.parentNode!==home||b.nextElementSibling!==document.getElementById('practice-info')){
+    home.insertBefore(b,document.getElementById('practice-info'));
+  }
+  b.style.display='';
 }
 
 function buildRepeatRow(){
@@ -6590,6 +6620,7 @@ const SECTIONS=[
   {id:'sec-range',    sum:'sum-range',group:'range',
    text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.span})+' · '+
         dirLabel(state.direction)+' · '+tr('sum.fromOctave','from octave {n}',{n:state.rootOct})},
+  // Pattern reads here now, where it is set
   // Free's Range section shares a group with the Scale one: folding either
   // folds both, so the layout does not change under you when switching mode.
   {id:'sec-freenotes',sum:'sum-freenotes',group:'notes',
@@ -6616,6 +6647,7 @@ const SECTIONS=[
   {id:'sec-progress', sum:'sum-progress',
    text:()=>{
      const b=[];
+     if(state.seqPattern&&state.seqPattern!=='plain')b.push(lab('seqpat',state.seqPattern,state.seqPattern));
      if(state.practice.rootMove==='fourths')b.push(tr('sum.fourths','cycle of 4ths'));
      if(modesRunOn())b.push(tr('sum.modes','through the modes of {key}',{key:modesKeyName()}));
      if(runsOnce())b.push(tr('sum.once','one round'));
