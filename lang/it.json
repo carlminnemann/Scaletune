@@ -4,7 +4,7 @@
  "a-bar-is-undercut-so": "Una lama viene scavata finché i suoi modi cadono su 1 : 4 : 10 — la nota, due ottave sopra, e poco più di tre. È questo rapporto che si legge come metallo percosso e non come un suono qualunque: le parziali di un pianoforte sono una serie armonica e si fondono, queste tre restano separate. Ognuna si spegne al proprio ritmo, più in fretta in alto, così passa da un ping a un ronzio. Niente motore — le ventole da cui il vibrafono prende il nome muovono solo il volume, ma un'oscillazione è l'ultima cosa che serve a un'app per sentire l'intonazione, e suonare col motore spento è normale.",
  "a-fold-like-the-pattern": "Una linguetta, come il pattern e il mixer, che da chiusa dice su cosa è impostata. In cosa si divide ogni movimento. Lo swing sono due colpi divisi due a uno — la sensazione di terzina con cui una coppia di crome scritte viene davvero suonata. Singola usa una figura; Sequenza prende a turno quelle che scegli, una per giro.",
  "a-level-for-each-drum": "Un livello per ogni pezzo, sopra a quello che il pattern chiede — l'unica cosa che può rispondere a «il charleston è troppo debole contro le spazzole», visto che quel che sta in equilibrio in cuffia non ci sta su un telefono. Vale per entrambe le batterie e per un pattern tuo, e resta per la volta dopo. Una nota fantasma risponde al rullante e la cassa della bossa alla cassa, perché è quello che sono; i cursori che uno stile non usa restano sbiaditi, così un cursore che non può fare nulla lo dice. <em>Rimetti i livelli</em> riporta ogni cursore a posto.",
- "a-seventh-arpeggio-over-one": "Un arpeggio di settima su un'ottava si ferma sotto la nota più alta, come si praticano i rivolti. Su più di un'ottava ci arriva.",
+ "a-seventh-arpeggio-over-one": "Un arpeggio finisce sulla nota da cui è partito, qualunque rivolto si prenda: il primo rivolto di Do è Mi Sol Do Mi. «Comincia da» qui si chiama Rivolto, perché su un accordo il grado da cui parti È il rivolto; e le forme di scala — terze, 1 2 3 — non vengono offerte: sono modi di percorrere una scala, e un accordo non ha gradi fra le sue note da percorrere.",
  "accompaniment": "Accompagnamento",
  "accompaniment-2": "Accompagnamento",
  "advance-every": "Avanza ogni",
@@ -564,5 +564,8 @@
  },
  "rot.hintPick": "tocca uno per spostarlo, o la sua ✕ per toglierlo",
  "rot.hintPlace": "tocca dove deve andare, o lo stesso per lasciarlo dov’era",
- "poly.cycle": "ciclo di {n}s"
+ "poly.cycle": "ciclo di {n}s",
+ "inv.root": "Fondamentale",
+ "inv.n": "{n}ª",
+ "sec.inversion": "Rivolto"
 }

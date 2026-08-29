@@ -4,7 +4,7 @@
  "a-bar-is-undercut-so": "Uma lâmina é escavada até os seus modos caírem em 1 : 4 : 10 — a nota, duas oitavas acima dela, e um pouco mais de três. É essa relação que se lê como metal percutido e não como um som afinado qualquer: os parciais de um piano são uma série harmónica e fundem-se, enquanto estes três ficam separados. Cada um apaga-se ao seu ritmo, mais depressa em cima, por isso passa de um ping a um zumbido. Sem motor — as ventoinhas que dão o nome ao vibrafone só mexem no volume, mas uma oscilação é a última coisa de que precisa uma app para ouvir afinação, e tocar com o motor desligado é normal.",
  "a-fold-like-the-pattern": "Uma aba, como o padrão e a mesa de mistura, que diz em que está posta enquanto está fechada. Em que cada tempo se divide. O swing são dois toques repartidos dois para um — a sensação de tercina com que um par de colcheias escrito é realmente tocado. Único usa uma figura; Sequência leva à vez as que escolheres, uma por volta.",
  "a-level-for-each-drum": "Um nível para cada peça, por cima do que o padrão pedir — a única coisa que consegue responder a «o choque está baixo demais contra as vassouras», já que o que equilibra em auscultadores não equilibra num telemóvel. Aplica-se às duas baterias e a um padrão teu, e fica guardado para a próxima vez. Uma nota fantasma responde à tarola e o bombo da bossa ao bombo, porque é isso que são; os cursores que um estilo não usa ficam esbatidos, para que um cursor que não pode fazer nada o diga. <em>Repor níveis</em> põe todos os cursores no sítio.",
- "a-seventh-arpeggio-over-one": "Um arpejo de sétima ao longo de uma oitava pára abaixo da nota de cima, como se praticam as inversões. Em mais do que uma oitava, cai nela.",
+ "a-seventh-arpeggio-over-one": "Um arpejo acaba na nota em que começou, seja qual for a inversão: a primeira inversão de Dó é Mi Sol Dó Mi. O «Começar em» chama-se aqui Inversão, porque num acorde o grau de onde partes É a inversão; e as formas de escala — terceiras, 1 2 3 — não são oferecidas: são maneiras de percorrer uma escala, e um acorde não tem graus entre as suas notas para percorrer.",
  "accompaniment": "Acompanhamento",
  "accompaniment-2": "Acompanhamento",
  "advance-every": "Avançar a cada",
@@ -564,5 +564,8 @@
  },
  "rot.hintPick": "toca num para o mover, ou no ✕ para o tirar",
  "rot.hintPlace": "toca onde deve ficar, ou no mesmo para o deixar onde estava",
- "poly.cycle": "ciclo de {n}s"
+ "poly.cycle": "ciclo de {n}s",
+ "inv.root": "Fundamental",
+ "inv.n": "{n}ª",
+ "sec.inversion": "Inversão"
 }

@@ -921,7 +921,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="btn-wrap" id="span-row"></div>
       <div class="group-label" data-t="start-octave">Start Octave</div>
       <div class="btn-wrap" id="rootoct-row"></div>
-      <div class="group-label" data-t="start-on">Start On</div>
+      <div class="group-label" id="startdeg-label" data-t="start-on">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
     </div>
   </details>
@@ -1312,8 +1312,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <em>Blue notes</em> adds one note to each — a flat third over the major, a flat fifth over the
     minor — which is what turns a pentatonic into a blues scale. It is spelled the way it is written:
     A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
-    <dt data-t="sevenths-in-one-octave">Sevenths in one octave</dt><dd data-t="a-seventh-arpeggio-over-one">A seventh arpeggio over one octave stops below its top note, the
-    way inversions are practised. Over more than one octave it lands on it.</dd>
+    <dt data-t="sevenths-in-one-octave">Sevenths in one octave</dt><dd data-t="a-seventh-arpeggio-over-one">An arpeggio ends on the note it began on, whichever inversion you take:
+    the first inversion of C is E G C E. Start On is named Inversion here, because on a chord the
+    degree you set off from IS the inversion, and the scale shapes — thirds, 1 2 3 — are not
+    offered: they are ways of walking a scale, and a chord has no steps between its notes to walk.</dd>
     <dt id="help-exercises" data-t="saved-exercises">Saved exercises</dt><dd data-t="the-panel-at-the-top">The panel
     at the top. Set the app up the way you want to practise — the scale or the chord, the range and
     direction, the study list, what moves between passes, the tempo, the bar, the count-in, the
@@ -3355,11 +3357,12 @@ function buildSequence(){
   const degrees=activeDegrees();
   if(!degrees)return[];
   const rootS=semitone(state.root,state.rootOct)+modesLift();
-  // A single-octave seventh arpeggio is four notes and stops there — adding the
-  // octave on top would make five and blur the inversion. Across two or more
-  // octaves it does land back on the starting note.
-  const seventh=playingKind()==='chord'&&state.chordGroup==='seventh';
-  const appendTop=!(seventh&&state.span===1);
+  /* An arpeggio ends on the note it began on, inversion or not: E G C E is the
+     first inversion, and stopping at the C leaves it hanging on a note that is
+     neither where it started nor where it is going. A one-octave seventh used
+     to stop short of its octave, which made the third inversion the only one
+     that did not come home. */
+  const appendTop=true;
   return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,activeDirection());
 }
 
@@ -3781,7 +3784,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29j';
+const APP_VERSION='2026-08-29k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3890,7 +3893,10 @@ function setMode(m){
      notes, and Metro has no notes — the panel stood there holding one control
      that had nothing to do with its name. */
   document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner)?'none':'';
-  document.getElementById('seqpat-block').style.display=isPitch?'':'none';
+  /* Thirds and 1 2 3 are ways of walking a scale. A chord has three or four
+     notes and no steps between them to walk, so the shapes go. */
+  document.getElementById('seqpat-block').style.display=(m==='scale')?'':'none';
+  if(m!=='scale'&&state.seqPattern!=='plain'){state.seqPattern='plain';renderPitchPickers();}
   placeRepeat(isMetro);
   // Each side restores the last voice you chose there: the drone starts out on
   // the cello, the sequence modes on the sampled piano.
@@ -5290,16 +5296,25 @@ function renderPitchPickers(){
        the whole point of it — so this says so rather than accepting a choice it
        would overwrite at the next handover. */
     const locked=modesRunOn();
+    /* On a chord the degree you start from IS the inversion — starting on the
+       third is the first inversion — so it is named that way rather than making
+       the player translate. On a scale it stays the note it is. */
+    const chord=playingKind()==='chord';
     degrees.forEach((d,i)=>{
       const b=document.createElement('button');
       const off=locked&&i!==0;
       b.className='pick-btn'+(i===state.startDeg?' active':'')+(off?' disabled':'');
-      b.textContent=bareName((rootIdx+d)%12);
+      b.textContent=chord
+        ? (i===0?tr('inv.root','Root'):tr('inv.n','{n}',{n:i}))+' · '+bareName((rootIdx+d)%12)
+        : bareName((rootIdx+d)%12);
       if(off)b.title=tr('modes.ownTonic','Each mode starts on its own tonic');
       else b.onclick=()=>{state.startDeg=i;renderPitchPickers();refreshSequence();restartIfPlaying();};
       degRow.appendChild(b);
     });
   }
+  const degLabel=document.getElementById('startdeg-label');
+  if(degLabel)degLabel.textContent=(playingKind()==='chord')
+    ? tr('sec.inversion','Inversion') : tr('start-on','Start On');
   updateInfo();
   updatePracticeInfo();
   refreshSectionSummaries();

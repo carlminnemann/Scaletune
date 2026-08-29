@@ -4,7 +4,7 @@
  "a-bar-is-undercut-so": "Eine Platte wird so ausgefräst, dass ihre Moden auf 1 : 4 : 10 fallen — der Ton, zwei Oktaven darüber und etwas mehr als drei. Dieses Verhältnis liest sich als angeschlagenes Metall und nicht als bloßer Klang: die Teiltöne eines Klaviers sind eine Obertonreihe und verschmelzen, diese drei stehen für sich. Jeder verklingt in seinem eigenen Tempo, oben am schnellsten, weshalb aus einem Ping ein Summen wird. Kein Motor — die Ventilatoren, nach denen das Vibraphon heißt, bewegen nur die Lautstärke, aber ein Schwanken ist das Letzte, was eine App zum Hören von Intonation braucht, und ohne Motor zu spielen ist ganz üblich.",
  "a-fold-like-the-pattern": "Ein Aufklapper wie das Muster und der Mischer, der im geschlossenen Zustand sagt, worauf er steht. Worin jeder Schlag geteilt wird. Swing sind zwei Ticks im Verhältnis zwei zu eins — das Triolengefühl, mit dem ein geschriebenes Achtelpaar tatsächlich gespielt wird. Einzeln nimmt eine Figur; Folge nimmt die gewählten der Reihe nach, eine pro Durchgang.",
  "a-level-for-each-drum": "Ein Pegel für jede Trommel, über dem, was das Muster verlangt — das Einzige, was auf «die Hi-Hat ist zu leise gegen die Besen» antworten kann, denn was über Kopfhörer stimmt, stimmt über ein Telefon nicht. Er gilt für beide Sets und für ein eigenes Muster, und er bleibt bis zum nächsten Mal. Eine Ghost-Note gehört zur Snare und die Bassdrum der Bossa zur Bassdrum, denn das sind sie; die Regler, die ein Stil nicht braucht, sind ausgeblendet, damit ein Regler, der nichts bewirken kann, es auch sagt. <em>Pegel zurück</em> stellt jeden Regler zurück.",
- "a-seventh-arpeggio-over-one": "Ein Septakkord-Arpeggio über eine Oktave endet unter seinem obersten Ton, so wie Umkehrungen geübt werden. Über mehr als eine Oktave landet es darauf.",
+ "a-seventh-arpeggio-over-one": "Ein Arpeggio endet auf dem Ton, mit dem es begonnen hat, in welcher Umkehrung auch immer: die erste Umkehrung von C ist E G C E. „Beginnen auf“ heißt hier Umkehrung, denn bei einem Akkord IST die Stufe, von der aus man startet, die Umkehrung; und die Tonleiterfiguren — Terzen, 1 2 3 — werden nicht angeboten: sie sind Arten, eine Tonleiter abzuschreiten, und ein Akkord hat zwischen seinen Tönen keine Stufen zum Abschreiten.",
  "accompaniment": "Begleitung",
  "accompaniment-2": "Begleitung",
  "advance-every": "Weiter alle",
@@ -564,5 +564,8 @@
  },
  "rot.hintPick": "tippe eines an, um es zu verschieben, oder sein ✕, um es zu entfernen",
  "rot.hintPlace": "tippe an, wohin es soll, oder dasselbe, um es zu lassen",
- "poly.cycle": "Zyklus {n}s"
+ "poly.cycle": "Zyklus {n}s",
+ "inv.root": "Grundstellung",
+ "inv.n": "{n}.",
+ "sec.inversion": "Umkehrung"
 }

@@ -4,7 +4,7 @@
  "a-bar-is-undercut-so": "Cada lámina está rebajada hasta que sus modos caen en 1 : 4 : 10 — la nota, dos octavas por encima y algo más de tres. Esa proporción es lo que se oye como metal golpeado y no como un sonido cualquiera: los parciales de un piano forman una serie armónica y se funden, mientras que estos tres se separan. Cada uno se apaga a su ritmo, más rápido el agudo, y por eso pasa de golpe a zumbido. Sin motor — los ventiladores que dan nombre al vibráfono solo mueven el volumen, y un temblor es lo último que necesita una app para oír la afinación; además, tocar con el motor apagado es de lo más normal.",
  "a-fold-like-the-pattern": "Un pliegue, como el patrón y el mezclador, que dice cómo está puesto mientras está cerrado. En qué se divide cada pulso. El swing son dos golpes repartidos dos a uno — la sensación de tresillo con la que realmente se tocan dos corcheas escritas. Única usa una figura; Secuencia toma por turno las que elijas, una por pasada.",
  "a-level-for-each-drum": "Un nivel para cada tambor, por encima de lo que pida el patrón — lo único que responde a «el charles suena bajo frente a las escobillas», porque lo que se equilibra en auriculares no se equilibra en un teléfono. Vale para los dos kits y para un patrón tuyo, y se guarda para la próxima vez. Una nota fantasma obedece a la caja y el bombo de la bossa al bombo, porque eso es lo que son; los faders que un estilo no usa aparecen apagados, para que un fader que no puede hacer nada lo diga. Nivel de nuevo devuelve todos los faders a su sitio.",
- "a-seventh-arpeggio-over-one": "Un arpegio de séptima en una octava se detiene por debajo de su nota más alta, que es como se practican las inversiones. En más de una octava sí llega a ella.",
+ "a-seventh-arpeggio-over-one": "Un arpegio acaba en la nota en que empezó, sea cual sea la inversión: la primera inversión de Do es Mi Sol Do Mi. «Empezar en» se llama aquí Inversión, porque en un acorde el grado del que partes ES la inversión; y las formas de escala —terceras, 1 2 3— no se ofrecen: son maneras de recorrer una escala, y un acorde no tiene grados entre sus notas que recorrer.",
  "accompaniment": "Acompañamiento",
  "accompaniment-2": "Acompañamiento",
  "advance-every": "Avanzar cada",
@@ -564,5 +564,8 @@
  },
  "rot.hintPick": "toca uno para moverlo, o su ✕ para quitarlo",
  "rot.hintPlace": "toca dónde debe ir, o el mismo para dejarlo donde estaba",
- "poly.cycle": "ciclo de {n}s"
+ "poly.cycle": "ciclo de {n}s",
+ "inv.root": "Fundamental",
+ "inv.n": "{n}ª",
+ "sec.inversion": "Inversión"
 }

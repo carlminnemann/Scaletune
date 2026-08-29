@@ -4,7 +4,7 @@
  "a-bar-is-undercut-so": "Une lame est creusée jusqu'à ce que ses modes tombent sur 1 : 4 : 10 — la note, deux octaves au-dessus, et un peu plus de trois. C'est ce rapport qui se lit comme du métal frappé et non comme un son quelconque : les partiels d'un piano forment une série harmonique et se fondent, ces trois-là restent distincts. Chacun s'éteint à son rythme, le plus vite en haut, si bien qu'il passe d'un ping à un bourdonnement. Pas de moteur — les ventilateurs qui donnent son nom au vibraphone ne bougent que le volume, mais une oscillation est la dernière chose dont a besoin une app pour entendre la justesse, et jouer moteur coupé est courant.",
  "a-fold-like-the-pattern": "Un volet, comme le motif et la console, qui dit sur quoi il est réglé tant qu'il est fermé. En quoi chaque temps se divise. Le swing, ce sont deux impulsions partagées deux pour une — la sensation de triolet avec laquelle une paire de croches écrites se joue réellement. Seule prend une figure ; Séquence prend tour à tour celles que vous choisissez, une par tour.",
  "a-level-for-each-drum": "Un niveau pour chaque fût, par-dessus ce que le motif demande — la seule chose qui puisse répondre à « le charleston est trop faible contre les balais », puisque ce qui s'équilibre au casque ne s'équilibre pas sur un téléphone. Cela vaut pour les deux batteries et pour un motif à vous, et c'est gardé pour la fois suivante. Une note fantôme répond à la caisse claire et la grosse caisse de la bossa à la grosse caisse, car c'est ce qu'elles sont ; les curseurs qu'un style n'utilise pas sont estompés, pour qu'un curseur qui ne peut rien faire le dise. <em>Remettre les niveaux</em> remet chaque curseur en place.",
- "a-seventh-arpeggio-over-one": "Un arpège de septième sur une octave s'arrête sous sa note du haut, comme on travaille les renversements. Sur plus d'une octave, il y arrive.",
+ "a-seventh-arpeggio-over-one": "Un arpège finit sur la note d’où il est parti, quel que soit le renversement : le premier renversement de Do est Mi Sol Do Mi. « Commencer sur » s’appelle ici Renversement, car sur un accord le degré de départ EST le renversement ; et les formes de gamme — tierces, 1 2 3 — ne sont pas proposées : ce sont des façons de parcourir une gamme, et un accord n’a pas de degrés à parcourir entre ses notes.",
  "accompaniment": "Accompagnement",
  "accompaniment-2": "Accompagnement",
  "advance-every": "Avancer toutes les",
@@ -564,5 +564,8 @@
  },
  "rot.hintPick": "touche-en un pour le déplacer, ou son ✕ pour l’enlever",
  "rot.hintPlace": "touche où il doit aller, ou le même pour le laisser où il était",
- "poly.cycle": "cycle de {n}s"
+ "poly.cycle": "cycle de {n}s",
+ "inv.root": "Fondamental",
+ "inv.n": "{n}e",
+ "sec.inversion": "Renversement"
 }
