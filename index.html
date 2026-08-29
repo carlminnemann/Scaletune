@@ -224,6 +224,14 @@ details.sec.pinned>summary::after{display:none}
    twelfths the engine actually uses it would be 6px, which does not. So the grid
    is a view — sixteenths, or triplets for the swung things — onto the twelfths
    underneath. */
+/* Three separate choices live in Practice Progressions — the shape the line
+   walks, what moves the key between passes, and whether it stops — and with the
+   pattern's own reading directly above it, Root Movement was touching it with
+   nothing between. They are set apart by the same gap, so each reads as its own
+   thing rather than as one column of controls. */
+#progress-body>div+div{margin-top:var(--s3)}
+#progress-body>#rootmove-block{margin-top:var(--s5)}
+
 /* Every pixel here is a pixel of cell: on a phone the sixteen cells of a bar
    have about 300px between them, so the labels are two letters and the gaps are
    one pixel. Below a cell of 17px it scrolls sideways instead of shrinking. */
@@ -3764,7 +3772,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29g';
+const APP_VERSION='2026-08-29h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
