@@ -3890,7 +3890,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29v';
+const APP_VERSION='2026-08-29w';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5570,6 +5570,12 @@ function renderPitchPickers(){
   const degLabel=document.getElementById('startdeg-label');
   if(degLabel)degLabel.textContent=(playingKind()==='chord')
     ? tr('sec.inversion','Inversion') : tr('start-on','Start On');
+  /* How far the tour goes is a question only while the modes are running, and
+     picking a shape ends that. It used to be asked from the direction row and
+     from the root-movement row alone, so a shape chosen after the question
+     appeared left it on screen — still answerable, about a run that was no
+     longer happening. It belongs with everything else that is redrawn here. */
+  buildModesTourRow();
   updateInfo();
   updatePracticeInfo();
   refreshSectionSummaries();
