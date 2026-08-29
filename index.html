@@ -1373,7 +1373,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="octaves-3">Octaves</dt><dd data-t="how-far-the-line-reaches">How far the line reaches. If the top would run past the highest sample, the
     span is reduced until it fits — and grows back by itself once there is room again.</dd>
     <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
-    <dt data-t="direction-2">Direction</dt><dd data-t="up-down-or-up-then">Up, down, or up then back down.</dd>
+    <dt data-t="direction-2">Direction</dt><dd data-t="up-down-or-up-then">Up, down, or up then back down. Over anything that moves between
+    passes — the cycle of fourths, a study list, the modes — up and down means the passes take
+    turns instead: this one up, the next one down. It is the same exercise either way, and over a
+    progression it is the one people mean. An item given a direction of its own keeps it.</dd>
     <dt data-t="start-on-2">Start On</dt><dd data-t="which-degree-of-the-scale">Which degree of the scale the line starts from — the way a mode is practised
     from each of its own notes.</dd>
     <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="the-shape-walked-from-every">The shape walked from every degree, rather than straight up. <em>Thirds</em>
@@ -3833,7 +3836,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29q';
+const APP_VERSION='2026-08-29r';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4107,10 +4110,14 @@ const ITEM_DIRS=['up','down','updown'];
 const DIR_MARK={up:'\u2191',down:'\u2193',updown:'\u2195'};
 function activeDirection(){
   if(modesRunOn())return modeRunDir();
+  /* An item that was given a direction of its own keeps it. It is the more
+     particular choice — "this one down, whatever the panel says" — and the
+     alternation is what the panel says. */
   if(listEnabled()){
     const it=activeList()[studyIdx];
     if(it&&it.dir)return it.dir;
   }
+  if(passesAlternate())return alternatingDir();
   return state.direction;
 }
 
@@ -4151,6 +4158,19 @@ function restartModesRun(){
    whole run stays between the octave you chose and the one above it. Seven is
    odd, so the eighth mode is the ionian coming down, landing exactly where the
    first one set off. */
+/* Up-Down over something that moves means the passes take turns: this one up,
+   the next one down. It was the modes' rule alone; it is the rule of every
+   progression, because it is the same exercise — the cycle of fourths played C
+   up, F down, B flat up, and a study list ionian up, dorian down. Where nothing
+   moves between passes there is nothing to alternate, so a scale on its own
+   still goes up and back within the one pass, which is what up and down means
+   there. */
+function passesAlternate(){
+  if(state.direction!=='updown'&&state.direction!=='downup')return false;
+  return modesRunOn()
+      || (state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio'))
+      || (useListOn()&&activeList().length>1);
+}
 function modesSnake(){
   return modesRunOn()&&(state.direction==='updown'||state.direction==='downup');
 }
@@ -4254,11 +4274,17 @@ function modesLift(){
   modesTour().forEach(o=>{top=Math.max(top,modesRise(o));});
   return NOTES.indexOf(home.root)+top-NOTES.indexOf(state.root);
 }
+/* Which way THIS pass goes. Counted on a tick that only ever goes up, so a
+   rotation with an odd number of items — three scales — hands each of them both
+   directions over two rounds instead of resetting to the same one every time. */
+let passTick=0;
+function alternatingDir(){
+  const first=state.direction==='updown'?'up':'down';
+  return (passTick%2)?(first==='up'?'down':'up'):first;
+}
 function modeRunDir(){
   if(!modesSnake())return state.direction;
-  const first=state.direction==='updown'?'up':'down';
-  const turned=(modesStep%2)===1;
-  return turned?(first==='up'?'down':'up'):first;
+  return alternatingDir();
 }
 
 
@@ -4439,7 +4465,7 @@ let runEnding=false,runEndAt=0;
    the notes are being worked out, and a counter left standing at the end of the
    last run made every run after the first build itself as though it were
    already finished. The first one closed, the rest did not. */
-function resetRun(){passesDone=0;runEnding=false;runEndAt=0;roundJustWrapped=false;}
+function resetRun(){passesDone=0;runEnding=false;runEndAt=0;roundJustWrapped=false;passTick=0;}
 /* Set on the pass that completes a round, read by whatever is asked to happen
    at the top of the next one. A round that is not the last one starts counting
    again from nothing, which is what makes "each round" a thing the count-in can
@@ -4485,6 +4511,7 @@ function advancePass(){
     return false;
   }
   roundsInFigure=0;
+  passTick++;                    // one pass done, whichever way it went
   if(markPassDone())return false;
 
   // Then the outer loops: modes, then the figure, then the key.
