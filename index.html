@@ -20,7 +20,14 @@
      minimum, and it carried the group labels and the info lines, which are text
      you have to read. Raised until it clears, with the secondary grey lifted
      with it so the three levels stay three levels. */
-  --text:#eee;--text2:#b0b0b0;--text3:#8a8a8a;
+  /* Measured against the palest surface each one ever sits on — #222 in the
+     dark, the cream panels in the light. The old --text3 came out at 4.61:1 and
+     4.67:1: over the standard's 4.5 for normal reading text, and this is not
+     normal reading text. It is 10 and 11px labels read at arm's length on a
+     stand with the room lit. These reach 7:1, which is the point where the eye
+     stops working for it — and no further, or the labels would start competing
+     with the values they name. */
+  --text:#eee;--text2:#b0b0b0;--text3:#acacac;
   --blue:#f0f0f3;--blue-bg:#42424a;   /* selections inside panels: grey, not blue */
   /* One green in the app, and it is the wordmark's: what is sounding now, the
      starting degree, and a tuner sitting on the note all wear it. */
@@ -34,7 +41,8 @@
   /* The same hue at reading weight, for the things that take something
      away. Stop is filled because the transport is running; a Clear is not
      running, so it is written in the colour rather than wearing it. */
-  --wipe:#c98d86;--wipe-bd:#5e3f3b;
+  /* Reads as a word on a button, so it is held to the same 7:1 as the rest. */
+  --wipe:#dbaaa4;--wipe-bd:#5e3f3b;
   /* the mode row is top-level navigation, so it gets a hue of its own that
      none of the in-panel selections use */
   /* The selection colour, taken from the wordmark's own grey-green. --mode is
@@ -64,7 +72,7 @@
      readable minimum; on this tone the muted grey fell to 3.5:1, so it is
      darkened until it clears again — the paper stays the tone chosen, the text
      stops paying for it. */
-  --text:#2b2418;--text2:#4a4232;--text3:#57503f;
+  --text:#2b2418;--text2:#3f3829;--text3:#3a362a;
   --blue:#f7f3e8;--blue-bg:#5f5a4c;   /* inverted: on paper the selected chip goes dark */
   --green:#3f5147;--green-bg:#cdd6d0;--green-hi:#2f3f36;
   --yellow:#7c4a0c;--yellow-bg:#f2e2b4;
@@ -75,7 +83,9 @@
   /* Darker than --stop: that tone was made to carry white on a fill, and
      as ink on the paper it measured 4.43:1, just under the readable
      minimum. At this shade it is 4.87:1. */
-  --wipe:#763e37;--wipe-bd:#b98f85;
+  /* The clear colour is a word on a button, not a decoration: it was the last
+     normal text under 5:1 on the cream. */
+  --wipe:#5f2f29;--wipe-bd:#b98f85;
   /* --mode also writes the italic line beside a closed family, which sits on the
      darkest paper, so the ink is a shade deeper than the fill. On the chip
      itself that shade is only the border, invisible against it. */
@@ -245,7 +255,7 @@ details.sec.pinned>summary::after{display:none}
 .pat-grid{display:flex;flex-direction:column;gap:var(--s3);min-width:260px}
 .pat-half{display:flex;flex-direction:column;gap:3px}
 .pat-lane{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
-.pat-name{font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+.pat-name{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
   color:var(--text3);text-align:right;line-height:1.1}
 .pat-cells{display:grid;gap:1px}
 .pat-cell{height:26px;border-radius:3px;background:var(--bg3);border:0;padding:0;
@@ -327,7 +337,7 @@ details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-
   color:var(--text3);font-style:italic;font-size:11px;
   min-width:0;flex:1 1 auto;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 details.sec[open] .sec-sum{display:none}
-.group-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
+.group-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
 /* only the label that opens a panel loses its top margin — one inside a wrapper
    div lower down is still a new group and needs the space above it */
 .sec-body>.group-label:first-child,
@@ -356,14 +366,14 @@ details.sec[open] .sec-sum{display:none}
   background:var(--text);left:50%;transform:translateX(-50%);
   transition:left 90ms linear,background-color 120ms}
 .tuner-needle.in-tune{background:var(--green)}
-.tuner-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);
+.tuner-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);
   margin-top:4px;letter-spacing:.06em}
 /* the strobe: stripes that stand still when the pitch is right, and drift in the
    direction of the error. Reads finer than any needle, and needs no numbers. */
 .tuner-strobe{display:block;width:100%;height:32px;margin-top:var(--s2);
   border-radius:var(--r);background:var(--bg3)}
 /* the deviation list is a reference, not a sentence: small and tight */
-.tuner-devs{font-size:10px;line-height:1.45;margin-top:var(--s2)}
+.tuner-devs{font-size:11px;line-height:1.45;margin-top:var(--s2)}
 .tuner-hz{font-size:11px;color:var(--text3);margin-top:6px;
   font-variant-numeric:tabular-nums;min-height:18px}
 
@@ -445,7 +455,7 @@ details.sec[open] .sec-sum{display:none}
    language, on a narrow phone, would otherwise do. */
 .btn-wrap.seg,.seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px;
   gap:2px;flex:0 1 auto;width:auto;flex-wrap:wrap;max-width:100%}
-.seg>button{height:26px;min-height:0;font-size:10px;padding:0 9px;border-radius:6px;
+.seg>button{height:26px;min-height:0;font-size:11px;padding:0 9px;border-radius:6px;
   color:var(--text3);background:none;border:1px solid transparent;cursor:pointer;
   white-space:nowrap;font-family:inherit;touch-action:manipulation;
   display:flex;align-items:center;justify-content:center}
@@ -569,7 +579,7 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
   display:flex;flex-direction:column;align-items:flex-start;gap:2px}
 /* What is in a saved pattern, under its name: two patterns called "funk" and
    "funk 2" tell you nothing, "8 hits · 1 bar" tells you which is which. */
-.ex-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.ex-sub{font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
 /* The cross is a pick-btn too, so the rule above would stretch it as well —
    and that rule stacks a name over a subtitle, which makes align-items the
    horizontal axis. Left-aligned, the cross sat 1px from one edge and 24 from
@@ -608,7 +618,7 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 .note-btn.active .oct-val{color:var(--blue)}
 .note-btn.start .oct-btn{border-color:var(--green);color:var(--green-hi)}
 .note-btn.start .oct-val{color:var(--green-hi)}
-.start-badge{position:absolute;top:2px;right:4px;font-size:8px;color:var(--green-hi);font-weight:700}
+.start-badge{position:absolute;top:2px;right:4px;font-size:10px;color:var(--green-hi);font-weight:700}
 
 .control-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
 .control-row label{font-size:13px;color:var(--text2);min-width:110px}
@@ -3863,7 +3873,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29t';
+const APP_VERSION='2026-08-29u';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
