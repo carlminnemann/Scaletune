@@ -3784,7 +3784,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29k';
+const APP_VERSION='2026-08-29l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4694,11 +4694,19 @@ function buildRepeatRow(){
 
 function buildRootMoveRow(){
   const row=document.getElementById('rootmove-row');row.innerHTML='';
-  ROOT_MOVES.forEach(m=>{
-    /* Running the modes needs a family whose members are rotations of one
-       scale. Offered greyed rather than hidden where it cannot work, so it is
-       clear the app has it and clear what it wants: a seven-note scale, chosen
-       one at a time. */
+  /* In Arpeggio it is not merely unavailable, it is inapplicable: the modes are
+     the seven rotations of a seven-note scale, and a chord has three or four
+     notes. A button that can never light in a whole mode is weight, so it goes
+     — and if it was the choice when you got here, the choice goes with it,
+     or the panel would go on reading "through the modes" with nothing on
+     screen to undo it. */
+  if(state.mode==='arpeggio'&&state.practice.rootMove==='modes'){
+    state.practice.rootMove='stay';updatePracticeInfo();refreshSectionSummaries();
+  }
+  ROOT_MOVES.filter(m=>!(m.k==='modes'&&state.mode==='arpeggio')).forEach(m=>{
+    /* In Scale it stays, greyed where this scale cannot do it: there it IS
+       available, with another choice, and a control that vanishes as you browse
+       the families both moves the row about and hides that the app has it. */
     const off=(m.k==='modes')&&!modesRunPossible();
     const b=document.createElement('button');
     b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'')+(off?' disabled':'');
