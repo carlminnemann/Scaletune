@@ -224,6 +224,12 @@ details.sec.pinned>summary::after{display:none}
    twelfths the engine actually uses it would be 6px, which does not. So the grid
    is a view — sixteenths, or triplets for the swung things — onto the twelfths
    underneath. */
+/* The hand-written shape gets a box of its own so it reads as a thing you are
+   filling in rather than more controls in the column. */
+#seqcustom-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 12px;margin-top:var(--s3)}
+#seqcustom-box .group-label{margin-top:0}
+
 /* Three separate choices live in Practice Progressions — the shape the line
    walks, what moves the key between passes, and whether it stops — and with the
    pattern's own reading directly above it, Root Movement was touching it with
@@ -968,6 +974,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div id="seqpat-block">
         <div class="group-label" data-t="seq.pattern">Pattern</div>
         <div class="btn-wrap" id="seqpat-row"></div>
+        <!-- Only there while Custom is the choice: the degrees of whatever scale
+             is loaded, numbered in the order they were tapped. -->
+        <div id="seqcustom-box" style="display:none">
+          <div class="group-label" data-t="seq.custom.pick">Tap the degrees, in order</div>
+          <div class="btn-wrap" id="seqcustom-row"></div>
+          <button class="clear-btn" id="seqcustom-clear" data-t="clear-2">✕ Clear</button>
+        </div>
         <div class="info-line" id="seqpat-info"></div>
       </div>
       <div id="rootmove-block">
@@ -1364,7 +1377,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="start-on-2">Start On</dt><dd data-t="which-degree-of-the-scale">Which degree of the scale the line starts from — the way a mode is practised
     from each of its own notes.</dd>
     <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="the-shape-walked-from-every">The shape walked from every degree, rather than straight up. <em>Thirds</em>
-    plays 1–3, then 2–4, then 3–5; <em>1 2 3</em> plays 1-2-3, then 2-3-4. Fourths through sevenths
+    plays 1–3, then 2–4, then 3–5; <em>1 3 5</em> plays the arpeggio standing on each
+    degree, C E G then D F A, and <em>1 3 5 7</em> the seventh chord. <em>Free</em> is a shape of
+    your own: tap the degrees in the order you want them and it holds that order, a degree taken
+    more than once if the shape asks for it, with the numbers following whatever scale is loaded —
+    five on a pentatonic, twelve on the chromatic. A long press takes back the last place a degree
+    holds. Fourths through sevenths
     are the same idea with a wider reach. The steps are counted in degrees of the scale, not
     semitones, so thirds are thirds in any mode — and over the chromatic, where a degree is a
     semitone, the name is the shape rather than the interval. A shape has nowhere to go past the end of
@@ -1971,6 +1989,11 @@ let state={
   // asked for, so a range clamp can be undone once the key allows it again
   span:1,spanWanted:1,rootOctWanted:3,direction:'up',startDeg:0,
   seqPattern:'plain',      // the shape walked from each degree; see SEQ_PATTERNS
+  /* A shape of your own, as offsets from the degree the shape starts on: tap 1,
+     3, 2, 4 and it holds [0,2,1,3]. A degree may be taken more than once — the
+     order you tap is the order it plays, which is the same bargain the study
+     list makes, and a shape that returns to a note is a real exercise. */
+  seqCustom:[],
   /* Whether an arpeggio takes the octave on top. C E G Bb is the chord; C E G
      Bb C is the chord and the note it is built on, played again. Both are how
      people practise, so it is asked rather than decided. */
@@ -3259,13 +3282,23 @@ const SEQ_PATTERNS=[
   {k:'5ths', steps:[0,4],        label:'Fifths'},
   {k:'6ths', steps:[0,5],        label:'Sixths'},
   {k:'7ths', steps:[0,6],        label:'Sevenths'},
-  {k:'g3',   steps:[0,1,2],      label:'1 2 3'},
-  {k:'g4',   steps:[0,1,2,3],    label:'1 2 3 4'},
-  {k:'g5',   steps:[0,1,2,3,4],  label:'1 2 3 4 5'},
+  /* The arpeggio on every degree, walked as one line: C E G, D F A, E G B.
+     A different exercise from Arpeggio mode, which plays one chord. */
+  {k:'135',  steps:[0,2,4],      label:'1 3 5'},
+  {k:'1357', steps:[0,2,4,6],    label:'1 3 5 7'},
+  /* Anything else, written by hand. The three group shapes that used to sit
+     here — 1 2 3, 1 2 3 4, 1 2 3 4 5 — are four taps away in it, which is
+     cheaper than three buttons of their own. */
+  {k:'custom',steps:null,        label:'Custom'},
 ];
+function seqCustomSteps(){
+  const l=state.seqCustom;
+  return (Array.isArray(l)&&l.length)?l:[0];
+}
 function seqSteps(){
+  if(state.seqPattern==='custom')return seqCustomSteps();
   const p=SEQ_PATTERNS.find(x=>x.k===state.seqPattern);
-  return p?p.steps:[0];
+  return (p&&p.steps)?p.steps:[0];
 }
 /* The shape spelled out in the notes it actually produces, from whatever is
    selected — a row of buttons called "Thirds" does not tell a student that in
@@ -3790,7 +3823,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29o';
+const APP_VERSION='2026-08-29p';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4698,6 +4731,46 @@ function buildRepeatRow(){
   gridify(row);
 }
 
+/* The degrees of whatever scale is loaded, in the order they were tapped. The
+   count follows the scale — five on a pentatonic, twelve on the chromatic —
+   because a button numbered 7 on a five-note scale names nothing. If a shape
+   written for a longer scale is still held, its degrees are shown anyway rather
+   than becoming unreachable: you can always take back what you wrote. */
+function buildSeqCustom(){
+  const box=document.getElementById('seqcustom-box');
+  if(!box)return;
+  const on=state.seqPattern==='custom';
+  box.style.display=on?'':'none';
+  if(!on)return;
+  if(!Array.isArray(state.seqCustom))state.seqCustom=[];
+  const list=state.seqCustom;
+  const degs=activeDegrees();
+  const n=Math.max((degs&&degs.length)||7,list.length?Math.max.apply(null,list)+1:0);
+  const row=document.getElementById('seqcustom-row');row.innerHTML='';
+  for(let i=0;i<n;i++){
+    const b=document.createElement('button');
+    const at=[];list.forEach((v,j)=>{if(v===i)at.push(j);});
+    b.className='pick-btn'+(at.length?' active numbered':'');
+    if(at.length)b.innerHTML='<span class="idx">'+at.map(j=>j+1).join(',')+'</span>'+(i+1);
+    else b.textContent=String(i+1);
+    b.onclick=()=>{
+      if(list.length<16)list.push(i);
+      renderPitchPickers();refreshSequence();restartIfPlaying();
+    };
+    /* Taking one out without clearing the lot. There is no room for a cross on
+       a button this small, so a long press drops the last place it holds. */
+    b.oncontextmenu=e=>{
+      e.preventDefault();
+      const k=list.lastIndexOf(i);
+      if(k>=0){list.splice(k,1);renderPitchPickers();refreshSequence();restartIfPlaying();}
+    };
+    row.appendChild(b);
+  }
+  gridify(row);
+  const cl=document.getElementById('seqcustom-clear');
+  if(cl)cl.onclick=()=>{state.seqCustom=[];renderPitchPickers();refreshSequence();restartIfPlaying();};
+}
+
 function buildRootMoveRow(){
   const row=document.getElementById('rootmove-row');row.innerHTML='';
   /* In Arpeggio it is not merely unavailable, it is inapplicable: the modes are
@@ -5267,6 +5340,7 @@ function renderPitchPickers(){
     octRow.appendChild(b);
   });
 
+  buildSeqCustom();
   const patRow=document.getElementById('seqpat-row');
   if(patRow){
     patRow.innerHTML='';
@@ -5953,7 +6027,7 @@ const EX_KEYS=[
   'density','balladHat','metroInDrone','accentsTouched',
 ];
 // the ones that are objects and have to be copied rather than referenced
-const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','practice'];
+const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','practice','seqCustom'];
 /* Measured rather than guessed: an exercise is 1.2 KB, a loaded one with a
    study list and a four-bar pattern 1.8, and the drawer they go in holds tens
    of megabytes — the samples and the language packs live somewhere else and do
@@ -6020,6 +6094,8 @@ function applyExercise(x){
   set('seqPattern',oneOf(x.seqPattern,SEQ_PATTERNS.map(p=>p.k)));
   state.blueNotes=!!x.blueNotes;
   state.arpTop=x.arpTop!==false;
+  state.seqCustom=Array.isArray(x.seqCustom)
+    ? x.seqCustom.filter(v=>Number.isInteger(v)&&v>=0&&v<24).slice(0,16) : [];
   set('freeRoot',oneOf(x.freeRoot,NOTES));
   set('freeSpan',num(x.freeSpan,1,4));set('freeSpanWanted',num(x.freeSpanWanted,1,4));
   set('freeDirection',oneOf(x.freeDirection,DIRECTIONS.map(d=>d.k)));
