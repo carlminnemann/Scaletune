@@ -570,15 +570,5 @@
  "sec.inversion": "Inversão",
  "arp.top": "Nota de cima",
  "arp.withTop": "Fecha a oitava",
- "arp.noTop": "Pára no acorde",
- "rootmove.chords": "Pela escala",
- "chordrun.size": "Acordes de",
- "chordrun.three": "Três notas",
- "chordrun.four": "Quatro notas",
- "chordrun.degree": "grau {n}",
- "chordrun.needs": "Escolhe uma escala de sete notas — os acordes são os que ela dá",
- "chordrun.running": "os acordes de {key}, um por grau",
- "chordrun.now": "{n}. {chord} — {notes}",
- "through-the-scale": "Pela escala",
- "the-chord-that-stands-on": "O acorde que assenta em cada grau de uma escala, um por passagem — em Dó maior é Dó maior 7, Ré menor 7, Mi menor 7, Fá maior 7, Sol dominante 7, Lá menor 7, Si meio-diminuto, e outra vez. É a resposta do arpejo aos modos: mesma escala, mesma tonalidade, nada emprestado. Escolhes a escala e não o acorde — por isso o painel de cima mostra escalas enquanto isto está ligado — e escolhes três notas ou quatro; os acordes não se escolhem, são o que a escala dá quando se empilham terceiras dentro dela. As famílias melódica e harmónica dão os seus: Dó menor melódica dá Dó menor-maior 7, Ré menor 7, Mib aumentado maior 7, Fá 7, Sol 7, Lá meio-diminuto, Si meio-diminuto. A inversão aplica-se a todos, por isso «os acordes de sétima da escala, todos em primeira inversão» é um exercício só. Parar e voltar a começar recomeça no primeiro grau."
+ "arp.noTop": "Pára no acorde"
 }

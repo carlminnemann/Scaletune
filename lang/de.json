@@ -570,15 +570,5 @@
  "sec.inversion": "Umkehrung",
  "arp.top": "Oberster Ton",
  "arp.withTop": "Oktave schließen",
- "arp.noTop": "Auf dem Akkord enden",
- "rootmove.chords": "Durch die Tonleiter",
- "chordrun.size": "Akkorde aus",
- "chordrun.three": "Drei Tönen",
- "chordrun.four": "Vier Tönen",
- "chordrun.degree": "Stufe {n}",
- "chordrun.needs": "Wähl eine siebentönige Tonleiter — die Akkorde sind die, die sie hergibt",
- "chordrun.running": "die Akkorde von {key}, einer je Stufe",
- "chordrun.now": "{n}. {chord} — {notes}",
- "through-the-scale": "Durch die Tonleiter",
- "the-chord-that-stands-on": "Der Akkord, der auf jeder Stufe einer Tonleiter steht, einer je Durchgang — in C-Dur also Cmaj7, Dm7, Em7, Fmaj7, G7, Am7, Hm7b5, und wieder von vorn. Es ist die Antwort des Arpeggios auf die Modi: dieselbe Tonleiter, dieselbe Tonart, nichts geborgt. Du wählst die Tonleiter und nicht den Akkord — darum zeigt das Feld darüber Tonleitern, solange das an ist — und du wählst drei Töne oder vier; die Akkorde werden nicht gewählt, sie sind das, was die Tonleiter hergibt, wenn man Terzen in ihr stapelt. Die melodische und die harmonische Familie geben ihre eigenen. Die Umkehrung gilt für alle, sodass „die Septakkorde der Tonleiter, alle in erster Umkehrung“ eine einzige Übung ist. Anhalten und neu starten beginnt auf der ersten Stufe."
+ "arp.noTop": "Auf dem Akkord enden"
 }

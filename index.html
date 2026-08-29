@@ -970,11 +970,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <div class="btn-wrap" id="seqpat-row"></div>
         <div class="info-line" id="seqpat-info"></div>
       </div>
-      <div id="chordsize-block" style="display:none">
-        <div class="head" style="margin-bottom:0">
-          <span class="group-label" data-t="chordrun.size">Chords of</span>
-          <span class="btn-wrap seg" id="chordsize-row" data-cols="fixed"></span></div>
-      </div>
       <div id="rootmove-block">
       <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
@@ -1394,16 +1389,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="root-movement-2">Root Movement</dt><dd data-t="stay-in-one-key-or">Stay in one key, or move up a fourth each time everything else has been
     round once — the cycle of fourths.</dd>
 
-    <dt data-t="through-the-scale">Through the scale</dt><dd data-t="the-chord-that-stands-on">The chord
-    that stands on each degree of a scale, one per pass — in C major that is C major 7, D minor 7,
-    E minor 7, F major 7, G7, A minor 7, B half-diminished, and round again. It is the arpeggio's
-    answer to the modes: same scale, same key, nothing borrowed. Choose the scale rather than the
-    chord, which is why the panel above shows scales while this is on, and choose three notes or
-    four — the chords are not picked, they are what the scale gives when thirds are stacked inside
-    it. The melodic and harmonic families give their own: C melodic minor yields C minor-major 7,
-    D minor 7, E flat augmented major 7, F7, G7, A half-diminished, B half-diminished. Inversion
-    applies to every one of them, so "the seventh chords of the scale, all in first inversion" is
-    one exercise. Stopping and starting again begins at the first degree.</dd>
     <dt data-t="through-the-modes">Through the modes</dt><dd data-t="the-seven-modes-of-one">The seven modes of one scale, each from its own note and each one
     octave: C ionian, then D dorian, then E phrygian, round to B locrian and back to C. The key never
     changes — the tonic steps up to the next degree and the mode steps with it, which is the same
@@ -2032,9 +2017,6 @@ let state={
      dorian, then a minor seventh on the same root" is a real exercise and there
      was no way to ask for it. Each item says which it is, and what is playing
      follows the item rather than the panel you happen to be looking at. */
-  /* Building the chords of a scale: three notes or four. The chords themselves
-     are not chosen — they are what the scale gives on each of its degrees. */
-  chordRunSize:4,
   practice:{rootMove:'stay',repeat:'loop',useList:false,list:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
@@ -2054,8 +2036,7 @@ let state={
    are the rotations of one scale, which is what the seven-note families are and
    what a pentatonic, a chord or a symmetric scale is not. */
 const ROOT_MOVES=[{k:'stay',label:'Stay'},{k:'fourths',label:'Cycle of 4ths'},
-                  {k:'modes',label:'Through the modes'},
-                  {k:'chords',label:'Through the scale'}];
+                  {k:'modes',label:'Through the modes'}];
 /* Whether the exercise comes round again or stops when it has been through
    everything once. Everything the app can put in rotation nests: the figures
    inside the modes, the modes inside the keys — a round is one traversal of
@@ -2067,71 +2048,6 @@ function modesRunPossible(){
          &&!useListOn();
 }
 function modesRunOn(){return state.practice.rootMove==='modes'&&modesRunPossible();}
-/* ---------- the chords of a scale ----------
-   The modes run plays one scale from each of its degrees. This plays the CHORD
-   on each of its degrees: in C major, C major 7, D minor 7, E minor 7, F major
-   7, G7, A minor 7, B half-diminished — and the same for the melodic and
-   harmonic families, where the chords are the ones those scales actually give.
-
-   Nothing is looked up. A chord is thirds stacked inside the scale, so degree i
-   takes i, i+2, i+4 and — for four notes — i+6, wrapping into the next octave
-   as it goes. That is what a diatonic chord IS, and deriving it means the app
-   cannot disagree with the scale it came from. */
-/* Offerable wherever it could be used, not only where it is ready: choosing it
-   is what makes the scale picker appear, so requiring a scale first left the
-   button greyed with a tooltip asking for something there was no way to give.
-   With it on and no scale chosen yet, nothing plays and the app says so — which
-   is the same thing it does for a chord you have not picked. */
-function chordRunPossible(){
-  return state.mode==='arpeggio'&&!useListOn();
-}
-function chordRunReady(){
-  return chordRunOn()&&MODE_FAMILIES.indexOf(chordHomeNow().group)>=0&&!!chordHomeNow().name;
-}
-function chordRunOn(){return state.practice.rootMove==='chords'&&chordRunPossible();}
-let chordStep=0,chordHome=null;
-function markChordHome(){
-  chordHome=(state.mode==='arpeggio'&&state.scaleName)
-    ?{root:state.root,group:state.scaleGroup,name:state.scaleName}:null;
-  chordStep=0;
-}
-function chordHomeNow(){
-  return (chordHome&&chordHome.group===state.scaleGroup&&chordHome.name===state.scaleName)
-    ? chordHome : {root:state.root,group:state.scaleGroup,name:state.scaleName};
-}
-/* The chord standing on degree `step` of the home scale: where its root is, and
-   what it is made of, counted from that root. */
-function scaleChordAt(step){
-  const h=chordHomeNow();
-  const deg=h.name?degreesOf(h.group,h.name):null;
-  if(!deg||deg.length<7)return null;
-  const n=deg.length;
-  const at=k=>deg[((k%n)+n)%n]+12*Math.floor(k/n);
-  const size=state.chordRunSize===3?3:4;
-  const i=((step%n)+n)%n;
-  const base=at(i);
-  const ivals=[];
-  for(let j=0;j<size;j++)ivals.push(at(i+2*j)-base);
-  const homePc=NOTES.indexOf(chordHomeNow().root);
-  return {step:i,rootPc:((homePc+base)%12+12)%12,intervals:ivals,degree:i+1};
-}
-/* What that chord is called, by matching what it is made of. Every chord the
-   seven-note families give is in the table; if one ever is not, the degree it
-   stands on is a truthful answer. */
-function chordRunName(ch){
-  if(!ch)return '';
-  for(const g of Object.keys(CHORDS))for(const nm of Object.keys(CHORDS[g])){
-    const c=CHORDS[g][nm];
-    if(c.length===ch.intervals.length&&c.every((v,i)=>v===ch.intervals[i]))
-      return chordLabel(nm);
-  }
-  return tr('chordrun.degree','degree {n}',{n:ch.degree});
-}
-function chordRunKeyName(){
-  const h=chordHomeNow();
-  return h.root?bareName(NOTES.indexOf(h.root)):'';
-}
-
 /* Which key the run is in, whichever of its modes is playing: the first mode in
    the family is the parent, so the parent's tonic is this many degrees back. */
 function modesKeyName(){
@@ -3322,11 +3238,6 @@ function activeDegrees(){
   // single selection is left over from before
   if(useListOn()&&!activeList().length)return null;
   const kind=playingKind();
-  // the chord the scale gives on the degree the run has reached
-  if(kind==='chord'&&chordRunOn()){
-    const ch=scaleChordAt(chordStep);
-    return ch?ch.intervals:null;      // no scale chosen yet: nothing to play
-  }
   if(kind==='scale'&&state.scaleGroup)return degreesOf(state.scaleGroup,state.scaleName);
   if(kind==='chord'&&state.chordGroup)return CHORDS[state.chordGroup][state.chordName];
   return null;
@@ -3779,7 +3690,6 @@ function togglePlay(){
      way through and pressing Start again means starting it again, not resuming
      where it happened to be — the seven only make sense from the top. */
   restartModesRun();
-  restartChordRun();
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
   initAudio();
@@ -3880,7 +3790,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29n';
+const APP_VERSION='2026-08-29o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -3947,14 +3857,15 @@ function setMode(m){
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
   document.getElementById('free-section').style.display=m==='free'?'':'none';
   if(m==='free')setTimeout(fitNoteGrids,0);
-  showPitchPicker();
+  document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
+  document.getElementById('sec-scales-title').textContent=m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales');
+  document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   // in Metro there is nothing above the metronome to be divided from
   document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone)?'none':'';
   const ms=document.getElementById('metro-section');
   ms.style.display=isTuner?'none':'';
   buildMetroOnRow();
   buildListModeRow();
-  buildChordSizeRow();
   splitMetro(!isTuner);
   updateSupersededControls();      // the accompaniment is Metro's alone
   /* The panels close when the mode changes; the folds inside them are panels in
@@ -4096,9 +4007,7 @@ function buildPitchLists(){
     const b=document.createElement('button');
     // label is replaced by renderPitchPickers with the spelling of the key in use
     b.className='tonic-btn';b.dataset.root=n;b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
-    b.onclick=()=>{state.root=n;state.startDeg=0;markModesHome();markChordHome();
-      if(chordRunOn()){chordStep=0;const ch=scaleChordAt(0);if(ch)state.root=NOTES[ch.rootPc];}
-      renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
+    b.onclick=()=>{state.root=n;state.startDeg=0;markModesHome();renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();};
     root.appendChild(b);
   });
   const scaleGroups={gregorian:'gregorian-btns',pentatonic:'pentatonic-btns',
@@ -4112,13 +4021,7 @@ function buildPitchLists(){
       b.onclick=()=>{
         if(useListOn()){toggleListItem('scale',gk,sn);return;}
         state.scaleGroup=gk;state.scaleName=sn;state.startDeg=0;
-        markModesHome();markChordHome();   // a chosen scale is the start of the run
-        if(chordRunOn()){
-          chordStep=0;
-          const ch=scaleChordAt(0);
-          if(ch)state.root=NOTES[ch.rootPc];
-          state.startDeg=0;
-        }
+        markModesHome();                   // a chosen scale is the start of the run
         renderPitchPickers();updateInfo();refreshSequence();restartIfPlaying();
       };
       c.appendChild(b);
@@ -4186,16 +4089,6 @@ function markModesHome(){
     ?{root:state.root,group:state.scaleGroup,name:state.scaleName}:null;
   keyHome=(state.mode==='scale'||state.mode==='arpeggio')?state.root:null;
   modesStep=0;
-}
-function restartChordRun(){
-  if(!chordRunOn())return;
-  chordStep=0;
-  const h=chordHomeNow();
-  if(h.root&&state.root!==h.root){
-    const ch=scaleChordAt(0);
-    if(ch)state.root=NOTES[ch.rootPc];
-    state.startDeg=0;renderPitchPickers();updateInfo();refreshSequence();updateRotationPanel();
-  }
 }
 function restartModesRun(){
   if(!modesRunOn())return;
@@ -4579,14 +4472,6 @@ function advancePass(){
      above C in ionian, E a semitone above D in dorian — so the key never
      changes and the seven of them come back to where they began. Counted as a
      change of mode rather than of key, because that is what it is. */
-  if(wrapped&&chordRunOn()){
-    const h=chordHomeNow();
-    const deg=h.name?degreesOf(h.group,h.name):null;
-    const n=(deg&&deg.length)||7;
-    chordStep=(chordStep+1)%n;
-    const ch=scaleChordAt(chordStep);
-    if(ch){state.root=NOTES[ch.rootPc];state.startDeg=0;itemChange=true;}
-  }
   if(wrapped&&modesRunOn()){
     const next=modesAt(modesStep+1);
     if(next){
@@ -4813,40 +4698,6 @@ function buildRepeatRow(){
   gridify(row);
 }
 
-/* Running the chords of a scale, what you pick is a scale — so the panel shows
-   scales and calls itself Scales, in Arpeggio too. The chords are not chosen
-   there because they are not chosen at all: the scale gives them. Its own
-   function because the choice can change without the mode changing, and the
-   panel has to follow at that moment or you are asked for a scale by a panel
-   showing chords. */
-function showPitchPicker(){
-  const m=state.mode;
-  const pickScale=(m==='scale')||(m==='arpeggio'&&state.practice.rootMove==='chords');
-  const sl=document.getElementById('scale-lists'),al=document.getElementById('arp-lists');
-  const t=document.getElementById('sec-scales-title');
-  if(sl)sl.style.display=pickScale?'':'none';
-  if(al)al.style.display=(m==='arpeggio'&&!pickScale)?'':'none';
-  if(t)t.textContent=pickScale?tr('sec.scales','Scales')
-        :(m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales'));
-}
-
-function buildChordSizeRow(){
-  const block=document.getElementById('chordsize-block');
-  if(!block)return;
-  block.style.display=chordRunOn()?'':'none';
-  if(!chordRunOn())return;
-  const row=document.getElementById('chordsize-row');row.innerHTML='';
-  [[3,tr('chordrun.three','Three notes')],[4,tr('chordrun.four','Four notes')]].forEach(([v,label])=>{
-    const b=document.createElement('button');
-    b.className='pick-btn'+(state.chordRunSize===v?' active':'');
-    b.textContent=label;
-    b.onclick=()=>{state.chordRunSize=v;buildChordSizeRow();renderPitchPickers();
-                   refreshSequence();restartIfPlaying();};
-    row.appendChild(b);
-  });
-  gridify(row);
-}
-
 function buildRootMoveRow(){
   const row=document.getElementById('rootmove-row');row.innerHTML='';
   /* In Arpeggio it is not merely unavailable, it is inapplicable: the modes are
@@ -4858,19 +4709,15 @@ function buildRootMoveRow(){
   if(state.mode==='arpeggio'&&state.practice.rootMove==='modes'){
     state.practice.rootMove='stay';updatePracticeInfo();refreshSectionSummaries();
   }
-  ROOT_MOVES.filter(m=>!(m.k==='modes'&&state.mode==='arpeggio')
-                     &&!(m.k==='chords'&&state.mode!=='arpeggio')).forEach(m=>{
+  ROOT_MOVES.filter(m=>!(m.k==='modes'&&state.mode==='arpeggio')).forEach(m=>{
     /* In Scale it stays, greyed where this scale cannot do it: there it IS
        available, with another choice, and a control that vanishes as you browse
        the families both moves the row about and hides that the app has it. */
-    const off=((m.k==='modes')&&!modesRunPossible())
-            ||((m.k==='chords')&&!chordRunPossible());
+    const off=(m.k==='modes')&&!modesRunPossible();
     const b=document.createElement('button');
     b.className='pick-btn'+(m.k===state.practice.rootMove?' active':'')+(off?' disabled':'');
     b.textContent=lab('rootmove',m.k,m.label);
-    if(off)b.title=(m.k==='chords')
-      ? tr('chordrun.needs','Pick a seven-note scale — the chords are the ones it gives')
-      : tr('modes.needs','Pick one seven-note scale — the modes are its own rotations');
+    if(off)b.title=tr('modes.needs','Pick one seven-note scale — the modes are its own rotations');
     else b.onclick=()=>{
       state.practice.rootMove=m.k;
       /* Each mode runs one octave from its own note: that is the exercise, and
@@ -4878,14 +4725,8 @@ function buildRootMoveRow(){
          thread. */
       // a run always sets off the way Direction says, not half way through the
       // snake it was in when it was last switched off
-      markModesHome();markChordHome();
+      markModesHome();
       if(m.k==='modes'){state.span=1;state.spanWanted=1;renderPitchPickers();refreshSequence();}
-      if(m.k==='chords'){
-        const ch=scaleChordAt(0);
-        if(ch)state.root=NOTES[ch.rootPc];
-        state.startDeg=0;
-      }
-      buildChordSizeRow();showPitchPicker();buildPitchLists();renderPitchPickers();refreshSequence();
       buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
     };
     row.appendChild(b);
@@ -5241,8 +5082,6 @@ function updatePracticeInfo(){
   if(state.practice.rootMove==='fourths')bits.push((listEnabled()||subdivListOn())
     ? tr('practice.fourthsCycle','root up a 4th after the full cycle')
     : tr('practice.fourthsPass','root up a 4th each pass'));
-  if(chordRunOn())bits.push(tr('chordrun.running','the chords of {key}, one per degree',
-    {key:chordRunKeyName()}));
   if(modesRunOn())bits.push(modesSnake()
     ? tr('modes.tour','{n} modes of {key} and back, one octave each',
          {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
@@ -5519,16 +5358,6 @@ function updateInfo(){
   const degrees=activeDegrees();
   const el=document.getElementById('pitch-info');
   if(!degrees){el.textContent='';return;}
-  if(chordRunOn()){
-    const ch=scaleChordAt(chordStep);
-    if(ch){
-      rebuildSpelling();
-      el.textContent=tr('chordrun.now','{n}. {chord} — {notes}',
-        {n:ch.degree,chord:bareName(ch.rootPc)+' '+chordRunName(ch),
-         notes:degrees.map(d=>bareName((ch.rootPc+d)%12)).join(' ')});
-      return;
-    }
-  }
   rebuildSpelling();
   const rootIdx=NOTES.indexOf(state.root);
   const name=state.mode==='scale'?scaleLabel(state.scaleName):chordLabel(state.chordName);
@@ -6885,8 +6714,6 @@ const SECTIONS=[
      if(state.seqPattern&&state.seqPattern!=='plain')b.push(lab('seqpat',state.seqPattern,state.seqPattern));
      if(state.practice.rootMove==='fourths')b.push(tr('sum.fourths','cycle of 4ths'));
      if(modesRunOn())b.push(tr('sum.modes','through the modes of {key}',{key:modesKeyName()}));
-     if(chordRunOn())b.push(tr('chordrun.running','the chords of {key}, one per degree',
-       {key:chordRunKeyName()}));
      if(runsOnce())b.push(tr('sum.once','one round'));
      return b.length?b.join(' · '):tr('common.off.lower','off');
    }},
@@ -7750,7 +7577,7 @@ function rebuildEverything(){
   buildBeats();buildPolyBeats();updateSupersededControls();buildNoteLenRow();
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
-  buildAlignRow();buildSpeedControls();buildRootMoveRow();buildChordSizeRow();buildRepeatRow();
+  buildAlignRow();buildSpeedControls();buildRootMoveRow();buildRepeatRow();
   buildExercises();
   renderPitchPickers();updateInfo();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
@@ -7847,7 +7674,6 @@ buildClickModeRow();
 buildAlignRow();
 buildSpeedControls();
 buildRootMoveRow();
-buildChordSizeRow();
 buildRepeatRow();
 readExercises();
 buildExercises();

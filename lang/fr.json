@@ -570,15 +570,5 @@
  "sec.inversion": "Renversement",
  "arp.top": "Note du haut",
  "arp.withTop": "Ferme l’octave",
- "arp.noTop": "S’arrête sur l’accord",
- "rootmove.chords": "Par la gamme",
- "chordrun.size": "Accords de",
- "chordrun.three": "Trois notes",
- "chordrun.four": "Quatre notes",
- "chordrun.degree": "degré {n}",
- "chordrun.needs": "Choisis une gamme de sept notes — les accords sont ceux qu’elle donne",
- "chordrun.running": "les accords de {key}, un par degré",
- "chordrun.now": "{n}. {chord} — {notes}",
- "through-the-scale": "Par la gamme",
- "the-chord-that-stands-on": "L’accord qui se dresse sur chaque degré d’une gamme, un par passage — en Do majeur : Do majeur 7, Ré mineur 7, Mi mineur 7, Fa majeur 7, Sol 7, La mineur 7, Si semi-diminué, puis on recommence. C’est la réponse de l’arpège aux modes : même gamme, même tonalité, rien d’emprunté. Tu choisis la gamme et non l’accord — c’est pourquoi le panneau du dessus montre des gammes tant que c’est activé — et tu choisis trois notes ou quatre ; les accords ne se choisissent pas, ce sont ceux que la gamme donne quand on empile des tierces à l’intérieur. Les familles mélodique et harmonique donnent les leurs. Le renversement s’applique à tous, si bien que « les accords de septième de la gamme, tous en premier renversement » est un seul exercice. S’arrêter et repartir recommence au premier degré."
+ "arp.noTop": "S’arrête sur l’accord"
 }
