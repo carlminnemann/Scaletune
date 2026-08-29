@@ -563,5 +563,6 @@
   "other": "Poi: lo stesso, mancano {n} giri per cambiare"
  },
  "rot.hintPick": "tocca uno per spostarlo, o la sua ✕ per toglierlo",
- "rot.hintPlace": "tocca dove deve andare, o lo stesso per lasciarlo dov’era"
+ "rot.hintPlace": "tocca dove deve andare, o lo stesso per lasciarlo dov’era",
+ "poly.cycle": "ciclo di {n}s"
 }

@@ -563,5 +563,6 @@
   "other": "Después: lo mismo, faltan {n} vueltas para cambiar"
  },
  "rot.hintPick": "toca uno para moverlo, o su ✕ para quitarlo",
- "rot.hintPlace": "toca dónde debe ir, o el mismo para dejarlo donde estaba"
+ "rot.hintPlace": "toca dónde debe ir, o el mismo para dejarlo donde estaba",
+ "poly.cycle": "ciclo de {n}s"
 }

@@ -563,5 +563,6 @@
   "other": "Ensuite : le même, encore {n} tours avant de changer"
  },
  "rot.hintPick": "touche-en un pour le déplacer, ou son ✕ pour l’enlever",
- "rot.hintPlace": "touche où il doit aller, ou le même pour le laisser où il était"
+ "rot.hintPlace": "touche où il doit aller, ou le même pour le laisser où il était",
+ "poly.cycle": "cycle de {n}s"
 }

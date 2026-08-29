@@ -217,7 +217,8 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tighter #sig-block .beats-row{margin-bottom:var(--s1)}
 
 .scroll.tightest .bpm-big{font-size:26px}
-.scroll.tightest /* ---------- the pattern editor ----------
+
+/* ---------- the pattern editor ----------
    A step sequencer is a grid, and the only real constraint is the finger: at
    sixteen cells to the bar a cell is about 19px on a phone, which works; at the
    twelfths the engine actually uses it would be 6px, which does not. So the grid
@@ -389,6 +390,25 @@ details.sec[open] .sec-sum{display:none}
 .metro-body{padding:0}
 .mgroup{padding:var(--s4)}
 .mgroup+.mgroup{border-top:1px solid var(--border)}
+/* More holds eight unrelated groups one after another. Separated by hairlines
+   they read as one long strip with things floating in it — no group looks like
+   a group, and the three that fold looked like controls rather than sections,
+   because their heading wore a box the others did not. So each group is a card:
+   the box IS the group, the heading sits on it, and a chevron is the only thing
+   that says this one opens. */
+#metro-more-body{padding:var(--s4)}
+#metro-more-body>.mgroup{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 12px;margin-bottom:8px}
+#metro-more-body>.mgroup:last-child{margin-bottom:0}
+#metro-more-body>.mgroup+.mgroup{border-top:1px solid var(--border)}
+/* a heading belongs to what is under it: near its own controls, far from the
+   next group */
+#metro-more-body>.mgroup .section-label{margin-bottom:6px}
+#metro-more-body>.mgroup>.head:first-child{margin-bottom:0}
+/* the fold heading gives up its own box — the card is the box now */
+#metro-more-body>.mgroup>.pat-head{background:none;border:0;padding:0}
+#metro-more-body>.mgroup>.pat-head .section-label{margin-bottom:0}
 /* A hidden group is still a sibling, so the group under it drew a line with
    nothing above it. Outside Drone the switch is not there and neither is that. */
 .metro-body.no-switch>#tempo-block{border-top:0}
@@ -545,6 +565,9 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
   align-items:center;justify-content:center;text-align:center}
 .clear-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--wipe-bd);border-radius:var(--r);background:var(--bg3);color:var(--wipe);margin-top:10px;touch-action:manipulation}
 .info-line{font-size:11px;color:var(--text3);margin-top:8px;min-height:16px;font-style:italic;line-height:1.5}
+/* An empty one still took its line and its margin — 24px of nothing under the
+   tempo change while it is off, which is most of the time. */
+.info-line:empty{display:none}
 
 .legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
 .note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
@@ -3734,7 +3757,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29d';
+const APP_VERSION='2026-08-29e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5402,7 +5425,7 @@ function renderPolyBeats(){
   if(pb.options.length)pb.value=String(P.b);
   const cyc=polyCycleLen();
   document.getElementById('poly-label').textContent=
-    '· cycle '+cyc.toFixed(2)+'s';
+    '· '+tr('poly.cycle','cycle {n}s',{n:cyc.toFixed(2)});
   [['a',P.a,P.accA],['b',P.b,P.accB]].forEach(([layer,n,acc])=>{
     const row=document.getElementById('poly-row-'+layer);
     row.innerHTML='';

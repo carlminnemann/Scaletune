@@ -563,5 +563,6 @@
   "other": "Danach: dasselbe, noch {n} Runden bis zum Wechsel"
  },
  "rot.hintPick": "tippe eines an, um es zu verschieben, oder sein ✕, um es zu entfernen",
- "rot.hintPlace": "tippe an, wohin es soll, oder dasselbe, um es zu lassen"
+ "rot.hintPlace": "tippe an, wohin es soll, oder dasselbe, um es zu lassen",
+ "poly.cycle": "Zyklus {n}s"
 }
