@@ -1503,9 +1503,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="help-sec" id="help-phrasing"><h3 data-t="phrasing">Phrasing</h3><dl>
     <dt data-t="note-length-2">Note Length</dt><dd data-t="per-figure-gives-a-note">Per figure gives a note on every subdivision; Per beat one note a beat;
     Per bar one note a bar. Under swing the notes take the swing too, long then short.</dd>
-    <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="let-it-drift-is-the">Let it drift is the exercise: a phrase whose length does not divide the
-    bar walks round against the pulse and only comes back after several rounds, and the metronome is
-    never resynchronised to it. Restart each round puts note one back on beat one every time.</dd>
+    <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="let-it-drift-is-the">Restart each round is the base: note one falls on beat one
+    every time, whatever the phrase is. Let it drift is the other way and a real exercise — a
+    phrase whose length does not divide the bar walks round against the pulse and only comes back
+    after several rounds, and the metronome is never resynchronised to it. It is offered rather
+    than assumed: a line that quietly stops landing where you expect should be something you asked
+    for.</dd>
 
   </dl></div>
 
@@ -1970,7 +1973,13 @@ let state={
   // wave, the sequence modes default to the sampled piano
   timbre:'cello',droneTimbre:'cello',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
-  bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,alignPasses:false,clickFollowsFigure:true,
+  bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,
+  /* The base is that every round starts on beat one. Letting the phrase drift
+     against the pulse is a real exercise and it is offered right there, but it
+     is the thing you ask for — opening the app already drifting means a phrase
+     that does not divide the bar quietly stops landing where you expect, and
+     that has to be a choice rather than a surprise. */
+  alignPasses:true,clickFollowsFigure:true,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
@@ -3772,7 +3781,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29i';
+const APP_VERSION='2026-08-29j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the

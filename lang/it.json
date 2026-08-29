@@ -155,7 +155,7 @@
  "kit.machine": "Macchina",
  "kit.recorded": "Registrata",
  "lang.failed": "Non è stato possibile caricare questa lingua.",
- "let-it-drift-is-the": "Lascia scorrere è l'esercizio: una frase la cui lunghezza non divide la battuta cammina contro la pulsazione e torna a posto solo dopo parecchi giri, e il metronomo non le viene mai risincronizzato. Riparti a ogni giro rimette la nota uno sul primo movimento ogni volta.",
+ "let-it-drift-is-the": "Ricominciare a ogni giro è la base: la nota uno cade sul movimento uno ogni volta, qualunque sia la frase. Lasciarla scorrere è l’altra strada ed è un esercizio vero: una frase la cui lunghezza non divide la battuta gira contro il pulso e torna solo dopo diversi giri, e il metronomo non viene mai risincronizzato con lei. È offerto anziché dato per scontato: una linea che smette silenziosamente di cadere dove te l’aspetti dovrebbe essere una cosa che hai chiesto.",
  "level": "Intensità",
  "list.single": "Singola",
  "list.study": "Lista di studio",
