@@ -983,6 +983,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         </div>
         <div class="info-line" id="seqpat-info"></div>
       </div>
+      <div id="modestour-block" style="display:none">
+        <div class="head" style="margin-bottom:0">
+          <span class="group-label" data-t="modes.tourLabel">The run</span>
+          <span class="btn-wrap seg" id="modestour-row" data-cols="fixed"></span></div>
+      </div>
       <div id="rootmove-block">
       <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
         <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
@@ -1415,11 +1420,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     changes — the tonic steps up to the next degree and the mode steps with it, which is the same
     thing said twice — so the whole run is in one key and there is not an accidental in it.
     <em>Up</em> and <em>Down</em> take every mode the same way. <em>Up-Down</em> and <em>Down-Up</em>
-    make the run itself turn, which is how this is practised: C ionian up to the C above, and the D
+    do two things at once, and The run separates them. The first is that the direction alternates from
+    one mode to the next, which is how this is practised: C ionian up to the C above, and the D
     above that is where D dorian starts, coming all the way down to its own D — from which E is one
     step up and it turns again. Every handover but one is a single step, and the run stays between
-    the octave you chose and the one above it. The exception is the wrap from the last mode back to
-    the first, where you would take a breath anyway. It wants one
+    the octave you chose and the one above it. The second is that the whole thing turns
+    round at the top and comes back down through the modes — that is There and back. One way climbs
+    through them and stops on the tonic at the top: seven modes and the eighth pass that closes the
+    octave. Set to run once, either ends on the tonic it set off from. It wants one
     seven-note scale chosen on its own: the modes are that scale's own rotations, which a pentatonic,
     a chord and a symmetric scale do not have. It also wants no shape: a shape already walks every
     degree, so the modes over one play the same seven chords seven times, rotated — 1 3 5 7 in C
@@ -2046,7 +2054,7 @@ let state={
      dorian, then a minor seventh on the same root" is a real exercise and there
      was no way to ask for it. Each item says which it is, and what is playing
      follows the item rather than the panel you happen to be looking at. */
-  practice:{rootMove:'stay',repeat:'loop',useList:false,list:[],
+  practice:{rootMove:'stay',repeat:'loop',modesTour:'back',useList:false,list:[],
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
@@ -3363,11 +3371,29 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      on its second degree has not finished. So the last pass of a run that stops
      closes on the note it set off from, and only that pass. */
   const close=()=>{if(closesOnTonic()&&out.length){out.push(out[0]);seqCloses=true;}return out;};
+  /* A there-and-back run through the modes ends on the second degree — the
+     fourteenth pass is the dorian — so one scale step from its last note is the
+     tonic the whole thing set off from. Which step is not a matter of which way
+     the pass was travelling: going up it ends on the top of the dorian and going
+     down on the bottom, and in both the home tonic is the neighbour below. Both
+     neighbours are tried and the one that IS the tonic is taken, so the rule
+     cannot be right by luck. Only where it does not already land there — one
+     way, and the single-direction runs, end on a tonic by themselves. */
+  const closeModes=lastK=>{
+    if(!closesOnTonic()||!modesSnake()||!out.length)return out;
+    const homePc=NOTES.indexOf(modesHomeNow().root);
+    if(((out[out.length-1]%12)+12)%12===homePc)return out;
+    for(const step of [-1,1]){
+      const cand=at(lastK+step);
+      if(((cand%12)+12)%12===homePc){out.push(cand);seqCloses=true;return out;}
+    }
+    return out;
+  };
   /* A run that does not come back ends on the tonic at the end it arrived at,
      the way a plain scale does — a shape stops on its own second note, which is
      no more an ending for thirds than the second degree is for a scale. */
   const closeAt=k=>{if(closesOnTonic()){out.push(at(startIdx+k));seqCloses=true;}return out;};
-  if(direction==='down'&&!turns){climb(top,0,-1);return out;}
+  if(direction==='down'&&!turns){climb(top,0,-1);return closeModes(startIdx);}
   /* A pattern turns at the end because a shape has nowhere to go past it — but
      turning and coming back are two different things, and only Up-Down and
      Down-Up asked for the second. Up runs the shape up and stops where the shape
@@ -3383,7 +3409,7 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
   if(direction==='updown'){climb(0,top-1,1);climb(top,1,-1);return close();}
   if(direction==='downup'){climb(top,1,-1);climb(0,top-1,1);return close();}
   climb(0,top,1);
-  return out;
+  return closeModes(startIdx+top);
 }
 
 /* True while the pass being built is the last one of a run that stops at the
@@ -3836,7 +3862,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29r';
+const APP_VERSION='2026-08-29s';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4214,8 +4240,15 @@ function modesTour(){
     const whole=up.concat([n]);
     return state.direction==='down'?whole.reverse():whole;
   }
+  /* Up-Down does two things at once: it turns the direction from one mode to
+     the next, AND it turns the whole run round at the top to come home. The
+     first is the point; the second is a separate question, so it is asked
+     separately. One way climbs through the modes and stops on the tonic at the
+     top; there and back carries on down through them. */
+  const whole=up.concat([n]);
+  if(state.practice.modesTour==='oneway')return whole;
   const back=[];for(let i=n-1;i>=1;i--)back.push(i);
-  return up.concat([n],back);
+  return whole.concat(back);
 }
 /* The run set off from a mode and a tonic, and every pass is measured from
    there rather than stepped off the one before — a chain of local steps has
@@ -4808,6 +4841,33 @@ function buildSeqCustom(){
   if(cl)cl.onclick=()=>{state.seqCustom=[];renderPitchPickers();refreshSequence();restartIfPlaying();};
 }
 
+function buildModesTourRow(){
+  const block=document.getElementById('modestour-block');
+  if(!block)return;
+  /* Only where the question exists. Going one direction the run already ends at
+     the top, so there is nothing to ask. */
+  const ask=modesRunOn()&&modesSnake();
+  block.style.display=ask?'':'none';
+  if(!ask)return;
+  const row=document.getElementById('modestour-row');row.innerHTML='';
+  [['oneway',tr('modes.oneWay','One way')],['back',tr('modes.thereBack','There and back')]]
+    .forEach(([v,label])=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+((state.practice.modesTour==='oneway'?'oneway':'back')===v?' active':'');
+      b.textContent=label;
+      b.title=v==='oneway'
+        ? tr('modes.oneWayHint','Climbs through the modes and stops on the tonic at the top')
+        : tr('modes.thereBackHint','Climbs through them and comes back down through them');
+      b.onclick=()=>{
+        state.practice.modesTour=v;
+        buildModesTourRow();markModesHome();resetRun();
+        updatePracticeInfo();refreshSectionSummaries();refreshSequence();restartIfPlaying();
+      };
+      row.appendChild(b);
+    });
+  gridify(row);
+}
+
 function buildRootMoveRow(){
   const row=document.getElementById('rootmove-row');row.innerHTML='';
   /* In Arpeggio it is not merely unavailable, it is inapplicable: the modes are
@@ -4839,7 +4899,7 @@ function buildRootMoveRow(){
       // snake it was in when it was last switched off
       markModesHome();
       if(m.k==='modes'){state.span=1;state.spanWanted=1;renderPitchPickers();refreshSequence();}
-      buildRootMoveRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
+      buildRootMoveRow();buildModesTourRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
     };
     row.appendChild(b);
   });
@@ -5195,7 +5255,10 @@ function updatePracticeInfo(){
     ? tr('practice.fourthsCycle','root up a 4th after the full cycle')
     : tr('practice.fourthsPass','root up a 4th each pass'));
   if(modesRunOn())bits.push(modesSnake()
-    ? tr('modes.tour','{n} modes of {key} and back, one octave each',
+    ? tr(state.practice.modesTour==='oneway'?'modes.tourOne':'modes.tour',
+         state.practice.modesTour==='oneway'
+           ? '{n} modes of {key}, one octave each, one way'
+           : '{n} modes of {key} and back, one octave each',
          {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
     : (state.direction==='down'
         ? tr('modes.runningDown','{n} modes of {key}, one octave each, closing on the first an octave down',
@@ -5419,7 +5482,8 @@ function renderPitchPickers(){
     const b=document.createElement('button');
     b.className='pick-btn'+(d.k===state.direction?' active':'');
     b.textContent=dirLabel(d.k);
-    b.onclick=()=>{state.direction=d.k;renderPitchPickers();refreshSequence();restartIfPlaying();};
+    b.onclick=()=>{state.direction=d.k;buildModesTourRow();renderPitchPickers();
+      refreshSequence();restartIfPlaying();};
     dirRow.appendChild(b);
   });
 
@@ -6202,6 +6266,7 @@ function applyExercise(x){
   if(p&&typeof p==='object'){
     state.practice.rootMove=oneOf(p.rootMove,ROOT_MOVES.map(m=>m.k))||'stay';
     state.practice.repeat=oneOf(p.repeat,REPEATS.map(m=>m.k))||'loop';
+    state.practice.modesTour=(p.modesTour==='oneway')?'oneway':'back';
     state.practice.useList=!!p.useList;
     state.practice.list=Array.isArray(p.list)?p.list.filter(it=>
       it&&((it.kind==='chord'&&CHORDS[it.group]&&CHORDS[it.group][it.name])||
