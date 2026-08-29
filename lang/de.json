@@ -567,5 +567,8 @@
  "poly.cycle": "Zyklus {n}s",
  "inv.root": "Grundstellung",
  "inv.n": "{n}.",
- "sec.inversion": "Umkehrung"
+ "sec.inversion": "Umkehrung",
+ "arp.top": "Oberster Ton",
+ "arp.withTop": "Oktave schließen",
+ "arp.noTop": "Auf dem Akkord enden"
 }

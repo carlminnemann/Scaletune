@@ -583,5 +583,8 @@
  "poly.cycle": "цикл {n}с",
  "inv.root": "Основной вид",
  "inv.n": "{n}-е",
- "sec.inversion": "Обращение"
+ "sec.inversion": "Обращение",
+ "arp.top": "Верхняя нота",
+ "arp.withTop": "Замкнуть октаву",
+ "arp.noTop": "Остановиться на аккорде"
 }

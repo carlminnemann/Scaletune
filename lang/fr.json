@@ -567,5 +567,8 @@
  "poly.cycle": "cycle de {n}s",
  "inv.root": "Fondamental",
  "inv.n": "{n}e",
- "sec.inversion": "Renversement"
+ "sec.inversion": "Renversement",
+ "arp.top": "Note du haut",
+ "arp.withTop": "Ferme l’octave",
+ "arp.noTop": "S’arrête sur l’accord"
 }

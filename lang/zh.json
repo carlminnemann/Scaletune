@@ -551,5 +551,8 @@
  "poly.cycle": "周期 {n} 秒",
  "inv.root": "原位",
  "inv.n": "第 {n} 转位",
- "sec.inversion": "转位"
+ "sec.inversion": "转位",
+ "arp.top": "最高音",
+ "arp.withTop": "收在八度",
+ "arp.noTop": "停在和弦上"
 }

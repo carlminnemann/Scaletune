@@ -567,5 +567,8 @@
  "poly.cycle": "ciclo di {n}s",
  "inv.root": "Fondamentale",
  "inv.n": "{n}ª",
- "sec.inversion": "Rivolto"
+ "sec.inversion": "Rivolto",
+ "arp.top": "Nota acuta",
+ "arp.withTop": "Chiude l’ottava",
+ "arp.noTop": "Si ferma sull’accordo"
 }

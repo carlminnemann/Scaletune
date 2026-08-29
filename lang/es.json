@@ -567,5 +567,8 @@
  "poly.cycle": "ciclo de {n}s",
  "inv.root": "Fundamental",
  "inv.n": "{n}ª",
- "sec.inversion": "Inversión"
+ "sec.inversion": "Inversión",
+ "arp.top": "Nota superior",
+ "arp.withTop": "Cierra la octava",
+ "arp.noTop": "Para en el acorde"
 }

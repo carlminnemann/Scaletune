@@ -923,6 +923,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="btn-wrap" id="rootoct-row"></div>
       <div class="group-label" id="startdeg-label" data-t="start-on">Start On</div>
       <div class="btn-wrap" id="startdeg-row"></div>
+      <div class="head" id="arptop-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="arp.top">Top note</span>
+        <span class="btn-wrap seg" id="arptop-row" data-cols="fixed"></span></div>
     </div>
   </details>
 
@@ -1968,6 +1971,10 @@ let state={
   // asked for, so a range clamp can be undone once the key allows it again
   span:1,spanWanted:1,rootOctWanted:3,direction:'up',startDeg:0,
   seqPattern:'plain',      // the shape walked from each degree; see SEQ_PATTERNS
+  /* Whether an arpeggio takes the octave on top. C E G Bb is the chord; C E G
+     Bb C is the chord and the note it is built on, played again. Both are how
+     people practise, so it is asked rather than decided. */
+  arpTop:true,
   blueNotes:false,           // the added note in the two pentatonics
 
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
@@ -3357,12 +3364,11 @@ function buildSequence(){
   const degrees=activeDegrees();
   if(!degrees)return[];
   const rootS=semitone(state.root,state.rootOct)+modesLift();
-  /* An arpeggio ends on the note it began on, inversion or not: E G C E is the
-     first inversion, and stopping at the C leaves it hanging on a note that is
-     neither where it started nor where it is going. A one-octave seventh used
-     to stop short of its octave, which made the third inversion the only one
-     that did not come home. */
-  const appendTop=true;
+  /* An arpeggio can end on the note it began on — E G C E, the first inversion
+     coming home — or stop on the last note of the chord, E G C. Both are real:
+     one closes, the other leaves the chord bare. A scale always takes its
+     octave; it is only a chord that has a choice to make here. */
+  const appendTop=(playingKind()==='chord')?!!state.arpTop:true;
   return walk(degrees.map(d=>rootS+d),state.startDeg,state.span,appendTop,activeDirection());
 }
 
@@ -3784,7 +3790,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29l';
+const APP_VERSION='2026-08-29m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5320,6 +5326,25 @@ function renderPitchPickers(){
       degRow.appendChild(b);
     });
   }
+  /* Only a chord asks it: a scale that stopped a degree short of its octave
+     would just be a scale missing a note. */
+  const topLine=document.getElementById('arptop-line');
+  if(topLine){
+    const chordNow=playingKind()==='chord';
+    topLine.style.display=chordNow?'':'none';
+    if(chordNow){
+      const row=document.getElementById('arptop-row');row.innerHTML='';
+      [[true,tr('arp.withTop','Come home')],[false,tr('arp.noTop','Stop on the chord')]]
+        .forEach(([v,label])=>{
+          const b=document.createElement('button');
+          b.className='pick-btn'+(!!state.arpTop===v?' active':'');
+          b.textContent=label;
+          b.onclick=()=>{state.arpTop=v;renderPitchPickers();refreshSequence();restartIfPlaying();};
+          row.appendChild(b);
+        });
+      gridify(row);
+    }
+  }
   const degLabel=document.getElementById('startdeg-label');
   if(degLabel)degLabel.textContent=(playingKind()==='chord')
     ? tr('sec.inversion','Inversion') : tr('start-on','Start On');
@@ -5922,7 +5947,7 @@ function patInfo(){
 const EX_KEYS=[
   'mode','root','rootOct','rootOctWanted','scaleGroup','scaleName',
   'chordGroup','chordName','span','spanWanted','direction','startDeg',
-  'seqPattern','blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
+  'seqPattern','arpTop','blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
   'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv',
   'alignPasses','clickFollowsFigure','countBars','countWhen','groove','kit',
   'density','balladHat','metroInDrone','accentsTouched',
@@ -5994,6 +6019,7 @@ function applyExercise(x){
   set('startDeg',num(x.startDeg,0,11));
   set('seqPattern',oneOf(x.seqPattern,SEQ_PATTERNS.map(p=>p.k)));
   state.blueNotes=!!x.blueNotes;
+  state.arpTop=x.arpTop!==false;
   set('freeRoot',oneOf(x.freeRoot,NOTES));
   set('freeSpan',num(x.freeSpan,1,4));set('freeSpanWanted',num(x.freeSpanWanted,1,4));
   set('freeDirection',oneOf(x.freeDirection,DIRECTIONS.map(d=>d.k)));
