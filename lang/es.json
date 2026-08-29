@@ -578,5 +578,8 @@
  "timbre.rhodes": "Rhodes",
  "strings": "Cuerdas",
  "real-piano-rhodes": "Piano real, Rhodes",
- "carls-own-instruments-recorded-note": "Los propios instrumentos de Carl, grabados nota a nota y tocados sin vibrato: una referencia no puede oscilar. La afinación de cada nota se midió y se corrige al sonar, de modo que lo que se oye cae dentro de un centésimo de lo que dice la app."
+ "carls-own-instruments-recorded-note": "Los propios instrumentos de Carl, grabados nota a nota y tocados sin vibrato: una referencia no puede oscilar. La afinación de cada nota se midió y se corrige al sonar, de modo que lo que se oye cae dentro de un centésimo de lo que dice la app.",
+ "timbre.hammond": "Hammond",
+ "hammond": "Hammond",
+ "a-tonewheel-organ-recorded-with": "Un órgano de ruedas fónicas, grabado con el registro básico y sin vibrato ni Leslie. Mide 0,1 centésimas de oscilación de punta a punta: es una máquina, y es el bordón más firme de la app."
 }

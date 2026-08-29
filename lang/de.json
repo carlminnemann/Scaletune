@@ -578,5 +578,8 @@
  "timbre.rhodes": "Rhodes",
  "strings": "Streicher",
  "real-piano-rhodes": "Echtes Klavier, Rhodes",
- "carls-own-instruments-recorded-note": "Carls eigene Instrumente, Ton für Ton aufgenommen und ohne Vibrato gespielt — eine Referenz darf nicht schwanken. Die Stimmung jeder Note wurde gemessen und wird beim Abspielen korrigiert, sodass das Gehörte auf einen Cent genau dort liegt, wo die App es angibt."
+ "carls-own-instruments-recorded-note": "Carls eigene Instrumente, Ton für Ton aufgenommen und ohne Vibrato gespielt — eine Referenz darf nicht schwanken. Die Stimmung jeder Note wurde gemessen und wird beim Abspielen korrigiert, sodass das Gehörte auf einen Cent genau dort liegt, wo die App es angibt.",
+ "timbre.hammond": "Hammond",
+ "hammond": "Hammond",
+ "a-tonewheel-organ-recorded-with": "Eine Tonrad-Orgel, mit der Grundregistrierung aufgenommen, ohne Vibrato und ohne Leslie. Sie schwankt um 0,1 Cent von Spitze zu Spitze — eine Maschine, und der ruhigste Bordun der App."
 }

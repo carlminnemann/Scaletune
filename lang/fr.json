@@ -578,5 +578,8 @@
  "timbre.rhodes": "Rhodes",
  "strings": "Cordes",
  "real-piano-rhodes": "Piano réel, Rhodes",
- "carls-own-instruments-recorded-note": "Les instruments de Carl lui-même, enregistrés note par note et joués sans vibrato — une référence ne doit pas osciller. La justesse de chaque note a été mesurée et se corrige à la lecture, si bien que ce que l’on entend tombe à moins d’un centième de ce qu’annonce l’application."
+ "carls-own-instruments-recorded-note": "Les instruments de Carl lui-même, enregistrés note par note et joués sans vibrato — une référence ne doit pas osciller. La justesse de chaque note a été mesurée et se corrige à la lecture, si bien que ce que l’on entend tombe à moins d’un centième de ce qu’annonce l’application.",
+ "timbre.hammond": "Hammond",
+ "hammond": "Hammond",
+ "a-tonewheel-organ-recorded-with": "Un orgue à roues phoniques, enregistré avec le tirant de base, sans vibrato ni Leslie. Il mesure 0,1 centième d’oscillation d’un bout à l’autre : c’est une machine, et c’est le bourdon le plus stable de l’application."
 }

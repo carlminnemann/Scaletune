@@ -1585,6 +1585,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     you hear lands within a cent of where the app says it is.</dd>
     <dt data-t="organ">Organ</dt><dd data-t="synthesised-rather-than-recorded-from">Synthesised rather than recorded, from the harmonic profile of a church organ.
     Its pitch is exact by construction, at every note.</dd>
+    <dt data-t="hammond">Hammond</dt><dd data-t="a-tonewheel-organ-recorded-with">A tonewheel organ, recorded on the basic drawbar with no vibrato and
+    no Leslie. It measures a tenth of a cent of movement from end to end — it is a machine, and it is
+    the steadiest drone in the app.</dd>
     <dt data-t="real-piano-rhodes">Real piano, Rhodes</dt><dd data-t="for-the-note-sequences-where">For the note sequences, where a clear attack makes the rhythm
     of a line easy to hear. Both fade, so they are not offered as drones. The piano is corrected for
     the stretch a tuner gives it: sharp at the top is right on a piano and wrong in an app you tune
@@ -2440,9 +2443,15 @@ function initAudio(){
    heard, weighted by level: exact to a hundredth of a cent on test tones with
    a weak fundamental and a piano's stretch.
 
-   The strings are looped: they hold as long as the bow does, which is what a
-   drone needs. The piano and the Rhodes decay, so they are not offered as
-   drones and their samples end where the note does.
+   The strings and the Hammond are looped: they hold as long as the bow and the
+   key do, which is what a drone needs. The piano and the Rhodes decay, so they
+   are not offered as drones and their samples end where the note does.
+
+   The Hammond's corrections repeat every four entries — -1.2, -0.4, -0.3, -0.6
+   and then again an octave up. That is its gearing: a tonewheel organ makes
+   every pitch from the same set of gear ratios, so the same small errors come
+   back in every octave. Nothing else in this file has a pattern like it, and
+   its being there is the measurement checking itself.
 
    The gains put the three within a decibel and a half of each other and of the
    organ, measured as loudness over the first second rather than as peaks: a
@@ -2457,6 +2466,10 @@ const SAMPLED={
                 gain:1.6,label:'piano',loopForDrone:false,
                 tune:{36:-14.4,39:-13.1,42:-12.7,45:-7.2,48:-6.3,51:-5.1,54:-4.5,57:-3.9,60:-6.8,
                       63:-2.7,66:-7.7,69:-4.4,72:-3.6,75:-0.3,78:-1.2,81:1.5,84:2.9}},
+  'hammond':   {sf:'hammond',file:'vendor/hammond-aac.js',
+                gain:1.6,label:'hammond',loopForDrone:true,
+                tune:{36:-1.2,39:-0.4,42:-0.3,45:-0.6,48:-1.1,51:-0.3,54:-0.2,57:-0.6,60:-1,
+                      63:-0.3,66:-0.2,69:-0.5,72:-1.1,75:-0.3,78:-0.2,81:-0.5,84:-1}},
   'rhodes':    {sf:'rhodes',file:'vendor/rhodes-aac.js',
                 gain:0.9,label:'rhodes',loopForDrone:false,
                 tune:{36:1.2,39:0.6,42:0.3,45:0.8,48:1.2,51:0.7,54:0.8,57:1.2,60:0,
@@ -2476,8 +2489,8 @@ function sampleFor(kind,midi){
   /* Two different shifts, because two paths need different things. `cents` is
      for playing the recording as it is: the interval, less the error the
      recording was measured to have. `step` is the bare interval, for the drone,
-     whose loop has already been pulled onto its own nominal pitch by
-     flattenPitch — correcting there as well would correct it twice. */
+     which corrects itself against the loop it actually built rather than
+     against this table — see loopCentsCache. */
   return {midi:melhor,name:midiName(melhor),
           step:(midi-melhor)*100,
           cents:(midi-melhor)*100-spec.tune[melhor]};
@@ -2549,6 +2562,13 @@ function loadSampler(k,cb){
    matches the start, and crossfade the tail into the material just before it,
    so the join is continuous by construction. */
 const loopBufferCache={};
+/* How far the finished loop sits off its own note, in cents. Measured rather
+   than assumed: flattenPitch pulls the loop onto the note when it runs, but it
+   declines when it cannot track the pitch well enough — on the Hammond, whose
+   tone is so nearly a set of pure sines that the tracker will not vouch for it —
+   and then the loop keeps whatever the recording had. Measuring the loop that
+   actually came out covers both cases and needs to know which one happened. */
+const loopCentsCache={};
 
 /* The pitch contour of the sustain, one reading every 20 ms. The lag search is
    held within 6% of the nominal frequency, which is far wider than any vibrato
@@ -2681,6 +2701,26 @@ function sustainLoopBuffer(kind,midi){
     }
   }catch(e){}
   loopBufferCache[key]=result;
+  if(result){
+    let off=0;
+    try{
+      const fNom=freqOf(midi-12);
+      const pts=pitchContour(result.getChannelData(0),result.sampleRate,0,result.length,fNom);
+      if(pts.length>=4){
+        const qs=pts.map(p=>p.q).sort((a,b)=>a-b);
+        const fs=pts.map(p=>p.f).sort((a,b)=>a-b);
+        const cand=1200*Math.log2(fs[fs.length>>1]/fNom);
+        /* Two ways for this to be a reading of nothing, and both have been seen.
+           The tracker says how sure it is, and on a tone as nearly pure as the
+           Hammond's it is not sure — the same test flattenPitch uses to decline.
+           And the search only reaches a semitone, so a lag that drifts to the
+           end of it comes back as a hundred cents: a loop is never that far off
+           its own note, so a large answer is the meter failing, not the loop. */
+        if(qs[qs.length>>1]>=0.7&&Math.abs(cand)<=25)off=cand;
+      }
+    }catch(e){}
+    loopCentsCache[key]=off;
+  }
   return result;
 }
 
@@ -2700,7 +2740,10 @@ function startLoopedVoice(kind,sem,gain){
   const now=audioCtx.currentTime;
   const src=audioCtx.createBufferSource();
   src.buffer=lb;src.loop=true;
-  src.playbackRate.value=Math.pow(2,q.step/1200);
+  // the interval to the note, less whatever the finished loop was measured to
+  // be off by — so the drone lands on the note however the loop was made
+  const resid=loopCentsCache[kind+':'+q.midi]||0;
+  src.playbackRate.value=Math.pow(2,(q.step-resid)/1200);
   const g=audioCtx.createGain();
   g.gain.setValueAtTime(0,now);
   g.gain.linearRampToValueAtTime(gain,now+0.15);   // the loop starts mid-note, so ease it in
@@ -3975,11 +4018,12 @@ const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'strings',    label:'Strings',     decays:false},   // looped, so it holds
   {k:'organ',      label:'Organ',       decays:false},
+  {k:'hammond',    label:'Hammond',     decays:false},   // looped, so it holds
   {k:'rhodes',     label:'Rhodes',      decays:true},
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29z';
+const APP_VERSION='2026-08-30a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the

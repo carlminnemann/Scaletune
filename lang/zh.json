@@ -562,5 +562,8 @@
  "timbre.rhodes": "Rhodes",
  "strings": "弦乐",
  "real-piano-rhodes": "真实钢琴、Rhodes",
- "carls-own-instruments-recorded-note": "Carl 自己的乐器，逐音录制，演奏时不加揉弦——基准音不能晃动。每个音的音准都经过测量并在播放时校正，所以听到的与应用所标的相差不到一音分。"
+ "carls-own-instruments-recorded-note": "Carl 自己的乐器，逐音录制，演奏时不加揉弦——基准音不能晃动。每个音的音准都经过测量并在播放时校正，所以听到的与应用所标的相差不到一音分。",
+ "timbre.hammond": "Hammond",
+ "hammond": "Hammond",
+ "a-tonewheel-organ-recorded-with": "一台音轮风琴，用基本音栓录制，不加颤音也不用 Leslie。音高起伏只有 0.1 音分——它是一台机器，也是本应用中最稳的持续音。"
 }
