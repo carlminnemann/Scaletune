@@ -1580,12 +1580,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="why-it-matters">Why it matters</dt><dd data-t="you-tune-by-the-beating">You tune by the beating between partials, so a voice with partials is
     worth more than a clean one. A sine has a single partial: excellent for a unison or an octave,
     useless for anything else.</dd>
-    <dt data-t="cello">Cello</dt><dd data-t="recordings-of-real-players-with">Recordings of real players, with the vibrato tracked out — a reference
-    must not wobble — and retuned so every note lands within a cent.</dd>
+    <dt data-t="strings">Strings</dt><dd data-t="carls-own-instruments-recorded-note">Carl's own instruments, recorded note by note and played straight — a
+    reference must not wobble. Each note's tuning was measured and is corrected as it plays, so what
+    you hear lands within a cent of where the app says it is.</dd>
     <dt data-t="organ">Organ</dt><dd data-t="synthesised-rather-than-recorded-from">Synthesised rather than recorded, from the harmonic profile of a church organ.
     Its pitch is exact by construction, at every note.</dd>
-    <dt data-t="real-piano-piano-synth">Real piano, Piano synth</dt><dd data-t="for-the-note-sequences-where">For the note sequences, where a clear attack makes the rhythm
-    of a line easy to hear. Both fade, so they are not offered as drones.</dd>
+    <dt data-t="real-piano-rhodes">Real piano, Rhodes</dt><dd data-t="for-the-note-sequences-where">For the note sequences, where a clear attack makes the rhythm
+    of a line easy to hear. Both fade, so they are not offered as drones. The piano is corrected for
+    the stretch a tuner gives it: sharp at the top is right on a piano and wrong in an app you tune
+    against.</dd>
     <dt data-t="vibraphone-2">Vibraphone</dt><dd data-t="a-bar-is-undercut-so">A bar is undercut until its modes land on 1 : 4 : 10 — the note, two
     octaves above it, and a little over three. That ratio is what reads as struck metal rather than as
     a tone: a piano's partials are a harmonic series and blur together, while these three stand apart.
@@ -2044,7 +2047,7 @@ let state={
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   // remembered separately per mode family: Drone can only use a sustaining
   // wave, the sequence modes default to the sampled piano
-  timbre:'cello',droneTimbre:'cello',seqTimbre:'piano-real',volume:0.7,
+  timbre:'strings',droneTimbre:'strings',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
   bpm:80,sig:4,clickVol:0.5,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,
   /* The base is that every round starts on beat one. Letting the phrase drift
@@ -2409,21 +2412,80 @@ function initAudio(){
   return(p&&typeof p.then==='function')?p.catch(()=>{}):Promise.resolve();
 }
 
-// The sampled piano is quiet next to a raw oscillator: the samples peak well
-// below full scale and carry a natural decay. Measured against a sine at the
-// same volume setting, this brings them to a comparable level.
 /* ---------- sampled instruments ----------
-   Both voices come from the same MIT-licensed FluidR3_GM set that is bundled
-   in vendor/. Gains are measured against a sine at the same volume, since raw
-   samples peak well below full scale. The cello is looped: its sample runs dry
-   after about three seconds, which is fine for a sequence note but useless for
-   a drone that has to hold indefinitely.                                     */
+   Carl's own instruments, played and recorded by him: seventeen notes each,
+   from C2 up every three semitones to C6, built by tools/build-samples.py.
+
+   Seventeen and not eighty-eight. A borrowed soundfont ships every note because
+   it cannot know what will be asked for; here the sampler can shift a sample in
+   cents at playback, and three semitones apart means nothing is ever more than
+   one semitone from a real recording. The file carries a fifth of the bytes and
+   every note in it was actually played.
+
+   Nothing is retuned in the file. `tune` is each note's measured error in
+   cents, which the app subtracts from the shift it is already making — one
+   resampling instead of two.
+
+   The piano's numbers run from -14 at the bottom to +3 at the top, and that
+   monotone curve is a piano tuner's stretch, not noise: flat in the bass, sharp
+   in the treble, because a piano string is stiff and its partials are not quite
+   harmonics, so a piano tuned to the arithmetic sounds wrong to a pianist. It
+   is right on a piano and wrong in an app you tune against, so it comes out.
+
+   Measuring it took three tries. Autocorrelation reads a stretched tone sharp —
+   17.7 cents on a test tone with a piano's stiffness — and reading the
+   fundamental alone fails too, because on this piano's low C the fundamental
+   sits 16 dB under the second partial. What the numbers come from is fitting
+   the whole series, f(n) = n*f0*sqrt(1+B*n^2), to every partial that can be
+   heard, weighted by level: exact to a hundredth of a cent on test tones with
+   a weak fundamental and a piano's stretch.
+
+   The strings are looped: they hold as long as the bow does, which is what a
+   drone needs. The piano and the Rhodes decay, so they are not offered as
+   drones and their samples end where the note does.
+
+   The gains put the three within a decibel and a half of each other and of the
+   organ, measured as loudness over the first second rather than as peaks: a
+   struck piano note and a held bow reach the same peak and are nowhere near
+   the same loudness.                                                          */
 const SAMPLED={
-  'piano-real':{sf:'acoustic_grand_piano',file:'vendor/acoustic_grand_piano-mp3.js',
-                gain:17,label:'piano',loopForDrone:false},
-  'cello':     {sf:'cello',file:'vendor/cello-mp3.js',
-                gain:13,label:'cello',loopForDrone:true},
+  'strings':   {sf:'strings',file:'vendor/strings-aac.js',
+                gain:3,label:'strings',loopForDrone:true,
+                tune:{36:-5.4,39:-0.2,42:0.8,45:4.3,48:2.3,51:0.3,54:0.6,57:1.8,60:0.2,
+                      63:-4,66:-0.7,69:-2.6,72:1.9,75:0.5,78:2.4,81:1,84:-0.6}},
+  'piano-real':{sf:'piano_real',file:'vendor/piano-real-aac.js',
+                gain:1.6,label:'piano',loopForDrone:false,
+                tune:{36:-14.4,39:-13.1,42:-12.7,45:-7.2,48:-6.3,51:-5.1,54:-4.5,57:-3.9,60:-6.8,
+                      63:-2.7,66:-7.7,69:-4.4,72:-3.6,75:-0.3,78:-1.2,81:1.5,84:2.9}},
+  'rhodes':    {sf:'rhodes',file:'vendor/rhodes-aac.js',
+                gain:0.9,label:'rhodes',loopForDrone:false,
+                tune:{36:1.2,39:0.6,42:0.3,45:0.8,48:1.2,51:0.7,54:0.8,57:1.2,60:0,
+                      63:1.5,66:0.9,69:1.8,72:0.8,75:2,78:0.1,81:1.9,84:2.5}},
 };
+/* Which recording to play for a note, and how far to bend it. The samples run
+   from C2 to C6; past either end the nearest one is stretched further, which is
+   the honest cost of not having played those notes. */
+function sampleFor(kind,midi){
+  const spec=SAMPLED[kind];if(!spec)return null;
+  let melhor=null,dist=1e9;
+  for(const k in spec.tune){
+    const m=+k,d=Math.abs(m-midi);
+    if(d<dist){dist=d;melhor=m;}
+  }
+  if(melhor===null)return null;
+  /* Two different shifts, because two paths need different things. `cents` is
+     for playing the recording as it is: the interval, less the error the
+     recording was measured to have. `step` is the bare interval, for the drone,
+     whose loop has already been pulled onto its own nominal pitch by
+     flattenPitch — correcting there as well would correct it twice. */
+  return {midi:melhor,name:midiName(melhor),
+          step:(midi-melhor)*100,
+          cents:(midi-melhor)*100-spec.tune[melhor]};
+}
+function midiName(m){
+  const N=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+  return N[((m%12)+12)%12]+(Math.floor(m/12)-1);
+}
 const samplers={};   // timbre key -> {inst,ready,loading,queue}
 
 function samplerFor(k){
@@ -2469,16 +2531,16 @@ function loadSampler(k,cb){
 }
 
 /* ---------- seamless sustain loops ----------
-   The cello sample is a 3-second bow stroke that crescendos from silence to
-   its loudest point and then simply stops. Looping it whole means the level
-   climbs for three seconds and then drops sevenfold — an audible swell and
-   thump, not a held note.
+   A drone has to hold for as long as you want to play against it, and no
+   recording holds. The strings run six and a half seconds and then stop, and
+   looping a take whole puts its attack and its ending in the middle of a held
+   note, once a bar, forever.
 
-   It is also a real player, and a real player vibrates: measured across the
-   range, the pitch swings 5 to 10 cents either side of centre at 4 to 5 Hz.
-   That is expressive on a note and useless as a tuning reference, where the
-   whole point is a pitch that does not move — you cannot hear yourself beat
-   against something that is already beating.
+   A held note is also never quite still. The strings were played straight and
+   measure four cents from side to side, which is ten times better than the
+   soundfont they replace but not nothing, and a reference that moves is a
+   reference you cannot beat against — you cannot hear yourself against
+   something that is already beating.
 
    So the loop is built from a flattened copy of the sustain: track the sample's
    own pitch, then read it back at a rate that cancels the swing and lands on
@@ -2588,11 +2650,15 @@ function sustainLoopBuffer(kind,midi){
       const raw=buf.getChannelData(0),sr=buf.sampleRate;
       const fNom=freqOf(midi-12);
       const period=sr/fNom;
-      // the first half is the crescendo; the last 20 ms is the release
+      /* Start after the attack has settled, and stop clear of the end: the
+         samples are tapered over their last sixty milliseconds so that a note
+         played once does not end on a step, and a loop point found inside that
+         taper would fade a little further every time round. */
+      const cauda=Math.floor(sr*0.1);
       const flat=flattenPitch(raw,sr,Math.floor(buf.length*0.45),
-                              buf.length-Math.floor(sr*0.02),fNom);
+                              buf.length-cauda,fNom);
       const d=flat||raw;
-      const end=flat?flat.length:buf.length-Math.floor(sr*0.02);
+      const end=flat?flat.length:buf.length-cauda;
       // start far enough in that there is material before A to crossfade into
       let A=flat?Math.floor(sr*0.15):Math.floor(buf.length*0.5);
       while(A<end-1&&!(d[A]<=0&&d[A+1]>0))A++;             // upward zero crossing
@@ -2621,16 +2687,20 @@ function sustainLoopBuffer(kind,midi){
 // A held, seamlessly looping voice. Falls back to the library's own looping if
 // the buffer could not be prepared.
 function startLoopedVoice(kind,sem,gain){
-  const midi=sem+12;
-  const lb=sustainLoopBuffer(kind,midi);
+  /* The loop is built from the recording nearest the note, and then the whole
+     loop is played at the rate that lands it on the note — a seam found at one
+     pitch stays a seam at another, so nothing has to be looked for twice. */
+  const q=sampleFor(kind,sem+12);
+  const lb=q&&sustainLoopBuffer(kind,q.midi);
   if(!lb){
     const S=samplerFor(kind);
-    if(S.ready){const n=S.inst.play(stdName(sem),audioCtx.currentTime,{gain:gain,loop:true});if(n)schedPiano.push(n);}
+    if(S.ready&&q){const n=S.inst.play(q.name,audioCtx.currentTime,{gain:gain,loop:true,cents:q.cents});if(n)schedPiano.push(n);}
     return;
   }
   const now=audioCtx.currentTime;
   const src=audioCtx.createBufferSource();
   src.buffer=lb;src.loop=true;
+  src.playbackRate.value=Math.pow(2,q.step/1200);
   const g=audioCtx.createGain();
   g.gain.setValueAtTime(0,now);
   g.gain.linearRampToValueAtTime(gain,now+0.15);   // the loop starts mid-note, so ease it in
@@ -2641,11 +2711,11 @@ function startLoopedVoice(kind,sem,gain){
 /* A tone switched off is switched off within one sample, and a waveform that
    stops anywhere other than at zero leaves a step — which is a click. Measured
    at the moment of the stop, the last audible sample was at 0.07 to 0.20 of
-   full scale on every synthesised voice: they were all being cut mid-cycle, and
-   the two you hear it on are the two with real high partials. The synthesised
-   piano runs eight of them and the vibraphone puts one three octaves up, and a
-   sine that high cut mid-cycle is precisely the sound the ear is best at
-   hearing. On a low sine the same step is a soft thud you take for the end.
+   full scale on every synthesised voice: they were all being cut mid-cycle. The
+   one you hear it on is the one with real high partials — the vibraphone puts
+   one three octaves up, and a sine that high cut mid-cycle is precisely the
+   sound the ear is best at hearing. On a low sine the same step is a soft thud
+   you take for the end.
 
    So nothing is stopped outright any more: every gain in the list ramps to
    silence first. Twelve milliseconds is under a frame — it still reads as
@@ -2706,11 +2776,11 @@ function startContinuous(){
       const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
       if(!S.ready)return;
       if(spec.loopForDrone){startLoopedVoice(state.timbre,s,spec.gain*share);return;}
-      const n=S.inst.play(stdName(s),now,{gain:spec.gain*share});
+      const q=sampleFor(state.timbre,s+12);
+      const n=q&&S.inst.play(q.name,now,{gain:spec.gain*share,cents:q.cents});
       if(n)schedPiano.push(n);
       return;
     }
-    if(state.timbre==='piano-synth'){buildPianoSynth(freq,now,liveNodes,8,share);return;}
     if(state.timbre==='vibraphone'){buildVibraphone(freq,now,liveNodes,4,share);return;}
     const osc=audioCtx.createOscillator();
     const trim=isOrgan(state.timbre)?ORGAN_SYNTH_TRIM:1;
@@ -2770,35 +2840,16 @@ function buildVibraphone(freq,when,bucket,decay,share){
     bucket.push(osc,g);
   });
 }
-function buildPianoSynth(freq,when,bucket,decay,share){
-  const lvl=share===undefined?1:share;
-  const env=audioCtx.createGain();
-  env.connect(masterGain);
-  env.gain.setValueAtTime(0,when);
-  env.gain.linearRampToValueAtTime(lvl,when+0.005);
-  env.gain.setTargetAtTime(0.35*lvl,when+0.005,0.07);
-  env.gain.setTargetAtTime(0,when+0.4,decay);
-  [[1,1],[2,0.55],[3,0.3],[4,0.16],[5,0.09],[6,0.05],[7,0.025],[8,0.01]].forEach(([r,g])=>{
-    const osc=audioCtx.createOscillator();
-    osc.type='sine';osc.frequency.value=freq*r;
-    const gn=audioCtx.createGain();gn.gain.value=g;
-    osc.connect(gn);gn.connect(env);
-    osc.start(when);osc.stop(when+decay*6+1);
-    bucket.push(osc,gn);
-  });
-  bucket.push(env);
-}
 
 function scheduleTone(s,when,dur){
   const freq=freqOf(s);
   if(isSampled(state.timbre)){
     const S=samplerFor(state.timbre),spec=SAMPLED[state.timbre];
     if(S.ready){
-      const n=S.inst.play(stdName(s),when,{gain:spec.gain,duration:dur});
+      const q=sampleFor(state.timbre,s+12);
+      const n=q&&S.inst.play(q.name,when,{gain:spec.gain,duration:dur,cents:q.cents});
       if(n)schedPiano.push(n);
     }
-  } else if(state.timbre==='piano-synth'){
-    buildPianoSynth(freq,when,schedNodes,Math.max(0.15,dur*0.35));
   } else if(state.timbre==='vibraphone'){
     // it rings past the note it was struck on, the way the instrument does
     buildVibraphone(freq,when,schedNodes,Math.max(0.35,dur*0.9));
@@ -3922,18 +3973,18 @@ function renderSigFields(){
    against a sawtooth. */
 const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
-  {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
+  {k:'strings',    label:'Strings',     decays:false},   // looped, so it holds
   {k:'organ',      label:'Organ',       decays:false},
-  {k:'piano-synth',label:'Piano synth', decays:true},
+  {k:'rhodes',     label:'Rhodes',      decays:true},
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29y';
+const APP_VERSION='2026-08-29z';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
 // piano for the same reason: it is what you would play the line on.
-const DEFAULT_DRONE='cello';
+const DEFAULT_DRONE='strings';
 const WAVE_TYPES=['sine'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
 // scheduler mid-tick; fall back rather than let one bad value stop the audio.
@@ -4043,7 +4094,7 @@ function setMode(m){
   if(m!=='scale'&&state.seqPattern!=='plain'){state.seqPattern='plain';renderPitchPickers();}
   placeRepeat(isMetro);
   // Each side restores the last voice you chose there: the drone starts out on
-  // the cello, the sequence modes on the sampled piano.
+  // the strings, the sequence modes on the piano.
   state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
   if(!availableTimbres().some(t=>t.k===state.timbre))
     state.timbre=isDrone?DEFAULT_DRONE:DEFAULT_WAVE;
