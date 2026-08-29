@@ -2640,9 +2640,50 @@ function startLoopedVoice(kind,sem,gain){
   liveNodes.push(src,g);
 }
 
+/* A tone switched off is switched off within one sample, and a waveform that
+   stops anywhere other than at zero leaves a step — which is a click. Measured
+   at the moment of the stop, the last audible sample was at 0.07 to 0.20 of
+   full scale on every synthesised voice: they were all being cut mid-cycle, and
+   the two you hear it on are the two with real high partials. The synthesised
+   piano runs eight of them and the vibraphone puts one three octaves up, and a
+   sine that high cut mid-cycle is precisely the sound the ear is best at
+   hearing. On a low sine the same step is a soft thud you take for the end.
+
+   So nothing is stopped outright any more: every gain in the list ramps to
+   silence first. Twelve milliseconds is under a frame — it still reads as
+   instant — and it leaves no edge. The nodes are let go afterwards. */
+const KILL_FADE=0.012;
 function killNodes(list){
-  list.forEach(n=>{try{n.stop&&n.stop();}catch(e){}try{n.disconnect&&n.disconnect();}catch(e){}});
-  list.length=0;
+  if(!list.length)return;
+  const doomed=list.slice();list.length=0;
+  const largar=()=>doomed.forEach(n=>{
+    try{n.stop&&n.stop();}catch(e){}try{n.disconnect&&n.disconnect();}catch(e){}});
+  if(!audioCtx){largar();return;}
+  const t=audioCtx.currentTime;
+  let algum=false;
+  doomed.forEach(n=>{
+    const p=n&&n.gain;
+    if(!p||typeof p.linearRampToValueAtTime!=='function')return;
+    try{
+      /* Read the envelope where it stands, then anchor it there before the ramp,
+         or cancelling would jump it back to whatever it was last set to.
+
+         Not cancelAndHoldAtTime, which is what this is for: on a parameter under
+         setTargetAtTime it throws, and setTargetAtTime is exactly what the
+         synthesised piano and the vibraphone decay with. The throw was silent
+         and the ramp was skipped — on those two voices and no others, which is
+         the pair you hear the click on. */
+      const v=p.value;
+      p.cancelScheduledValues(t);
+      p.setValueAtTime(v,t);
+      p.linearRampToValueAtTime(0,t+KILL_FADE);
+      algum=true;
+    }catch(e){}
+  });
+  if(!algum){largar();return;}
+  doomed.forEach(n=>{if(n.stop){try{n.stop(t+KILL_FADE);}catch(e){}}});
+  setTimeout(()=>doomed.forEach(n=>{try{n.disconnect&&n.disconnect();}catch(e){}}),
+             KILL_FADE*1000+40);
 }
 function stopAllAudio(){
   stopBrushBed();
@@ -3890,7 +3931,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29w';
+const APP_VERSION='2026-08-29x';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
