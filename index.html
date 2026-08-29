@@ -1580,7 +1580,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="why-it-matters">Why it matters</dt><dd data-t="you-tune-by-the-beating">You tune by the beating between partials, so a voice with partials is
     worth more than a clean one. A sine has a single partial: excellent for a unison or an octave,
     useless for anything else.</dd>
-    <dt data-t="cello-and-oboe">Cello and Oboe</dt><dd data-t="recordings-of-real-players-with">Recordings of real players, with the vibrato tracked out — a reference
+    <dt data-t="cello">Cello</dt><dd data-t="recordings-of-real-players-with">Recordings of real players, with the vibrato tracked out — a reference
     must not wobble — and retuned so every note lands within a cent.</dd>
     <dt data-t="organ">Organ</dt><dd data-t="synthesised-rather-than-recorded-from">Synthesised rather than recorded, from the harmonic profile of a church organ.
     Its pitch is exact by construction, at every note.</dd>
@@ -2423,8 +2423,6 @@ const SAMPLED={
                 gain:17,label:'piano',loopForDrone:false},
   'cello':     {sf:'cello',file:'vendor/cello-mp3.js',
                 gain:13,label:'cello',loopForDrone:true},
-  'oboe':      {sf:'oboe',file:'vendor/oboe-mp3.js',
-                gain:13,label:'oboe',loopForDrone:true},
 };
 const samplers={};   // timbre key -> {inst,ready,loading,queue}
 
@@ -3926,12 +3924,11 @@ const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'cello',      label:'Cello',       decays:false},   // looped, so it holds
   {k:'organ',      label:'Organ',       decays:false},
-  {k:'oboe',       label:'Oboe',        decays:false},
   {k:'piano-synth',label:'Piano synth', decays:true},
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29x';
+const APP_VERSION='2026-08-29y';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
