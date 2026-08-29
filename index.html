@@ -198,7 +198,7 @@ details.sec.pinned>summary::after{display:none}
    foot of it: the auto margins take the free space above and below equally */
 .scroll.centred{display:flex;flex-direction:column}
 .scroll.centred>*{flex:0 0 auto}
-.scroll.centred>#metro-section{margin-top:auto;margin-bottom:auto}
+.scroll.centred>#metro-section,.scroll.centred>#tuner-section{margin-top:auto;margin-bottom:auto}
 /* It gives its airiness back a step at a time rather than let the screen it
    opens on start scrolling. Which step it is on is decided by measuring, not by
    guessing from the height of the window: how much room the panel actually has
@@ -729,7 +729,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   .scroll{overflow:visible;min-height:0;margin:0;padding:0}
   /* the page scrolls here, so there is no fixed box for Metro to centre in */
   .scroll.centred{display:block}
-  .scroll.centred>#metro-section{margin-top:0;margin-bottom:var(--s2)}
+  .scroll.centred>#metro-section,.scroll.centred>#tuner-section{margin-top:0;margin-bottom:var(--s2)}
   .btn-row{position:sticky;bottom:calc(0.5rem + env(safe-area-inset-bottom));z-index:5;
     margin-bottom:1rem}
   .btn-row::before{content:'';position:absolute;inset:-10px -16px;background:var(--bg);
@@ -3772,7 +3772,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29h';
+const APP_VERSION='2026-08-29i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6763,7 +6763,10 @@ function centreMetro(){
   // if it scrolls anyway — a panel is open — the tightening bought nothing, and
   // a cramped screen that scrolls is worse than a comfortable one
   if(over()){sc.classList.remove(...FIT_TIERS);return;}
-  if(state.mode==='metro')sc.classList.add('centred');
+  /* Metro and the Tuner are each one thing on an otherwise empty screen. Left
+     to the top they sit under the modes with all the room below them, which
+     reads as unfinished rather than as roomy. */
+  if(state.mode==='metro'||state.mode==='tuner')sc.classList.add('centred');
 }
 
 const SPREAD_MAX=64;
@@ -6785,7 +6788,13 @@ function shareOutRoom(){
   // should share the room the same way
   // folding sections, the tuner's two blocks, and the drone's grid of notes:
   // whatever reads as a block on the screen
-  const cards=[...sc.querySelectorAll('details.sec,#tuner-section>.panel,#drone-section')]
+  /* Single or Study list governs every panel below it, so it belongs to what is
+     above rather than floating between the two. It joins the blocks that share
+     out the spare room, which puts the room UNDER it — and Exercises gives up
+     its own share, so the row stays against it instead of being pushed away by
+     the very room there was to spare. */
+  const cards=[...sc.querySelectorAll(
+      'details.sec,#tuner-section>.panel,#drone-section,#listmode-row')]
     .filter(d=>d.offsetParent);
   cards.forEach(c=>c.style.marginBottom='');
   // Metro centres itself instead; adding margins there would push it off centre
@@ -6818,8 +6827,10 @@ function shareOutRoom(){
     spare=floor-reach()-2;
   }
   if(spare<=1){keepPlace();return;}
-  const extra=Math.min(SPREAD_MAX,spare/(cards.length-1));
-  cards.slice(0,-1).forEach(c=>{
+  const takers=cards.slice(0,-1).filter(c=>c.id!=='sec-exercises');
+  if(!takers.length){keepPlace();return;}
+  const extra=Math.min(SPREAD_MAX,spare/takers.length);
+  takers.forEach(c=>{
     c.style.marginBottom=(parseFloat(getComputedStyle(c).marginBottom)+extra)+'px';
   });
   keepPlace();
