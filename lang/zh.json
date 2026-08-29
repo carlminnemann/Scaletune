@@ -554,5 +554,15 @@
  "sec.inversion": "转位",
  "arp.top": "最高音",
  "arp.withTop": "收在八度",
- "arp.noTop": "停在和弦上"
+ "arp.noTop": "停在和弦上",
+ "rootmove.chords": "沿着音阶",
+ "chordrun.size": "和弦音数",
+ "chordrun.three": "三个音",
+ "chordrun.four": "四个音",
+ "chordrun.degree": "第 {n} 级",
+ "chordrun.needs": "选一条七音音阶——和弦就是它给出的那些",
+ "chordrun.running": "{key} 的和弦，每级一个",
+ "chordrun.now": "{n}. {chord} — {notes}",
+ "through-the-scale": "沿着音阶",
+ "the-chord-that-stands-on": "立在音阶每一级上的和弦，每遍一个——在 C 大调就是 Cmaj7、Dm7、Em7、Fmaj7、G7、Am7、Bm7b5，然后再来一轮。这是琶音对调式的回答：同一条音阶、同一个调，什么都不外借。你选的是音阶而不是和弦——所以开着它的时候上面那个面板显示的是音阶——并且选三个音还是四个音；和弦不是选出来的，而是在音阶内部叠三度所得到的东西。旋律与和声family 各自给出自己的和弦。转位对每一个都适用，于是「这条音阶的七和弦，全部用第一转位」就是一个练习。停下再开始会从第一级重新开始。"
 }

@@ -570,5 +570,15 @@
  "sec.inversion": "Rivolto",
  "arp.top": "Nota acuta",
  "arp.withTop": "Chiude l’ottava",
- "arp.noTop": "Si ferma sull’accordo"
+ "arp.noTop": "Si ferma sull’accordo",
+ "rootmove.chords": "Per la scala",
+ "chordrun.size": "Accordi di",
+ "chordrun.three": "Tre note",
+ "chordrun.four": "Quattro note",
+ "chordrun.degree": "grado {n}",
+ "chordrun.needs": "Scegli una scala di sette note — gli accordi sono quelli che dà",
+ "chordrun.running": "gli accordi di {key}, uno per grado",
+ "chordrun.now": "{n}. {chord} — {notes}",
+ "through-the-scale": "Per la scala",
+ "the-chord-that-stands-on": "L’accordo che sta su ogni grado di una scala, uno per passaggio — in Do maggiore è Do maggiore 7, Re minore 7, Mi minore 7, Fa maggiore 7, Sol 7, La minore 7, Si semidiminuito, e da capo. È la risposta dell’arpeggio ai modi: stessa scala, stessa tonalità, niente in prestito. Scegli la scala e non l’accordo — per questo il pannello sopra mostra le scale mentre è attivo — e scegli tre note o quattro; gli accordi non si scelgono, sono quelli che la scala dà impilando terze al suo interno. Le famiglie melodica e armonica danno i propri. Il rivolto vale per tutti, così «gli accordi di settima della scala, tutti in primo rivolto» è un esercizio solo. Fermarsi e ricominciare riparte dal primo grado."
 }

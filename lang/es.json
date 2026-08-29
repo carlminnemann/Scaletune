@@ -570,5 +570,15 @@
  "sec.inversion": "Inversión",
  "arp.top": "Nota superior",
  "arp.withTop": "Cierra la octava",
- "arp.noTop": "Para en el acorde"
+ "arp.noTop": "Para en el acorde",
+ "rootmove.chords": "Por la escala",
+ "chordrun.size": "Acordes de",
+ "chordrun.three": "Tres notas",
+ "chordrun.four": "Cuatro notas",
+ "chordrun.degree": "grado {n}",
+ "chordrun.needs": "Elige una escala de siete notas — los acordes son los que ella da",
+ "chordrun.running": "los acordes de {key}, uno por grado",
+ "chordrun.now": "{n}. {chord} — {notes}",
+ "through-the-scale": "Por la escala",
+ "the-chord-that-stands-on": "El acorde que se levanta sobre cada grado de una escala, uno por pasada — en Do mayor es Do mayor 7, Re menor 7, Mi menor 7, Fa mayor 7, Sol 7, La menor 7, Si semidisminuido, y de nuevo. Es la respuesta del arpegio a los modos: misma escala, misma tonalidad, nada prestado. Eliges la escala y no el acorde —por eso el panel de arriba muestra escalas mientras esto está activo— y eliges tres notas o cuatro; los acordes no se eligen, son lo que la escala da al apilar terceras dentro de ella. Las familias melódica y armónica dan los suyos. La inversión se aplica a todos, así que «los acordes de séptima de la escala, todos en primera inversión» es un solo ejercicio. Parar y volver a empezar arranca en el primer grado."
 }
