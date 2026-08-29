@@ -397,15 +397,15 @@ details.sec[open] .sec-sum{display:none}
    the box IS the group, the heading sits on it, and a chevron is the only thing
    that says this one opens. */
 #metro-more-body{padding:var(--s4)}
-#metro-more-body>.mgroup,#metro-more-body>#repeat-block{
+#metro-more-body>.mgroup{
   background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
   padding:10px 12px;margin-bottom:8px}
-#metro-more-body>.mgroup:last-child,#metro-more-body>#repeat-block:last-child{margin-bottom:0}
+#metro-more-body>.mgroup:last-child{margin-bottom:0}
 #metro-more-body>.mgroup+.mgroup{border-top:1px solid var(--border)}
 /* a heading belongs to what is under it: near its own controls, far from the
    next group */
-#metro-more-body>.mgroup .section-label,#metro-more-body>#repeat-block .group-label{margin-bottom:6px}
-#metro-more-body>.mgroup>.head:first-child,#metro-more-body>#repeat-block>.head{margin-bottom:0}
+#metro-more-body>.mgroup .section-label{margin-bottom:6px}
+#metro-more-body>.mgroup>.head:first-child{margin-bottom:0}
 /* the fold heading gives up its own box — the card is the box now */
 #metro-more-body>.mgroup>.pat-head{background:none;border:0;padding:0}
 #metro-more-body>.mgroup>.pat-head .section-label{margin-bottom:0}
@@ -3764,7 +3764,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-29f';
+const APP_VERSION='2026-08-29g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4353,7 +4353,9 @@ function roundPasses(){
    nothing there and the setting does not reach it — otherwise choosing "once"
    for a scale would silently cut the drone off eight bars in, three modes
    later, with nothing on the screen to explain it. */
-function runsOnce(){return state.practice.repeat==='once'&&state.mode!=='drone';}
+function runsOnce(){
+  return state.practice.repeat==='once'&&state.mode!=='drone'&&state.mode!=='metro';
+}
 let passesDone=0;
 /* A round that has finished is not stopped on the spot: the note that ends it
    is still sounding. The transport is asked to come down at a time instead —
@@ -4628,23 +4630,19 @@ function updateRotationPanel(){
                {n:p.roundsLeft-1});
 }
 
-/* Whether the exercise stops after one round is worth having in Metro too —
-   there a round is the pass you set, so Once means "give me eight bars and
-   stop". With its panel gone from Metro it moves next to the thing that says
-   what a pass is, which is where it belongs anyway. */
+/* Not in Metro. It went there because the machinery allowed it — a round in
+   Metro is the pass you set, so Once could mean "eight bars and stop" — and
+   that is building from what the code happens to know rather than from anything
+   a player wants. A metronome that falls silent on its own in the middle of
+   practice is a hazard, not a feature: in the note modes Once has an end to
+   arrive at, and here there is nothing to finish. */
 function placeRepeat(inMetro){
   const b=document.getElementById('repeat-block');
   if(!b)return;
   const home=document.getElementById('progress-body');
-  const pass=document.getElementById('pass-block');
-  const want=inMetro?(pass&&pass.parentNode):home;
-  if(!want)return;
-  if(inMetro){
-    if(b.parentNode!==want||b.previousElementSibling!==pass)pass.after(b);
-  } else if(b.parentNode!==home||b.nextElementSibling!==document.getElementById('practice-info')){
-    home.insertBefore(b,document.getElementById('practice-info'));
-  }
-  b.style.display='';
+  const info=document.getElementById('practice-info');
+  if(b.parentNode!==home||b.nextElementSibling!==info)home.insertBefore(b,info);
+  b.style.display=inMetro?'none':'';
 }
 
 function buildRepeatRow(){
