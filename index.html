@@ -1582,9 +1582,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     useless for anything else.</dd>
     <dt data-t="strings">Strings</dt><dd data-t="carls-own-instruments-recorded-note">Carl's own instruments, recorded note by note and played straight — a
     reference must not wobble. Each note's tuning was measured and is corrected as it plays, so what
-    you hear lands within a cent of where the app says it is.</dd>
-    <dt data-t="organ">Organ</dt><dd data-t="synthesised-rather-than-recorded-from">Synthesised rather than recorded, from the harmonic profile of a church organ.
-    Its pitch is exact by construction, at every note.</dd>
+    you hear lands within a cent of where the app says it is. A section has a spread of its own,
+    though: for the finest tuning, the Hammond is steadier.</dd>
     <dt data-t="hammond">Hammond</dt><dd data-t="a-tonewheel-organ-recorded-with">A tonewheel organ, recorded on the basic drawbar with no vibrato and
     no Leslie. It measures a tenth of a cent of movement from end to end — it is a machine, and it is
     the steadiest drone in the app.</dd>
@@ -2453,8 +2452,8 @@ function initAudio(){
    back in every octave. Nothing else in this file has a pattern like it, and
    its being there is the measurement checking itself.
 
-   The gains put the three within a decibel and a half of each other and of the
-   organ, measured as loudness over the first second rather than as peaks: a
+   The gains put the four within a decibel and a half of each other, measured as
+   loudness over the first second rather than as peaks: a
    struck piano note and a held bow reach the same peak and are nowhere near
    the same loudness.                                                          */
 const SAMPLED={
@@ -2826,13 +2825,11 @@ function startContinuous(){
     }
     if(state.timbre==='vibraphone'){buildVibraphone(freq,now,liveNodes,4,share);return;}
     const osc=audioCtx.createOscillator();
-    const trim=isOrgan(state.timbre)?ORGAN_SYNTH_TRIM:1;
-    if(isOrgan(state.timbre))osc.setPeriodicWave(organPeriodicWave());
-    else osc.type=oscType();
+    osc.type=oscType();
     osc.frequency.value=freq;
     const g=audioCtx.createGain();
     g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(share*trim,now+0.02);
+    g.gain.linearRampToValueAtTime(share,now+0.02);
     osc.connect(g);g.connect(masterGain);osc.start(now);
     liveNodes.push(osc,g);
   });
@@ -2898,15 +2895,13 @@ function scheduleTone(s,when,dur){
     buildVibraphone(freq,when,schedNodes,Math.max(0.35,dur*0.9));
   } else {
     const osc=audioCtx.createOscillator();
-    const trim=isOrgan(state.timbre)?ORGAN_SYNTH_TRIM:1;
-    if(isOrgan(state.timbre))osc.setPeriodicWave(organPeriodicWave());
-    else osc.type=oscType();
+    osc.type=oscType();
     osc.frequency.value=freq;
     const g=audioCtx.createGain();
     const rel=Math.min(0.09,dur*0.18),atk=0.012;
     g.gain.setValueAtTime(0,when);
-    g.gain.linearRampToValueAtTime(trim,when+atk);
-    g.gain.setValueAtTime(trim,when+Math.max(atk,dur-rel));
+    g.gain.linearRampToValueAtTime(1,when+atk);
+    g.gain.setValueAtTime(1,when+Math.max(atk,dur-rel));
     g.gain.linearRampToValueAtTime(0,when+dur);
     osc.connect(g);g.connect(masterGain);
     osc.start(when);osc.stop(when+dur+0.03);
@@ -2941,56 +2936,6 @@ const POLY_TONE={
   b:{low:{f:660,g:0.95,d:0.022},high:{f:470,g:0.62,d:0.018}},    // lower and longer
 };
 
-/* The organ is synthesised rather than sampled — the only voice here that is.
-
-   A pipe organ is close to additive synthesis made with air: a stop is very
-   nearly a sine, and drawing several stops adds them. So it is one periodic
-   waveform rather than a recording, and as a tuning reference that wins on
-   every count that can be measured: the pitch is exact by construction at every
-   note, with no contour to track, no residual wobble and no loop seam. The
-   recording it replaced was weakest exactly where that matters, at the top of
-   its range, where the pitch correction had to be refused.
-
-   Deliberately no detuning between partials — a celeste would sound richer and
-   would beat against itself, which is precisely what you are listening for in
-   the instrument you are tuning.
-
-   What it cannot do: a real organ's spectrum changes from note to note, as the
-   mixture ranks break back at different points across the compass. One fixed
-   waveform does not follow that. Judged by ear against the recording, it was
-   the one kept. */
-/* Not invented: measured off a recorded church organ, seven notes across its
-   range, by Goertzel at each exact harmonic, then averaged. The profile is
-   unmistakably a principal chorus — the octaves and the fifths above them stand
-   out and everything between them is 40 dB down, which is exactly what a stop
-   list looks like written as numbers. Partials quieter than that are dropped as
-   inaudible. The recording itself is gone; this is what was kept of it. */
-const ORGAN_PARTIALS=[
-  // harmonic, level      what an organist would call it
-  [ 1, 1.000],   //  8'   principal
-  [ 2, 0.840],   //  4'   octave
-  [ 3, 0.297],   //  2 2/3'  quint
-  [ 4, 0.327],   //  2'   super-octave
-  [ 5, 0.036],   //  1 3/5'  tierce
-  [ 6, 0.142],   //  1 1/3'  larigot
-  [ 8, 0.084],   //  1'
-  [ 9, 0.019],
-  [12, 0.069],   //  mixture
-  [16, 0.026],
-];
-let organWave=null;
-function organPeriodicWave(){
-  if(organWave)return organWave;
-  let top=1;ORGAN_PARTIALS.forEach(([h])=>{top=Math.max(top,h);});
-  const real=new Float32Array(top+1),imag=new Float32Array(top+1);
-  ORGAN_PARTIALS.forEach(([h,a])=>{imag[h]=a;});
-  organWave=audioCtx.createPeriodicWave(real,imag,{disableNormalization:false});
-  return organWave;
-}
-function isOrgan(k){return k==='organ';}
-// Level-matched to the recording it replaced, so switching voices does not
-// change how loud the drone is.
-const ORGAN_SYNTH_TRIM=0.74;
 
 function clickBuffer(f,decay){
   const sr=audioCtx.sampleRate;
@@ -4017,13 +3962,12 @@ function renderSigFields(){
 const TIMBRES=[
   {k:'piano-real', label:'Real piano',  decays:true},
   {k:'strings',    label:'Strings',     decays:false},   // looped, so it holds
-  {k:'organ',      label:'Organ',       decays:false},
   {k:'hammond',    label:'Hammond',     decays:false},   // looped, so it holds
   {k:'rhodes',     label:'Rhodes',      decays:true},
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30a';
+const APP_VERSION='2026-08-30b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
