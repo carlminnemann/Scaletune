@@ -718,31 +718,32 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .roller-tap{position:absolute;inset:0;border:0;background:none;padding:0;margin:0;
   cursor:pointer;border-radius:var(--r);touch-action:manipulation}
 .roller-tap:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-.roller-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);
-  display:flex;align-items:center;justify-content:center;padding:1rem}
+.roller-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.18)}
 .roller-back[hidden]{display:none}
-.roller-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
-  width:min(280px,100%);padding:var(--s3);box-shadow:0 18px 40px -12px rgba(0,0,0,.6)}
-.roller-title{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--text3);text-align:center;padding-bottom:var(--s2)}
-/* The window is five rows tall and the middle one is the value. The rows above
-   and below are the context that makes it a wheel rather than a list. */
-.roller-win{position:relative;height:200px;overflow:hidden}
-.roller-scroll{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+/* It opens over the control, not in the middle of the screen, and the row you
+   are on lands exactly where the value was — so the value stays put and the
+   others roll past it. */
+.roller-box{position:fixed;background:var(--bg2);border:1px solid var(--border3);
+  border-radius:var(--r);padding:4px 0;box-shadow:0 10px 24px -8px rgba(0,0,0,.55)}
+/* Three rows: the value and one either side. Any more and it stops being a
+   thing that opened out of a small control. */
+.roller-win{position:relative;height:102px;overflow:hidden}
+.roller-scroll{height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+  scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .roller-scroll::-webkit-scrollbar{display:none}
-.roller-item{height:40px;display:flex;align-items:center;justify-content:center;
-  scroll-snap-align:center;font-size:17px;color:var(--text3);cursor:pointer;
-  transition:color .12s,transform .12s;user-select:none;-webkit-user-select:none}
-.roller-item.on{color:var(--text);font-weight:600;transform:scale(1.12)}
-/* the band, drawn over the rows but not in their way */
-.roller-band{position:absolute;left:0;right:0;top:80px;height:40px;pointer-events:none;
+.roller-item{height:34px;display:flex;align-items:center;justify-content:center;
+  scroll-snap-align:center;font-size:15px;line-height:1;color:var(--text3);cursor:pointer;
+  padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:color .12s;user-select:none;-webkit-user-select:none}
+/* Weight and colour, and no scaling: a row wider than its column gave the
+   wheel somewhere to slide sideways to. */
+.roller-item.on{color:var(--text);font-weight:600}
+.roller-band{position:absolute;left:3px;right:3px;top:34px;height:34px;pointer-events:none;
   border-top:1px solid var(--border3);border-bottom:1px solid var(--border3);
-  background:var(--bg3);opacity:.5;border-radius:6px}
-.roller-fade{position:absolute;left:0;right:0;height:60px;pointer-events:none}
+  background:var(--bg3);opacity:.55;border-radius:4px}
+.roller-fade{position:absolute;left:0;right:0;height:22px;pointer-events:none}
 .roller-fade.up{top:0;background:linear-gradient(var(--bg2),rgba(0,0,0,0))}
 .roller-fade.down{bottom:0;background:linear-gradient(rgba(0,0,0,0),var(--bg2))}
-.roller-done{width:100%;margin-top:var(--s3)}
 
 /* The circles are a picture of the bar, so they are centred rather than lined up
    with the controls — and a cycle should read as one line. Laid out as a grid
@@ -1357,14 +1358,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
      that appears on whichever panel is open, which lands on its entry. -->
 <div class="roller-back" id="roller-back" hidden role="dialog" aria-modal="true">
   <div class="roller-box">
-    <div class="roller-title"></div>
     <div class="roller-win">
       <div class="roller-band"></div>
       <div class="roller-scroll" role="listbox" tabindex="-1"></div>
       <div class="roller-fade up"></div>
       <div class="roller-fade down"></div>
     </div>
-    <button type="button" class="pick-btn roller-done" data-t="common.done">Done</button>
   </div>
 </div>
 
@@ -4038,7 +4037,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30c';
+const APP_VERSION='2026-08-30d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5376,14 +5375,13 @@ function rollerAbre(sel){
   const back=document.getElementById('roller-back');
   if(!back||!sel.options.length||sel.disabled)return;
   rollerAlvo=sel;
-  back.querySelector('.roller-title').textContent=
-    sel.getAttribute('aria-label')||sel.getAttribute('data-roller-title')||'';
+  const box=back.querySelector('.roller-box');
   const scroll=back.querySelector('.roller-scroll');
   scroll.innerHTML='';
-  /* Two blank rows at each end so the first and the last value can reach the
-     middle of the window like every other one. */
+  /* One blank row at each end, so the first and the last value can reach the
+     middle of a three-row window like every other one. */
   const vazio=()=>{const d=document.createElement('div');d.className='roller-item';d.setAttribute('aria-hidden','true');return d;};
-  scroll.appendChild(vazio());scroll.appendChild(vazio());
+  scroll.appendChild(vazio());
   const itens=[];
   for(const o of sel.options){
     const d=document.createElement('div');
@@ -5392,7 +5390,7 @@ function rollerAbre(sel){
     d.onclick=()=>{rollerEscolhe(sel,o.value);rollerFecha();};
     scroll.appendChild(d);itens.push(d);
   }
-  scroll.appendChild(vazio());scroll.appendChild(vazio());
+  scroll.appendChild(vazio());
   const marca=()=>{
     const meio=scroll.scrollTop+scroll.clientHeight/2;
     let perto=null,dist=1e9;
@@ -5411,11 +5409,25 @@ function rollerAbre(sel){
     t=setTimeout(()=>{if(rollerAlvo===sel&&perto)rollerEscolhe(sel,perto.dataset.v);},140);
   };
   back.hidden=false;
+  /* Over the control: the middle row lands on the value it replaces, and the
+     column is at least as wide as the control it came out of. */
+  const r=sel.getBoundingClientRect();
+  box.style.width=Math.max(r.width,64)+'px';
+  box.style.left='0px';box.style.top='0px';
+  const b=box.getBoundingClientRect();
+  const win=back.querySelector('.roller-win').getBoundingClientRect();
+  const acima=win.top-b.top;                       // padding above the window
+  let esq=r.left+r.width/2-b.width/2;
+  let topo=r.top+r.height/2-(acima+51);            // 51 = half of three rows
+  esq=Math.max(8,Math.min(esq,innerWidth-b.width-8));
+  topo=Math.max(8,Math.min(topo,innerHeight-b.height-8));
+  box.style.left=Math.round(esq)+'px';
+  box.style.top=Math.round(topo)+'px';
   const actual=itens.find(d=>d.dataset.v===sel.value)||itens[0];
   scroll.scrollTop=actual.offsetTop-(scroll.clientHeight-actual.offsetHeight)/2;
   marca();
   rollerParar=itens;
-  back.querySelector('.roller-done').focus();
+  scroll.focus({preventScroll:true});
 }
 function rollerTeclas(e){
   if(!rollerAlvo)return;
@@ -5449,7 +5461,6 @@ function montaRoladores(){
   if(back&&!back.dataset.pronto){
     back.dataset.pronto='1';
     back.onclick=e=>{if(e.target===back)rollerFecha();};
-    back.querySelector('.roller-done').onclick=rollerFecha;
     document.addEventListener('keydown',rollerTeclas);
   }
 }
