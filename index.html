@@ -272,13 +272,33 @@ details.sec.pinned>summary::after{display:none}
 .pat-scroll{overflow-x:auto;padding-bottom:2px;margin:0 -2px;padding-left:2px;padding-right:2px}
 .pat-grid{display:flex;flex-direction:column;gap:var(--s3);min-width:260px}
 .pat-half{display:flex;flex-direction:column;gap:3px}
+/* ---------- the grid ----------
+   The beat was marked by tinting the first cell of it in each lane, which was
+   the right idea and the wrong weight: the tint was the same shade the empty
+   cells had become, so it marked nothing. The beat cell keeps the panel's own
+   ground while the others sit on the ground below it, which makes a band of
+   lighter cells running down through every lane at every beat — a line by
+   construction, aligned with the cells because it is made of them.
+
+   Not lines drawn over the top. Those were tried first: the cells are a grid
+   with a 1px gap, so a rule at a round percentage of the row lands a fraction
+   off the boundary and shaves the cell beside it. */
+.pat-lanes{display:flex;flex-direction:column;gap:3px}
 .pat-lane{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
 .pat-name{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
   color:var(--text3);text-align:right;line-height:1.1}
 .pat-cells{display:grid;gap:1px}
-.pat-cell{height:26px;border-radius:3px;background:var(--bg3);border:0;padding:0;
+/* An empty cell was --bg3, and so is the panel it sits in: they were the same
+   colour to the byte, and the grid was ninety-six invisible squares. They had
+   been a step apart until --bg3 moved in the contrast work and met the panel.
+   The cell takes the other ground now — darker than the panel in the dark and
+   lighter on paper, both ways round — and carries its own outline, so a cell
+   reads as a place you can put something whatever it is sitting on. */
+.pat-cell{height:26px;border-radius:3px;background:var(--bg2);border:0;padding:0;
   cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.pat-cell.beat{background:var(--border2)}
+.pat-cell[data-v="0"]{box-shadow:inset 0 0 0 1px var(--border2)}
+/* the first cell of a beat: the ground above, and a harder outline with it */
+.pat-cell.beat[data-v="0"]{background:var(--bg3);box-shadow:inset 0 0 0 1px var(--border3)}
 .pat-cell[data-v="1"]{background:var(--green-bg)}
 .pat-cell[data-v="2"]{background:var(--green)}
 .pat-cell[data-v="3"]{background:var(--green);box-shadow:inset 0 0 0 2px var(--green-hi)}
@@ -4113,7 +4133,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30i';
+const APP_VERSION='2026-08-30j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6408,6 +6428,8 @@ function buildPatternEditor(){
   for(let start=0;start<cells;start+=perRow){
     const half=document.createElement('div');half.className='pat-half';
     const count=Math.min(perRow,cells-start);
+    // the lanes in a box of their own, so the ruler underneath is not one of them
+    const lanes=document.createElement('div');lanes.className='pat-lanes';
     PAT_VOICES.forEach(([voice,name])=>{
       const lane=document.createElement('div');lane.className='pat-lane';
       const label=document.createElement('div');label.className='pat-name';label.textContent=lab('patvoice',voice,name);
@@ -6435,8 +6457,9 @@ function buildPatternEditor(){
         row.appendChild(cell);
       }
       lane.append(label,row);
-      half.appendChild(lane);
+      lanes.appendChild(lane);
     });
+    half.appendChild(lanes);
     const ruler=document.createElement('div');ruler.className='pat-ruler';
     const spacer=document.createElement('div');
     const marks=document.createElement('div');
