@@ -591,5 +591,6 @@
  "pat.plays": "Suona",
  "pat.playBoth": "Tutti e due",
  "pat.bothHint": "Prima quello dritto, poi quello in terzine — il doppio del giro",
- "pat.writeIn": "In scrittura"
+ "pat.writeIn": "In scrittura",
+ "pat.notPlaying": "Questo non è quello che suona — Suona è impostato sull’altro."
 }

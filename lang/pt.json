@@ -591,5 +591,6 @@
  "pat.plays": "Toca",
  "pat.playBoth": "Os dois",
  "pat.bothHint": "Primeiro o direito, depois o de tercinas — o dobro do ciclo",
- "pat.writeIn": "A escrever"
+ "pat.writeIn": "A escrever",
+ "pat.notPlaying": "Este não é o que está a tocar — o Toca está no outro."
 }

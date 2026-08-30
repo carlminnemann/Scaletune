@@ -591,5 +591,6 @@
  "pat.plays": "Suena",
  "pat.playBoth": "Los dos",
  "pat.bothHint": "Primero el recto, luego el de tresillos: el doble del bucle",
- "pat.writeIn": "Escribiendo"
+ "pat.writeIn": "Escribiendo",
+ "pat.notPlaying": "Este no es el que suena: Suena está puesto en el otro."
 }

@@ -4163,7 +4163,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31a';
+const APP_VERSION='2026-08-31b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6371,7 +6371,18 @@ function buildPatternEditor(){
       const b=document.createElement('button');
       b.className='pick-btn'+(state.custom.grid===v?' active':'');
       b.textContent=label;
-      b.onclick=()=>{state.custom.grid=v;savePattern();buildPatternEditor();};
+      b.onclick=()=>{
+        state.custom.grid=v;
+        /* What is on the screen is what sounds. Left apart, opening the triplet
+           pattern while the straight one was the one playing meant writing notes
+           and hearing nothing — the same fault the dots had, wearing a different
+           coat. Both is left alone, because Both already includes whichever one
+           you are looking at; and Plays can still be set by hand afterwards. */
+        if(state.custom.play!=='both')state.custom.play=(v===12?'12':'16');
+        savePattern();buildPatternEditor();
+        if(state.groove==='custom')liveChange();
+        refreshSectionSummaries();
+      };
       grow.appendChild(b);
     });
     gridify(grow);
@@ -6616,10 +6627,16 @@ function patInfo(){
   const bars=state.custom.bars;
   const where=tr('pat.loops',{one:'loops {n} bar',other:'loops {n} bars'},{n:bars})
     +(bars>1?tr('pat.editing',', editing bar {n}',{n:patBar+1}):'');
-  el.textContent=n
+  /* And if the one on screen is not the one being heard — which can only happen
+     now by asking for it — say so, rather than leaving you tapping in silence. */
+  const mudo=(state.custom.play!=='both')&&
+             ((state.custom.grid===12)!==(state.custom.play==='12'));
+  const aviso=mudo?'\n'+tr('pat.notPlaying',
+    'This one is not the one playing — Plays is set to the other.'):'';
+  el.textContent=(n
     ? where+' · '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})
       +' · '+tr('pat.tapWrites','tap writes at the level above, tap again to clear')
-    : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style');
+    : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style'))+aviso;
   paintMixUsed();      // a voice written in just now must become movable
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=n
@@ -6898,7 +6915,10 @@ function readPatterns(){
   try{
     const raw=localStorage.getItem('scaletune-patterns');
     const a=raw?JSON.parse(raw):[];
-    patterns=Array.isArray(a)?a.filter(x=>x&&typeof x.n==='string'&&Array.isArray(x.hits)).slice(0,PAT_MAX):[];
+    // the same guard, and the same fault: a pattern saved in the new shape has
+    // no single list, so this was discarding every one of them on the way in
+    patterns=Array.isArray(a)?a.filter(x=>x&&typeof x.n==='string'&&
+      (Array.isArray(x.hits)||Array.isArray(x.h16)||Array.isArray(x.h12))).slice(0,PAT_MAX):[];
   }catch(e){patterns=[];}
 }
 function writePatterns(){
@@ -6995,7 +7015,11 @@ function loadPattern(){
     const raw=localStorage.getItem('scaletune-pattern');
     if(!raw)return;
     const p=JSON.parse(raw);
-    if(p&&Array.isArray(p.hits)){
+    /* Either shape. This guard still asked for the single list after the file
+       had stopped writing one, so the first open after the update migrated the
+       old pattern and every open after that restored nothing — the pattern was
+       being written to the store and read back as empty. */
+    if(p&&(Array.isArray(p.hits)||Array.isArray(p.h16)||Array.isArray(p.h12))){
       patLoadInto(state.custom,p);
       state.custom.bars=Math.max(1,Math.min(4,parseInt(p.bars,10)||1));
       state.custom.grid=p.grid===12?12:16;
