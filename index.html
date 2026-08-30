@@ -62,6 +62,13 @@
      the tint itself, for borders and for text on a panel; --mode-fg is the text
      that sits ON the fill, which has to be near-white to be read. */
   --mode:#8d9c93;--mode-bg:#2e3a34;--mode-fg:#eef3ef;
+  /* Three weights for a hit, and they have to read as three. They were the dark
+     green, the green, and the green again with a ring round it: the first was
+     all but invisible on the cell and the last two were the same colour, so a
+     ghost note and an accent were told apart by a two-pixel outline. These are
+     the app's own green taken to three luminances, each about 1.9:1 from the one
+     under it, which is a step you can see across a room. */
+  --hit1:#4c5550;--hit2:#75817a;--hit3:#a5b6ab;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
@@ -107,6 +114,10 @@
      darkest paper, so the ink is a shade deeper than the fill. On the chip
      itself that shade is only the border, invisible against it. */
   --mode:#3f5147;--mode-bg:#5c6f63;--mode-fg:#f3f6f3;
+  /* The same three steps, going down into the paper instead of up out of the
+     dark. The old first step was --green-bg, which on this warm ground read as
+     a cold pale blue and belonged to nothing else on the page. */
+  --hit1:#89ac98;--hit2:#5f796b;--hit3:#3c4d43;
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -299,20 +310,24 @@ details.sec.pinned>summary::after{display:none}
 .pat-cell[data-v="0"]{box-shadow:inset 0 0 0 1px var(--border2)}
 /* the first cell of a beat: the ground above, and a harder outline with it */
 .pat-cell.beat[data-v="0"]{background:var(--bg3);box-shadow:inset 0 0 0 1px var(--border3)}
-.pat-cell[data-v="1"]{background:var(--green-bg)}
-.pat-cell[data-v="2"]{background:var(--green)}
-.pat-cell[data-v="3"]{background:var(--green);box-shadow:inset 0 0 0 2px var(--green-hi)}
+.pat-cell[data-v="1"]{background:var(--hit1)}
+.pat-cell[data-v="2"]{background:var(--hit2)}
+.pat-cell[data-v="3"]{background:var(--hit3)}
 .pat-cell.now{outline:2px solid var(--text2);outline-offset:-1px}
 /* the level buttons carry the shade they write, so the choice is visible and
    not only spelled */
 .pen-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .pen-dot{width:10px;height:10px;border-radius:2px;flex:0 0 auto}
-.pen-btn[data-v="1"] .pen-dot{background:var(--green-bg)}
-.pen-btn[data-v="2"] .pen-dot{background:var(--green)}
-.pen-btn[data-v="3"] .pen-dot{background:var(--green);box-shadow:inset 0 0 0 2px var(--green-hi)}
+.pen-btn[data-v="1"] .pen-dot{background:var(--hit1)}
+.pen-btn[data-v="2"] .pen-dot{background:var(--hit2)}
+.pen-btn[data-v="3"] .pen-dot{background:var(--hit3)}
 /* something is written here, but between these cells: it belongs to the other
    grid and is left exactly where it is */
-.pat-cell.off{box-shadow:inset 0 0 0 1px var(--green-bg)}
+/* The ring that says a hit is written here but between these cells. It was
+   --green-bg, which is the tone that read as a cold pale blue on the paper; the
+   ghost weight is both warmer and the right meaning — something faint is
+   there. */
+.pat-cell.off{box-shadow:inset 0 0 0 1px var(--hit1)}
 /* the mark has to read on an empty cell and on a full one, so it takes the text
    colour rather than the green it would disappear into */
 .pat-cell.off::before{content:'';display:block;width:5px;height:5px;border-radius:50%;
@@ -4133,7 +4148,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30j';
+const APP_VERSION='2026-08-30k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
