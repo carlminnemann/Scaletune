@@ -720,28 +720,35 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 .roller-tap:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .roller-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.18)}
 .roller-back[hidden]{display:none}
-/* It opens over the control, not in the middle of the screen, and the row you
-   are on lands exactly where the value was — so the value stays put and the
-   others roll past it. */
-.roller-box{position:fixed;background:var(--bg2);border:1px solid var(--border3);
-  border-radius:var(--r);padding:4px 0;box-shadow:0 10px 24px -8px rgba(0,0,0,.55)}
+/* The wheel is the control, seen closer. Same corner, same border, same width,
+   opened over the place it came from, and the row you are on wears the chip the
+   value was wearing a moment ago — so what you are looking at reads as the
+   button under a glass rather than as a menu that arrived from somewhere. */
+.roller-box{position:fixed;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:3px;box-shadow:0 10px 24px -10px rgba(0,0,0,.55)}
 /* Three rows: the value and one either side. Any more and it stops being a
    thing that opened out of a small control. */
-.roller-win{position:relative;height:102px;overflow:hidden}
-.roller-scroll{height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+.roller-win{position:relative;height:96px;overflow:hidden;border-radius:6px}
+/* Above the band. The band is positioned and the scroller was not, which put
+   the chip on top of the number it was meant to sit behind. */
+.roller-scroll{position:relative;z-index:1;
+  height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
   scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .roller-scroll::-webkit-scrollbar{display:none}
-.roller-item{height:34px;display:flex;align-items:center;justify-content:center;
-  scroll-snap-align:center;font-size:15px;line-height:1;color:var(--text3);cursor:pointer;
+.roller-item{height:32px;display:flex;align-items:center;justify-content:center;
+  scroll-snap-align:center;font-size:14px;line-height:1;color:var(--text3);cursor:pointer;
   padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  transition:color .12s;user-select:none;-webkit-user-select:none}
-/* Weight and colour, and no scaling: a row wider than its column gave the
-   wheel somewhere to slide sideways to. */
-.roller-item.on{color:var(--text);font-weight:600}
-.roller-band{position:absolute;left:3px;right:3px;top:34px;height:34px;pointer-events:none;
-  border-top:1px solid var(--border3);border-bottom:1px solid var(--border3);
-  background:var(--bg3);opacity:.55;border-radius:4px}
-.roller-fade{position:absolute;left:0;right:0;height:22px;pointer-events:none}
+  transition:color .12s,font-size .12s;user-select:none;-webkit-user-select:none}
+/* The middle one is bigger, which is the glass. Bigger by type size and not by
+   transform: a scaled row is wider than its column, and that gave the wheel
+   somewhere sideways to slide. */
+.roller-item.on{color:var(--text2);font-weight:600;font-size:17px}
+.roller-box.viva .roller-item.on{color:var(--blue)}
+/* the chip the value was wearing, drawn under the middle row */
+.roller-band{position:absolute;left:0;right:0;top:32px;height:32px;pointer-events:none;
+  border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2)}
+.roller-box.viva .roller-band{background:var(--blue-bg);border-color:var(--blue)}
+.roller-fade{position:absolute;left:0;right:0;height:18px;pointer-events:none;z-index:2}
 .roller-fade.up{top:0;background:linear-gradient(var(--bg2),rgba(0,0,0,0))}
 .roller-fade.down{bottom:0;background:linear-gradient(rgba(0,0,0,0),var(--bg2))}
 
@@ -4037,7 +4044,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30d';
+const APP_VERSION='2026-08-30e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5409,16 +5416,17 @@ function rollerAbre(sel){
     t=setTimeout(()=>{if(rollerAlvo===sel&&perto)rollerEscolhe(sel,perto.dataset.v);},140);
   };
   back.hidden=false;
+  box.classList.toggle('viva',sel.classList.contains('active'));
   /* Over the control: the middle row lands on the value it replaces, and the
-     column is at least as wide as the control it came out of. */
+     column is exactly as wide as the control it came out of. */
   const r=sel.getBoundingClientRect();
-  box.style.width=Math.max(r.width,64)+'px';
+  box.style.width=Math.max(r.width,58)+'px';
   box.style.left='0px';box.style.top='0px';
   const b=box.getBoundingClientRect();
   const win=back.querySelector('.roller-win').getBoundingClientRect();
   const acima=win.top-b.top;                       // padding above the window
   let esq=r.left+r.width/2-b.width/2;
-  let topo=r.top+r.height/2-(acima+51);            // 51 = half of three rows
+  let topo=r.top+r.height/2-(acima+48);            // 48 = half of three rows
   esq=Math.max(8,Math.min(esq,innerWidth-b.width-8));
   topo=Math.max(8,Math.min(topo,innerHeight-b.height-8));
   box.style.left=Math.round(esq)+'px';
