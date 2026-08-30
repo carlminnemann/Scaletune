@@ -1159,7 +1159,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
          The three are different kinds of thing and were sharing two lines. -->
     <div class="tempo-3">
       <div class="t3-cell t3-left">
-        <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" data-ta="aria.bpm" aria-label="Beats per minute">
+        <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="60" data-ta="aria.bpm" aria-label="Beats per minute">
         <span class="bpm-label" data-t="bpm">BPM</span>
       </div>
       <div class="t3-cell t3-mid">
@@ -1172,7 +1172,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
         <span class="sig-unit" data-t="beats">beats</span>
       </div>
     </div>
-    <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
+    <input type="range" id="bpm-slider" min="10" max="300" step="1" value="60" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
          own: a label, a slider and a number on one line -->
     <div class="vol-line">
@@ -2180,7 +2180,7 @@ let state={
   // wave, the sequence modes default to the sampled piano
   timbre:'strings',droneTimbre:'strings',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
-  bpm:80,sig:4,clickVol:0.7,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,
+  bpm:60,sig:4,clickVol:0.7,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,
   /* The base is that every round starts on beat one. Letting the phrase drift
      against the pulse is a real exercise and it is offered right there, but it
      is the thing you ask for — opening the app already drifting means a phrase
@@ -2367,7 +2367,11 @@ function tonicNear(abs){
    there is nothing to land, so that count is the bars asked for and no more. */
 function beginCount(landOn){
   resolveNote=null;resolveIn=0;
-  if(!(state.countBars>0)||pulseOnly()){countTicks=0;return;}
+  /* Not pulseOnly() any more. A count-in was ruled out wherever no notes play,
+     which ruled it out of the metronome itself — where four bars of click
+     before the exercise starts is exactly what it is for. What is still ruled
+     out is the drone: it has no bar to count and nothing to come in on. */
+  if(!(state.countBars>0)||state.mode==='drone'){countTicks=0;return;}
   const t=subTicks(activeSubdiv||currentSubdiv());
   const bar=Math.max(1,state.sig*t);
   const into=(beatIdx*t+subIdx)%bar;
@@ -3844,7 +3848,7 @@ function polySchedulerTick(){
     const len=polyCycleLen();
     schedulePolyCycle(nextBeatTime);
     nextBeatTime+=len;
-    if(notesSilent()&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
+    if(notesSilent()&&countTicks<=0&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
     if(runEnding){runEndAt=nextBeatTime;break;}
   }
   pruneFinishedNodes();
@@ -3924,7 +3928,10 @@ function schedulerTick(){
     if(subIdx>=subTicks(sub)){
       subIdx=0;beatIdx=(beatIdx+1)%state.sig;
       if(!counting)grooveBeat=(grooveBeat+1)%(grooveBars()*grooveBeatsPerBar());
-      if(pulseOnly()){
+      /* Not while it is counting. The count-in is bars of click before the
+         exercise, not bars of it: counted in, a two-bar count would spend the
+         first two bars of every "raise the tempo every four" on the counting. */
+      if(pulseOnly()&&!counting&&!countedThisTick){
         metroBeats++;
         if(beatIdx===0)metroBars++;
         const done=state.practice.passUnit==='beat'?metroBeats:metroBars;
@@ -4106,7 +4113,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30h';
+const APP_VERSION='2026-08-30i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4147,7 +4154,9 @@ function setMode(m){
   const wasPlaying=state.playing;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   const modeChanged=state.mode!==m;
+  if(modeChanged&&METRO_FRESH){metroKeep(state.mode);}
   state.mode=m;
+  if(modeChanged&&METRO_FRESH){metroTake(m);redrawMetro();}
   const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro',
         isTuner=m==='tuner';
   // the tuner listens, so it must not be listening to us
@@ -4768,6 +4777,60 @@ function endRunNow(){
   refreshSequence();
   setStatus(tr('run.done','Round finished.'));
   setTimeout(()=>setStatus(''),2000);
+}
+
+/* ---------- one metronome per mode ----------
+   The metronome is not one thing you carry between modes. A drone you hold
+   against is not the tempo you take a scale at, and neither is the tempo you
+   set a metronome to on its own, and having them share meant every mode change
+   was followed by putting the metronome back. So each mode keeps its own, and
+   all of them start in the same place: 60 to the quarter, four to the bar.
+
+   What travels with the mode is what you would call the metronome — the tempo,
+   the bar, the figure, the accents, the count-in, the tempo change, the figure
+   list and the polyrhythm. What does not is the accompaniment, the kit, the
+   mixer and the pattern you wrote: those only exist in Metro, where the
+   accompaniment lives, so there is nothing for the other modes to hold. */
+const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol',
+  'clickFollowsFigure','alignPasses','countBars','countWhen','polyVol','metroInDrone'];
+const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
+  'passCount','passUnit','useSubdivList','subdivDir'];
+const metroPerMode={};
+let METRO_FRESH=null;
+function metroSnapshot(){
+  const o={p:{}};
+  METRO_MINE.forEach(k=>o[k]=state[k]);
+  METRO_MINE_P.forEach(k=>o.p[k]=state.practice[k]);
+  o.accents=(state.accents||[]).slice();
+  o.p.subdivList=(state.practice.subdivList||[]).slice();
+  o.poly=JSON.parse(JSON.stringify(state.poly));
+  return o;
+}
+function metroRestore(o){
+  if(!o)return;
+  METRO_MINE.forEach(k=>{if(k in o)state[k]=o[k];});
+  METRO_MINE_P.forEach(k=>{if(k in o.p)state.practice[k]=o.p[k];});
+  state.accents=(o.accents||[]).slice();
+  state.practice.subdivList=(o.p.subdivList||[]).slice();
+  state.poly=JSON.parse(JSON.stringify(o.poly));
+}
+function metroKeep(mode){metroPerMode[mode]=metroSnapshot();}
+function metroTake(mode){
+  if(!metroPerMode[mode])metroPerMode[mode]=JSON.parse(JSON.stringify(METRO_FRESH));
+  metroRestore(metroPerMode[mode]);
+}
+/* Everything the metronome draws, drawn again — the whole of it changes at once
+   when the mode does, so there is no point being clever about which parts. */
+function redrawMetro(){
+  const d=document.getElementById('bpm-display');if(d)d.value=state.bpm;
+  const sl=document.getElementById('bpm-slider');if(sl)sl.value=state.bpm;
+  const cv=document.getElementById('click-vol');if(cv)cv.value=state.clickVol;
+  const cvo=document.getElementById('click-vol-out');
+  if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
+  renderSigFields();buildBeats();buildPolyBeats();renderPolyBeats();
+  buildNoteLenRow();buildSubdivRow();buildClickModeRow();buildAlignRow();
+  buildSpeedControls();buildCountRow();buildPassRow();buildMetroOnRow();
+  updateSupersededControls();
 }
 
 function metroPass(){
@@ -6657,6 +6720,10 @@ function applyExercise(x){
   }
   state.listKind=null;studyIdx=0;subdivIdx=0;passesDone=0;
   if(state.practice.list.length)applyListItem(state.practice.list[0]);
+  /* An exercise carries a metronome and a mode, so what it carries becomes that
+     mode's metronome — otherwise the mode it lands in would hand it back its
+     own the moment anything redrew. */
+  if(METRO_FRESH)metroKeep(state.mode);
   markModesHome();          // this key and this mode are where it sets off from
   return true;
 }
@@ -7118,6 +7185,10 @@ function updateSupersededControls(){
     const el=document.getElementById(id);
     if(el)el.style.display=(on||!grooveAllowed())?'none':'';
   });
+  /* A drone has no bar to be counted into and nothing to come in on. It is the
+     one panel in the metronome that cannot do anything in one of the modes. */
+  const cb=document.getElementById('count-block');
+  if(cb)cb.style.display=(state.mode==='drone')?'none':'';
   /* Under a style the bar stays on the screen — it is still four beats and the
      circles still show which one you are on — but the accents are the pattern's
      now, so tapping them would promise something it cannot do. */
@@ -8256,6 +8327,9 @@ renderPitchPickers();
    say, which is how Drone opened with no metronome — the panel is marked hidden
    in the markup, from when Drone had no metronome, and only a mode change ever
    corrected it. */
+/* The template every mode starts from, taken before anything has been chosen:
+   60 to the quarter, four to the bar, no count-in and no tempo change. */
+METRO_FRESH=metroSnapshot();
 setMode(state.mode);
 /* Every dropdown in the app becomes a wheel. They are all in the markup from
    the start, so one pass here catches them all; what fills them with options
