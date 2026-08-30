@@ -486,13 +486,18 @@ details.sec[open] .sec-sum{display:none}
 .t3-cell .bpm-label,.t3-cell .sig-unit{margin:0}
 #tap-btn{min-width:190px;height:52px;padding:0 14px;font-size:15px;font-weight:600;
   white-space:normal;line-height:1.15;
-  background:var(--green-bg);border-color:var(--green);color:var(--green-hi)}
-/* The flash inverts rather than brightens: filling with the mid green left the
-   word on it at 4.1:1, under the minimum, and a word is a word even for the
-   fifth of a second it is lit. Filling with the far end of the same green
-   carries it at nine, and the light theme inverts with it — a dark flash on
-   paper, which is what a selected chip already does there. */
-#tap-btn.tapping{background:var(--green-hi);border-color:var(--green);color:var(--green-bg)}
+  /* The same fill as Start and as the mode you are in — the app's one filled
+     button, and it reads the same in both themes. The green tokens did not: in
+     the dark they are a dark fill with a pale word, and on paper they invert to
+     a pale fill, so the button changed character between themes. */
+  background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
+/* A straight inversion, and it has to be a straight one. Flashing to the border
+   tint goes the wrong way in one theme or the other — the tint is lighter than
+   the fill in the dark and darker than it on paper — and on paper that left the
+   word at 1.6:1, which is no word at all. Swapping the fill and the word keeps
+   both themes readable and makes the same gesture in each: the button goes
+   bright for as long as the beat lasts. */
+#tap-btn.tapping{background:var(--mode-fg);border-color:var(--mode);color:var(--mode-bg)}
 /* On a phone the button takes what is left after the two of them, and its words
    wrap rather than push anything aside. */
 @media (max-width:420px){#tap-btn{min-width:0}}
@@ -4101,7 +4106,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30g';
+const APP_VERSION='2026-08-30h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
