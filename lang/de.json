@@ -220,10 +220,6 @@
  "pat.cellAria": "{name}, Schlag {beat}, Zelle {cell}",
  "pat.clear": "✕ Leeren",
  "pat.copyAria": "Takt {from} in Takt {to} kopieren",
- "pat.dots": {
-  "one": "{n} Punkt: auf dem {grid}-Raster geschrieben, zwischen diesen Zellen. Tippen Sie den Punkt an, um ihn zu entfernen, oder wechseln Sie das Raster, um ihn zu verschieben.",
-  "other": "{n} Punkte: auf dem {grid}-Raster geschrieben, zwischen diesen Zellen. Tippen Sie einen Punkt an, um ihn zu entfernen, oder wechseln Sie das Raster, um sie zu verschieben."
- },
  "pat.editing": ", Takt {n} in Arbeit",
  "pat.empty": "wählen Sie eine Stärke und tippen Sie ins Raster, oder gehen Sie von einem Stil aus",
  "pat.emptySum": "leer",
@@ -235,7 +231,6 @@
   "one": "wiederholt {n} Takt",
   "other": "wiederholt {n} Takte"
  },
- "pat.otherGrid": "auf dem anderen Raster geschrieben",
  "pat.tapWrites": "jedes Tippen schreibt in der Stärke oben, noch einmal tippen löscht",
  "pattern": "Muster",
  "pattern-2": "Muster",
@@ -592,5 +587,9 @@
  "aria.groove": "Stil der Begleitung",
  "aria.patBars": "Wie viele Takte im Loop",
  "aria.patFrom": "Einen Stil ins Muster kopieren",
- "aria.bpm": "Schläge pro Minute"
+ "aria.bpm": "Schläge pro Minute",
+ "pat.plays": "Spielt",
+ "pat.playBoth": "Beide",
+ "pat.bothHint": "Erst das gerade, dann das triolische — der doppelte Loop",
+ "pat.writeIn": "Bearbeitet"
 }

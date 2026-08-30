@@ -220,10 +220,6 @@
  "pat.cellAria": "{name}, temps {beat}, case {cell}",
  "pat.clear": "✕ Vider",
  "pat.copyAria": "Copier la mesure {from} dans la mesure {to}",
- "pat.dots": {
-  "one": "{n} point : écrit sur la grille de {grid}, entre ces cases. Touchez le point pour le retirer, ou changez de grille pour le déplacer.",
-  "other": "{n} points : écrits sur la grille de {grid}, entre ces cases. Touchez un point pour le retirer, ou changez de grille pour les déplacer."
- },
  "pat.editing": ", mesure {n} en cours",
  "pat.empty": "choisissez une intensité et touchez la grille, ou partez d'un style",
  "pat.emptySum": "vide",
@@ -235,7 +231,6 @@
   "one": "répète {n} mesure",
   "other": "répète {n} mesures"
  },
- "pat.otherGrid": "écrit sur l'autre grille",
  "pat.tapWrites": "chaque touche écrit à l'intensité ci-dessus, touchez encore pour effacer",
  "pattern": "Motif",
  "pattern-2": "Motif",
@@ -592,5 +587,9 @@
  "aria.groove": "Style de l’accompagnement",
  "aria.patBars": "Combien de mesures en boucle",
  "aria.patFrom": "Copier un style dans le motif",
- "aria.bpm": "Battements par minute"
+ "aria.bpm": "Battements par minute",
+ "pat.plays": "Joue",
+ "pat.playBoth": "Les deux",
+ "pat.bothHint": "Le droit d’abord, le ternaire ensuite — deux fois la boucle",
+ "pat.writeIn": "Écriture"
 }

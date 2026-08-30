@@ -220,10 +220,6 @@
  "pat.cellAria": "{name}, tempo {beat}, célula {cell}",
  "pat.clear": "✕ Limpar",
  "pat.copyAria": "Copiar o compasso {from} para o compasso {to}",
- "pat.dots": {
-  "one": "{n} ponto: escrito na grelha de {grid}, entre estas células. Toca no ponto para o tirares, ou muda de grelha para o mexeres.",
-  "other": "{n} pontos: escritos na grelha de {grid}, entre estas células. Toca num ponto para o tirares, ou muda de grelha para os mexeres."
- },
  "pat.editing": ", a editar o compasso {n}",
  "pat.empty": "escolhe uma intensidade e toca na grelha, ou parte de um estilo",
  "pat.emptySum": "vazio",
@@ -235,7 +231,6 @@
   "one": "repete {n} compasso",
   "other": "repete {n} compassos"
  },
- "pat.otherGrid": "escrito na outra grelha",
  "pat.tapWrites": "cada toque escreve na intensidade acima, toca outra vez para limpar",
  "pattern": "Padrão",
  "pattern-2": "Padrão",
@@ -592,5 +587,9 @@
  "aria.groove": "Estilo do acompanhamento",
  "aria.patBars": "Quantos compassos em ciclo",
  "aria.patFrom": "Copiar um estilo para o padrão",
- "aria.bpm": "Batidas por minuto"
+ "aria.bpm": "Batidas por minuto",
+ "pat.plays": "Toca",
+ "pat.playBoth": "Os dois",
+ "pat.bothHint": "Primeiro o direito, depois o de tercinas — o dobro do ciclo",
+ "pat.writeIn": "A escrever"
 }

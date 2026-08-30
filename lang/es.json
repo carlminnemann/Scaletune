@@ -220,10 +220,6 @@
  "pat.cellAria": "{name}, pulso {beat}, celda {cell}",
  "pat.clear": "✕ Borrar",
  "pat.copyAria": "Copiar el compás {from} en el compás {to}",
- "pat.dots": {
-  "one": "{n} punto: escrito en la rejilla de {grid}, entre estas celdas. Toca el punto para quitarlo, o cambia de rejilla para moverlo.",
-  "other": "{n} puntos: escritos en la rejilla de {grid}, entre estas celdas. Toca un punto para quitarlo, o cambia de rejilla para moverlo."
- },
  "pat.editing": ", editando el compás {n}",
  "pat.empty": "elige un nivel y toca la rejilla, o parte de un estilo",
  "pat.emptySum": "vacío",
@@ -235,7 +231,6 @@
   "one": "repite {n} compás",
   "other": "repite {n} compases"
  },
- "pat.otherGrid": "escrito en la otra rejilla",
  "pat.tapWrites": "tocar escribe en el nivel de arriba, tocar otra vez borra",
  "pattern": "Patrón",
  "pattern-2": "Patrón",
@@ -592,5 +587,9 @@
  "aria.groove": "Estilo del acompañamiento",
  "aria.patBars": "Cuántos compases en bucle",
  "aria.patFrom": "Copiar un estilo al patrón",
- "aria.bpm": "Pulsaciones por minuto"
+ "aria.bpm": "Pulsaciones por minuto",
+ "pat.plays": "Suena",
+ "pat.playBoth": "Los dos",
+ "pat.bothHint": "Primero el recto, luego el de tresillos: el doble del bucle",
+ "pat.writeIn": "Escribiendo"
 }
