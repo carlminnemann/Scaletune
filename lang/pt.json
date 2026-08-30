@@ -591,5 +591,6 @@
  "aria.polyB": "Pulsações na camada B",
  "aria.groove": "Estilo do acompanhamento",
  "aria.patBars": "Quantos compassos em ciclo",
- "aria.patFrom": "Copiar um estilo para o padrão"
+ "aria.patFrom": "Copiar um estilo para o padrão",
+ "aria.bpm": "Batidas por minuto"
 }

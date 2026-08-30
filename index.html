@@ -235,7 +235,8 @@ details.sec.pinned>summary::after{display:none}
 .scroll.tight #sig-block .clear-btn{margin-top:var(--s3)}
 .scroll.tight #tempo-block .head{margin-bottom:var(--s2)}
 .scroll.tight #tempo-block .vol-line{margin-top:var(--s2)}
-.scroll.tight #tempo-block .bpm-row{margin-bottom:var(--s2)}
+.scroll.tight #tempo-block .tempo-3{margin-bottom:var(--s3)}
+.scroll.tight #tap-btn{height:46px}
 
 .scroll.tighter #tempo-block,.scroll.tighter #sig-block{padding:var(--s2) var(--s4)}
 .scroll.tighter .bpm-big{font-size:32px}
@@ -331,7 +332,9 @@ details.sec.pinned>summary::after{display:none}
    day it was written. */
 .scroll.tightest .beats-hint{display:none}
 .scroll.tightest #tempo-block .head{margin-bottom:var(--s1)}
-.scroll.tightest #tempo-block .bpm-row{margin-bottom:var(--s1)}
+.scroll.tightest #tempo-block .tempo-3{margin-bottom:var(--s2)}
+.scroll.tightest #tap-btn{height:40px;font-size:13px}
+.scroll.tightest .tempo-3{gap:var(--s2)}
 .scroll.tightest #tempo-block .vol-line{margin-top:var(--s1)}
 .scroll.tightest #tempo-block,.scroll.tightest #sig-block{padding:var(--s1) var(--s4)}
 
@@ -454,11 +457,34 @@ details.sec[open] .sec-sum{display:none}
    nothing above it. Outside Drone the switch is not there and neither is that. */
 .metro-body.no-switch>#tempo-block{border-top:0}
 .mgroup>.head:last-child,.mgroup>*:last-child{margin-bottom:0}
-.bpm-row{display:flex;align-items:baseline;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
-/* Tap tempo is pushed to the far end of the number's own line, on its baseline. */
-.bpm-row .tap-btn{margin-left:auto;align-self:center}
-.bpm-row .bpm-big{width:auto;text-align:left}
-.bpm-row .bpm-label{margin:0}
+/* ---------- the tempo row ----------
+   Three things that are not the same kind of thing, and they were sharing two
+   lines: the number you read, the button you hit, and how long the bar is. Now
+   they stand side by side — the number on the left where reading starts, the
+   bar length on the right where the wheel already was, and Tap tempo between
+   them, which is where the hand goes. The middle column takes the slack, so the
+   button grows on a wide screen and the other two never move.
+
+   The button is filled and it is the green: everything else in a panel is an
+   outline, and this is the one control here you hit in time rather than set. */
+.tempo-3{display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:var(--s3);margin-bottom:var(--s4)}
+.t3-cell{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.t3-left{align-items:flex-start}
+.t3-right{align-items:flex-end}
+.t3-left .bpm-big{width:auto;text-align:left;margin:0}
+.t3-cell .bpm-label,.t3-cell .sig-unit{margin:0}
+#tap-btn{width:100%;height:52px;padding:0 10px;font-size:15px;font-weight:600;
+  white-space:normal;line-height:1.15;
+  background:var(--green-bg);border-color:var(--green);color:var(--green-hi)}
+/* The flash inverts rather than brightens: filling with the mid green left the
+   word on it at 4.1:1, under the minimum, and a word is a word even for the
+   fifth of a second it is lit. Filling with the far end of the same green
+   carries it at nine, and the light theme inverts with it — a dark flash on
+   paper, which is what a selected chip already does there. */
+#tap-btn.tapping{background:var(--green-hi);border-color:var(--green);color:var(--green-bg)}
+/* the sliders under it get the room the two lines used to take */
+#tempo-block #bpm-slider{margin-top:var(--s1)}
 .sig-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
 .val{font-size:12px;font-weight:500;color:var(--text)}
 .vol-line{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s3)}
@@ -1110,15 +1136,23 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <!-- The bar length rides the label line, where every other group keeps its
          controls. Tap tempo sits against the number instead: it is a way of
          setting that number, so it belongs beside it and not up in the title. -->
-    <div class="head"><span class="section-label" data-t="tempo">Tempo</span>
-      <span class="sig-fields">
-        <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
+    <div class="head"><span class="section-label" data-t="tempo">Tempo</span></div>
+    <!-- Three across: the number you read, the button you hit, the bar length.
+         The three are different kinds of thing and were sharing two lines. -->
+    <div class="tempo-3">
+      <div class="t3-cell t3-left">
+        <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" data-ta="aria.bpm" aria-label="Beats per minute">
+        <span class="bpm-label" data-t="bpm">BPM</span>
+      </div>
+      <div class="t3-cell t3-mid">
+        <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
+      </div>
+      <div class="t3-cell t3-right">
+        <span class="sig-fields">
+          <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
+        </span>
         <span class="sig-unit" data-t="beats">beats</span>
-      </span></div>
-    <div class="bpm-row">
-      <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="80" aria-label="Beats per minute">
-      <span class="bpm-label" data-t="bpm">BPM</span>
-      <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
+      </div>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="80" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
@@ -4044,7 +4078,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30e';
+const APP_VERSION='2026-08-30f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the

@@ -591,5 +591,6 @@
  "aria.polyB": "Pulsos en la capa B",
  "aria.groove": "Estilo del acompañamiento",
  "aria.patBars": "Cuántos compases en bucle",
- "aria.patFrom": "Copiar un estilo al patrón"
+ "aria.patFrom": "Copiar un estilo al patrón",
+ "aria.bpm": "Pulsaciones por minuto"
 }

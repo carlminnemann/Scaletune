@@ -591,5 +591,6 @@
  "aria.polyB": "Impulse in Ebene B",
  "aria.groove": "Stil der Begleitung",
  "aria.patBars": "Wie viele Takte im Loop",
- "aria.patFrom": "Einen Stil ins Muster kopieren"
+ "aria.patFrom": "Einen Stil ins Muster kopieren",
+ "aria.bpm": "Schläge pro Minute"
 }

@@ -591,5 +591,6 @@
  "aria.polyB": "Impulsi nel livello B",
  "aria.groove": "Stile dell’accompagnamento",
  "aria.patBars": "Quante battute in ciclo",
- "aria.patFrom": "Copiare uno stile nel pattern"
+ "aria.patFrom": "Copiare uno stile nel pattern",
+ "aria.bpm": "Battiti al minuto"
 }

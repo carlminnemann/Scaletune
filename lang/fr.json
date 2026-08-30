@@ -591,5 +591,6 @@
  "aria.polyB": "Impulsions dans la couche B",
  "aria.groove": "Style de l’accompagnement",
  "aria.patBars": "Combien de mesures en boucle",
- "aria.patFrom": "Copier un style dans le motif"
+ "aria.patFrom": "Copier un style dans le motif",
+ "aria.bpm": "Battements par minute"
 }

@@ -575,5 +575,6 @@
  "aria.polyB": "B 层脉冲数",
  "aria.groove": "伴奏风格",
  "aria.patBars": "循环几个小节",
- "aria.patFrom": "把一种风格复制进图案"
+ "aria.patFrom": "把一种风格复制进图案",
+ "aria.bpm": "每分钟拍数"
 }
