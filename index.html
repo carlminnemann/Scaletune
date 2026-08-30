@@ -674,9 +674,24 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 /* it sits on a label line now, so it carries no margin of its own */
 .sig-fields{display:flex;gap:var(--s2);align-items:center}
 .sig-select:disabled{opacity:.45}
-.sig-select{font-family:inherit;font-size:15px;padding:6px 8px;min-width:58px;text-align:center;
+.sig-select{font-family:inherit;font-size:15px;padding:6px 18px 6px 8px;min-width:62px;text-align:center;
   cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);
-  background:var(--bg2);color:var(--text2);touch-action:manipulation}
+  background:var(--bg2);color:var(--text2);touch-action:manipulation;
+  /* the platform's own arrow says "a menu drops from here", and none does any
+     more — and each platform drew a different one anyway */
+  -webkit-appearance:none;appearance:none}
+/* Two marks instead of one: an arrow points at a list, a pair points both ways,
+   which is what a wheel does. */
+.roller-host::after{content:'';position:absolute;right:7px;top:50%;
+  width:7px;height:12px;margin-top:-6px;pointer-events:none;opacity:.75;
+  background:
+    linear-gradient(to bottom right,transparent 49%,currentColor 49%) top left/3.5px 4px no-repeat,
+    linear-gradient(to bottom left, transparent 49%,currentColor 49%) top right/3.5px 4px no-repeat,
+    linear-gradient(to top right,  transparent 49%,currentColor 49%) bottom left/3.5px 4px no-repeat,
+    linear-gradient(to top left,   transparent 49%,currentColor 49%) bottom right/3.5px 4px no-repeat;
+  color:var(--text3)}
+.roller-host:has(>.sig-select.active)::after{color:var(--blue)}
+.roller-host:has(>.sig-select:disabled)::after{opacity:.3}
 .sig-select.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
 /* A select renders its own text on some platforms and ignores the parent
    colour, so state the colour on the options too or the number goes blank. */
@@ -685,6 +700,49 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 /* the browser's own focus ring is blue, which is the one colour not in the app */
 .sig-select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .sig-select:focus{outline-color:var(--blue)}
+
+/* ---------- the roller ----------
+   A dropdown is the one control in the app the browser draws, and it draws it
+   its own way on every platform: a grey list on the Mac, a full-height sheet on
+   the phone, nothing that matches the rest. It is also the worst shape for the
+   things it holds here, which are almost all short runs of numbers — beats in a
+   bar, bars of count-in, pulses in a layer. A number you scrub to lands faster
+   than a number you hunt for in a list.
+
+   So the select stays as the value and stops being the control: it cannot be
+   clicked, a transparent button over it opens a wheel instead, and picking a
+   value writes it back and fires the change the app was already listening for.
+   Nothing that used a dropdown had to learn anything. */
+.roller-host{position:relative;display:inline-flex}
+.roller-host>.sig-select{pointer-events:none}
+.roller-tap{position:absolute;inset:0;border:0;background:none;padding:0;margin:0;
+  cursor:pointer;border-radius:var(--r);touch-action:manipulation}
+.roller-tap:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.roller-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;padding:1rem}
+.roller-back[hidden]{display:none}
+.roller-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
+  width:min(280px,100%);padding:var(--s3);box-shadow:0 18px 40px -12px rgba(0,0,0,.6)}
+.roller-title{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text3);text-align:center;padding-bottom:var(--s2)}
+/* The window is five rows tall and the middle one is the value. The rows above
+   and below are the context that makes it a wheel rather than a list. */
+.roller-win{position:relative;height:200px;overflow:hidden}
+.roller-scroll{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.roller-scroll::-webkit-scrollbar{display:none}
+.roller-item{height:40px;display:flex;align-items:center;justify-content:center;
+  scroll-snap-align:center;font-size:17px;color:var(--text3);cursor:pointer;
+  transition:color .12s,transform .12s;user-select:none;-webkit-user-select:none}
+.roller-item.on{color:var(--text);font-weight:600;transform:scale(1.12)}
+/* the band, drawn over the rows but not in their way */
+.roller-band{position:absolute;left:0;right:0;top:80px;height:40px;pointer-events:none;
+  border-top:1px solid var(--border3);border-bottom:1px solid var(--border3);
+  background:var(--bg3);opacity:.5;border-radius:6px}
+.roller-fade{position:absolute;left:0;right:0;height:60px;pointer-events:none}
+.roller-fade.up{top:0;background:linear-gradient(var(--bg2),rgba(0,0,0,0))}
+.roller-fade.down{bottom:0;background:linear-gradient(rgba(0,0,0,0),var(--bg2))}
+.roller-done{width:100%;margin-top:var(--s3)}
 
 /* The circles are a picture of the bar, so they are centred rather than lined up
    with the controls — and a cycle should read as one line. Laid out as a grid
@@ -863,15 +921,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="panel">
     <div class="head"><span class="group-label" data-t="reference-a4">Reference A4</span>
       <span class="sig-fields">
-        <select class="sig-select active" id="tuner-a4" aria-label="Reference pitch for A4"></select>
+        <select class="sig-select active" id="tuner-a4" data-ta="aria.a4" aria-label="Reference pitch for A4"></select>
         <span class="sig-unit" data-t="hz">Hz</span>
       </span></div>
     <!-- one line, because a temperament and the key it is built on are one
          choice, and two lines of it pushed the tuner into scrolling -->
     <div class="head"><span class="group-label" data-t="temperament">Temperament</span>
       <span class="sig-fields">
-        <select class="sig-select active" id="tuner-temp" aria-label="Temperament"></select>
-        <select class="sig-select active" id="tuner-key" aria-label="Key the temperament is built on"
+        <select class="sig-select active" id="tuner-temp" data-ta="aria.temp" aria-label="Temperament"></select>
+        <select class="sig-select active" id="tuner-key" data-ta="aria.tempKey" aria-label="Key the temperament is built on"
                 style="display:none"></select>
       </span></div>
     <div class="info-line tuner-devs" id="tuner-temp-info"></div>
@@ -1046,7 +1104,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
          setting that number, so it belongs beside it and not up in the title. -->
     <div class="head"><span class="section-label" data-t="tempo">Tempo</span>
       <span class="sig-fields">
-        <select class="sig-select active" id="sig-4" aria-label="Beats per bar"></select>
+        <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
         <span class="sig-unit" data-t="beats">beats</span>
       </span></div>
     <div class="bpm-row">
@@ -1075,7 +1133,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="groove-block">
     <div class="head" style="margin-bottom:0"><span class="section-label" data-t="accompaniment">Accompaniment</span>
       <span class="sig-fields">
-        <select class="sig-select" id="groove-sel" aria-label="Accompaniment style"></select>
+        <select class="sig-select" id="groove-sel" data-ta="aria.groove" aria-label="Accompaniment style"></select>
       </span></div>
     <div class="head" id="kit-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="kit">Kit</span>
@@ -1116,7 +1174,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="head" style="margin-top:var(--s3)">
         <span class="sig-fields">
           <span class="sig-unit" data-t="loop">loop</span>
-          <select class="sig-select" id="pat-bars" aria-label="How many bars loop"></select>
+          <select class="sig-select" id="pat-bars" data-ta="aria.patBars" aria-label="How many bars loop"></select>
           <span class="sig-unit" data-t="bars">bars</span>
         </span>
         <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span>
@@ -1131,7 +1189,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
       <div class="step-row" style="margin-top:var(--s3)">
         <span class="step-unit" data-t="start-from">start from</span>
-        <select class="sig-select" id="pat-from" aria-label="Copy a style into the pattern"></select>
+        <select class="sig-select" id="pat-from" data-ta="aria.patFrom" aria-label="Copy a style into the pattern"></select>
         <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
       </div>
       <div class="info-line" id="pat-info"></div>
@@ -1162,14 +1220,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <input class="step-input" id="speed-amount" type="number" inputmode="numeric"
              min="1" max="60" step="1" value="5" aria-label="BPM each step">
       <span class="step-unit" data-t="bpm-every">BPM every</span>
-      <select class="sig-select active" id="speed-every" aria-label="How often the tempo steps"></select>
+      <select class="sig-select active" id="speed-every" data-ta="aria.speedEvery" aria-label="How often the tempo steps"></select>
     </div>
     <div class="step-row" id="speed-ramp" style="display:none">
       <span class="step-lead" data-t="to">to</span>
       <input class="step-input active" id="ramp-to" type="number" inputmode="numeric"
              min="10" max="300" step="1" value="120" aria-label="Tempo to reach">
       <span class="step-unit" data-t="bpm-over">BPM over</span>
-      <select class="sig-select active" id="ramp-min" aria-label="Minutes to take"></select>
+      <select class="sig-select active" id="ramp-min" data-ta="aria.rampMin" aria-label="Minutes to take"></select>
       <span class="step-unit" data-t="min">min</span>
     </div>
     <div class="info-line" id="speed-info"></div>
@@ -1178,7 +1236,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="count-block">
     <div class="head" style="margin-bottom:0"><span class="section-label" data-t="count-in">Count In</span>
       <span class="sig-fields">
-        <select class="sig-select" id="count-bars" aria-label="Bars of count-in"></select>
+        <select class="sig-select" id="count-bars" data-ta="aria.countBars" aria-label="Bars of count-in"></select>
         <span class="sig-unit" data-t="bars-2">bars</span>
       </span></div>
     <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
@@ -1209,7 +1267,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="mgroup" id="pass-block" style="display:none">
     <div class="head" style="margin-bottom:0"><span class="section-label" data-t="advance-every">Advance Every</span>
       <span class="sig-fields">
-        <select class="sig-select" id="pass-count" aria-label="How many before the figure and the tempo move on"></select>
+        <select class="sig-select" id="pass-count" data-ta="aria.passCount" aria-label="How many before the figure and the tempo move on"></select>
         <span class="btn-wrap seg" id="pass-unit-row" data-cols="fixed"></span>
       </span></div>
   </div>
@@ -1218,9 +1276,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <span class="btn-wrap seg" id="polymode-row" data-cols="fixed"></span></div>
   <div id="poly-controls" style="display:none">
     <div class="step-row" style="margin-bottom:4px">
-      <select class="sig-select active" id="poly-a" aria-label="Pulses in layer A"></select>
+      <select class="sig-select active" id="poly-a" data-ta="aria.polyA" aria-label="Pulses in layer A"></select>
       <span class="step-unit" data-t="against">against</span>
-      <select class="sig-select active" id="poly-b" aria-label="Pulses in layer B"></select>
+      <select class="sig-select active" id="poly-b" data-ta="aria.polyB" aria-label="Pulses in layer B"></select>
       <span class="step-unit" id="poly-label"></span>
     </div>
     <div class="beats-row" id="poly-row-a"></div>
@@ -1297,6 +1355,19 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <!-- The guide. Written as the app is laid out, so reading it top to bottom is
      walking down the screen. Reached from the ? in the header, or from the ?
      that appears on whichever panel is open, which lands on its entry. -->
+<div class="roller-back" id="roller-back" hidden role="dialog" aria-modal="true">
+  <div class="roller-box">
+    <div class="roller-title"></div>
+    <div class="roller-win">
+      <div class="roller-band"></div>
+      <div class="roller-scroll" role="listbox" tabindex="-1"></div>
+      <div class="roller-fade up"></div>
+      <div class="roller-fade down"></div>
+    </div>
+    <button type="button" class="pick-btn roller-done" data-t="common.done">Done</button>
+  </div>
+</div>
+
 <div class="help-overlay" id="help-overlay" hidden role="dialog" aria-modal="true" aria-label="What everything does">
  <button class="theme-btn help-close" onclick="closeHelp()" aria-label="Close">✕</button>
  <div class="help-inner">
@@ -3967,7 +4038,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-30b';
+const APP_VERSION='2026-08-30c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5285,6 +5356,104 @@ function buildTempoStepRow(){buildSpeedControls();}
    it can be asked for again whenever a pass hands over to the next key or the
    next mode — which is the moment you need to find the new starting note. */
 const COUNT_MAX=8;
+/* ---------- the roller ----------
+   Every <select> in the app keeps holding the value and firing the change; it
+   just stops being the thing you press. See the note by .roller-host. */
+let rollerAlvo=null,rollerParar=null;
+function rollerFecha(){
+  const back=document.getElementById('roller-back');
+  if(back)back.hidden=true;
+  if(rollerAlvo){const t=rollerAlvo;rollerAlvo=null;const tap=t.parentNode&&t.parentNode.querySelector('.roller-tap');if(tap)tap.focus();}
+  rollerAlvo=null;
+}
+function rollerEscolhe(sel,valor){
+  if(sel.value!==valor){
+    sel.value=valor;
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+}
+function rollerAbre(sel){
+  const back=document.getElementById('roller-back');
+  if(!back||!sel.options.length||sel.disabled)return;
+  rollerAlvo=sel;
+  back.querySelector('.roller-title').textContent=
+    sel.getAttribute('aria-label')||sel.getAttribute('data-roller-title')||'';
+  const scroll=back.querySelector('.roller-scroll');
+  scroll.innerHTML='';
+  /* Two blank rows at each end so the first and the last value can reach the
+     middle of the window like every other one. */
+  const vazio=()=>{const d=document.createElement('div');d.className='roller-item';d.setAttribute('aria-hidden','true');return d;};
+  scroll.appendChild(vazio());scroll.appendChild(vazio());
+  const itens=[];
+  for(const o of sel.options){
+    const d=document.createElement('div');
+    d.className='roller-item';d.textContent=o.textContent;d.dataset.v=o.value;
+    d.setAttribute('role','option');
+    d.onclick=()=>{rollerEscolhe(sel,o.value);rollerFecha();};
+    scroll.appendChild(d);itens.push(d);
+  }
+  scroll.appendChild(vazio());scroll.appendChild(vazio());
+  const marca=()=>{
+    const meio=scroll.scrollTop+scroll.clientHeight/2;
+    let perto=null,dist=1e9;
+    itens.forEach(d=>{
+      const c=d.offsetTop+d.offsetHeight/2,q=Math.abs(c-meio);
+      if(q<dist){dist=q;perto=d;}
+    });
+    itens.forEach(d=>d.classList.toggle('on',d===perto));
+    return perto;
+  };
+  let t=null;
+  scroll.onscroll=()=>{
+    const perto=marca();
+    clearTimeout(t);
+    // write it back once the wheel has come to rest, not on every frame
+    t=setTimeout(()=>{if(rollerAlvo===sel&&perto)rollerEscolhe(sel,perto.dataset.v);},140);
+  };
+  back.hidden=false;
+  const actual=itens.find(d=>d.dataset.v===sel.value)||itens[0];
+  scroll.scrollTop=actual.offsetTop-(scroll.clientHeight-actual.offsetHeight)/2;
+  marca();
+  rollerParar=itens;
+  back.querySelector('.roller-done').focus();
+}
+function rollerTeclas(e){
+  if(!rollerAlvo)return;
+  const scroll=document.querySelector('#roller-back .roller-scroll');
+  if(e.key==='Escape'){e.preventDefault();rollerFecha();return;}
+  if(e.key==='Enter'){e.preventDefault();rollerFecha();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    const itens=rollerParar||[];
+    const i=itens.findIndex(d=>d.classList.contains('on'));
+    const j=Math.max(0,Math.min(itens.length-1,i+(e.key==='ArrowDown'?1:-1)));
+    const d=itens[j];
+    if(d)scroll.scrollTop=d.offsetTop-(scroll.clientHeight-d.offsetHeight)/2;
+  }
+}
+function montaRoladores(){
+  document.querySelectorAll('select.sig-select').forEach(sel=>{
+    if(sel.parentNode&&sel.parentNode.classList.contains('roller-host'))return;
+    const host=document.createElement('span');
+    host.className='roller-host';
+    sel.parentNode.insertBefore(host,sel);
+    host.appendChild(sel);
+    const tap=document.createElement('button');
+    tap.type='button';
+    tap.className='roller-tap';
+    tap.setAttribute('aria-label',sel.getAttribute('aria-label')||'');
+    tap.onclick=()=>{if(!sel.disabled)rollerAbre(sel);};
+    host.appendChild(tap);
+  });
+  const back=document.getElementById('roller-back');
+  if(back&&!back.dataset.pronto){
+    back.dataset.pronto='1';
+    back.onclick=e=>{if(e.target===back)rollerFecha();};
+    back.querySelector('.roller-done').onclick=rollerFecha;
+    document.addEventListener('keydown',rollerTeclas);
+  }
+}
+
 function buildCountRow(){
   const sel=document.getElementById('count-bars');
   const row=document.getElementById('count-between-row');
@@ -8007,6 +8176,10 @@ renderPitchPickers();
    in the markup, from when Drone had no metronome, and only a mode change ever
    corrected it. */
 setMode(state.mode);
+/* Every dropdown in the app becomes a wheel. They are all in the markup from
+   the start, so one pass here catches them all; what fills them with options
+   happens later and does not care. */
+montaRoladores();
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{

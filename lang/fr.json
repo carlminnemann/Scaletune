@@ -578,5 +578,19 @@
  "carls-own-instruments-recorded-note": "Les instruments de Carl lui-même, enregistrés note par note et joués sans vibrato — une référence ne doit pas osciller. La justesse de chaque note a été mesurée et se corrige à la lecture, si bien que ce que l’on entend tombe à moins d’un centième de ce qu’annonce l’application. Un pupitre a toujours une dispersion propre : pour un accord fin, le Hammond est plus stable.",
  "timbre.hammond": "Hammond",
  "hammond": "Hammond",
- "a-tonewheel-organ-recorded-with": "Un orgue à roues phoniques, enregistré avec le tirant de base, sans vibrato ni Leslie. Il mesure 0,1 centième d’oscillation d’un bout à l’autre : c’est une machine, et c’est le bourdon le plus stable de l’application."
+ "a-tonewheel-organ-recorded-with": "Un orgue à roues phoniques, enregistré avec le tirant de base, sans vibrato ni Leslie. Il mesure 0,1 centième d’oscillation d’un bout à l’autre : c’est une machine, et c’est le bourdon le plus stable de l’application.",
+ "common.done": "Terminé",
+ "aria.a4": "Hauteur de référence du La4",
+ "aria.temp": "Tempérament",
+ "aria.tempKey": "Tonalité sur laquelle le tempérament est bâti",
+ "aria.beats": "Temps par mesure",
+ "aria.countBars": "Mesures de décompte",
+ "aria.speedEvery": "À quelle fréquence le tempo monte",
+ "aria.rampMin": "Minutes à prendre",
+ "aria.passCount": "Combien avant que la figure et le tempo avancent",
+ "aria.polyA": "Impulsions dans la couche A",
+ "aria.polyB": "Impulsions dans la couche B",
+ "aria.groove": "Style de l’accompagnement",
+ "aria.patBars": "Combien de mesures en boucle",
+ "aria.patFrom": "Copier un style dans le motif"
 }

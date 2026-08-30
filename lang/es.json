@@ -578,5 +578,19 @@
  "carls-own-instruments-recorded-note": "Los propios instrumentos de Carl, grabados nota a nota y tocados sin vibrato: una referencia no puede oscilar. La afinación de cada nota se midió y se corrige al sonar, de modo que lo que se oye cae dentro de un centésimo de lo que dice la app. Una sección siempre tiene cierta dispersión propia: para afinar al detalle, el Hammond es más firme.",
  "timbre.hammond": "Hammond",
  "hammond": "Hammond",
- "a-tonewheel-organ-recorded-with": "Un órgano de ruedas fónicas, grabado con el registro básico y sin vibrato ni Leslie. Mide 0,1 centésimas de oscilación de punta a punta: es una máquina, y es el bordón más firme de la app."
+ "a-tonewheel-organ-recorded-with": "Un órgano de ruedas fónicas, grabado con el registro básico y sin vibrato ni Leslie. Mide 0,1 centésimas de oscilación de punta a punta: es una máquina, y es el bordón más firme de la app.",
+ "common.done": "Listo",
+ "aria.a4": "Altura de referencia del La4",
+ "aria.temp": "Temperamento",
+ "aria.tempKey": "Tonalidad sobre la que se construye el temperamento",
+ "aria.beats": "Tiempos por compás",
+ "aria.countBars": "Compases de count-in",
+ "aria.speedEvery": "Cada cuánto sube el tempo",
+ "aria.rampMin": "Minutos a emplear",
+ "aria.passCount": "Cuántas antes de que la figura y el tempo avancen",
+ "aria.polyA": "Pulsos en la capa A",
+ "aria.polyB": "Pulsos en la capa B",
+ "aria.groove": "Estilo del acompañamiento",
+ "aria.patBars": "Cuántos compases en bucle",
+ "aria.patFrom": "Copiar un estilo al patrón"
 }

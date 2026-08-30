@@ -578,5 +578,19 @@
  "carls-own-instruments-recorded-note": "Carls eigene Instrumente, Ton für Ton aufgenommen und ohne Vibrato gespielt — eine Referenz darf nicht schwanken. Die Stimmung jeder Note wurde gemessen und wird beim Abspielen korrigiert, sodass das Gehörte auf einen Cent genau dort liegt, wo die App es angibt. Eine Gruppe hat immer eine eigene Streuung: zum feinen Stimmen ist die Hammond ruhiger.",
  "timbre.hammond": "Hammond",
  "hammond": "Hammond",
- "a-tonewheel-organ-recorded-with": "Eine Tonrad-Orgel, mit der Grundregistrierung aufgenommen, ohne Vibrato und ohne Leslie. Sie schwankt um 0,1 Cent von Spitze zu Spitze — eine Maschine, und der ruhigste Bordun der App."
+ "a-tonewheel-organ-recorded-with": "Eine Tonrad-Orgel, mit der Grundregistrierung aufgenommen, ohne Vibrato und ohne Leslie. Sie schwankt um 0,1 Cent von Spitze zu Spitze — eine Maschine, und der ruhigste Bordun der App.",
+ "common.done": "Fertig",
+ "aria.a4": "Referenzton für A4",
+ "aria.temp": "Temperatur",
+ "aria.tempKey": "Tonart, auf der die Temperatur aufbaut",
+ "aria.beats": "Schläge pro Takt",
+ "aria.countBars": "Takte Vorzähler",
+ "aria.speedEvery": "Wie oft das Tempo steigt",
+ "aria.rampMin": "Minuten dafür",
+ "aria.passCount": "Wie viele, bevor Figur und Tempo weitergehen",
+ "aria.polyA": "Impulse in Ebene A",
+ "aria.polyB": "Impulse in Ebene B",
+ "aria.groove": "Stil der Begleitung",
+ "aria.patBars": "Wie viele Takte im Loop",
+ "aria.patFrom": "Einen Stil ins Muster kopieren"
 }

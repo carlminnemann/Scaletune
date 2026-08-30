@@ -562,5 +562,19 @@
  "carls-own-instruments-recorded-note": "Carl 自己的乐器，逐音录制，演奏时不加揉弦——基准音不能晃动。每个音的音准都经过测量并在播放时校正，所以听到的与应用所标的相差不到一音分。 一个声部本身总有些许离散：要精细对音，Hammond 更稳。",
  "timbre.hammond": "Hammond",
  "hammond": "Hammond",
- "a-tonewheel-organ-recorded-with": "一台音轮风琴，用基本音栓录制，不加颤音也不用 Leslie。音高起伏只有 0.1 音分——它是一台机器，也是本应用中最稳的持续音。"
+ "a-tonewheel-organ-recorded-with": "一台音轮风琴，用基本音栓录制，不加颤音也不用 Leslie。音高起伏只有 0.1 音分——它是一台机器，也是本应用中最稳的持续音。",
+ "common.done": "完成",
+ "aria.a4": "A4 基准音高",
+ "aria.temp": "律制",
+ "aria.tempKey": "律制所依的调",
+ "aria.beats": "每小节拍数",
+ "aria.countBars": "预备拍小节数",
+ "aria.speedEvery": "速度每隔多久上升",
+ "aria.rampMin": "用时分钟数",
+ "aria.passCount": "图形与速度前进前的遍数",
+ "aria.polyA": "A 层脉冲数",
+ "aria.polyB": "B 层脉冲数",
+ "aria.groove": "伴奏风格",
+ "aria.patBars": "循环几个小节",
+ "aria.patFrom": "把一种风格复制进图案"
 }
