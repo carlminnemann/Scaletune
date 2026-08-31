@@ -319,7 +319,12 @@ details.sec.pinned>summary::after{display:none}
 .pat-cell[data-v="1"]{background:var(--hit1)}
 .pat-cell[data-v="2"]{background:var(--hit2)}
 .pat-cell[data-v="3"]{background:var(--hit3)}
-.pat-cell.now{outline:2px solid var(--text2);outline-offset:-1px}
+/* The beat that is sounding, lit down the whole stack of lanes: an empty cell
+   comes up a shade and every cell in the column takes an edge. Not an outline
+   in the text colour, which on six cells at once was a white ladder standing in
+   front of the pattern rather than a light on it. */
+.pat-cell.now{box-shadow:inset 0 0 0 1px var(--text3)}
+.pat-cell.now[data-v="0"]{background:var(--border)}
 /* the level buttons carry the shade they write, so the choice is visible and
    not only spelled */
 .pen-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -3981,6 +3986,8 @@ function schedulerTick(){
       if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
+      // the pattern lights the beat it is on, and turns the page to find it
+      if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime);
     } else if(!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
@@ -4014,6 +4021,46 @@ function pruneFinishedNodes(){
   if(schedPiano.length>80)schedPiano.splice(0,schedPiano.length-40);
 }
 
+/* ---------- the pattern's own beat light ----------
+   Which beat of which bar is sounding, lit across every lane. The scheduler
+   knows it as one number counted through the whole loop; here it is split back
+   into the bar and the beat inside it, because that is how the editor shows it.
+
+   Where the loop is longer than the bar on screen, the editor turns to the bar
+   being played rather than leaving you watching one that is silent — and only
+   while it is playing. Stopping puts it back at the first bar, where the
+   pattern begins, rather than wherever the stop happened to land. */
+function schedulePatFlash(beat,when){
+  const d=(when-audioCtx.currentTime)*1000;
+  pendingTimeouts.push(setTimeout(()=>patFlash(beat),Math.max(0,d)));
+}
+function patFlash(beat){
+  if(!state.playing||state.groove!=='custom')return;
+  const grid=document.getElementById('pat-grid');
+  if(!grid||!grid.children.length)return;             // the editor is not open
+  const porCompasso=Math.max(1,state.sig);
+  const compasso=Math.floor(beat/porCompasso), dentro=beat%porCompasso;
+  /* With Both the loop runs the straight pattern and then the triplet one, so
+     half of it belongs to the pattern that is not on screen. Nothing is lit
+     then: the editor would otherwise be pointing at a cell that is not the one
+     making the sound. */
+  const meus=state.custom.play==='both'
+    ? (state.custom.grid===12?compasso>=state.custom.bars:compasso<state.custom.bars)
+    : true;
+  const meuCompasso=compasso%Math.max(1,state.custom.bars);
+  if(!meus){patLimpaLuz();return;}
+  if(state.custom.bars>1&&meuCompasso!==patBar){
+    patBar=meuCompasso;buildPatternEditor();
+  }
+  const span=patBarSpan(), de=patBar*span+dentro*GRID, ate=de+GRID;
+  document.querySelectorAll('#pat-grid .pat-cell').forEach(c=>{
+    const p=+c.dataset.pos;
+    c.classList.toggle('now',p>=de&&p<ate);
+  });
+}
+function patLimpaLuz(){
+  document.querySelectorAll('#pat-grid .pat-cell.now').forEach(c=>c.classList.remove('now'));
+}
 function scheduleFlash(i,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>flashBeat(i),Math.max(0,d)));
@@ -4027,6 +4074,9 @@ function stopPlayback(){
   if(metroScheduler){clearInterval(metroScheduler);metroScheduler=null;}
   stopBrushBed();
   stopAllAudio();
+  patLimpaLuz();
+  // back to the first bar, which is where the pattern begins
+  if(patBar!==0&&state.custom.bars>1){patBar=0;buildPatternEditor();}
   document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('active-beat'));
   document.getElementById('current-note').textContent='—';
   document.getElementById('current-freq').textContent='';
@@ -4176,7 +4226,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31f';
+const APP_VERSION='2026-08-31g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
