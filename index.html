@@ -4260,7 +4260,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31l';
+const APP_VERSION='2026-08-31m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4926,31 +4926,46 @@ function endRunNow(){
   setTimeout(()=>setStatus(''),2000);
 }
 
-/* ---------- one metronome per mode ----------
-   The metronome is not one thing you carry between modes. A drone you hold
-   against is not the tempo you take a scale at, and neither is the tempo you
-   set a metronome to on its own, and having them share meant every mode change
-   was followed by putting the metronome back. So each mode keeps its own, and
-   all of them start in the same place: 60 to the quarter, four to the bar.
+/* ---------- every mode keeps its own of everything ----------
+   A mode is a way of practising, not a view onto one shared setting. A drone
+   you hold against is not the tempo you take a scale at; a study list of scales
+   is not a study list of chords. Sharing them meant every mode change was
+   followed by putting things back — and worse: a study list built in Scale was
+   still the list in Arpeggio, so Arpeggio played scales.
 
-   What travels with the mode is what you would call the metronome — the tempo,
-   the bar, the figure, the accents, the count-in, the tempo change, the figure
-   list and the polyrhythm. What does not is the accompaniment, the kit, the
-   mixer and the pattern you wrote: those only exist in Metro, where the
-   accompaniment lives, so there is nothing for the other modes to hold. */
+   So each mode keeps the lot: its tempo, bar, figure, accents, count-in and
+   tempo change, and also its key, its scale or chord, its range, its direction,
+   its shape, its root movement and its study list. All of them start in the
+   same place, and they coexist for as long as the app is open.
+
+   Three kinds of thing stay shared, each for its own reason. The voice, because
+   it is a choice about sound and not about practice — one for the note modes
+   and one of its own for the drone, whose sounds have to hold. The
+   accompaniment, the kit, the mixer and the pattern, because they only exist in
+   Metro. And what belongs to the person rather than the practice: the volume
+   and what the notes are called. */
 const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol',
-  'clickFollowsFigure','alignPasses','countBars','countWhen','polyVol','metroInDrone'];
+  'clickFollowsFigure','alignPasses','countBars','countWhen','polyVol','metroInDrone',
+  'root','rootOct','rootOctWanted','scaleGroup','scaleName','chordGroup','chordName',
+  'span','spanWanted','direction','startDeg','seqPattern','arpTop','blueNotes','listKind',
+  'freeRoot','freeSpan','freeSpanWanted','freeDirection'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
-  'passCount','passUnit','useSubdivList','subdivDir'];
+  'passCount','passUnit','useSubdivList','subdivDir',
+  'rootMove','repeat','modesTour','useList'];
 const metroPerMode={};
 let METRO_FRESH=null;
+const clonar=x=>JSON.parse(JSON.stringify(x));
 function metroSnapshot(){
   const o={p:{}};
   METRO_MINE.forEach(k=>o[k]=state[k]);
   METRO_MINE_P.forEach(k=>o.p[k]=state.practice[k]);
   o.accents=(state.accents||[]).slice();
   o.p.subdivList=(state.practice.subdivList||[]).slice();
-  o.poly=JSON.parse(JSON.stringify(state.poly));
+  o.p.list=clonar(state.practice.list||[]);
+  o.poly=clonar(state.poly);
+  o.seqCustom=(state.seqCustom||[]).slice();
+  o.droneSelected=clonar(state.droneSelected||{});
+  o.freeSelected=clonar(state.freeSelected||{});
   return o;
 }
 function metroRestore(o){
@@ -4959,7 +4974,15 @@ function metroRestore(o){
   METRO_MINE_P.forEach(k=>{if(k in o.p)state.practice[k]=o.p[k];});
   state.accents=(o.accents||[]).slice();
   state.practice.subdivList=(o.p.subdivList||[]).slice();
-  state.poly=JSON.parse(JSON.stringify(o.poly));
+  state.practice.list=clonar(o.p.list||[]);
+  state.poly=clonar(o.poly);
+  state.seqCustom=(o.seqCustom||[]).slice();
+  state.droneSelected=clonar(o.droneSelected||{});
+  state.freeSelected=clonar(o.freeSelected||{});
+  /* Where the rotation had got to belongs to the run, not to the mode: coming
+     back to a mode starts it again rather than resuming something that was
+     stopped when you left. */
+  studyIdx=0;subdivIdx=0;patBar=0;
 }
 function metroKeep(mode){metroPerMode[mode]=metroSnapshot();}
 function metroTake(mode){
@@ -4969,6 +4992,10 @@ function metroTake(mode){
 /* Everything the metronome draws, drawn again — the whole of it changes at once
    when the mode does, so there is no point being clever about which parts. */
 function redrawMetro(){
+  // the pitch side of it, which the metronome's own redraw knew nothing about
+  buildPitchLists();buildDroneGrid();buildFreeGrid();buildBlueRow();
+  buildRootMoveRow();buildRepeatRow();buildListModeRow();
+  renderPitchPickers();updateInfo();updateRotationPanel();updateDroneReadout();
   const d=document.getElementById('bpm-display');if(d)d.value=state.bpm;
   const sl=document.getElementById('bpm-slider');if(sl)sl.value=state.bpm;
   const cv=document.getElementById('click-vol');if(cv)cv.value=state.clickVol;
@@ -6918,9 +6945,9 @@ function applyExercise(x){
   }
   state.listKind=null;studyIdx=0;subdivIdx=0;passesDone=0;
   if(state.practice.list.length)applyListItem(state.practice.list[0]);
-  /* An exercise carries a metronome and a mode, so what it carries becomes that
-     mode's metronome — otherwise the mode it lands in would hand it back its
-     own the moment anything redrew. */
+  /* An exercise carries a whole mode, so what it carries becomes that mode's —
+     otherwise the mode it lands in would hand back its own the moment anything
+     redrew. */
   if(METRO_FRESH)metroKeep(state.mode);
   markModesHome();          // this key and this mode are where it sets off from
   return true;
