@@ -2280,7 +2280,7 @@ let state={
      They never cross: four sixteenths do not fit in three triplets, so anything
      that converted between them would be dropping a note and calling it a
      conversion. */
-  custom:{grid:16,b16:1,b12:1,h16:[],h12:[],pen:3},
+  custom:{grid:16,b16:1,b12:1,h16:[],h12:[],pen:2},
   // In Drone the metronome is not the point, so there it is asked for
   metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
@@ -4260,7 +4260,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31j';
+const APP_VERSION='2026-08-31k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5750,10 +5750,12 @@ function buildCountRow(){
   const row=document.getElementById('count-between-row');
   const line=document.getElementById('count-between-line');
   if(!sel||!row)return;
-  if(!sel.options.length){
+  if(!sel.options.length||sel.dataset.lang!==LANG){
+    const liga=!sel.options.length;
+    sel.innerHTML='';sel.dataset.lang=LANG;
     sel.appendChild(new Option(tr('common.off','Off'),0));
     for(let i=1;i<=COUNT_MAX;i++)sel.appendChild(new Option(i,i));
-    sel.addEventListener('change',()=>{
+    if(liga)sel.addEventListener('change',()=>{
       state.countBars=parseInt(sel.value,10)||0;
       buildCountRow();refreshSectionSummaries();
     });
@@ -5912,6 +5914,7 @@ function repaintNoteNames(){
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
   document.querySelectorAll('#notenames-row .pick-btn').forEach(b=>
     b.classList.toggle('active',b.dataset.style===state.noteNames));
+  buildTunerControls();          // its key list is note names too
 }
 
 function familyMembers(fam){
@@ -6570,10 +6573,12 @@ function buildPatternEditor(){
     }
   }
   const from=document.getElementById('pat-from');
-  if(from&&!from.options.length){
+  if(from&&(!from.options.length||from.dataset.lang!==LANG)){
+    const liga=!from.options.length;
+    from.innerHTML='';from.dataset.lang=LANG;
     from.appendChild(new Option(tr('pat.aStyle','a style'),''));
     Object.keys(GROOVES).forEach(k=>from.appendChild(new Option(grooveLabel(k),k)));
-    from.addEventListener('change',()=>{
+    if(liga)from.addEventListener('change',()=>{
       if(!from.value)return;
       patFromStyle(from.value);
       from.value='';
@@ -8080,8 +8085,13 @@ function renderTuner(f){
 
 // Sharps and flats as the rest of the app spells them: flats, and F# for the one
 // the app has always shown sharp.
-const TUNER_NAMES=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-function noteNameOfMidi(m){return TUNER_NAMES[((m%12)+12)%12];}
+/* The tuner named its notes in letters and nothing else, whatever the rest of
+   the app was calling them: with Dó Ré Mi chosen, every panel said Dó and the
+   tuner said C. It uses the app's own spelling now — the same twelve, written
+   the way the setting asks for. */
+const TUNER_STEPS=[[0,0],[1,-1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[5,-1],[5,0],[6,-1],[6,0]];
+function tunerNames(){return TUNER_STEPS.map(([l,a])=>noteText(l,a));}
+function noteNameOfMidi(m){return tunerNames()[((m%12)+12)%12];}
 
 /* The strobe. Stripes drift at the beat frequency between what is played and
    what is wanted: still means right, and the direction is the direction of the
@@ -8167,11 +8177,23 @@ function buildTunerControls(){
 
   const tsel=document.getElementById('tuner-temp');
   const ksel=document.getElementById('tuner-key');
-  if(tsel&&!tsel.options.length){
+  /* The temperaments are named and the keys are notes, and a note is named
+     differently in a different language — and by the note-naming setting, which
+     moves on its own. Both are rebuilt whenever either has changed. */
+  const seloT=LANG+'|'+state.noteNames;
+  if(tsel&&(!tsel.options.length||tsel.dataset.selo!==seloT)){
+    const liga=!tsel.options.length;
+    const tT=tsel.value,tK=ksel?ksel.value:null;
+    tsel.innerHTML='';tsel.dataset.selo=seloT;
     TEMPERAMENTS.forEach(x=>tsel.appendChild(new Option(lab('temp',x.k,x.label),x.k)));
-    tsel.addEventListener('change',()=>{state.tunerTemp=tsel.value;buildTunerControls();});
-    TUNER_NAMES.forEach((n,i)=>ksel.appendChild(new Option(n,i)));
-    ksel.addEventListener('change',()=>{state.tunerKey=parseInt(ksel.value,10)||0;buildTunerControls();});
+    if(tT)tsel.value=tT;
+    if(liga)tsel.addEventListener('change',()=>{state.tunerTemp=tsel.value;buildTunerControls();});
+    if(ksel){
+      ksel.innerHTML='';
+      tunerNames().forEach((n,i)=>ksel.appendChild(new Option(n,i)));
+      if(tK)ksel.value=tK;
+      if(liga)ksel.addEventListener('change',()=>{state.tunerKey=parseInt(ksel.value,10)||0;buildTunerControls();});
+    }
   }
   if(tsel){
     tsel.value=state.tunerTemp||'equal';
@@ -8185,7 +8207,7 @@ function buildTunerControls(){
       const parts=[];
       for(let pc=0;pc<12;pc++){
         const o=tempOffset(pc);
-        if(Math.abs(o)>=0.5)parts.push(TUNER_NAMES[pc]+' '+(o>0?'+':'')+o.toFixed(0));
+        if(Math.abs(o)>=0.5)parts.push(tunerNames()[pc]+' '+(o>0?'+':'')+o.toFixed(0));
       }
       // the words cost a line of their own on a phone; the signs say cents
       info.textContent=parts.length?parts.join('  '):'';
