@@ -333,11 +333,16 @@ details.sec.pinned>summary::after{display:none}
    moves it towards the ground, so a lit cell read as a faded one — which is the
    opposite of what it is saying. */
 :root[data-theme="light"]{--lit:0.72}
-/* And one thin rule over the bar that is sounding, so the page turning is
-   something you can see happen rather than something you notice afterwards. */
-#pat-grid.live .pat-lanes::before{content:'';position:absolute;z-index:2;
-  left:36px;right:0;top:-5px;height:2px;border-radius:1px;
-  background:var(--red);opacity:.8;pointer-events:none}
+/* One thin rule over the beat that is sounding, the width of that beat, sliding
+   along as the bar goes by. Over the beat and not over the bar: the bar is the
+   whole of what is on screen, and a rule across all of it says only that
+   something is playing. */
+.pat-lanes::before{content:'';position:absolute;z-index:2;pointer-events:none;
+  top:-5px;height:2px;border-radius:1px;background:var(--red);opacity:0;
+  left:calc(36px + var(--beat-i,0) * (100% - 36px) / var(--beat-n,4));
+  width:calc((100% - 36px) / var(--beat-n,4));
+  transition:left .06s linear,opacity .06s linear}
+.pat-lanes.live::before{opacity:.85}
 /* the level buttons carry the shade they write, so the choice is visible and
    not only spelled */
 .pen-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -4085,10 +4090,23 @@ function patHitLight(pos,voice){
   // long enough to see at any tempo, short enough not to run into the next one
   pendingTimeouts.push(setTimeout(()=>c.classList.remove('now'),110));
 }
+let patTempoVivo=null;                  // which beat of the bar is sounding
+/* Drawn from the remembered beat rather than at the moment it changes, so that
+   a rebuild — and the page turns itself, so there are plenty — puts it straight
+   back instead of losing it until the next beat. */
+function patPintaRisco(){
+  const vivo=(patTempoVivo!=null&&state.playing);
+  document.querySelectorAll('#pat-grid .pat-lanes').forEach(l=>{
+    const b0=+l.dataset.b0||0, n=+l.style.getPropertyValue('--beat-n')||1;
+    const cá=vivo&&patTempoVivo>=b0&&patTempoVivo<b0+n;
+    l.classList.toggle('live',cá);
+    if(cá)l.style.setProperty('--beat-i',String(patTempoVivo-b0));
+  });
+}
 function patFlash(beat){
   const grid=document.getElementById('pat-grid');
   if(!grid||!grid.children.length)return;             // the editor is not open
-  if(!state.playing||state.groove!=='custom'){grid.classList.remove('live');return;}
+  if(!state.playing||state.groove!=='custom'){patTempoVivo=null;patPintaRisco();return;}
   const porCompasso=Math.max(1,state.sig);
   const compasso=Math.floor(beat/porCompasso);
   const C=state.custom;
@@ -4100,11 +4118,11 @@ function patFlash(beat){
   }
   const meuCompasso=compasso%Math.max(1,C.bars);
   if(C.bars>1&&meuCompasso!==patBar){patBar=meuCompasso;buildPatternEditor();}
-  document.getElementById('pat-grid').classList.add('live');
+  patTempoVivo=beat%porCompasso;
+  patPintaRisco();
 }
 function patLimpaLuz(){
-  const grid=document.getElementById('pat-grid');
-  if(grid)grid.classList.remove('live');
+  patTempoVivo=null;patPintaRisco();
   document.querySelectorAll('#pat-grid .pat-cell.now').forEach(c=>c.classList.remove('now'));
 }
 function scheduleFlash(i,when){
@@ -4278,7 +4296,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31h';
+const APP_VERSION='2026-08-31i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6636,8 +6654,12 @@ function buildPatternEditor(){
   for(let start=0;start<cells;start+=perRow){
     const half=document.createElement('div');half.className='pat-half';
     const count=Math.min(perRow,cells-start);
-    // the lanes in a box of their own, so the ruler underneath is not one of them
+    /* The lanes in a box of their own, so the ruler underneath is not one of
+       them — and it says which beats it holds, so the rule that marks the beat
+       knows whether the beat is in this row and where along it. */
     const lanes=document.createElement('div');lanes.className='pat-lanes';
+    lanes.dataset.b0=String(start/perBeat);
+    lanes.style.setProperty('--beat-n',String(Math.max(1,Math.ceil(count/perBeat))));
     PAT_VOICES.forEach(([voice,name])=>{
       const lane=document.createElement('div');lane.className='pat-lane';
       const label=document.createElement('div');label.className='pat-name';label.textContent=lab('patvoice',voice,name);
@@ -6678,6 +6700,7 @@ function buildPatternEditor(){
     half.appendChild(ruler);
     grid.appendChild(half);
   }
+  patPintaRisco();
   patInfo();
 }
 /* Opening something taller than the screen used to leave you looking at where it
