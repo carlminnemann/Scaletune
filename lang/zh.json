@@ -573,11 +573,9 @@
  "aria.patBars": "循环几个小节",
  "aria.patFrom": "把一种风格复制进图案",
  "aria.bpm": "每分钟拍数",
- "pat.plays": "播放",
- "pat.playBoth": "两个",
- "pat.bothHint": "先平均的，再三连音的——循环长度加倍",
- "pat.writeIn": "正在编辑",
- "pat.notPlaying": "正在播放的不是这个——「播放」选的是另一个。",
  "pat.clearAll": "✕ 全部清除",
- "pat.clearBar": "✕ 清除第 {n} 小节"
+ "pat.clearBar": "✕ 清除第 {n} 小节",
+ "fig.simple": "单拍子",
+ "fig.compound": "复拍子",
+ "pat.which": "拍子"
 }

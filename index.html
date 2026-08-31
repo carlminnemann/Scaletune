@@ -1297,18 +1297,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
           <span class="sig-unit" data-t="bars">bars</span>
         </span>
       </div>
-      <!-- The two rows below name the same two things and mean different
-           questions of them: which of the two you are looking at, and which of
-           the two sounds. Both are labelled, or the words repeat with nothing
-           to tell them apart. -->
+      <!-- One choice, not two. Which of the two patterns you are writing is
+           also which one sounds: there is no state where you are looking at one
+           and hearing the other. -->
       <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
-        <span class="section-label" data-t="pat.writeIn">Writing</span>
+        <span class="section-label" data-t="pat.which">Time</span>
         <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span></div>
-      <!-- Which of the two sounds, chosen apart from which of the two you are
-           looking at — the same kind of choice as how many bars it loops. -->
-      <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
-        <span class="section-label" data-t="pat.plays">Plays</span>
-        <span class="btn-wrap seg" id="pat-play-row" data-cols="fixed"></span></div>
       <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
         <span class="section-label" data-t="level">Level</span>
         <span class="btn-wrap seg" id="pat-pen-row" data-cols="fixed"></span></div>
@@ -2278,11 +2272,15 @@ let state={
   /* A pattern of the player's own. Kept in the same twelfths the styles use, so
      what is written is exactly what plays; the editor is a view onto it at a
      resolution a finger can hit. */
-  /* Two patterns, not one written twice. The grid is which of them is on the
-     screen; `play` is which of them sounds. They never cross: four sixteenths
-     do not fit in three triplets, so anything that converted between them would
-     be dropping a note and calling it a conversion. */
-  custom:{bars:1,grid:16,h16:[],h12:[],play:'16',pen:3},
+  /* Two patterns, not one written twice, and each one whole: its own notes and
+     its own length. Simple can run four bars and compound two. Choosing one
+     chooses it for writing and for playing at once — there is no third state
+     where you are looking at one and hearing the other.
+
+     They never cross: four sixteenths do not fit in three triplets, so anything
+     that converted between them would be dropping a note and calling it a
+     conversion. */
+  custom:{grid:16,b16:1,b12:1,h16:[],h12:[],pen:3},
   // In Drone the metronome is not the point, so there it is asked for
   metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
@@ -3378,18 +3376,9 @@ function thinHits(hits){
   return hits.filter(h=>h[1]!=='g'&&((h[1]!=='h'&&h[1]!=='d')||h[0]%GRID===0));
 }
 function grooveDef(){
-  if(state.groove==='custom'){
-    /* One of the two, or both end to end. Both is the whole of the straight one
-       and then the whole of the triplet one, which makes the loop twice as long
-       — the same choice as asking for more bars, and it reads the same way when
-       you hear it. */
-    const C=state.custom,span=C.bars*patBarSpan();
-    if(C.play==='both')
-      return {label:'Custom',bars:C.bars*2,
-              hits:C.h16.concat(C.h12.map(h=>[h[0]+span,h[1],h[2]]))
-                         .sort((a,b)=>a[0]-b[0])};
-    return {label:'Custom',bars:C.bars,hits:C.play==='12'?C.h12:C.h16};
-  }
+  // whichever of the two is chosen, for as many bars as that one was written in
+  if(state.groove==='custom')
+    return {label:'Custom',bars:patBars(),hits:patHits()};
   const G=GROOVES[state.groove];
   if(!G)return null;
   let hits=G.hits;
@@ -3832,8 +3821,6 @@ function startPlayback(){
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
-    // which of the two patterns was open before the page starts turning itself
-    patGridSeu=state.custom.grid;
     beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
@@ -4058,7 +4045,6 @@ function pruneFinishedNodes(){
 
    The grid the editor is on is the grid a tap would write to, so the one you
    chose is put back the moment it stops. */
-let patGridSeu=null;
 function schedulePatFlash(beat,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>patFlash(beat),Math.max(0,d)));
@@ -4069,22 +4055,12 @@ function schedulePatHit(pos,voice,when){
 }
 function patHitLight(pos,voice){
   if(!state.playing)return;
-  const C=state.custom,span=patBarSpan(),todo=Math.max(1,C.bars)*span;
-  /* Where the hit is in the pattern it came from. With Both the loop is the two
-     of them end to end, so the triplet half arrives a whole pattern further
-     along than the cells that hold it — looked up at that number it matched
-     nothing, and the triplet pattern never lit at all. */
-  let p=pos,grelha=(C.play==='12')?12:16;
-  if(C.play==='both'&&pos>=todo){p=pos-todo;grelha=12;}
-  const compasso=Math.floor(p/span);
-  /* And the page is turned here rather than trusted to have been turned. Both
-     are timers for the same instant and the order they run in is not ours to
-     decide; asking for the page we need makes it not matter. */
-  let mudou=false;
-  if(C.grid!==grelha){C.grid=grelha;mudou=true;}
-  if(C.bars>1&&patBar!==compasso){patBar=compasso;mudou=true;}
-  if(mudou)buildPatternEditor();
-  const c=document.querySelector('#pat-grid .pat-cell[data-pos="'+p+'"][data-voice="'+voice+'"]');
+  const compasso=Math.floor(pos/patBarSpan());
+  /* The page is turned here rather than trusted to have been turned. This and
+     the beat rule are timers for the same instant and the order they run in is
+     not ours to decide; asking for the page we need makes it not matter. */
+  if(patBars()>1&&patBar!==compasso){patBar=compasso;buildPatternEditor();}
+  const c=document.querySelector('#pat-grid .pat-cell[data-pos="'+pos+'"][data-voice="'+voice+'"]');
   if(!c)return;
   c.classList.add('now');
   // long enough to see at any tempo, short enough not to run into the next one
@@ -4108,16 +4084,8 @@ function patFlash(beat){
   if(!grid||!grid.children.length)return;             // the editor is not open
   if(!state.playing||state.groove!=='custom'){patTempoVivo=null;patPintaRisco();return;}
   const porCompasso=Math.max(1,state.sig);
-  const compasso=Math.floor(beat/porCompasso);
-  const C=state.custom;
-  /* With Both the loop is the straight pattern and then the triplet one, so
-     which half is sounding says which of the two to be looking at. */
-  if(C.play==='both'){
-    const querGrelha=compasso<C.bars?16:12;
-    if(C.grid!==querGrelha){C.grid=querGrelha;buildPatternEditor();}
-  }
-  const meuCompasso=compasso%Math.max(1,C.bars);
-  if(C.bars>1&&meuCompasso!==patBar){patBar=meuCompasso;buildPatternEditor();}
+  const compasso=Math.floor(beat/porCompasso)%patBars();
+  if(patBars()>1&&compasso!==patBar){patBar=compasso;buildPatternEditor();}
   patTempoVivo=beat%porCompasso;
   patPintaRisco();
 }
@@ -4139,14 +4107,8 @@ function stopPlayback(){
   stopBrushBed();
   stopAllAudio();
   patLimpaLuz();
-  /* Back to the first bar, and to the pattern whoever is at the keyboard had
-     open: the page turns itself while it plays, and a tap after it stops must
-     write where they left off, not where the loop happened to end. */
-  let volta=false;
-  if(patGridSeu!=null&&state.custom.grid!==patGridSeu){state.custom.grid=patGridSeu;volta=true;}
-  if(patBar!==0&&state.custom.bars>1){patBar=0;volta=true;}
-  patGridSeu=null;
-  if(volta)buildPatternEditor();
+  // back to the first bar, which is where the pattern begins
+  if(patBar!==0&&patBars()>1){patBar=0;buildPatternEditor();}
   document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('active-beat'));
   document.getElementById('current-note').textContent='—';
   document.getElementById('current-freq').textContent='';
@@ -4266,11 +4228,13 @@ function setSig(n){
      leaves hits past its end with nowhere to be. They are dropped rather than
      kept invisible: a hit you cannot see and cannot reach is worse than one
      that is gone. A longer bar simply has room to spare. */
-  const span=state.custom.bars*patBarSpan();
-  const before=state.custom.h16.length+state.custom.h12.length;
-  state.custom.h16=state.custom.h16.filter(h=>h[0]<span);
-  state.custom.h12=state.custom.h12.filter(h=>h[0]<span);
-  if(state.custom.h16.length+state.custom.h12.length!==before)savePattern();
+  const span=patBars()*patBarSpan();
+  const antes=state.custom.h16.length+state.custom.h12.length;
+  const s16=Math.max(1,state.custom.b16||1)*patBarSpan();
+  const s12=Math.max(1,state.custom.b12||1)*patBarSpan();
+  state.custom.h16=state.custom.h16.filter(h=>h[0]<s16);
+  state.custom.h12=state.custom.h12.filter(h=>h[0]<s12);
+  if(state.custom.h16.length+state.custom.h12.length!==antes)savePattern();
   buildPatternEditor();
   buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
 }
@@ -4296,7 +4260,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31i';
+const APP_VERSION='2026-08-31j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6396,6 +6360,8 @@ let patBar=0;                            // which bar of the pattern is on scree
    the dots that used to say so are gone. */
 const patHits=()=>state.custom.grid===12?state.custom.h12:state.custom.h16;
 const patPut=a=>{if(state.custom.grid===12)state.custom.h12=a;else state.custom.h16=a;};
+const patBars=()=>Math.max(1,(state.custom.grid===12?state.custom.b12:state.custom.b16)||1);
+const patSetBars=n=>{if(state.custom.grid===12)state.custom.b12=n;else state.custom.b16=n;};
 const patStep=()=>state.custom.grid===12?4:3;    // twelfths per cell
 const patPerBeat=()=>state.custom.grid===12?3:4; // cells per beat
 const patCells=()=>patPerBeat()*Math.max(1,state.sig);   // cells per bar
@@ -6407,6 +6373,7 @@ const patBarSpan=()=>Math.max(1,state.sig)*GRID;         // twelfths per bar
    pattern in triplets. */
 function patLoadInto(C,x){
   const ok=a=>Array.isArray(a)?a.filter(h=>Array.isArray(h)&&h.length===3):[];
+  const n=(v,d)=>{const k=parseInt(v,10);return (k>=1&&k<=4)?k:d;};
   if(Array.isArray(x.h16)||Array.isArray(x.h12)){
     C.h16=ok(x.h16);C.h12=ok(x.h12);
   } else {
@@ -6414,7 +6381,11 @@ function patLoadInto(C,x){
     if(x.grid===12){C.h12=um;C.h16=[];}
     else{C.h16=um;C.h12=[];}
   }
-  C.play=(x.play==='12'||x.play==='both')?x.play:'16';
+  /* Each pattern's own length. Saved before there were two of them there is one
+     number, which was the length of whichever one was written, so it is given
+     to both — and the empty one is one bar of nothing either way. */
+  const velho=n(x.bars,1);
+  C.b16=n(x.b16,velho);C.b12=n(x.b12,velho);
 }
 function patAt(voice,pos){
   return patHits().find(h=>h[1]===voice&&h[0]===pos);
@@ -6434,10 +6405,10 @@ function patFromStyle(key){
      would throw away a four-bar pattern the moment you asked to start from one;
      it is laid down repeatedly instead, up to the length you have, so four bars
      of rock is four bars of rock to work on. */
-  if(state.custom.bars<G.bars)state.custom.bars=G.bars;
+  if(patBars()<G.bars)patSetBars(G.bars);
   // the style is written in four; anything past the end of a shorter bar is left
   // behind rather than folded somewhere it was never meant to be
-  const span=state.custom.bars*patBarSpan(), styleSpan=G.bars*4*GRID;
+  const span=patBars()*patBarSpan(), styleSpan=G.bars*4*GRID;
   const hits=[];
   for(let at=0;at<span;at+=styleSpan){
     G.hits.forEach(h=>{
@@ -6485,17 +6456,16 @@ function buildPatternEditor(){
   buildPatternList();
   const grid=document.getElementById('pat-grid');
   if(!grid)return;
-  const bars=state.custom.bars,cells=patCells(),step=patStep();
+  const bars=patBars(),cells=patCells(),step=patStep();
   if(patBar>=bars)patBar=0;
 
   const bsel=document.getElementById('pat-bars');
   if(bsel&&!bsel.options.length){
     [1,2,3,4].forEach(n=>bsel.appendChild(new Option(n,n)));
     bsel.addEventListener('change',()=>{
-      state.custom.bars=Math.max(1,Math.min(4,parseInt(bsel.value,10)||1));
-      const span=state.custom.bars*patBarSpan();
-      state.custom.h16=state.custom.h16.filter(h=>h[0]<span);
-      state.custom.h12=state.custom.h12.filter(h=>h[0]<span);
+      patSetBars(Math.max(1,Math.min(4,parseInt(bsel.value,10)||1)));
+      const span=patBars()*patBarSpan();
+      patPut(patHits().filter(h=>h[0]<span));
       savePattern();buildPatternEditor();refreshSectionSummaries();liveChange();
     });
   }
@@ -6504,18 +6474,13 @@ function buildPatternEditor(){
   const grow=document.getElementById('pat-grid-row');
   if(grow){
     grow.innerHTML='';
-    [[16,tr('grid.16ths','16ths')],[12,tr('grid.triplets','Triplets')]].forEach(([v,label])=>{
+    [[16,tr('fig.simple','Simple')],[12,tr('fig.compound','Compound')]].forEach(([v,label])=>{
       const b=document.createElement('button');
       b.className='pick-btn'+(state.custom.grid===v?' active':'');
       b.textContent=label;
       b.onclick=()=>{
         state.custom.grid=v;
-        /* What is on the screen is what sounds. Left apart, opening the triplet
-           pattern while the straight one was the one playing meant writing notes
-           and hearing nothing — the same fault the dots had, wearing a different
-           coat. Both is left alone, because Both already includes whichever one
-           you are looking at; and Plays can still be set by hand afterwards. */
-        if(state.custom.play!=='both')state.custom.play=(v===12?'12':'16');
+        if(patBar>=patBars())patBar=0;
         savePattern();buildPatternEditor();
         if(state.groove==='custom')liveChange();
         refreshSectionSummaries();
@@ -6523,24 +6488,6 @@ function buildPatternEditor(){
       grow.appendChild(b);
     });
     gridify(grow);
-  }
-  const prow=document.getElementById('pat-play-row');
-  if(prow){
-    prow.innerHTML='';
-    [['16',tr('grid.16ths','16ths')],['12',tr('grid.triplets','Triplets')],
-     ['both',tr('pat.playBoth','Both')]].forEach(([v,label])=>{
-      const b=document.createElement('button');
-      b.className='pick-btn'+((state.custom.play||'16')===v?' active':'');
-      b.textContent=label;
-      b.title=v==='both'?tr('pat.bothHint','The straight one, then the triplet one — twice the loop'):'';
-      b.onclick=()=>{
-        state.custom.play=v;savePattern();buildPatternEditor();
-        if(state.groove!=='custom')setGroove('custom');
-        else{refreshSectionSummaries();liveChange();}
-      };
-      prow.appendChild(b);
-    });
-    gridify(prow);
   }
   const pen=document.getElementById('pat-pen-row');
   if(pen){
@@ -6576,9 +6523,9 @@ function buildPatternEditor(){
   const cprow=document.getElementById('pat-copy-row');
   const cpline=document.getElementById('pat-copy-line');
   if(cprow&&cpline){
-    cpline.style.display=state.custom.bars>1?'':'none';
+    cpline.style.display=patBars()>1?'':'none';
     cprow.innerHTML='';
-    for(let i=0;i<state.custom.bars;i++){
+    for(let i=0;i<patBars();i++){
       if(i===patBar)continue;
       const b=document.createElement('button');
       b.className='pick-btn';
@@ -6784,27 +6731,16 @@ function patInfo(){
   const el=document.getElementById('pat-info');
   if(!el)return;
   const n=patHits().length;
-  const bars=state.custom.bars;
+  const bars=patBars();
   const where=tr('pat.loops',{one:'loops {n} bar',other:'loops {n} bars'},{n:bars})
     +(bars>1?tr('pat.editing',', editing bar {n}',{n:patBar+1}):'');
-  /* And if the one on screen is not the one being heard — which can only happen
-     now by asking for it — say so, rather than leaving you tapping in silence. */
-  const mudo=(state.custom.play!=='both')&&
-             ((state.custom.grid===12)!==(state.custom.play==='12'));
-  const aviso=mudo?'\n'+tr('pat.notPlaying',
-    'This one is not the one playing — Plays is set to the other.'):'';
+  const aviso='';
   el.textContent=(n
     ? where+' · '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})
       +' · '+tr('pat.tapWrites','tap writes at the level above, tap again to clear')
     : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style'))+aviso;
   paintMixUsed();      // a voice written in just now must become movable
-  /* The closed panel says what you would hear, not what you happen to be
-     looking at: with Both that is the two of them and twice the bars, and with
-     either one on its own it is that one — which is not always the one on the
-     screen. */
-  const C=state.custom;
-  const soa=C.play==='both'?C.h16.length+C.h12.length:(C.play==='12'?C.h12.length:C.h16.length);
-  const compassos=C.play==='both'?C.bars*2:C.bars;
+  const soa=n,compassos=bars;
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=soa
     ? '· '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:soa})+', '
@@ -6951,7 +6887,6 @@ function applyExercise(x){
   }
   if(x.custom&&(Array.isArray(x.custom.hits)||Array.isArray(x.custom.h16)||Array.isArray(x.custom.h12))){
     patLoadInto(state.custom,x.custom);
-    state.custom.bars=num(x.custom.bars,1,4)||1;
     state.custom.grid=x.custom.grid===12?12:16;
   }
   const p=x.practice;
@@ -7096,8 +7031,8 @@ function savePatternAs(){
   const field=document.getElementById('pat-name');
   const name=(field.value||'').trim().slice(0,40);
   if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
-  const entry={n:name,bars:state.custom.bars,grid:state.custom.grid,
-               play:state.custom.play,
+  const entry={n:name,grid:state.custom.grid,
+               b16:state.custom.b16,b12:state.custom.b12,
                h16:JSON.parse(JSON.stringify(state.custom.h16)),
                h12:JSON.parse(JSON.stringify(state.custom.h12))};
   const at=patterns.findIndex(x=>x.n.toLowerCase()===name.toLowerCase());
@@ -7116,7 +7051,6 @@ function savePatternAs(){
 function loadPatternNamed(i){
   const x=patterns[i];if(!x)return;
   patLoadInto(state.custom,x);
-  state.custom.bars=Math.max(1,Math.min(4,parseInt(x.bars,10)||1));
   state.custom.grid=x.grid===12?12:16;
   document.getElementById('pat-name').value=x.n;
   savePattern();                       // the working slot is what Custom plays
@@ -7143,13 +7077,20 @@ function buildPatternList(){
     const row=document.createElement('div');row.className='ex-row';
     const b=document.createElement('button');
     b.className='pick-btn';
-    const n=(x.hits||[]).length;
     b.innerHTML='';
     b.append(document.createTextNode(x.n));
     const sub=document.createElement('span');
     sub.className='ex-sub';
-    sub.textContent=tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})+' · '+
-                    tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:x.bars||1});
+    /* A saved pattern holds both times now, so the line under its name says
+       what is in each of them. It was reading a field that stopped being
+       written, and every one of them said nought hits, one bar. */
+    const conta=(a,b2)=>tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:(a||[]).length})+
+      ' / '+tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:b2||1});
+    const velho=Array.isArray(x.hits);
+    sub.textContent=velho
+      ? conta(x.hits,x.bars)
+      : tr('fig.simple','Simple')+' '+conta(x.h16,x.b16)+' · '+
+        tr('fig.compound','Compound')+' '+conta(x.h12,x.b12);
     b.appendChild(sub);
     b.onclick=()=>loadPatternNamed(i);
     const d=document.createElement('button');
@@ -7173,7 +7114,7 @@ function buildPatternList(){
    purpose, but a pattern you wrote is your work, not a view setting. */
 function savePattern(){
   try{localStorage.setItem('scaletune-pattern',JSON.stringify({
-    bars:state.custom.bars,grid:state.custom.grid,play:state.custom.play,
+    grid:state.custom.grid,b16:state.custom.b16,b12:state.custom.b12,
     h16:state.custom.h16,h12:state.custom.h12,
     kit:state.kit,mix:state.mix}));}catch(e){}
 }
@@ -7188,7 +7129,6 @@ function loadPattern(){
        being written to the store and read back as empty. */
     if(p&&(Array.isArray(p.hits)||Array.isArray(p.h16)||Array.isArray(p.h12))){
       patLoadInto(state.custom,p);
-      state.custom.bars=Math.max(1,Math.min(4,parseInt(p.bars,10)||1));
       state.custom.grid=p.grid===12?12:16;
     }
     if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;

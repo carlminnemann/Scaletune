@@ -588,11 +588,9 @@
  "aria.patBars": "Wie viele Takte im Loop",
  "aria.patFrom": "Einen Stil ins Muster kopieren",
  "aria.bpm": "Schläge pro Minute",
- "pat.plays": "Spielt",
- "pat.playBoth": "Beide",
- "pat.bothHint": "Erst das gerade, dann das triolische — der doppelte Loop",
- "pat.writeIn": "Bearbeitet",
- "pat.notPlaying": "Dieses ist nicht das, was spielt — Spielt steht auf dem anderen.",
  "pat.clearAll": "✕ Alles leeren",
- "pat.clearBar": "✕ Takt {n} leeren"
+ "pat.clearBar": "✕ Takt {n} leeren",
+ "fig.simple": "Einfach",
+ "fig.compound": "Zusammengesetzt",
+ "pat.which": "Taktart"
 }

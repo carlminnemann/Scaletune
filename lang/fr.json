@@ -588,11 +588,9 @@
  "aria.patBars": "Combien de mesures en boucle",
  "aria.patFrom": "Copier un style dans le motif",
  "aria.bpm": "Battements par minute",
- "pat.plays": "Joue",
- "pat.playBoth": "Les deux",
- "pat.bothHint": "Le droit d’abord, le ternaire ensuite — deux fois la boucle",
- "pat.writeIn": "Écriture",
- "pat.notPlaying": "Ce n’est pas celui qui joue — Joue est réglé sur l’autre.",
  "pat.clearAll": "✕ Tout effacer",
- "pat.clearBar": "✕ Effacer la mesure {n}"
+ "pat.clearBar": "✕ Effacer la mesure {n}",
+ "fig.simple": "Simple",
+ "fig.compound": "Composé",
+ "pat.which": "Mesure"
 }

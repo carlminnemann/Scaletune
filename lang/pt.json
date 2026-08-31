@@ -588,11 +588,9 @@
  "aria.patBars": "Quantos compassos em ciclo",
  "aria.patFrom": "Copiar um estilo para o padrão",
  "aria.bpm": "Batidas por minuto",
- "pat.plays": "Toca",
- "pat.playBoth": "Os dois",
- "pat.bothHint": "Primeiro o direito, depois o de tercinas — o dobro do ciclo",
- "pat.writeIn": "A escrever",
- "pat.notPlaying": "Este não é o que está a tocar — o Toca está no outro.",
  "pat.clearAll": "✕ Limpar tudo",
- "pat.clearBar": "✕ Limpar o compasso {n}"
+ "pat.clearBar": "✕ Limpar o compasso {n}",
+ "fig.simple": "Simples",
+ "fig.compound": "Composto",
+ "pat.which": "Tempo"
 }

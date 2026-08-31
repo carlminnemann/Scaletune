@@ -603,11 +603,9 @@
  "aria.patBars": "Сколько тактов в петле",
  "aria.patFrom": "Скопировать стиль в паттерн",
  "aria.bpm": "Ударов в минуту",
- "pat.plays": "Играет",
- "pat.playBoth": "Оба",
- "pat.bothHint": "Сначала ровный, затем триольный — вдвое длиннее петля",
- "pat.writeIn": "Правка",
- "pat.notPlaying": "Играет не этот — «Играет» стоит на другом.",
  "pat.clearAll": "✕ Очистить всё",
- "pat.clearBar": "✕ Очистить такт {n}"
+ "pat.clearBar": "✕ Очистить такт {n}",
+ "fig.simple": "Простой",
+ "fig.compound": "Сложный",
+ "pat.which": "Метр"
 }
