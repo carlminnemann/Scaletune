@@ -4163,7 +4163,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31b';
+const APP_VERSION='2026-08-31c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6316,12 +6316,16 @@ function patFromStyle(key){
          they have to land on triplet cells, so they are put on the nearest one;
          where two arrive together the louder stays. Into the sixteenth pattern
          nothing moves, because nothing has to. */
+      /* `cai`, not `at`: the loop outside is already using that name, and a
+         const of the same name inside the callback put the whole callback in
+         its own dead zone — every call threw, so copying a style in did
+         nothing at all. */
       const step=patStep();
-      const at=Math.round(pos/step)*step;
-      if(at>=span)return;
-      const had=hits.find(x=>x[0]===at&&x[1]===voice);
+      const cai=Math.round(pos/step)*step;
+      if(cai>=span)return;
+      const had=hits.find(x=>x[0]===cai&&x[1]===voice);
       if(had){if(vel>had[2])had[2]=vel;return;}
-      hits.push([at,voice,vel]);
+      hits.push([cai,voice,vel]);
     });
   }
   patPut(hits.sort((a,b)=>a[0]-b[0]));
@@ -6638,10 +6642,17 @@ function patInfo(){
       +' · '+tr('pat.tapWrites','tap writes at the level above, tap again to clear')
     : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style'))+aviso;
   paintMixUsed();      // a voice written in just now must become movable
+  /* The closed panel says what you would hear, not what you happen to be
+     looking at: with Both that is the two of them and twice the bars, and with
+     either one on its own it is that one — which is not always the one on the
+     screen. */
+  const C=state.custom;
+  const soa=C.play==='both'?C.h16.length+C.h12.length:(C.play==='12'?C.h12.length:C.h16.length);
+  const compassos=C.play==='both'?C.bars*2:C.bars;
   const sum=document.getElementById('pat-sum');
-  if(sum)sum.textContent=n
-    ? '· '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:n})+', '
-      +tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:state.custom.bars})
+  if(sum)sum.textContent=soa
+    ? '· '+tr('pat.hits',{one:'{n} hit',other:'{n} hits'},{n:soa})+', '
+      +tr('pat.bars',{one:'{n} bar',other:'{n} bars'},{n:compassos})
     : '· '+tr('pat.emptySum','empty');
 }
 /* ---------- saved exercises ----------
