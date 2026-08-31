@@ -592,5 +592,7 @@
  "pat.playBoth": "Beide",
  "pat.bothHint": "Erst das gerade, dann das triolische — der doppelte Loop",
  "pat.writeIn": "Bearbeitet",
- "pat.notPlaying": "Dieses ist nicht das, was spielt — Spielt steht auf dem anderen."
+ "pat.notPlaying": "Dieses ist nicht das, was spielt — Spielt steht auf dem anderen.",
+ "pat.clearAll": "✕ Alles leeren",
+ "pat.clearBar": "✕ Takt {n} leeren"
 }

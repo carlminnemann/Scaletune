@@ -592,5 +592,7 @@
  "pat.playBoth": "Os dois",
  "pat.bothHint": "Primeiro o direito, depois o de tercinas — o dobro do ciclo",
  "pat.writeIn": "A escrever",
- "pat.notPlaying": "Este não é o que está a tocar — o Toca está no outro."
+ "pat.notPlaying": "Este não é o que está a tocar — o Toca está no outro.",
+ "pat.clearAll": "✕ Limpar tudo",
+ "pat.clearBar": "✕ Limpar o compasso {n}"
 }

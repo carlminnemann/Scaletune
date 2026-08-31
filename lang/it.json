@@ -592,5 +592,7 @@
  "pat.playBoth": "Tutti e due",
  "pat.bothHint": "Prima quello dritto, poi quello in terzine — il doppio del giro",
  "pat.writeIn": "In scrittura",
- "pat.notPlaying": "Questo non è quello che suona — Suona è impostato sull’altro."
+ "pat.notPlaying": "Questo non è quello che suona — Suona è impostato sull’altro.",
+ "pat.clearAll": "✕ Cancella tutto",
+ "pat.clearBar": "✕ Cancella la battuta {n}"
 }

@@ -592,5 +592,7 @@
  "pat.playBoth": "Les deux",
  "pat.bothHint": "Le droit d’abord, le ternaire ensuite — deux fois la boucle",
  "pat.writeIn": "Écriture",
- "pat.notPlaying": "Ce n’est pas celui qui joue — Joue est réglé sur l’autre."
+ "pat.notPlaying": "Ce n’est pas celui qui joue — Joue est réglé sur l’autre.",
+ "pat.clearAll": "✕ Tout effacer",
+ "pat.clearBar": "✕ Effacer la mesure {n}"
 }
