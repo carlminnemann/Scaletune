@@ -607,5 +607,8 @@
  "pat.clearBar": "✕ Очистить такт {n}",
  "fig.simple": "Простой",
  "fig.compound": "Сложный",
- "pat.which": "Метр"
+ "pat.which": "Метр",
+ "reset.all": "✕ Очистить этот режим",
+ "reset.sure": "✕ Нажмите ещё раз, чтобы очистить",
+ "reset.done": "Очищено."
 }

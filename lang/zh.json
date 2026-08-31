@@ -577,5 +577,8 @@
  "pat.clearBar": "✕ 清除第 {n} 小节",
  "fig.simple": "单拍子",
  "fig.compound": "复拍子",
- "pat.which": "拍子"
+ "pat.which": "拍子",
+ "reset.all": "✕ 清空此模式",
+ "reset.sure": "✕ 再点一次以清空此模式",
+ "reset.done": "已清空。"
 }

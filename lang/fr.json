@@ -592,5 +592,8 @@
  "pat.clearBar": "✕ Effacer la mesure {n}",
  "fig.simple": "Simple",
  "fig.compound": "Composé",
- "pat.which": "Mesure"
+ "pat.which": "Mesure",
+ "reset.all": "✕ Vider ce mode",
+ "reset.sure": "✕ Touchez encore pour vider ce mode",
+ "reset.done": "Vidé."
 }

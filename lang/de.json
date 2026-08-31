@@ -592,5 +592,8 @@
  "pat.clearBar": "✕ Takt {n} leeren",
  "fig.simple": "Einfach",
  "fig.compound": "Zusammengesetzt",
- "pat.which": "Taktart"
+ "pat.which": "Taktart",
+ "reset.all": "✕ Diesen Modus leeren",
+ "reset.sure": "✕ Nochmal tippen, um zu leeren",
+ "reset.done": "Geleert."
 }

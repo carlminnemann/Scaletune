@@ -592,5 +592,8 @@
  "pat.clearBar": "✕ Cancella la battuta {n}",
  "fig.simple": "Semplice",
  "fig.compound": "Composto",
- "pat.which": "Tempo"
+ "pat.which": "Tempo",
+ "reset.all": "✕ Azzera questo modo",
+ "reset.sure": "✕ Tocca di nuovo per azzerare questo modo",
+ "reset.done": "Azzerato."
 }

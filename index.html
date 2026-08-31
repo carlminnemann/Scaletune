@@ -581,6 +581,11 @@ details.sec[open] .sec-sum{display:none}
   display:flex;align-items:center;justify-content:center}
 .seg>button.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .seg>button.now{background:transparent;color:var(--green-hi);box-shadow:inset 0 0 0 1px var(--green)}
+.mode-reset{margin:var(--s5) 0 var(--s3)}
+.mode-reset .clear-btn{margin-top:0}
+/* Armed, it says what the next tap will do and wears the colour of a thing that
+   takes something away. */
+.clear-btn.armed{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 .btn-wrap{display:grid;gap:var(--s1);grid-template-columns:repeat(var(--cols,4),1fr)}
 .btn-wrap>*{min-width:0}
 .pick-btn{position:relative;min-height:var(--h);padding:4px 7px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;white-space:normal;overflow-wrap:break-word;hyphens:auto;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);touch-action:manipulation}
@@ -1467,6 +1472,12 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <div class="info-line" id="rot-hint" style="display:none">tap one to take it out</div>
   <div class="rot-line" id="rot-now"></div>
   <div class="rot-line rot-next" id="rot-next"></div>
+</div>
+
+<!-- After everything it clears, which is where a thing like this belongs: you
+     scroll past what it will undo before you reach it. -->
+<div class="mode-reset">
+  <button class="clear-btn" id="mode-reset" onclick="resetMode()"></button>
 </div>
 
 </div><!-- /scroll -->
@@ -4260,7 +4271,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31m';
+const APP_VERSION='2026-09-01a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4953,7 +4964,12 @@ const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes',
   'passCount','passUnit','useSubdivList','subdivDir',
   'rootMove','repeat','modesTour','useList'];
 const metroPerMode={};
-let METRO_FRESH=null;
+let METRO_FRESH=null,METRO_FRESH_G=null;
+/* What only Metro has: the accompaniment, the kit, the mixer and the pattern.
+   They are not per mode, because they exist in one — but clearing that mode has
+   to clear them too, or All clear would leave a drum pattern playing under a
+   metronome it had just put back to nothing. */
+const SO_DO_METRO=['groove','sigBeforeGroove','kit','density','balladHat'];
 const clonar=x=>JSON.parse(JSON.stringify(x));
 function metroSnapshot(){
   const o={p:{}};
@@ -4985,6 +5001,50 @@ function metroRestore(o){
   studyIdx=0;subdivIdx=0;patBar=0;
 }
 function metroKeep(mode){metroPerMode[mode]=metroSnapshot();}
+/* ---------- All clear, one mode at a time ----------
+   Back to the way this mode opens, and nothing beyond it: the other modes are
+   left exactly as they were, and so is what belongs to you rather than to the
+   practice — the voice, the volume, what the notes are called, and every
+   exercise and pattern you have saved.
+
+   It asks first. It undoes more than any other button here, and there is no
+   undo behind it; the second tap within four seconds is the one that does it,
+   and it says so in between. */
+let resetArmado=0;
+function resetLabel(){
+  const b=document.getElementById('mode-reset');
+  if(!b)return;
+  const armado=resetArmado&&Date.now()<resetArmado;
+  b.textContent=armado?tr('reset.sure','✕ Tap again to clear this mode')
+                      :tr('reset.all','✕ Clear this mode');
+  b.classList.toggle('armed',!!armado);
+}
+function resetMode(){
+  if(!(resetArmado&&Date.now()<resetArmado)){
+    resetArmado=Date.now()+4000;
+    resetLabel();
+    setTimeout(()=>{if(resetArmado&&Date.now()>=resetArmado){resetArmado=0;resetLabel();}},4100);
+    return;
+  }
+  resetArmado=0;
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  metroRestore(clonar(METRO_FRESH));
+  // and what only this mode has, where this mode is the one that has it
+  if(state.mode==='metro'&&METRO_FRESH_G){
+    SO_DO_METRO.forEach(k=>state[k]=METRO_FRESH_G[k]);
+    state.mix=clonar(METRO_FRESH_G.mix);
+    state.custom=clonar(METRO_FRESH_G.custom);
+  }
+  metroKeep(state.mode);
+  resetRun();restartModesRun();
+  redrawMetro();
+  buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
+  buildPatternEditor();updateSupersededControls();
+  refreshSequence();refreshSectionSummaries();
+  resetLabel();
+  setStatus(tr('reset.done','Cleared.'));
+  setTimeout(()=>setStatus(''),1600);
+}
 function metroTake(mode){
   if(!metroPerMode[mode])metroPerMode[mode]=JSON.parse(JSON.stringify(METRO_FRESH));
   metroRestore(metroPerMode[mode]);
@@ -8442,7 +8502,7 @@ function rebuildEverything(){
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
   buildAlignRow();buildSpeedControls();buildRootMoveRow();buildRepeatRow();
-  buildExercises();
+  buildExercises();resetLabel();
   renderPitchPickers();updateInfo();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
   setMode(state.mode);
@@ -8564,11 +8624,16 @@ renderPitchPickers();
 /* The template every mode starts from, taken before anything has been chosen:
    60 to the quarter, four to the bar, no count-in and no tempo change. */
 METRO_FRESH=metroSnapshot();
+METRO_FRESH_G={};
+SO_DO_METRO.forEach(k=>METRO_FRESH_G[k]=state[k]);
+METRO_FRESH_G.mix=clonar(state.mix);
+METRO_FRESH_G.custom=clonar(state.custom);
 setMode(state.mode);
 /* Every dropdown in the app becomes a wheel. They are all in the markup from
    the start, so one pass here catches them all; what fills them with options
    happens later and does not care. */
 montaRoladores();
+resetLabel();
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{

@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v205';
+const CACHE = 'scaletune-v206';
 const ASSETS = [
   './',
   './index.html',

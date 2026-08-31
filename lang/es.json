@@ -592,5 +592,8 @@
  "pat.clearBar": "✕ Borrar el compás {n}",
  "fig.simple": "Simple",
  "fig.compound": "Compuesto",
- "pat.which": "Compás"
+ "pat.which": "Compás",
+ "reset.all": "✕ Borrar este modo",
+ "reset.sure": "✕ Toca otra vez para borrar este modo",
+ "reset.done": "Borrado."
 }

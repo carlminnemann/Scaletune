@@ -592,5 +592,8 @@
  "pat.clearBar": "✕ Limpar o compasso {n}",
  "fig.simple": "Simples",
  "fig.compound": "Composto",
- "pat.which": "Tempo"
+ "pat.which": "Tempo",
+ "reset.all": "✕ Limpar este modo",
+ "reset.sure": "✕ Toca outra vez para limpar este modo",
+ "reset.done": "Limpo."
 }
