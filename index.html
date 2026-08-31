@@ -3252,6 +3252,13 @@ function woodClick(t,v){
    what a drum is. It weighs nothing, carries no licence, and it is dry and tight
    where the recorded kit is big and warm — so it is a choice, not a fallback.
    Every voice keeps content above 400Hz, which is where a phone speaker starts. */
+/* Every one of these used to begin at full level in a single sample. On the
+   noises that is a transient and reads as the stick; on the cymbal, which is
+   six square waves, it is a step of 0.85 out of nothing, and a step is a click.
+   Measured on a busy bar: thirty-four jumps over a third of full scale, the
+   worst of them 1.14. A millisecond and a bit of fade-in costs nothing anyone
+   can hear on a drum and leaves no edge at all. */
+const DRUM_ATK=0.0013;
 function drumNoise(t,o){
   const n=Math.ceil(audioCtx.sampleRate*o.dur);
   const buf=audioCtx.createBuffer(1,n,audioCtx.sampleRate);
@@ -3262,8 +3269,10 @@ function drumNoise(t,o){
   if(o.bp){f.type='bandpass';f.frequency.value=o.bp;f.Q.value=o.q||1;}
   else{f.type='highpass';f.frequency.value=o.hp||4000;}
   const g=audioCtx.createGain();
-  g.gain.setValueAtTime(Math.max(1e-4,o.gain),t);
-  g.gain.exponentialRampToValueAtTime(1e-4,t+o.dur);
+  const pico=Math.max(1e-4,o.gain);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(pico,t+DRUM_ATK);
+  g.gain.exponentialRampToValueAtTime(1e-4,t+Math.max(o.dur,DRUM_ATK*2));
   src.connect(f);f.connect(g);g.connect(audioCtx.destination);
   src.start(t);src.stop(t+o.dur+0.02);
   schedNodes.push(src,f,g);
@@ -3273,8 +3282,10 @@ function drumTone(t,o){
   osc.type=o.type||'sine';
   osc.frequency.setValueAtTime(o.f0,t);
   if(o.f1)osc.frequency.exponentialRampToValueAtTime(o.f1,t+Math.min(o.dur,o.bend||0.05));
-  g.gain.setValueAtTime(Math.max(1e-4,o.gain),t);
-  g.gain.exponentialRampToValueAtTime(1e-4,t+o.dur);
+  const pico=Math.max(1e-4,o.gain);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(pico,t+DRUM_ATK);
+  g.gain.exponentialRampToValueAtTime(1e-4,t+Math.max(o.dur,DRUM_ATK*2));
   osc.connect(g);g.connect(audioCtx.destination);
   osc.start(t);osc.stop(t+o.dur+0.02);
   schedNodes.push(osc,g);
@@ -4271,7 +4282,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01a';
+const APP_VERSION='2026-09-01b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7347,7 +7358,11 @@ function buildKitRow(){
   const row=document.getElementById('kit-row');
   if(!row)return;
   const line=document.getElementById('kit-line');
-  if(line)line.style.display=grooveOn()?'':'none';
+  /* Whether an accompaniment is chosen, not whether it happens to have anything
+     in it yet. Custom starts empty, so asking for hits hid the kit at exactly
+     the moment you were about to write for it — and the kit is what you write
+     for. */
+  if(line)line.style.display=(grooveAllowed()&&state.groove!=='click')?'':'none';
   row.innerHTML='';
   [['recorded',tr('kit.recorded','Recorded')],['machine',tr('kit.machine','Machine')]].forEach(([k,label])=>{
     const b=document.createElement('button');
