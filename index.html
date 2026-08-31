@@ -1313,7 +1313,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <div class="pat-scroll"><div class="pat-grid" id="pat-grid"></div></div>
       <div class="step-row" style="margin-top:var(--s3)">
         <span class="step-unit" data-t="start-from">start from</span>
-        <select class="sig-select" id="pat-from" data-ta="aria.patFrom" aria-label="Copy a style into the pattern"></select>
+        <select class="sig-select" id="pat-from" data-repick="1" data-ta="aria.patFrom" aria-label="Copy a style into the pattern"></select>
         <button class="clear-btn" id="pat-clear-bar" style="margin-top:0;display:none"></button>
         <button class="clear-btn" id="pat-clear" style="margin-top:0">✕ Clear</button>
       </div>
@@ -4234,7 +4234,7 @@ function setSig(n){
   const s12=Math.max(1,state.custom.b12||1)*patBarSpan();
   state.custom.h16=state.custom.h16.filter(h=>h[0]<s16);
   state.custom.h12=state.custom.h12.filter(h=>h[0]<s12);
-  if(state.custom.h16.length+state.custom.h12.length!==antes)savePattern();
+  if(state.custom.h16.length+state.custom.h12.length!==antes)
   buildPatternEditor();
   buildBeats();renderPolyBeats();updateAlignInfo();refreshSectionSummaries();restartIfPlaying();
 }
@@ -4260,7 +4260,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31k';
+const APP_VERSION='2026-08-31l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5645,10 +5645,12 @@ function rollerFecha(){
   rollerAlvo=null;
 }
 function rollerEscolhe(sel,valor){
-  if(sel.value!==valor){
-    sel.value=valor;
-    sel.dispatchEvent(new Event('change',{bubbles:true}));
-  }
+  /* Normally a value that has not moved has nothing to say. Start from is the
+     exception: it stays on the style it copied, so choosing that same one again
+     is a request to copy it again, and it has to be heard. */
+  const outra=sel.value!==valor;
+  sel.value=valor;
+  if(outra||sel.dataset.repick)sel.dispatchEvent(new Event('change',{bubbles:true}));
 }
 function rollerAbre(sel){
   const back=document.getElementById('roller-back');
@@ -6453,7 +6455,6 @@ function patToggle(voice,pos){
   const a=patHits().filter(x=>x!==h);
   if(!h||patLevel(h)!==pen)a.push([pos,voice,PAT_VELS[pen]]);
   a.sort((x,y)=>x[0]-y[0]);patPut(a);
-  savePattern();
 }
 function buildPatternEditor(){
   buildPatternList();
@@ -6468,8 +6469,7 @@ function buildPatternEditor(){
     bsel.addEventListener('change',()=>{
       patSetBars(Math.max(1,Math.min(4,parseInt(bsel.value,10)||1)));
       const span=patBars()*patBarSpan();
-      patPut(patHits().filter(h=>h[0]<span));
-      savePattern();buildPatternEditor();refreshSectionSummaries();liveChange();
+      patPut(patHits().filter(h=>h[0]<span));buildPatternEditor();refreshSectionSummaries();liveChange();
     });
   }
   if(bsel)bsel.value=String(bars);
@@ -6483,8 +6483,7 @@ function buildPatternEditor(){
       b.textContent=label;
       b.onclick=()=>{
         state.custom.grid=v;
-        if(patBar>=patBars())patBar=0;
-        savePattern();buildPatternEditor();
+        if(patBar>=patBars())patBar=0;buildPatternEditor();
         if(state.groove==='custom')liveChange();
         refreshSectionSummaries();
       };
@@ -6538,8 +6537,7 @@ function buildPatternEditor(){
         const span=patBarSpan(), from=i*span, to=patBar*span;
         const taken=patHits().filter(h=>h[0]>=from&&h[0]<from+span)
           .map(h=>[h[0]-from+to,h[1],h[2]]);
-        patPut(patHits().filter(h=>h[0]<to||h[0]>=to+span).concat(taken).sort((a,b)=>a[0]-b[0]));
-        savePattern();buildPatternEditor();refreshSectionSummaries();liveChange();
+        patPut(patHits().filter(h=>h[0]<to||h[0]>=to+span).concat(taken).sort((a,b)=>a[0]-b[0]));buildPatternEditor();refreshSectionSummaries();liveChange();
       };
       cprow.appendChild(b);
     }
@@ -6554,7 +6552,7 @@ function buildPatternEditor(){
   if(clr&&!clr.dataset.wired){
     clr.dataset.wired='1';
     clr.onclick=()=>{
-      patPut([]);savePattern();buildPatternEditor();
+      patPut([]);buildPatternEditor();
       buildGrooveRow();refreshSectionSummaries();liveChange();
     };
   }
@@ -6566,8 +6564,7 @@ function buildPatternEditor(){
       clrBar.dataset.wired='1';
       clrBar.onclick=()=>{
         const span=patBarSpan(),de=patBar*span;
-        patPut(patHits().filter(h=>h[0]<de||h[0]>=de+span));
-        savePattern();buildPatternEditor();
+        patPut(patHits().filter(h=>h[0]<de||h[0]>=de+span));buildPatternEditor();
         buildGrooveRow();refreshSectionSummaries();liveChange();
       };
     }
@@ -6580,9 +6577,10 @@ function buildPatternEditor(){
     Object.keys(GROOVES).forEach(k=>from.appendChild(new Option(grooveLabel(k),k)));
     if(liga)from.addEventListener('change',()=>{
       if(!from.value)return;
-      patFromStyle(from.value);
-      from.value='';
-      savePattern();buildPatternEditor();
+      /* It stays on what was chosen. Resetting to "a style" made the line read
+         as though nothing had been done, when a whole pattern had just arrived
+         — and left no way to see which one it came from. */
+      patFromStyle(from.value);buildPatternEditor();
       setGroove('custom');
     });
   }
@@ -7057,8 +7055,7 @@ function loadPatternNamed(i){
   const x=patterns[i];if(!x)return;
   patLoadInto(state.custom,x);
   state.custom.grid=x.grid===12?12:16;
-  document.getElementById('pat-name').value=x.n;
-  savePattern();                       // the working slot is what Custom plays
+  document.getElementById('pat-name').value=x.n;                       // the working slot is what Custom plays
   /* Straight into the accompaniment, because a pattern you just chose and
      cannot hear reads as one that did not load. Nothing stops: the pattern is
      read fresh on every beat. */
@@ -7117,32 +7114,12 @@ function buildPatternList(){
 
 /* The one thing worth remembering across launches: the app opens clean on
    purpose, but a pattern you wrote is your work, not a view setting. */
-function savePattern(){
-  try{localStorage.setItem('scaletune-pattern',JSON.stringify({
-    grid:state.custom.grid,b16:state.custom.b16,b12:state.custom.b12,
-    h16:state.custom.h16,h12:state.custom.h12,
-    kit:state.kit,mix:state.mix}));}catch(e){}
-}
-function loadPattern(){
-  try{
-    const raw=localStorage.getItem('scaletune-pattern');
-    if(!raw)return;
-    const p=JSON.parse(raw);
-    /* Either shape. This guard still asked for the single list after the file
-       had stopped writing one, so the first open after the update migrated the
-       old pattern and every open after that restored nothing — the pattern was
-       being written to the store and read back as empty. */
-    if(p&&(Array.isArray(p.hits)||Array.isArray(p.h16)||Array.isArray(p.h12))){
-      patLoadInto(state.custom,p);
-      state.custom.grid=p.grid===12?12:16;
-    }
-    if(p&&(p.kit==='machine'||p.kit==='recorded'))state.kit=p.kit;
-    if(p&&p.mix)Object.keys(state.mix).forEach(k=>{
-      const v=parseFloat(p.mix[k]);
-      if(!isNaN(v)&&v>=0&&v<=1.5)state.mix[k]=v;
-    });
-  }catch(e){}
-}
+/* The working pattern is not remembered between launches, and nor is the kit or
+   the mixer. What you were in the middle of is not what you meant to keep: the
+   saves are, and they are one tap away. Opening the app puts everything at
+   zero, the way the scale, the mode and the metronome already did — this was
+   the one thing that carried over, and it made the app open in the middle of
+   something you had finished with. */
 
 function buildDensityRow(){
   const row=document.getElementById('density-row');
@@ -7217,8 +7194,7 @@ function buildMixer(){
         out.textContent=sl.value+'%';
         // the sweep is one long sound: it has to be told, not waited for
         if(k==='w'&&brushBed)
-          brushBed.g.gain.setTargetAtTime(brushBedLevel(),audioCtx.currentTime,0.05);
-        savePattern();mixSummary();
+          brushBed.g.gain.setTargetAtTime(brushBedLevel(),audioCtx.currentTime,0.05);mixSummary();
       };
       row.append(label,sl,out);
       host.appendChild(row);
@@ -7237,8 +7213,7 @@ function buildMixer(){
   if(reset&&!reset.dataset.wired){
     reset.dataset.wired='1';
     reset.onclick=()=>{
-      MIX_VOICES.forEach(([k])=>state.mix[k]=1);
-      savePattern();buildMixer();
+      MIX_VOICES.forEach(([k])=>state.mix[k]=1);buildMixer();
     };
   }
   mixSummary();
@@ -7292,7 +7267,7 @@ function buildKitRow(){
     b.className='pick-btn'+(state.kit===k?' active':'');
     b.textContent=label;
     b.onclick=()=>{
-      state.kit=k;savePattern();buildKitRow();
+      state.kit=k;buildKitRow();
       if(k!=='machine')Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
       refreshSectionSummaries();
     };
@@ -8300,13 +8275,14 @@ function spreadPanelsSoon(){
 }
 
 function initSections(){
-  // earlier versions remembered this across launches; clear what they left
-  // behind rather than leave dead keys sitting in storage forever
+  // earlier versions remembered these across launches — which sections were
+  // open, and the pattern you were writing; clear what they left behind rather
+  // than leave dead keys sitting in storage forever
   try{
     const stale=[];
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
-      if(k&&k.indexOf('scaletune-sec-')===0)stale.push(k);
+      if(k&&(k.indexOf('scaletune-sec-')===0||k==='scaletune-pattern'))stale.push(k);
     }
     stale.forEach(k=>localStorage.removeItem(k));
   }catch(e){}
@@ -8522,7 +8498,6 @@ buildBeats();
 buildPolyBeats();
 updateSupersededControls();
 buildNoteLenRow();
-loadPattern();
 buildGrooveRow();
 buildKitRow();
 buildDensityRow();
