@@ -62,13 +62,15 @@
      the tint itself, for borders and for text on a panel; --mode-fg is the text
      that sits ON the fill, which has to be near-white to be read. */
   --mode:#8d9c93;--mode-bg:#2e3a34;--mode-fg:#eef3ef;
-  /* Three weights for a hit, and they have to read as three. They were the dark
-     green, the green, and the green again with a ring round it: the first was
-     all but invisible on the cell and the last two were the same colour, so a
-     ghost note and an accent were told apart by a two-pixel outline. These are
-     the app's own green taken to three luminances, each about 1.9:1 from the one
-     under it, which is a step you can see across a room. */
-  --hit1:#4c5550;--hit2:#75817a;--hit3:#a5b6ab;
+  /* Three weights for a hit, and now three colours rather than three shades of
+     one: grey, green, red, which are three the app already owns. Luminance alone
+     was doing the telling and it was doing it too quietly.
+
+     The green here is the app's own with the grey squeezed out of it: the
+     wordmark's green is so nearly neutral that a grey beside it measured 19
+     apart, which at the size of a cell is not two colours. Same hue, the grey
+     taken out — 34 apart now, and the grey still sits at 3.2 on the cell. */
+  --hit1:#6b6b6b;--hit2:#7caf91;--hit3:var(--red);
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
@@ -114,10 +116,10 @@
      darkest paper, so the ink is a shade deeper than the fill. On the chip
      itself that shade is only the border, invisible against it. */
   --mode:#3f5147;--mode-bg:#5c6f63;--mode-fg:#f3f6f3;
-  /* The same three steps, going down into the paper instead of up out of the
-     dark. The old first step was --green-bg, which on this warm ground read as
-     a cold pale blue and belonged to nothing else on the page. */
-  --hit1:#89ac98;--hit2:#5f796b;--hit3:#3c4d43;
+  /* The same three, going dark into the paper instead of bright out of the
+     dark. The grey is a true neutral against a warm ground, which is what makes
+     it read as the quiet one and not as another shade of the green. */
+  --hit1:#868680;--hit2:#2f6a4a;--hit3:var(--red);
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -4163,7 +4165,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31c';
+const APP_VERSION='2026-08-31d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
