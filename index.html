@@ -66,11 +66,15 @@
      one: grey, green, red, which are three the app already owns. Luminance alone
      was doing the telling and it was doing it too quietly.
 
-     The green here is the app's own with the grey squeezed out of it: the
-     wordmark's green is so nearly neutral that a grey beside it measured 19
-     apart, which at the size of a cell is not two colours. Same hue, the grey
-     taken out — 34 apart now, and the grey still sits at 3.2 on the cell. */
-  --hit1:#6b6b6b;--hit2:#7caf91;--hit3:var(--red);
+     Muted, not vivid. The first pass at three colours reached for saturation to
+     separate them and they shouted; these are matte, and the separating is done
+     by hue and brightness together instead. The red is the app's own matte one
+     — the tone the transport wears, not the bright red that flashes a beat —
+     and the green is the wordmark's with a little of the grey taken out, which
+     is what a grey beside it needs to be a different colour at all.
+
+     Chroma 0, 15 and 23, against 22 and 65 in the pass that was too strong. */
+  --hit1:#5f5f5f;--hit2:#86a493;--hit3:#c58e86;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
@@ -119,7 +123,7 @@
   /* The same three, going dark into the paper instead of bright out of the
      dark. The grey is a true neutral against a warm ground, which is what makes
      it read as the quiet one and not as another shade of the green. */
-  --hit1:#868680;--hit2:#2f6a4a;--hit3:var(--red);
+  --hit1:#868680;--hit2:var(--green);--hit3:var(--stop);
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -4165,7 +4169,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31d';
+const APP_VERSION='2026-08-31e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
