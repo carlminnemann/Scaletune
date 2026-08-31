@@ -286,7 +286,10 @@ details.sec.pinned>summary::after{display:none}
 /* Every pixel here is a pixel of cell: on a phone the sixteen cells of a bar
    have about 300px between them, so the labels are two letters and the gaps are
    one pixel. Below a cell of 17px it scrolls sideways instead of shrinking. */
-.pat-scroll{overflow-x:auto;padding-bottom:2px;margin:0 -2px;padding-left:2px;padding-right:2px}
+/* Room above for the rule that marks the sounding bar: this box scrolls, so
+   anything drawn past its edge is cut off, and at the top the rule was being
+   cut off entirely. */
+.pat-scroll{overflow-x:auto;padding:7px 2px 2px;margin:0 -2px}
 .pat-grid{display:flex;flex-direction:column;gap:var(--s3);min-width:260px}
 .pat-half{display:flex;flex-direction:column;gap:3px}
 /* ---------- the grid ----------
@@ -300,7 +303,7 @@ details.sec.pinned>summary::after{display:none}
    Not lines drawn over the top. Those were tried first: the cells are a grid
    with a 1px gap, so a rule at a round percentage of the row lands a fraction
    off the boundary and shaves the cell beside it. */
-.pat-lanes{display:flex;flex-direction:column;gap:3px}
+.pat-lanes{position:relative;display:flex;flex-direction:column;gap:3px}
 .pat-lane{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
 .pat-name{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
   color:var(--text3);text-align:right;line-height:1.1}
@@ -319,12 +322,22 @@ details.sec.pinned>summary::after{display:none}
 .pat-cell[data-v="1"]{background:var(--hit1)}
 .pat-cell[data-v="2"]{background:var(--hit2)}
 .pat-cell[data-v="3"]{background:var(--hit3)}
-/* The beat that is sounding, lit down the whole stack of lanes: an empty cell
-   comes up a shade and every cell in the column takes an edge. Not an outline
-   in the text colour, which on six cells at once was a white ladder standing in
-   front of the pattern rather than a light on it. */
-.pat-cell.now{box-shadow:inset 0 0 0 1px var(--text3)}
-.pat-cell.now[data-v="0"]{background:var(--border)}
+/* A cell lights when its own hit sounds, and only then. Lighting the whole beat
+   said where the pulse was, which the bar of circles above already says; what
+   is worth seeing here is what is playing — and where three drums land
+   together, three cells light together. */
+.pat-cell.now{box-shadow:inset 0 0 0 1px var(--text2)}
+.pat-cell.now[data-v="1"],.pat-cell.now[data-v="2"],.pat-cell.now[data-v="3"]{
+  filter:brightness(var(--lit,1.45))}
+/* On paper the light goes the other way. Brightening a mark on a pale ground
+   moves it towards the ground, so a lit cell read as a faded one — which is the
+   opposite of what it is saying. */
+:root[data-theme="light"]{--lit:0.72}
+/* And one thin rule over the bar that is sounding, so the page turning is
+   something you can see happen rather than something you notice afterwards. */
+#pat-grid.live .pat-lanes::before{content:'';position:absolute;z-index:2;
+  left:36px;right:0;top:-5px;height:2px;border-radius:1px;
+  background:var(--red);opacity:.8;pointer-events:none}
 /* the level buttons carry the shade they write, so the choice is visible and
    not only spelled */
 .pen-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -3514,7 +3527,10 @@ function scheduleGrooveBeat(t0,beat){
     if(h[0]<from||h[0]>=from+GRID)return;
     const voice=voices[h[1]];
     const level=mixLevel(h[1]);
-    if(voice)voice(t0+(h[0]-from)*unit,h[2]*level*clickGain()*KIT_HEADROOM,60/state.bpm);
+    const quando=t0+(h[0]-from)*unit;
+    if(voice)voice(quando,h[2]*level*clickGain()*KIT_HEADROOM,60/state.bpm);
+    // the cell lights at the instant its own hit sounds
+    if(state.groove==='custom')schedulePatHit(h[0],h[1],quando);
   });
   return true;
 }
@@ -3811,6 +3827,8 @@ function startPlayback(){
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
+    // which of the two patterns was open before the page starts turning itself
+    patGridSeu=state.custom.grid;
     beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
@@ -3983,11 +4001,14 @@ function schedulerTick(){
     // count-in, where a click is what you want to hear.
     const groove=grooveOn()&&!(counting||countedThisTick);
     if(subIdx===0){
+      /* The page turns first. Both are timers for the same instant, so they run
+         in the order they were set — and set the other way round, the light for
+         the first hit of a new bar went looking for its cell in the bar that
+         was still on screen and found nothing. */
+      if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime);
       if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-      // the pattern lights the beat it is on, and turns the page to find it
-      if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime);
     } else if(!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
@@ -4021,44 +4042,69 @@ function pruneFinishedNodes(){
   if(schedPiano.length>80)schedPiano.splice(0,schedPiano.length-40);
 }
 
-/* ---------- the pattern's own beat light ----------
-   Which beat of which bar is sounding, lit across every lane. The scheduler
-   knows it as one number counted through the whole loop; here it is split back
-   into the bar and the beat inside it, because that is how the editor shows it.
+/* ---------- the pattern's own light ----------
+   Two separate things, because they answer two questions. A thin rule over the
+   bar says which bar is sounding — and where the loop is longer than what fits
+   on screen, the editor turns to it, through both patterns when Both is
+   playing: the straight one for its bars, the triplet one for its own, and
+   round again. And each cell lights as its own hit sounds, so what you see is
+   what is being played rather than where the pulse happens to be — three drums
+   landing together light three cells together.
 
-   Where the loop is longer than the bar on screen, the editor turns to the bar
-   being played rather than leaving you watching one that is silent — and only
-   while it is playing. Stopping puts it back at the first bar, where the
-   pattern begins, rather than wherever the stop happened to land. */
+   The grid the editor is on is the grid a tap would write to, so the one you
+   chose is put back the moment it stops. */
+let patGridSeu=null;
 function schedulePatFlash(beat,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>patFlash(beat),Math.max(0,d)));
 }
+function schedulePatHit(pos,voice,when){
+  const d=(when-audioCtx.currentTime)*1000;
+  pendingTimeouts.push(setTimeout(()=>patHitLight(pos,voice),Math.max(0,d)));
+}
+function patHitLight(pos,voice){
+  if(!state.playing)return;
+  const C=state.custom,span=patBarSpan(),todo=Math.max(1,C.bars)*span;
+  /* Where the hit is in the pattern it came from. With Both the loop is the two
+     of them end to end, so the triplet half arrives a whole pattern further
+     along than the cells that hold it — looked up at that number it matched
+     nothing, and the triplet pattern never lit at all. */
+  let p=pos,grelha=(C.play==='12')?12:16;
+  if(C.play==='both'&&pos>=todo){p=pos-todo;grelha=12;}
+  const compasso=Math.floor(p/span);
+  /* And the page is turned here rather than trusted to have been turned. Both
+     are timers for the same instant and the order they run in is not ours to
+     decide; asking for the page we need makes it not matter. */
+  let mudou=false;
+  if(C.grid!==grelha){C.grid=grelha;mudou=true;}
+  if(C.bars>1&&patBar!==compasso){patBar=compasso;mudou=true;}
+  if(mudou)buildPatternEditor();
+  const c=document.querySelector('#pat-grid .pat-cell[data-pos="'+p+'"][data-voice="'+voice+'"]');
+  if(!c)return;
+  c.classList.add('now');
+  // long enough to see at any tempo, short enough not to run into the next one
+  pendingTimeouts.push(setTimeout(()=>c.classList.remove('now'),110));
+}
 function patFlash(beat){
-  if(!state.playing||state.groove!=='custom')return;
   const grid=document.getElementById('pat-grid');
   if(!grid||!grid.children.length)return;             // the editor is not open
+  if(!state.playing||state.groove!=='custom'){grid.classList.remove('live');return;}
   const porCompasso=Math.max(1,state.sig);
-  const compasso=Math.floor(beat/porCompasso), dentro=beat%porCompasso;
-  /* With Both the loop runs the straight pattern and then the triplet one, so
-     half of it belongs to the pattern that is not on screen. Nothing is lit
-     then: the editor would otherwise be pointing at a cell that is not the one
-     making the sound. */
-  const meus=state.custom.play==='both'
-    ? (state.custom.grid===12?compasso>=state.custom.bars:compasso<state.custom.bars)
-    : true;
-  const meuCompasso=compasso%Math.max(1,state.custom.bars);
-  if(!meus){patLimpaLuz();return;}
-  if(state.custom.bars>1&&meuCompasso!==patBar){
-    patBar=meuCompasso;buildPatternEditor();
+  const compasso=Math.floor(beat/porCompasso);
+  const C=state.custom;
+  /* With Both the loop is the straight pattern and then the triplet one, so
+     which half is sounding says which of the two to be looking at. */
+  if(C.play==='both'){
+    const querGrelha=compasso<C.bars?16:12;
+    if(C.grid!==querGrelha){C.grid=querGrelha;buildPatternEditor();}
   }
-  const span=patBarSpan(), de=patBar*span+dentro*GRID, ate=de+GRID;
-  document.querySelectorAll('#pat-grid .pat-cell').forEach(c=>{
-    const p=+c.dataset.pos;
-    c.classList.toggle('now',p>=de&&p<ate);
-  });
+  const meuCompasso=compasso%Math.max(1,C.bars);
+  if(C.bars>1&&meuCompasso!==patBar){patBar=meuCompasso;buildPatternEditor();}
+  document.getElementById('pat-grid').classList.add('live');
 }
 function patLimpaLuz(){
+  const grid=document.getElementById('pat-grid');
+  if(grid)grid.classList.remove('live');
   document.querySelectorAll('#pat-grid .pat-cell.now').forEach(c=>c.classList.remove('now'));
 }
 function scheduleFlash(i,when){
@@ -4075,8 +4121,14 @@ function stopPlayback(){
   stopBrushBed();
   stopAllAudio();
   patLimpaLuz();
-  // back to the first bar, which is where the pattern begins
-  if(patBar!==0&&state.custom.bars>1){patBar=0;buildPatternEditor();}
+  /* Back to the first bar, and to the pattern whoever is at the keyboard had
+     open: the page turns itself while it plays, and a tap after it stops must
+     write where they left off, not where the loop happened to end. */
+  let volta=false;
+  if(patGridSeu!=null&&state.custom.grid!==patGridSeu){state.custom.grid=patGridSeu;volta=true;}
+  if(patBar!==0&&state.custom.bars>1){patBar=0;volta=true;}
+  patGridSeu=null;
+  if(volta)buildPatternEditor();
   document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('active-beat'));
   document.getElementById('current-note').textContent='—';
   document.getElementById('current-freq').textContent='';
@@ -4226,7 +4278,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-08-31g';
+const APP_VERSION='2026-08-31h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
