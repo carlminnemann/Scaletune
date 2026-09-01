@@ -547,7 +547,6 @@
  "aria.gapMins": "Minutes pour atteindre le niveau",
  "sum.gap": "silences {n}",
  "gap.in": "en {n} min",
- "h.lead": "Quelque chose contre quoi jouer — un bourdon, une gamme, un métronome, un accordeur — pour les instruments dont on fait soi-même la justesse.",
  "h.m.drone": "Tient des notes aussi longtemps que tu veux, pour t'accorder dessus. Plusieurs ensemble font un accord. Le métronome est là aussi, si tu le veux.",
  "h.m.scale": "Joue une gamme dans la tonalité, l'étendue et le sens que tu choisis.",
  "h.m.arp": "La même chose, à partir d'un accord.",

@@ -547,7 +547,6 @@
  "aria.gapMins": "Minutos hasta llegar al nivel",
  "sum.gap": "silencios {n}",
  "gap.in": "en {n} min",
- "h.lead": "Algo contra lo que tocar — un bordón, una escala, un metrónomo, un afinador — para instrumentos cuya afinación haces tú.",
  "h.m.drone": "Mantiene notas todo el tiempo que quieras, para afinar contra ellas. Varias a la vez forman un acorde. El metrónomo también está, si lo quieres.",
  "h.m.scale": "Toca una escala en la tonalidad, extensión y sentido que elijas.",
  "h.m.arp": "Lo mismo, a partir de un acorde.",
