@@ -600,12 +600,13 @@
  "gap.light": "Leggero",
  "gap.normal": "Normale",
  "gap.heavy": "Forte",
- "gap.over": "in",
+ "gap.over": "arriva al livello",
  "gap.now": "subito",
  "gap.keepOne": "Tenere l’1",
  "gap.dropAll": "Togliere anche quello",
  "gap.hintNow": "Continua a contare: rientra dove rientra lui.",
  "gap.hintOver": "Intero all’inizio, e sempre più rado col passare dei minuti. Continua a contare comunque.",
  "aria.gapMins": "Minuti per arrivare al livello",
- "sum.gap": "silenzi {n}"
+ "sum.gap": "silenzi {n}",
+ "gap.in": "in {n} min"
 }

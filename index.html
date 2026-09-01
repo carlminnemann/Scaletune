@@ -1384,7 +1384,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
       <span class="btn-wrap seg" id="gap-row" data-cols="fixed"></span></div>
     <div class="head" id="gap-when-line" style="display:none;margin-bottom:var(--s2)">
       <span class="sig-fields">
-        <span class="sig-unit" data-t="gap.over">over</span>
+        <span class="sig-unit" data-t="gap.over">reaches the level</span>
         <select class="sig-select" id="gap-mins" data-ta="aria.gapMins" aria-label="Minutes to reach the level"></select>
       </span>
       <span class="btn-wrap seg" id="gap-one-row" data-cols="fixed"></span></div>
@@ -4360,7 +4360,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01d';
+const APP_VERSION='2026-09-01e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5944,8 +5944,10 @@ function buildGapRow(){
   if(mins&&(!mins.options.length||mins.dataset.lang!==LANG)){
     const liga=!mins.options.length;
     mins.innerHTML='';mins.dataset.lang=LANG;
-    mins.appendChild(new Option(tr('gap.now','straight in'),'0'));
-    [2,5,10,15,20,30].forEach(n=>mins.appendChild(new Option(tr('ramp.min','{n} min',{n:n}),String(n))));
+    /* The line has to read as a sentence whichever way it is set. "over: at
+       once" is not one, and being asked what it meant is how I found out. */
+    mins.appendChild(new Option(tr('gap.now','at once'),'0'));
+    [2,5,10,15,20,30].forEach(n=>mins.appendChild(new Option(tr('gap.in','in {n} min',{n:n}),String(n))));
     if(liga)mins.addEventListener('change',()=>{
       P.gapMinutes=parseInt(mins.value,10)||0;
       buildGapRow();refreshSectionSummaries();
