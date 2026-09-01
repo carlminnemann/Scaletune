@@ -1376,6 +1376,21 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
   <!-- A fold like the pattern and the mixer: five figures and a direction on
        permanent display is a lot of buttons for something most players set once. -->
+  <!-- The metronome that goes away: it keeps counting and stops sounding, and
+       you keep going. -->
+  <div class="mgroup" id="gap-block">
+    <div class="head" style="margin-bottom:var(--s2)">
+      <span class="section-label" data-t="gap.title">Dropout</span>
+      <span class="btn-wrap seg" id="gap-row" data-cols="fixed"></span></div>
+    <div class="head" id="gap-when-line" style="display:none;margin-bottom:var(--s2)">
+      <span class="sig-fields">
+        <span class="sig-unit" data-t="gap.over">over</span>
+        <select class="sig-select" id="gap-mins" data-ta="aria.gapMins" aria-label="Minutes to reach the level"></select>
+      </span>
+      <span class="btn-wrap seg" id="gap-one-row" data-cols="fixed"></span></div>
+    <div class="info-line" id="gap-info"></div>
+  </div>
+
   <div class="mgroup" id="subdiv-block">
     <div class="head pat-head" id="subdiv-head" role="button" tabindex="0"
          aria-expanded="false" aria-controls="subdiv-body" style="margin-bottom:0">
@@ -2305,6 +2320,7 @@ let state={
                a time, or as a ramp that slides from where you are to where you
                want to be over so many minutes. 'every' is either a pass — one
                round of whatever is playing — or a number of minutes. */
+            gapMode:'off',gapMinutes:10,gapKeepOne:true,
             tempoMode:'off',tempoStep:5,tempoEvery:'pass',
             rampTo:120,rampMinutes:10,rampFrom:null,
             passCount:4,passUnit:'bar'},
@@ -2382,7 +2398,7 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
 /* The order the More panel is filled in. The mixer comes last, after the
    pattern: it balances whatever is playing, so it is the thing you reach for
    once the pattern is written rather than before. */
-const METRO_MORE=['count-block','speed-block','subdiv-block','pass-block','poly-block',
+const METRO_MORE=['count-block','gap-block','speed-block','subdiv-block','pass-block','poly-block',
                   'groove-block','pattern-block','mixer-block'];
 /* The split runs in every mode, not only Metro: the metronome opens on the
    tempo and the bar, and everything else it can do waits behind one more tap.
@@ -2417,6 +2433,60 @@ function splitMetro(active){
   more.style.display=active?'':'none';
   if(!active)more.open=false;
   spreadPanelsSoon();
+}
+/* ---------- the metronome that goes away ----------
+   It keeps counting and stops sounding, and you keep going. What is being
+   trained is not the silence — it is the instant it comes back: if you drifted,
+   you hear it there.
+
+   In beats and anywhere, not in whole bars. Handing back beat one at the end of
+   every gap is a crutch when what you are doing is improvising; whether you
+   want that crutch is a switch of its own, because it is the difference between
+   holding a groove, where you must be sure of the one, and playing over the bar
+   line, where being sure of it is the thing you are trying to stop needing.
+
+   The level is where it ends up and the minutes are how long it takes to get
+   there — the same shape the tempo ramp already has. Start and the metronome is
+   whole; it thins out from under you as the time runs. */
+const GAP_LEVELS={
+  light: {silencio:[1,2], toca:[6,10]},
+  normal:{silencio:[2,4], toca:[3,6]},
+  heavy: {silencio:[4,8], toca:[1,3]},
+};
+let gapT0=0,gapCala=0,gapToca=0;
+function gapOn(){return state.practice.gapMode!=='off'&&!!GAP_LEVELS[state.practice.gapMode];}
+function gapArm(t0){gapT0=t0;gapCala=0;gapToca=0;}
+/* Nought when it begins and one when the time is up. With no minutes asked for
+   it is one from the first beat: the level, straight away. */
+function gapDificuldade(when){
+  const m=state.practice.gapMinutes|0;
+  if(!m)return 1;
+  return Math.max(0,Math.min(1,(when-gapT0)/(m*60)));
+}
+function gapSorteia(d){
+  const L=GAP_LEVELS[state.practice.gapMode];
+  const entre=(a,b)=>a+(b-a)*d;
+  const inteiro=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  /* The silence grows towards the level and the stretch that sounds shrinks
+     towards it. At the start the stretch is long enough that nothing goes
+     missing for a good while, which is what makes the curve a curve. */
+  const sMax=Math.max(1,Math.round(entre(1,L.silencio[1],d)));
+  const sMin=Math.max(1,Math.min(sMax,Math.round(entre(1,L.silencio[0],d))));
+  const tMin=Math.max(1,Math.round(entre(24,L.toca[0],d)));
+  const tMax=Math.max(tMin,Math.round(entre(32,L.toca[1],d)));
+  gapCala=inteiro(sMin,sMax);
+  gapToca=inteiro(tMin,tMax);
+}
+/* Called once for each beat, in order. Answers whether this one is heard. */
+function gapBeat(when,beatIdx){
+  if(!gapOn())return true;
+  const d=gapDificuldade(when);
+  if(d<0.02){gapCala=0;gapToca=0;return true;}
+  if(gapCala<=0&&gapToca<=0)gapSorteia(d);
+  if(gapToca>0){gapToca--;return true;}
+  gapCala--;
+  // the one survives if you asked it to, and the gap is no shorter for it
+  return state.practice.gapKeepOne&&beatIdx===0;
 }
 // how far into the current pass the metronome is, when nothing else marks one
 let metroBars=0,metroBeats=0,metroCycles=0;
@@ -3843,6 +3913,7 @@ function startPlayback(){
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
     armTempoOverTime(nextBeatTime);
+    gapArm(nextBeatTime);
     beginCount();
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
@@ -3968,7 +4039,7 @@ function schedulerTick(){
   }
   // The loop steps by subdivision, not by beat, so the guard allows up to four
   // ticks per beat.
-  let guard=0;
+  let guard=0,gapMudo=false;
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<256){
     // A figure the player picks by hand takes effect on the next beat, so it
     // never stretches the beat it lands in.
@@ -4020,10 +4091,17 @@ function schedulerTick(){
          the first hit of a new bar went looking for its cell in the bar that
          was still on screen and found nothing. */
       if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime);
-      if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
+      /* A beat the metronome is sitting out. Everything it makes goes with it,
+         the accompaniment included — half a drum kit over a hole is not silence.
+         Never during the count-in: that is the one place the clicks are the
+         whole point. */
+      const soa=(counting||countedThisTick)?true:gapBeat(nextBeatTime,beatIdx);
+      gapMudo=!soa;
+      if(!soa){/* counted, not sounded */}
+      else if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
       scheduleFlash(beatIdx,nextBeatTime);
-    } else if(!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
+    } else if(!gapMudo&&!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
     tickCount++;
@@ -4282,7 +4360,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01b';
+const APP_VERSION='2026-09-01c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4408,7 +4486,7 @@ function setMode(m){
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
-  buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildCountRow();buildTempoStepRow();updatePracticeInfo();
+  buildBeats();renderPolyBeats();buildSubdivRow();buildPassRow();buildCountRow();buildGapRow();buildTempoStepRow();updatePracticeInfo();
   spreadPanelsSoon();
   // the rotation belongs to the note modes; nothing refreshed it on the way out,
   // so a study list set up in Scale left it standing in the Tuner and in Metro
@@ -4973,7 +5051,8 @@ const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol',
   'freeRoot','freeSpan','freeSpanWanted','freeDirection'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
   'passCount','passUnit','useSubdivList','subdivDir',
-  'rootMove','repeat','modesTour','useList'];
+  'rootMove','repeat','modesTour','useList',
+  'gapMode','gapMinutes','gapKeepOne'];
 const metroPerMode={};
 let METRO_FRESH=null,METRO_FRESH_G=null;
 /* What only Metro has: the accompaniment, the kit, the mixer and the pattern.
@@ -5074,7 +5153,7 @@ function redrawMetro(){
   if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
   renderSigFields();buildBeats();buildPolyBeats();renderPolyBeats();
   buildNoteLenRow();buildSubdivRow();buildClickModeRow();buildAlignRow();
-  buildSpeedControls();buildCountRow();buildPassRow();buildMetroOnRow();
+  buildSpeedControls();buildCountRow();buildGapRow();buildPassRow();buildMetroOnRow();
   updateSupersededControls();
 }
 
@@ -5845,6 +5924,52 @@ function montaRoladores(){
   }
 }
 
+function buildGapRow(){
+  const row=document.getElementById('gap-row');
+  if(!row)return;
+  const P=state.practice;
+  row.innerHTML='';
+  [['off',tr('common.off','Off')],['light',tr('gap.light','Light')],
+   ['normal',tr('gap.normal','Normal')],['heavy',tr('gap.heavy','Heavy')]].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className=(P.gapMode===v?'active':'');
+    b.textContent=label;
+    b.onclick=()=>{P.gapMode=v;buildGapRow();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+  gridify(row);
+  const line=document.getElementById('gap-when-line');
+  if(line)line.style.display=(P.gapMode==='off')?'none':'';
+  const mins=document.getElementById('gap-mins');
+  if(mins&&(!mins.options.length||mins.dataset.lang!==LANG)){
+    const liga=!mins.options.length;
+    mins.innerHTML='';mins.dataset.lang=LANG;
+    mins.appendChild(new Option(tr('gap.now','straight in'),'0'));
+    [2,5,10,15,20,30].forEach(n=>mins.appendChild(new Option(tr('ramp.min','{n} min',{n:n}),String(n))));
+    if(liga)mins.addEventListener('change',()=>{
+      P.gapMinutes=parseInt(mins.value,10)||0;
+      buildGapRow();refreshSectionSummaries();
+    });
+  }
+  if(mins)mins.value=String(P.gapMinutes|0);
+  const one=document.getElementById('gap-one-row');
+  if(one){
+    one.innerHTML='';
+    [[true,tr('gap.keepOne','Keep the 1')],[false,tr('gap.dropAll','Drop it too')]].forEach(([v,label])=>{
+      const b=document.createElement('button');
+      b.className=(!!P.gapKeepOne===v?'active':'');
+      b.textContent=label;
+      b.onclick=()=>{P.gapKeepOne=v;buildGapRow();refreshSectionSummaries();};
+      one.appendChild(b);
+    });
+    gridify(one);
+  }
+  const info=document.getElementById('gap-info');
+  if(info)info.textContent=P.gapMode==='off'?''
+    :((P.gapMinutes|0)
+       ? tr('gap.hintOver','Whole to begin with, and thinner as the minutes go by. It keeps counting either way.')
+       : tr('gap.hintNow','It keeps counting — come back in where it comes back.'));
+}
 function buildCountRow(){
   const sel=document.getElementById('count-bars');
   const row=document.getElementById('count-between-row');
@@ -8516,7 +8641,7 @@ function rebuildEverything(){
   buildBeats();buildPolyBeats();updateSupersededControls();buildNoteLenRow();
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
-  buildAlignRow();buildSpeedControls();buildRootMoveRow();buildRepeatRow();
+  buildAlignRow();buildSpeedControls();buildGapRow();buildRootMoveRow();buildRepeatRow();
   buildExercises();resetLabel();
   renderPitchPickers();updateInfo();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();

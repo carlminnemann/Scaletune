@@ -580,5 +580,17 @@
  "pat.which": "拍子",
  "reset.all": "✕ 清空此模式",
  "reset.sure": "✕ 再点一次以清空此模式",
- "reset.done": "已清空。"
+ "reset.done": "已清空。",
+ "gap.title": "留白",
+ "gap.light": "轻",
+ "gap.normal": "中",
+ "gap.heavy": "重",
+ "gap.over": "经过",
+ "gap.now": "立即",
+ "gap.keepOne": "保留第一拍",
+ "gap.dropAll": "一并去掉",
+ "gap.hintNow": "它仍在数拍——它回来时你就跟上。",
+ "gap.hintOver": "开始时完整，随着时间越来越稀疏。无论如何它都在数。",
+ "aria.gapMins": "到达该级别的分钟数",
+ "sum.gap": "留白 {n}"
 }

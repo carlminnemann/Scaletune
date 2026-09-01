@@ -595,5 +595,17 @@
  "pat.which": "Taktart",
  "reset.all": "✕ Diesen Modus leeren",
  "reset.sure": "✕ Nochmal tippen, um zu leeren",
- "reset.done": "Geleert."
+ "reset.done": "Geleert.",
+ "gap.title": "Aussetzer",
+ "gap.light": "Leicht",
+ "gap.normal": "Normal",
+ "gap.heavy": "Stark",
+ "gap.over": "in",
+ "gap.now": "sofort",
+ "gap.keepOne": "Die 1 behalten",
+ "gap.dropAll": "Auch weglassen",
+ "gap.hintNow": "Es zählt weiter — komm dort wieder rein, wo es wiederkommt.",
+ "gap.hintOver": "Am Anfang ganz, und mit den Minuten immer dünner. Gezählt wird so oder so.",
+ "aria.gapMins": "Minuten bis zur Stufe",
+ "sum.gap": "Aussetzer {n}"
 }

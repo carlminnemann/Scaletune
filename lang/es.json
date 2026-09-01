@@ -595,5 +595,17 @@
  "pat.which": "Compás",
  "reset.all": "✕ Borrar este modo",
  "reset.sure": "✕ Toca otra vez para borrar este modo",
- "reset.done": "Borrado."
+ "reset.done": "Borrado.",
+ "gap.title": "Silencios",
+ "gap.light": "Leve",
+ "gap.normal": "Normal",
+ "gap.heavy": "Fuerte",
+ "gap.over": "al cabo de",
+ "gap.now": "ya",
+ "gap.keepOne": "Mantener el 1",
+ "gap.dropAll": "Que caiga también",
+ "gap.hintNow": "Sigue contando: entra donde él vuelva.",
+ "gap.hintOver": "Entero al principio, y más ralo según pasan los minutos. Sigue contando de todos modos.",
+ "aria.gapMins": "Minutos hasta llegar al nivel",
+ "sum.gap": "silencios {n}"
 }
