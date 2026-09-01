@@ -4360,7 +4360,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01c';
+const APP_VERSION='2026-09-01d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7606,6 +7606,13 @@ function updateSupersededControls(){
      one panel in the metronome that cannot do anything in one of the modes. */
   const cb=document.getElementById('count-block');
   if(cb)cb.style.display=(state.mode==='drone')?'none':'';
+  /* Dropout only means something where the pulse is the only thing keeping
+     time. In the note modes the app is playing the line itself, so taking the
+     clicks away leaves you the tempo anyway and there is nothing to hold on to
+     alone — it belongs to the metronome by itself and to the drone, which has
+     no pulse of its own at all. */
+  const gb=document.getElementById('gap-block');
+  if(gb)gb.style.display=(state.mode==='metro'||state.mode==='drone')?'':'none';
   /* Under a style the bar stays on the screen — it is still four beats and the
      circles still show which one you are on — but the accents are the pattern's
      now, so tapping them would promise something it cannot do. */
