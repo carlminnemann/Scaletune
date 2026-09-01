@@ -4360,7 +4360,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01f';
+const APP_VERSION='2026-09-01g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6976,6 +6976,10 @@ function patInfo(){
       +' · '+tr('pat.tapWrites','tap writes at the level above, tap again to clear')
     : where+' \u2014 '+tr('pat.empty','pick a level and tap the grid, or start from a style'))+aviso;
   paintMixUsed();      // a voice written in just now must become movable
+  /* Writing the first hit into an empty pattern is the moment it starts
+     playing, so it is also the moment the subdivision stops meaning anything —
+     and nothing was asking that question again after an edit. */
+  updateSupersededControls();
   const soa=n,compassos=bars;
   const sum=document.getElementById('pat-sum');
   if(sum)sum.textContent=soa
@@ -7602,7 +7606,7 @@ function setPolyCount(which,n){
 // visible doing nothing.
 function updateSupersededControls(){
   const on=state.poly.on;
-  ['sig-block','subdiv-block','notelen-block'].forEach(id=>{
+  ['sig-block','notelen-block'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=on?'none':'';
   });
@@ -7623,6 +7627,15 @@ function updateSupersededControls(){
      no pulse of its own at all. */
   const gb=document.getElementById('gap-block');
   if(gb)gb.style.display=(state.mode==='metro'||state.mode==='drone')?'':'none';
+  /* And a style puts the subdivision away for the same reason the polyrhythm
+     does. A kit is placed in twelfths of the beat whatever figure is chosen,
+     and the sub-clicks are already silent under one, so the figure — and the
+     table of figures that rotates them — change nothing anybody can hear. Only
+     where the metronome is the thing playing: in the note modes the figure is
+     what the notes are made of. */
+  const sob=on||(grooveOn()&&pulseOnly());
+  const sb=document.getElementById('subdiv-block');
+  if(sb)sb.style.display=sob?'none':'';
   /* Under a style the bar stays on the screen — it is still four beats and the
      circles still show which one you are on — but the accents are the pattern's
      now, so tapping them would promise something it cannot do. */
