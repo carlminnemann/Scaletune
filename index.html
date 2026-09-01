@@ -1524,315 +1524,91 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <h2 data-t="what-everything-does">What everything does</h2>
   </div>
 
-  <p class="help-lead" data-t="scaletune-is-for-instruments-whose">ScaleTune is for instruments whose intonation you have to make yourself —
-  strings, winds, voice. Everything here is a reference to play against, not a thing to listen to.</p>
+  <p class="help-lead" data-t="h.lead">Something to play against — a drone, a scale, a metronome, a tuner — for instruments whose intonation you make yourself.</p>
 
   <div class="help-sec" id="help-modes"><h3 data-t="modes">Modes</h3><dl>
-    <dt data-t="drone-2">Drone</dt><dd data-t="holds-notes-indefinitely-to-tune">Holds notes indefinitely, to tune against. Several sound together, so a drone can be a chord. The metronome is there too, switched off until you ask for it: a held note, and a pulse to place it against.</dd>
-    <dt data-t="scale-2">Scale</dt><dd data-t="plays-a-scale-as-a">Plays a scale as a line, in the key, range and direction you choose.</dd>
-    <dt data-t="arpeggio-2">Arpeggio</dt><dd data-t="the-same-built-from-a">The same, built from a chord instead of a scale.</dd>
-    <dt data-t="free-2">Free</dt><dd data-t="you-pick-the-notes-yourself">You pick the notes yourself, each with its own octave, and they play in that order.</dd>
-    <dt data-t="metro-2">Metro</dt><dd data-t="the-metronome-on-its-own">The metronome on its own, with no notes at all. It opens on the tempo and the bar; the count-in, the subdivision, the speed-up and the polyrhythm are under <em>More</em>.</dd>
-    <dt data-t="tuner-2">Tuner</dt><dd data-t="listens-instead-of-sounding-nothing">Listens instead of sounding. Nothing else plays while it is open —
-    the microphone would hear the app itself.</dd>
+    <dt data-t="drone-2">Drone</dt><dd data-t="h.m.drone">Holds notes for as long as you like, to tune against. Several at once make a chord. The metronome is there if you want it.</dd>
+    <dt data-t="scale-2">Scale</dt><dd data-t="h.m.scale">Plays a scale in the key, range and direction you choose.</dd>
+    <dt data-t="arpeggio-2">Arpeggio</dt><dd data-t="h.m.arp">The same, from a chord.</dd>
+    <dt data-t="free-2">Free</dt><dd data-t="h.m.free">Notes you pick yourself, played in that order.</dd>
+    <dt data-t="metro-2">Metro</dt><dd data-t="h.m.metro">The metronome alone. <em>More</em> opens the rest of it.</dd>
+    <dt data-t="tuner-2">Tuner</dt><dd data-t="h.m.tuner">Listens instead of playing. Nothing else sounds while it is open.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-tuner"><h3 data-t="tuner-3">Tuner</h3><dl>
-    <dt data-t="what-it-reads">What it reads</dt><dd data-t="the-note-how-many-cents">The note, how many cents away you are, and both frequencies —
-    the one you are playing and the one you want. Under two cents it turns green.</dd>
-    <dt data-t="the-strobe">The strobe</dt><dd data-t="the-band-of-stripes-drifts">The band of stripes drifts at the difference between the two
-    pitches: still means right, and it drifts the way you are wrong. It shows a quarter of
-    a cent, which no needle can — at A4 that is a tenth of a hertz, one slow crawl every
-    ten seconds. A long way out it blurs, which is what the number above is for.</dd>
-    <dt data-t="reference-a4-2">Reference A4</dt><dd data-t="415-to-466-moving-every">415 to 466, moving every note with it. 415 for baroque pitch,
-    442 or 443 where the orchestra sits high.</dd>
-    <dt data-t="temperament-2">Temperament</dt><dd data-t="equal-just-pythagorean-quarter-comma">Equal, just, Pythagorean, quarter-comma meantone, Werckmeister III.
-    Each is a set of deviations from equal temperament, counted from the key you name, so the
-    key note is the one everything else is made pure against. Just makes the thirds pure and
-    the fifths nearly so; Pythagorean makes the fifths pure and the thirds wide; meantone buys
-    pure thirds by narrowing every fifth; Werckmeister spreads the error so that every key is
-    playable and none is identical.</dd>
-    <dt data-t="what-key-does-to-the">What Key does to the reading</dt><dd data-t="in-just-intonation-in-c">In just intonation in C, an A sits about fifteen
-    cents under an equal A — and the tuner will say so. That is not an error to correct; it is
-    what the temperament is. Reference A4 keeps its own job, which is to place the equal grid
-    that the deviations are counted from.</dd>
-    <dt data-t="low-strings">Low strings</dt><dd data-t="it-reads-down-to-27">It reads down to 27.5 Hz, below the lowest string on a
-    five-string bass. Down there it answers more slowly: a pitch that low needs a fifth of
-    a second of sound before there is anything to measure.</dd>
+    <dt data-t="what-it-reads">What it reads</dt><dd data-t="h.t.reads">The note and how far off you are, in cents. Green means you are there.</dd>
+    <dt data-t="the-strobe">The strobe</dt><dd data-t="h.t.strobe">Still means in tune, and it drifts the way you are out.</dd>
+    <dt data-t="reference-a4-2">Reference A4</dt><dd data-t="h.t.a4">Moves every note with it: 415 for baroque pitch, 442 or 443 where the orchestra sits high.</dd>
+    <dt data-t="temperament-2">Temperament</dt><dd data-t="h.t.temp">Equal, just, Pythagorean, meantone or Werckmeister, measured from the key you name. Away from equal the reading moves: that is the temperament, not an error.</dd>
+    <dt data-t="h.t.clear.k">Clear this mode</dt><dd data-t="h.t.clear">Back to equal and 440 in two taps.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-root"><h3 data-t="root">Root</h3><dl>
     <dt data-t="the-twelve-notes">The twelve notes</dt><dd data-t="the-key-everything-else-is">The key everything else is built from.</dd>
-
   </dl></div>
 
   <div class="help-sec" id="help-scales"><h3 data-t="scales-and-chords">Scales and chords</h3><dl>
-    <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="one-opens-at-a-time">One opens at a time and the others fold away. A closed box still says
-    what is chosen inside it, so folding one never hides a selection.</dd>
-    <dt data-t="symmetric-scales">Symmetric</dt><dd data-t="three-scales-that-do-not">Three that do not have seven notes. The <em>whole tone</em> has six and no
-    semitone anywhere, so nothing in it points home and any note could be the tonic. The two
-    <em>diminished</em> scales have eight and alternate their steps — whole-half is the classical one,
-    half-whole the one played over a dominant chord. The <em>chromatic</em> has all twelve. None can be
-    spelled with one letter each, so they are written the way players write them rather than the way
-    the rule would force: a rising chromatic in sharps, the diminished without the double flat.</dd>
-    <dt data-t="pentatonic-and-the-blue-notes">Pentatonic and the blue notes</dt><dd data-t="five-notes-and-what-is">Five notes, and what is missing is the point: the major
-    has no fourth and no seventh, the minor no second and no sixth, so neither leans anywhere.
-    <em>Blue notes</em> adds one note to each — a flat third over the major, a flat fifth over the
-    minor — which is what turns a pentatonic into a blues scale. It is spelled the way it is written:
-    A blues reads A C D Eb E G, with the flat fifth sharing its letter with the fifth.</dd>
-    <dt data-t="sevenths-in-one-octave">Sevenths in one octave</dt><dd data-t="a-seventh-arpeggio-over-one">An arpeggio ends on the note it began on, whichever inversion you take:
-    the first inversion of C is E G C E. Start On is named Inversion here, because on a chord the
-    degree you set off from IS the inversion, and the scale shapes — thirds, 1 2 3 — are not
-    offered: they are ways of walking a scale, and a chord has no steps between its notes to walk.</dd>
-    <dt id="help-exercises" data-t="saved-exercises">Saved exercises</dt><dd data-t="the-panel-at-the-top">The panel
-    at the top. Set the app up the way you want to practise — the scale or the chord, the range and
-    direction, the study list, what moves between passes, the tempo, the bar, the count-in, the
-    accompaniment and the pattern — give it a name, and it is there next time you open the app. A
-    week of practice can be prepared in one sitting and taken off the shelf each morning. Saving
-    under a name you already have replaces it, so an exercise is corrected rather than duplicated;
-    the ✕ beside one removes it. What a saved exercise carries is the practice, not the room: the
-    volume, the theme, the language and the note names are how you happen to be listening today and
-    are left exactly as they are. It is read back one field at a time and checked against what the
-    app has now, so an exercise saved before something changed loses that field rather than
-    misbehaving.</dd>
-    <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="the-two-boxes-under-the">The two boxes under the modes. Single works on one scale or
-    chord at a time; Study list collects several and takes them in turn, one per pass, so a whole
-    family can be worked without stopping. It governs every panel below it, which is why it sits
-    above them rather than inside the Root panel where it used to hide.</dd>
-    <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="the-mark-before-a-name">The mark before a name in the rotation is that
-    item's direction, and tapping it goes round up, down, up-and-back, and off again. Off — a faint
-    dot — means it follows Direction like everything else, which is what a rotation usually wants;
-    set it on one item and only that one changes. "The dorian up, then the same arpeggio down" is one
-    exercise in two halves, and this is where that is written. It sits on the chip rather than on the
-    scale's own button because a button that chooses a scale should not also, on some hidden press,
-    choose how it goes.</dd>
-    <dt data-t="the-study-list">The study list</dt><dd data-t="one-list-holding-scales-and">One list, holding scales and chords together: pick scales in Scale and
-    chords in Arpeggio and they join the same rotation, so "the dorian, then a minor seventh on the
-    same root" is one exercise rather than two. Each item plays as what it is, whichever panel you
-    happen to be looking at, and the numbers on the buttons count through the whole list. A tap adds,
-    every time, so the same thing can be in twice — a major chord after the ionian and again after
-    the lydian is a real exercise, and a button that only toggled could not say it. A button in the
-    list twice shows both its places. In the rotation itself every item does two things:
-    its ✕ takes it out — four taps by mistake are four taps back — and the item itself picks it up.
-    Picked up, the next one you tap is where it goes; tap the same one again to leave it where it
-    was. Two taps and no dragging, which is the only kind of reordering a finger can do on a phone.
-    Moving while it plays keeps whatever is sounding.</dd>
-    <dt data-t="clear-6">Clear</dt><dd data-t="empties-the-selection-with-the">Empties the selection. With the study list on it drops that panel's kind from
-    the list — the scales from Scale, the chords from Arpeggio — and leaves the rest.</dd>
+    <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="h.s.families">One opens at a time, and a closed one still says what is chosen inside it.</dd>
+    <dt id="help-exercises" data-t="saved-exercises">Saved exercises</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. The same name replaces; the ✕ removes.</dd>
+    <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="h.s.single">Single works on one scale or chord; Study list takes several in turn, one per pass.</dd>
+    <dt data-t="the-study-list">The study list</dt><dd data-t="h.s.list">Scales chosen in Scale and chords chosen in Arpeggio join the same rotation. A tap adds, so the same thing can be in twice. In the list, ✕ takes one out and tapping one picks it up — tap where it should go.</dd>
+    <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="h.s.each">The mark before a name is that item's own direction; tap it to change it. A faint dot means it follows Direction like everything else.</dd>
+    <dt data-t="clear-6">Clear</dt><dd data-t="h.s.clear">Empties the selection.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-range"><h3 data-t="range-amp-direction">Range &amp; Direction</h3><dl>
-    <dt data-t="octaves-3">Octaves</dt><dd data-t="how-far-the-line-reaches">How far the line reaches. If the top would run past the highest sample, the
-    span is reduced until it fits — and grows back by itself once there is room again.</dd>
+    <dt data-t="octaves-3">Octaves</dt><dd data-t="h.r.oct">How far the line reaches.</dd>
     <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
-    <dt data-t="direction-2">Direction</dt><dd data-t="up-down-or-up-then">Up, down, or up then back down. Over anything that moves between
-    passes — the cycle of fourths, a study list, the modes — up and down means the passes take
-    turns instead: this one up, the next one down. It is the same exercise either way, and over a
-    progression it is the one people mean. An item given a direction of its own keeps it.</dd>
-    <dt data-t="start-on-2">Start On</dt><dd data-t="which-degree-of-the-scale">Which degree of the scale the line starts from — the way a mode is practised
-    from each of its own notes.</dd>
-    <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="the-shape-walked-from-every">The shape walked from every degree, rather than straight up. <em>Thirds</em>
-    plays 1–3, then 2–4, then 3–5; <em>1 3 5</em> plays the arpeggio standing on each
-    degree, C E G then D F A, and <em>1 3 5 7</em> the seventh chord. <em>Free</em> is a shape of
-    your own: tap the degrees in the order you want them and it holds that order, a degree taken
-    more than once if the shape asks for it, with the numbers following whatever scale is loaded —
-    five on a pentatonic, twelve on the chromatic. A long press takes back the last place a degree
-    holds. Fourths through sevenths
-    are the same idea with a wider reach. The steps are counted in degrees of the scale, not
-    semitones, so thirds are thirds in any mode — and over the chromatic, where a degree is a
-    semitone, the name is the shape rather than the interval. A shape has nowhere to go past the end of
-    the exercise — a third above the top C is outside the octave you asked for — so a pattern always
-    turns there, and it is the shape that inverts. Going up you play C–E, D–F, on to B–D, and the C
-    above turns it over into C–A, a third <em>below</em>: the descent has begun. Coming down the shape
-    keeps reaching under, so D–B passes below the C you set off from before the next C turns it back
-    into C–E. Turning the shape and coming back down are two different things,
-    though, so Direction means here what it means everywhere: Up runs the shape up the octave and
-    stops where the shape runs out — thirds end on B–D, which is how they are written — and Up-Down
-    comes back. A run that comes back stops one degree short of where it set off, so that looping
-    does not sound that note twice at the seam: the next round begins on it. Set to run once there
-    is no next round, and a scale that finishes on its second degree has not finished, so the last
-    pass closes on the tonic — the one it set off from if it came back, the one at the end it
-    arrived at if it did not. The line under the buttons spells out
-    what the one you picked does in the key you are in. It sits in Practice Progressions, with the
-    rest of what makes a scale an exercise, rather than in Range &amp; Direction, which is a
-    measurement.</dd>
+    <dt data-t="direction-2">Direction</dt><dd data-t="h.r.dir">Up, down, or up and back down. Where something changes between passes, up and back means the passes take turns instead: this one up, the next one down.</dd>
+    <dt data-t="start-on-2">Start On</dt><dd data-t="h.r.start">Which degree of the scale the line starts from. On a chord it is the inversion.</dd>
+    <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="h.r.pattern">A shape walked from every degree instead of straight up: <em>thirds</em> plays 1–3, then 2–4, then 3–5, and <em>1 3 5</em> the arpeggio standing on each degree. <em>Free</em> is a shape of your own — tap the degrees in the order you want them. The line underneath spells out what it does in your key.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-progress"><h3 data-t="practice-progressions">Practice Progressions</h3><dl>
-    <dt data-t="root-movement-2">Root Movement</dt><dd data-t="stay-in-one-key-or">Stay in one key, or move up a fourth each time everything else has been
-    round once — the cycle of fourths.</dd>
-
-    <dt data-t="through-the-modes">Through the modes</dt><dd data-t="the-seven-modes-of-one">The seven modes of one scale, each from its own note and each one
-    octave: C ionian, then D dorian, then E phrygian, round to B locrian and back to C. The key never
-    changes — the tonic steps up to the next degree and the mode steps with it, which is the same
-    thing said twice — so the whole run is in one key and there is not an accidental in it.
-    <em>Up</em> and <em>Down</em> take every mode the same way. <em>Up-Down</em> and <em>Down-Up</em>
-    do two things at once, and The run separates them. The first is that the direction alternates from
-    one mode to the next, which is how this is practised: C ionian up to the C above, and the D
-    above that is where D dorian starts, coming all the way down to its own D — from which E is one
-    step up and it turns again. Every handover but one is a single step, and the run stays between
-    the octave you chose and the one above it. The second is that the whole thing turns
-    round at the top and comes back down through the modes — that is There and back. One way climbs
-    through them and stops on the tonic at the top: seven modes and the eighth pass that closes the
-    octave. Set to run once, either ends on the tonic it set off from. It wants one
-    seven-note scale chosen on its own: the modes are that scale's own rotations, which a pentatonic,
-    a chord and a symmetric scale do not have. It also wants no shape: a shape already walks every
-    degree, so the modes over one play the same seven chords seven times, rotated — 1 3 5 7 in C
-    ionian gives every diatonic seventh, and D dorian gives the same set beginning one along. Where
-    that is what you want, Start On says it without promising the modes. One octave each, because over two the next mode would
-    begin where the ear has lost the thread of the one before — and between them there is a drop back
-    down, which is what your hand does anyway.</dd>
-    <dt data-t="what-a-pass-is">What a pass is</dt><dd data-t="one-round-of-the-notes">One round of the notes. The order is: the rhythmic figure first, then the
-    mode or chord, then the key — so one mode goes through every figure before the next mode starts.</dd>
+    <dt data-t="root-movement-2">Root Movement</dt><dd data-t="h.p.root">Stay in one key, or move up a fourth each time round — the cycle of fourths.</dd>
+    <dt data-t="through-the-modes">Through the modes</dt><dd data-t="h.p.modes">The seven modes of one scale, each from its own note and one octave each. It wants a single seven-note scale and no shape.</dd>
+    <dt data-t="what-a-pass-is">What a pass is</dt><dd data-t="h.p.pass">One round of the notes. The figure changes first, then the scale or chord, then the key.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-metro"><h3 data-t="metronome">Metronome</h3><dl>
-    <dt data-t="tempo-2">Tempo</dt><dd data-t="10-to-300-bpm-type">10 to 300 BPM. Type it, drag it, or tap it in — Tap tempo averages the last few taps.</dd>
-    <dt data-t="bar-2">Bar</dt><dd data-t="how-many-beats-it-counts">How many beats it counts. Tap a circle to cycle it: accented, plain, silent. With
-    notes playing every beat is plain unless you ask otherwise; with the metronome alone the first
-    beat is accented, so the bar you chose can be heard.</dd>
-    <dt data-t="subdivision-2">Subdivision</dt><dd data-t="a-fold-like-the-pattern">A fold, like the pattern and the mixer, saying what it is set to while it
-    is shut. What each beat is divided into. Swing is two ticks split two to one — the
-    triplet feel a written pair of eighths is actually played with. Single uses one figure; Sequence
-    takes the ones you pick in turn, one per pass.</dd>
-    <dt data-t="click-3">Click</dt><dd data-t="follow-figure-clicks-every-subdivision">Follow figure clicks every subdivision; Beats only clicks the beats and leaves the
-    figure to the notes.</dd>
-    <dt data-t="count-in-2">Count In</dt><dd data-t="bars-of-click-before-the">Bars of click before the notes come in. It ends on a downbeat: what is left of
-    the bar first, then whole bars, so a phrase that finishes mid-bar does not put your entry off the
-    beat. And the phrase finishes where a phrase finishes: on the handover the line runs to the next bar
-    line and lands there on the tonic of the key it has been in, and only then does the waiting begin
-    — the rest of that bar, and any further bars you asked for.
-    <em>Count again on</em> says when it comes back: on a <em>new key</em> only, which is the moment
-    you always need, or on <em>any change</em>, which includes handing over from one scale or chord to
-    the next in the same key. Never between rounds of the same thing, which would break the very drift
-    the app is built around.</dd>
-    <dt data-t="advance-every-2">Advance Every</dt><dd data-t="with-the-metronome-alone-nothing">With the metronome alone nothing comes round on its own, so you say what a
-    pass is: so many bars, or so many beats. The figure list and a per-pass tempo change both move on
-    that.</dd>
-    <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="the-tempo-moving-on-its">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it by so many
-    BPM — every round, or every so many minutes up to thirty. A round is the whole of what is in
-    rotation, which is the same thing Repeat means by one: with a study list of four scales the
-    tempo moves once the four have been through, not once for each of them, and with the cycle of
-    fourths once all twelve keys have. Where nothing is in rotation a round is one pass of the
-    notes, and the word above the box says which it is. <em>Ramp</em> slides instead: from the
-    tempo you set to the one you name, a little on every beat, over as long as you choose, so there
-    is no moment where it jumps. Either kind starts again from your
-    tempo every time you press Start: "start at 80 and climb" is the exercise, and pressing Start
-    plays the exercise rather than the place you happened to stop in the middle of it. Where the
-    beginning is, is what your own hand says — move the tempo and you move it. Either way it stops
-    at 10 and at 300.</dd>
-    <dt data-t="where-the-accompaniment-lives">Where the accompaniment lives</dt><dd data-t="in-metro-and-only-there">In Metro, and only there. In the other modes the
-    metronome is something to play against, so it clicks and nothing more — a kit, a mixer and a
-    pattern editor were six controls deep in a panel you open to set a tempo. Choose a style in Metro
-    and it stays chosen; step into Scale and you get the click back.</dd>
-    <dt data-t="accompaniment-2">Accompaniment</dt><dd data-t="instead-of-a-click-a">Instead of a click, a groove: Rock, Pop, Funk, R&amp;B, Bossa or Jazz Swing, on a kick,
-    a snare, hats, a ride, a wooden clave and a pair of brushes. The <em>Ballad</em> is those brushes: one
-    sweep that never stops, the way a brush is actually played, leaning a little on two and four and
-    breathing on one and three. No cymbal in it unless you ask: <em>Hi-hat on 2 &amp; 4</em> puts the foot under the sweep, which is
-    the other half of how a ballad is usually played. Try it under 90. Each is a bar of four that repeats — the bossa is two, because its
-    clave is — with no fills and no breaks, so it stays something to play over rather than something
-    to listen to. The swing sits where a swing sits — two thirds through the beat, not half — and its
-    bass drum feathers all four beats so quietly it is felt rather than heard. The styles are written
-    in four, so the bar goes to four while one plays and comes back to what it was when the click
-    returns. The count-in still clicks: there you want a beat and
-    nothing else. The Click slider is its volume. The kit is recorded, not
-    synthesised, and the whole kit was recorded here — bass drum, snare, three hi-hats, ride
-    and clave. The bass drum and the snare come in two takes each, loud and soft, so an accent and a ghost
-    note are different strokes rather than one stroke at two volumes.</dd>
-    <dt data-t="mixer-2">Mixer</dt><dd data-t="a-level-for-each-drum">A level for each drum, over whatever the pattern asks for — the one thing that
-    can answer "the hi-hat is too quiet against the brushes", since what balances on headphones does
-    not balance on a phone. It applies to both kits and to a pattern of your own, and it is kept for
-    next time. A ghost note answers to the snare and the bossa's bass drum to the bass drum, since
-    that is what they are; the faders a style does not use are faded out, so a fader that can do
-    nothing says so. <em>Level again</em> puts every fader back.</dd>
-    <dt data-t="density-2">Density</dt><dd data-t="how-full-a-style-plays">How full a style plays. <em>Busy</em> adds what a drummer would add — the extra
-    hits are written into each style, not invented on the fly, because a random note is not a groove.
-    <em>Light</em> takes the ghost notes out and leaves the cymbals on the beat. A pattern of your own
-    is never thinned or filled: it is exactly as full as you made it.</dd>
+    <dt data-t="tempo-2">Tempo</dt><dd data-t="h.x.tempo">10 to 300 BPM. Type it, drag it, or tap it in.</dd>
+    <dt data-t="bar-2">Bar</dt><dd data-t="h.x.bar">How many beats it counts. Tap a circle to cycle it: accented, plain, silent.</dd>
+    <dt data-t="subdivision-2">Subdivision</dt><dd data-t="h.x.subdiv">What each beat is divided into. Swing splits it two to one. <em>Sequence</em> takes the figures you pick in turn, one per pass.</dd>
+    <dt data-t="click-3">Click</dt><dd data-t="h.x.click">Follow figure clicks every subdivision; Beats clicks the beats only.</dd>
+    <dt data-t="count-in-2">Count In</dt><dd data-t="h.x.count">Bars of click before the notes come in, ending on a downbeat. <em>Count again on</em> says when it comes back.</dd>
+    <dt data-t="advance-every-2">Advance Every</dt><dd data-t="h.x.advance">With the metronome alone, what counts as a pass: so many bars, or so many beats.</dd>
+    <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="h.x.tempochange">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it every round or every so many minutes; <em>Ramp</em> slides it to the tempo you name. Start always begins again from your own tempo.</dd>
+    <dt data-t="h.x.gap.k">Silences</dt><dd data-t="h.x.gap">The metronome drops out for a stretch of beats and comes back in time, so you keep it going yourself. Three levels, reached over the minutes you give it; <em>Keep the one</em> leaves beat one sounding. In Metro and Drone.</dd>
+    <dt data-t="h.x.clear.k">Clear this mode</dt><dd data-t="h.x.clear">Puts that mode back to how the app opens. Every mode is separate, so clearing one leaves the others alone.</dd>
+    <dt data-t="where-the-accompaniment-lives">Where the accompaniment lives</dt><dd data-t="h.x.where">In Metro, and only there. In the other modes the metronome clicks and nothing more.</dd>
+    <dt data-t="accompaniment-2">Accompaniment</dt><dd data-t="h.x.acc">A groove instead of the click: Rock, Pop, Funk, R&amp;B, Bossa, Jazz Swing, or a Ballad on brushes. Each is a bar that repeats, with no fills — something to play over rather than to listen to. The count-in still clicks.</dd>
+    <dt data-t="kit-2">Kit</dt><dd data-t="h.x.kit"><em>Recorded</em> is a real kit, warm and big; <em>Machine</em> is dry and tight and cuts through a small speaker. Switch while it plays.</dd>
+    <dt data-t="mixer-2">Mixer</dt><dd data-t="h.x.mixer">A level for each drum. The faders a style does not use are faded out. <em>Level again</em> puts them all back.</dd>
+    <dt data-t="density-2">Density</dt><dd data-t="h.x.density">How full a style plays. A pattern of your own is left exactly as you made it.</dd>
+    <dt data-t="pattern-2">Pattern</dt><dd data-t="h.x.pattern">Write your own: six voices down the side and the bar across. <em>Level</em> says how hard a tap writes — tapping the same cell again clears it. <em>Time</em> is what you write on, sixteenths or triplets, and both can live in the same pattern. <em>Loop</em> is how many bars go round. It can all be written while it plays, and it sounds under <em>Accompaniment → Custom</em>. Save it under <em>My patterns</em> and it is there next time.</dd>
+    <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="h.x.poly">Two pulses at once. The cycle shown is how long until they meet again.</dd>
     <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
-    <dt data-t="kit-2">Kit</dt><dd data-t="two-of-them-recorded-is">Three. <em>Recorded</em> is a real acoustic kit, warm and big.
-    <em>Mine</em> is a kit recorded here, in this room. <em>Machine</em> is made rather than
-    recorded — dry, tight, and it cuts through a small speaker. Switch between them while something
-    is playing; that is the only way to hear the difference.</dd>
-    <dt data-t="pattern-2">Pattern</dt><dd data-t="write-your-own-six-voices">Write your own. Six voices down the side and a bar across — the bar you chose, so setting
-    Beats to three gives you three to write in, and the pattern loops in three. A written style is
-    still in four and still says so; this one is yours. <em>Loop</em> is how
-    many bars go round: set it to one and the bar you write repeats, set it to four and you have four
-    to fill, with tabs to move between them. Pick a
-    <em>Level</em> — ghost, middling or accented — and every tap writes at it; tapping a cell that
-    already has that level clears it, and tapping one at another level changes it. One tap either
-    way, so a wrong cell costs one tap to undo. <em>Grid</em> is what you are writing on, not what is written: it changes which cells you can put a
-    hit on, and moves nothing that is already there. Sixteenths for straight things, triplets for
-    swung ones, and both can live in the same pattern — straight sixteenths under a swung ride, both
-    playing. A hit written on the grid you are not looking at shows as a dot in the cell it falls
-    inside; tap the dot to remove it, or switch grid to move it. Your own patterns are kept under My patterns, at the top
-    of this panel: name one and it is there next time, and taking one loads it into the pattern you
-    are editing and switches the accompaniment to Custom, where it plays. What you write after that
-    changes the pattern and not the saved copy, until you save over the name again — so a pattern
-    can be tried without losing what it was. Starting from a style copies that
-    style in and leaves the original untouched, so the styles never get spoiled. With more than one bar
-    there is <em>Copy into this bar</em>, which takes any other bar and puts it here — bar three into
-    bar one as readily as bar one into bar three — for when a bar is a variation of another rather
-    than something new. Up to four bars, for
-    a phrase that takes longer than one. On a phone the bar is stacked two beats to a row, so the
-    cells stay wide enough to hit. All of it can be written while it plays: the pattern, the kit, the density
-    and the levels are read fresh on every beat, so a cell goes in or comes out at the next one and the pulse
-    never moves under your hands. What you write is kept for next time — it is your work, not a setting —
-    and it plays under <em>Accompaniment &rarr; Custom</em>.</dd>
-    <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="two-pulses-at-once-any">Two pulses at once, any two numbers. The cycle shown is how long until they
-    meet again. A bar and a subdivision mean nothing against two pulses, so they are put away while
-    it is on.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-phrasing"><h3 data-t="phrasing">Phrasing</h3><dl>
-    <dt data-t="note-length-2">Note Length</dt><dd data-t="per-figure-gives-a-note">Per figure gives a note on every subdivision; Per beat one note a beat;
-    Per bar one note a bar. Under swing the notes take the swing too, long then short.</dd>
-    <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="let-it-drift-is-the">Restart each round is the base: note one falls on beat one
-    every time, whatever the phrase is. Let it drift is the other way and a real exercise — a
-    phrase whose length does not divide the bar walks round against the pulse and only comes back
-    after several rounds, and the metronome is never resynchronised to it. It is offered rather
-    than assumed: a line that quietly stops landing where you expect should be something you asked
-    for.</dd>
-
+    <dt data-t="note-length-2">Note Length</dt><dd data-t="h.f.len">A note on every subdivision, one a beat, or one a bar.</dd>
+    <dt data-t="phrase-alignment-2">Phrase Alignment</dt><dd data-t="h.f.align">Restart each round puts note one on beat one every time. Let it drift lets a phrase that does not fit the bar walk round against the pulse.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-timbre"><h3 data-t="timbre">Timbre</h3><dl>
-    <dt data-t="why-it-matters">Why it matters</dt><dd data-t="you-tune-by-the-beating">You tune by the beating between partials, so a voice with partials is
-    worth more than a clean one. A sine has a single partial: excellent for a unison or an octave,
-    useless for anything else.</dd>
-    <dt data-t="strings">Strings</dt><dd data-t="carls-own-instruments-recorded-note">Carl's own instruments, recorded note by note and played straight — a
-    reference must not wobble. Each note's tuning was measured and is corrected as it plays, so what
-    you hear lands within a cent of where the app says it is. A section has a spread of its own,
-    though: for the finest tuning, the Hammond is steadier.</dd>
-    <dt data-t="hammond">Hammond</dt><dd data-t="a-tonewheel-organ-recorded-with">A tonewheel organ, recorded on the basic drawbar with no vibrato and
-    no Leslie. It measures a tenth of a cent of movement from end to end — it is a machine, and it is
-    the steadiest drone in the app.</dd>
-    <dt data-t="real-piano-rhodes">Real piano, Rhodes</dt><dd data-t="for-the-note-sequences-where">For the note sequences, where a clear attack makes the rhythm
-    of a line easy to hear. Both fade, so they are not offered as drones. The piano is corrected for
-    the stretch a tuner gives it: sharp at the top is right on a piano and wrong in an app you tune
-    against.</dd>
-    <dt data-t="vibraphone-2">Vibraphone</dt><dd data-t="a-bar-is-undercut-so">A bar is undercut until its modes land on 1 : 4 : 10 — the note, two
-    octaves above it, and a little over three. That ratio is what reads as struck metal rather than as
-    a tone: a piano's partials are a harmonic series and blur together, while these three stand apart.
-    Each fades at its own rate, quickest at the top, so it turns from a ping into a hum. No motor —
-    the fans a vibraphone is named for only move the volume, but a wobble is the last thing an app for
-    hearing intonation needs, and motor off is a normal way to play it.</dd>
+    <dt data-t="h.v.pick.k">Which to use</dt><dd data-t="h.v.pick">You tune by the beating between partials, so a voice with partials is worth more than a clean one. A sine is good for a unison or an octave and little else.</dd>
+    <dt data-t="h.v.hold.k">The ones that hold</dt><dd data-t="h.v.hold">Strings and Hammond hold a note, so they can be drones. The Hammond is the steadiest of them.</dd>
+    <dt data-t="h.v.fade.k">The ones that fade</dt><dd data-t="h.v.fade">Piano, Rhodes and Vibraphone fade, which is what makes the rhythm of a line easy to hear. They play the note sequences rather than drones.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-settings"><h3 data-t="settings-the-in-the-corner">Settings — the ⚙ in the corner</h3><dl>
-    <dt data-t="note-names">Note names</dt><dd data-t="what-the-notes-are-called">What the notes are called on the screen, and nothing else: no pitch moves.
-    <b>A B C</b> is the English convention. <b>Dó Ré Mi</b> is fixed do — the note keeps its name in
-    every key, as it is taught in Portugal, Spain, Italy and France. <b>Cis Des H</b> is the German one,
-    where a sharp is the suffix -is and a flat -es, the seventh letter is H, and the note a semitone
-    under it is called B rather than H flat.
-    The spelling still follows the key: in Db major you get Ré♭ — or Des — never Dó♯.</dd>
-    <dt data-t="theme">Theme</dt><dd data-t="dark-or-light-it-used">Dark or light. It used to be the sun in the header; it lives here now.</dd>
+    <dt data-t="note-names">Note names</dt><dd data-t="h.g.names">What the notes are called on screen, and nothing more — no pitch moves. <b>A B C</b>, <b>Dó Ré Mi</b> (fixed do) or the German <b>Cis Des H</b>. The spelling follows the key.</dd>
+    <dt data-t="theme">Theme</dt><dd data-t="h.g.theme">Dark or light.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-transport"><h3 data-t="playing">Playing</h3><dl>
-    <dt data-t="start">Start</dt><dd data-t="or-the-space-bar-which">Or the space bar, which works wherever you are — unless you are typing in a field.</dd>
-    <dt data-t="offline">Offline</dt><dd data-t="once-opened-the-app-runs">Once opened, the app runs with no network at all. Add it to your home screen
-    and it behaves as an app.</dd>
+    <dt data-t="start">Start</dt><dd data-t="h.g.start">Or the space bar, unless you are typing in a field.</dd>
+    <dt data-t="offline">Offline</dt><dd data-t="h.g.offline">Once opened, the app runs with no network at all. Add it to your home screen and it behaves as an app.</dd>
   </dl></div>
   <p class="help-build" id="build-stamp"></p>
  </div>
@@ -4377,7 +4153,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01i';
+const APP_VERSION='2026-09-01j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
