@@ -4360,7 +4360,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01e';
+const APP_VERSION='2026-09-01f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5625,10 +5625,18 @@ function buildSubdivRow(){
 /* ---------- tap tempo ---------- */
 let tapTimes=[],tapResetTimer=null;
 
+/* The hand setting the tempo, from the tap or from the typed field. The slider
+   has always moved the tempo change's starting point with it, and these two did
+   not: the number moved, and Start put it straight back to wherever the slider
+   had last been. Which reads as the app refusing a tempo — and only while a
+   tempo change is switched on, which is exactly when you are most likely to be
+   setting one. All three say the same thing now, so all three do. */
 function setBpm(v){
   state.bpm=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(v)));
   document.getElementById('bpm-slider').value=state.bpm;
   document.getElementById('bpm-display').value=state.bpm;
+  state.practice.rampFrom=state.bpm;
+  buildSpeedControls();
   refreshSectionSummaries();
 }
 
@@ -8820,7 +8828,11 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
   const el=document.getElementById('bpm-display');
   el.addEventListener('input',()=>{
     const v=parseInt(el.value,10);
-    if(!isNaN(v)&&v>=BPM_MIN&&v<=BPM_MAX){state.bpm=v;tapTimes=[];refreshSectionSummaries();}
+    if(!isNaN(v)&&v>=BPM_MIN&&v<=BPM_MAX){
+      state.bpm=v;tapTimes=[];
+      state.practice.rampFrom=state.bpm;   // typed by hand, same as the slider
+      buildSpeedControls();refreshSectionSummaries();
+    }
   });
   const settle=()=>{
     let v=parseInt(el.value,10);
