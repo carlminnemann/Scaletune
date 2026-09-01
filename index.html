@@ -76,6 +76,10 @@
      Chroma 0, 15 and 23, against 22 and 65 in the pass that was too strong. */
   --hit1:#5f5f5f;--hit2:#86a493;--hit3:#c58e86;
   --brand:#8d9c93;      /* muted grey-green, for the wordmark capitals */
+  /* The help mark: the plainest ink there is, so it reads as a mark rather
+     than as a warning. Red is the transport's and the accents', and a ? is
+     never the loudest thing on a screen. */
+  --qink:#ffffff;--qbd:#6a6a6a;
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
      vertical gaps and eleven different control heights before this; that is
@@ -110,6 +114,7 @@
   /* On paper a pale tint reads as pink, so it is solid, the way the selected
      chip is. */
   --stop:#7d443d;--stop-bg:#9c5a52;--stop-fg:#faf0ee;
+  --qink:#000000;--qbd:#8d846c;
   /* Darker than --stop: that tone was made to carry white on a fill, and
      as ink on the paper it measured 4.43:1, just under the readable
      minimum. At this shade it is 4.87:1. */
@@ -203,6 +208,21 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
    starts wearing it — the same fill as Stop, for the same reason. */
 .theme-btn.armed{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.q-btn{flex:0 0 auto;width:17px;height:17px;padding:0;border:1px solid var(--qbd);border-radius:50%;
+  background:transparent;color:var(--qink);font-size:11px;font-weight:700;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation}
+/* Switched on, the mark stops being written in the ink and starts wearing it —
+   the same move the armed ✕ makes. */
+.q-btn.on{background:var(--qink);color:var(--bg);border-color:var(--qink)}
+/* A 17px circle is a 17px target, and a finger is not. The circle stays the
+   size it looks, and the tap area grows around it — wide beside the word Mode,
+   where there is nothing else to hit, and only into its own gap on a panel
+   head, where the title beside it opens the panel and must keep its taps. */
+.q-btn{position:relative}
+.q-btn::after{content:'';position:absolute;top:-11px;bottom:-11px;left:-10px;right:-10px}
+.q-btn.q-mark::after{top:-7px;bottom:-7px;left:-4px;right:-4px}
+.mode-head{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-bottom:8px}
+.mode-head .section-label{margin-bottom:0}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
@@ -969,12 +989,15 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <span></span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
   <span class="head-btns">
-    <button class="theme-btn" id="help-btn" onclick="openHelp()" aria-label="What everything does">?</button>
     <button class="theme-btn" id="settings-btn" onclick="openSettings()" aria-label="Settings">⚙</button>
   </span>
 </div>
 
-<div class="section-label" style="flex:0 0 auto" data-t="mode">Mode</div>
+<div class="mode-head">
+  <span class="section-label" data-t="mode">Mode</span>
+  <button class="q-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
+          data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
+</div>
 <div class="mode-row">
   <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')" data-t="drone">Drone</button>
   <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')" data-t="scale">Scale</button>
@@ -1532,6 +1555,10 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="tuner-2">Tuner</dt><dd data-t="h.m.tuner">Listens instead of playing. Nothing else sounds while it is open.</dd>
   </dl></div>
 
+  <div class="help-sec" id="help-exercises"><h3 data-t="saved-exercises">Saved exercises</h3><dl>
+    <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. The same name replaces; the ✕ removes.</dd>
+  </dl></div>
+
   <div class="help-sec" id="help-tuner"><h3 data-t="tuner-3">Tuner</h3><dl>
     <dt data-t="what-it-reads">What it reads</dt><dd data-t="h.t.reads">The note and how far off you are, in cents. Green means you are there.</dd>
     <dt data-t="the-strobe">The strobe</dt><dd data-t="h.t.strobe">Still means in tune, and it drifts the way you are out.</dd>
@@ -1546,7 +1573,6 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 
   <div class="help-sec" id="help-scales"><h3 data-t="scales-and-chords">Scales and chords</h3><dl>
     <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="h.s.families">One opens at a time, and a closed one still says what is chosen inside it.</dd>
-    <dt id="help-exercises" data-t="saved-exercises">Saved exercises</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. The same name replaces; the ✕ removes.</dd>
     <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="h.s.single">Single works on one scale or chord; Study list takes several in turn, one per pass.</dd>
     <dt data-t="the-study-list">The study list</dt><dd data-t="h.s.list">Scales chosen in Scale and chords chosen in Arpeggio join the same rotation. A tap adds, so the same thing can be in twice. In the list, ✕ takes one out and tapping one picks it up — tap where it should go.</dd>
     <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="h.s.each">The mark before a name is that item's own direction; tap it to change it. A faint dot means it follows Direction like everything else.</dd>
@@ -1607,6 +1633,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="start">Start</dt><dd data-t="h.g.start">Or the space bar, unless you are typing in a field.</dd>
     <dt data-t="offline">Offline</dt><dd data-t="h.g.offline">Once opened, the app runs with no network at all. Add it to your home screen and it behaves as an app.</dd>
   </dl></div>
+  <button class="clear-btn" id="help-all" type="button" onclick="helpShowAll()" data-t="h.all">See the whole guide</button>
   <p class="help-build" id="build-stamp"></p>
  </div>
 </div>
@@ -4150,7 +4177,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01k';
+const APP_VERSION='2026-09-02a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4282,6 +4309,11 @@ function setMode(m){
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
   if(isTuner)buildTunerControls();
+  /* Last, not with the rest: half these panels are shown or hidden after
+     updateSupersededControls has run, so marks painted there missed whichever
+     ones had not appeared yet — Practice Progressions and Phrasing had none on
+     the first step into Scale. */
+  paintHelpMarks();
   setStatus('');
   refreshSequence();
 }
@@ -7460,6 +7492,9 @@ function updateSupersededControls(){
   }
   // and in Metro the pulses take the place the bar has just left
   splitMetro(state.mode!=='tuner');
+  /* Which panels are on the screen has just been decided, and the marks sit on
+     the panels — so this is where they are put back. */
+  paintHelpMarks();
 }
 
 /* With notes playing, every beat is plain: an accent imposes a bar on someone
@@ -8251,8 +8286,15 @@ function buildTunerControls(){
   }
 }
 /* ---------- the guide ----------
-   The ? in the header opens it. The map below ties a panel to its entry, and is
-   what openHelp() is given when something wants to land on a particular one. */
+   Asked for one panel at a time, rather than the whole guide with one part of
+   it somewhere down the page. The map below ties a panel to its entry.
+
+   The marks are not on the screen until you ask for them: a ? beside every
+   panel is a ? you look past for a year, and on a phone the summary line beside
+   the name is already full — at 320px there are 17 pixels spare, and the
+   metronome's line is over its width as it is. So the switch lives beside the
+   word Mode, which is a label with no panel of its own, and costs nothing
+   anywhere else while it is off. */
 const HELP_FOR={
   'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
@@ -8260,16 +8302,60 @@ const HELP_FOR={
   'metro-section':'help-metro','metro-more':'help-metro',
   'sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
 };
+let helpMarks=false;
+function toggleHelpMarks(){helpMarks=!helpMarks;paintHelpMarks();}
+function helpMark(secao,nome){
+  const b=document.createElement('button');
+  b.className='q-btn q-mark';b.type='button';b.textContent='?';
+  b.setAttribute('aria-label',tr('aria.helpFor','What {what} does',{what:nome}));
+  /* A summary opens its panel when anything inside it is tapped, and this is
+     inside one. */
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();openHelp(secao);};
+  return b;
+}
+function paintHelpMarks(){
+  const sw=document.getElementById('help-toggle');
+  if(sw)sw.classList.toggle('on',helpMarks);
+  document.querySelectorAll('.q-mark').forEach(b=>b.remove());
+  if(!helpMarks)return;
+  for(const painel in HELP_FOR){
+    const d=document.getElementById(painel);
+    if(!d||!d.offsetParent)continue;
+    const s=d.querySelector(':scope>summary');
+    // Metro holds its metronome panel open with no summary at all; the mark for
+    // it rides on More, which opens the same entry
+    if(!s||!s.offsetParent)continue;
+    const t=s.querySelector('span[data-t]')||s.firstElementChild;
+    if(t)t.insertAdjacentElement('afterend',helpMark(HELP_FOR[painel],t.textContent));
+  }
+  /* The Tuner is the one mode with no panel to put a mark on, so it goes on the
+     head of the one panel it does have. */
+  const tp=document.querySelector('#tuner-section .panel:not(.tuner-panel) .head .group-label');
+  if(tp&&tp.offsetParent)tp.insertAdjacentElement('afterend',helpMark('help-tuner',tr('tuner','Tuner')));
+}
+/* One section, or all of them. Asked for a panel, the guide is that panel: the
+   title of the whole thing goes, since the section's own heading is the title
+   now, and the way back to everything sits at the foot of it. */
+function helpOnlySection(id){
+  const o=document.getElementById('help-overlay');
+  if(!o)return;
+  o.querySelectorAll('.help-sec').forEach(s=>{s.style.display=(!id||s.id===id)?'':'none';});
+  const top=o.querySelector('.help-top');if(top)top.style.display=id?'none':'';
+  const all=document.getElementById('help-all');if(all)all.style.display=id?'':'none';
+}
+function helpShowAll(){
+  helpOnlySection(null);
+  const o=document.getElementById('help-overlay');if(o)o.scrollTop=0;
+}
 function openHelp(anchor){
   const o=document.getElementById('help-overlay');
   if(!o)return;
   o.hidden=false;
   document.body.style.overflow='hidden';
-  const t=anchor&&document.getElementById(anchor);
+  helpOnlySection(anchor||null);
   // jump, do not glide: the sheet has only just appeared and there is nothing
   // to follow with the eye
   o.scrollTop=0;
-  if(t)t.scrollIntoView({block:'start'});
 }
 function closeHelp(){
   const o=document.getElementById('help-overlay');

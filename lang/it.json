@@ -601,5 +601,9 @@
  "h.g.names": "Come si chiamano le note sullo schermo, e nient'altro — nessuna altezza si muove. <b>A B C</b>, <b>Do Re Mi</b> (do fisso) o il tedesco <b>Cis Des H</b>. La grafia segue la tonalità.",
  "h.g.theme": "Scuro o chiaro.",
  "h.g.start": "O la barra spaziatrice, a meno che tu non stia scrivendo in un campo.",
- "h.g.offline": "Una volta aperta, l'app funziona senza rete. Mettila nella schermata home e si comporta come un'app."
+ "h.g.offline": "Una volta aperta, l'app funziona senza rete. Mettila nella schermata home e si comporta come un'app.",
+ "h.all": "Vedi tutta la guida",
+ "aria.helpMarks": "Mostra un ? su ogni pannello",
+ "aria.helpFor": "Cosa fa {what}",
+ "h.s.saved.k": "Salvare una preparazione"
 }

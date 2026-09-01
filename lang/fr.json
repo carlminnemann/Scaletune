@@ -601,5 +601,9 @@
  "h.g.names": "Comment les notes s'appellent à l'écran, et rien d'autre — aucune hauteur ne bouge. <b>A B C</b>, <b>Do Ré Mi</b> (do fixe) ou l'allemand <b>Cis Des H</b>. L'orthographe suit la tonalité.",
  "h.g.theme": "Sombre ou clair.",
  "h.g.start": "Ou la barre d'espace, sauf si tu écris dans un champ.",
- "h.g.offline": "Une fois ouverte, l'app fonctionne sans réseau. Ajoute-la à l'écran d'accueil et elle se comporte comme une app."
+ "h.g.offline": "Une fois ouverte, l'app fonctionne sans réseau. Ajoute-la à l'écran d'accueil et elle se comporte comme une app.",
+ "h.all": "Voir tout le guide",
+ "aria.helpMarks": "Afficher un ? sur chaque panneau",
+ "aria.helpFor": "Ce que fait {what}",
+ "h.s.saved.k": "Garder une préparation"
 }

@@ -601,5 +601,9 @@
  "h.g.names": "Wie die Töne auf dem Bildschirm heißen, mehr nicht — keine Tonhöhe bewegt sich. <b>A B C</b>, <b>Do Re Mi</b> (festes Do) oder das deutsche <b>Cis Des H</b>. Die Schreibweise folgt der Tonart.",
  "h.g.theme": "Dunkel oder hell.",
  "h.g.start": "Oder die Leertaste, außer du schreibst gerade in ein Feld.",
- "h.g.offline": "Einmal geöffnet, läuft die App ganz ohne Netz. Leg sie auf den Startbildschirm, dann verhält sie sich wie eine App."
+ "h.g.offline": "Einmal geöffnet, läuft die App ganz ohne Netz. Leg sie auf den Startbildschirm, dann verhält sie sich wie eine App.",
+ "h.all": "Den ganzen Leitfaden",
+ "aria.helpMarks": "Ein ? auf jedem Panel zeigen",
+ "aria.helpFor": "Was {what} tut",
+ "h.s.saved.k": "Eine Einrichtung behalten"
 }
