@@ -4377,7 +4377,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01h';
+const APP_VERSION='2026-09-01i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5071,12 +5071,17 @@ const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes',
   'rootMove','repeat','modesTour','useList',
   'gapMode','gapMinutes','gapKeepOne'];
 const metroPerMode={};
-let METRO_FRESH=null,METRO_FRESH_G=null;
+let METRO_FRESH=null,METRO_FRESH_G=null,TUNER_FRESH=null;
 /* What only Metro has: the accompaniment, the kit, the mixer and the pattern.
    They are not per mode, because they exist in one — but clearing that mode has
    to clear them too, or All clear would leave a drum pattern playing under a
    metronome it had just put back to nothing. */
 const SO_DO_METRO=['groove','sigBeforeGroove','kit','density','balladHat'];
+/* And what only the Tuner has. Nothing else in that mode is the metronome's, so
+   without these Clear this mode had nothing to clear there and did nothing at
+   all — where what it is good for is exactly the two you want back in a hurry:
+   equal temperament and A=440. */
+const SO_DO_TUNER=['tunerA4','tunerTemp','tunerKey'];
 const clonar=x=>JSON.parse(JSON.stringify(x));
 function metroSnapshot(){
   const o={p:{}};
@@ -5141,6 +5146,10 @@ function resetMode(){
     SO_DO_METRO.forEach(k=>state[k]=METRO_FRESH_G[k]);
     state.mix=clonar(METRO_FRESH_G.mix);
     state.custom=clonar(METRO_FRESH_G.custom);
+  }
+  if(state.mode==='tuner'&&TUNER_FRESH){
+    SO_DO_TUNER.forEach(k=>state[k]=TUNER_FRESH[k]);
+    buildTunerControls();     // its two wheels are not part of the metronome's redraw
   }
   metroKeep(state.mode);
   resetRun();restartModesRun();
@@ -8815,6 +8824,8 @@ METRO_FRESH_G={};
 SO_DO_METRO.forEach(k=>METRO_FRESH_G[k]=state[k]);
 METRO_FRESH_G.mix=clonar(state.mix);
 METRO_FRESH_G.custom=clonar(state.custom);
+TUNER_FRESH={};
+SO_DO_TUNER.forEach(k=>TUNER_FRESH[k]=state[k]);
 setMode(state.mode);
 /* Every dropdown in the app becomes a wheel. They are all in the markup from
    the start, so one pass here catches them all; what fills them with options
