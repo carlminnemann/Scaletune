@@ -3564,7 +3564,18 @@ function startBrushBed(t){
   brushBed={src,f,g};
   schedNodes.push(src,f,g);
 }
+/* Held down through a silence and let up again when the beats come back. Only on
+   the change, so the swirls keep their own leans while it sounds. Nothing to
+   cancel: a lean is already back at the bed's level before the next beat. */
+let bedCalado=false;
+function brushBedGate(soa,when){
+  if(!brushBed){bedCalado=!soa;return;}
+  if(bedCalado===!soa)return;
+  bedCalado=!soa;
+  brushBed.g.gain.setTargetAtTime(bedCalado?0.0001:brushBedLevel(),when,0.04);
+}
 function stopBrushBed(){
+  bedCalado=false;
   if(!brushBed)return;
   const {src,g}=brushBed;
   brushBed=null;
@@ -4086,21 +4097,27 @@ function schedulerTick(){
     // count-in, where a click is what you want to hear.
     const groove=grooveOn()&&!(counting||countedThisTick);
     if(subIdx===0){
-      /* The page turns first. Both are timers for the same instant, so they run
-         in the order they were set — and set the other way round, the light for
-         the first hit of a new bar went looking for its cell in the bar that
-         was still on screen and found nothing. */
-      if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime);
       /* A beat the metronome is sitting out. Everything it makes goes with it,
          the accompaniment included — half a drum kit over a hole is not silence.
          Never during the count-in: that is the one place the clicks are the
          whole point. */
       const soa=(counting||countedThisTick)?true:gapBeat(nextBeatTime,beatIdx);
       gapMudo=!soa;
+      /* The page turns first. Both are timers for the same instant, so they run
+         in the order they were set — and set the other way round, the light for
+         the first hit of a new bar went looking for its cell in the bar that
+         was still on screen and found nothing. It still turns during a gap, so
+         that what comes back is on screen when it does; only the rule goes. */
+      if(groove&&state.groove==='custom')schedulePatFlash(grooveBeat,nextBeatTime,soa);
+      /* Brushes are a hand moving all the time, not a stroke: the sweep is one
+         long sound that the beats only lean on. Left running it whispers the
+         pulse straight through a gap — the one kit that never actually stops. */
+      brushBedGate(soa,nextBeatTime);
       if(!soa){/* counted, not sounded */}
       else if(!groove||!scheduleGrooveBeat(nextBeatTime,grooveBeat))
         scheduleClick(nextBeatTime,accentFor(beatIdx));
-      scheduleFlash(beatIdx,nextBeatTime);
+      // and no dot either: a light on the beat is a metronome you can see
+      scheduleFlash(soa?beatIdx:-1,nextBeatTime);
     } else if(!gapMudo&&!(groove&&(currentDrums()||state.kit==='machine'))&&clickFollowsFigure()&&accentFor(beatIdx)!=='off'){
       scheduleClick(nextBeatTime,'sub');   // a silenced beat silences its subdivisions too
     }
@@ -4145,9 +4162,9 @@ function pruneFinishedNodes(){
 
    The grid the editor is on is the grid a tap would write to, so the one you
    chose is put back the moment it stops. */
-function schedulePatFlash(beat,when){
+function schedulePatFlash(beat,when,soa){
   const d=(when-audioCtx.currentTime)*1000;
-  pendingTimeouts.push(setTimeout(()=>patFlash(beat),Math.max(0,d)));
+  pendingTimeouts.push(setTimeout(()=>patFlash(beat,soa!==false),Math.max(0,d)));
 }
 function schedulePatHit(pos,voice,when){
   const d=(when-audioCtx.currentTime)*1000;
@@ -4179,14 +4196,14 @@ function patPintaRisco(){
     if(cá)l.style.setProperty('--beat-i',String(patTempoVivo-b0));
   });
 }
-function patFlash(beat){
+function patFlash(beat,soa){
   const grid=document.getElementById('pat-grid');
   if(!grid||!grid.children.length)return;             // the editor is not open
   if(!state.playing||state.groove!=='custom'){patTempoVivo=null;patPintaRisco();return;}
   const porCompasso=Math.max(1,state.sig);
   const compasso=Math.floor(beat/porCompasso)%patBars();
   if(patBars()>1&&compasso!==patBar){patBar=compasso;buildPatternEditor();}
-  patTempoVivo=beat%porCompasso;
+  patTempoVivo=soa===false?null:beat%porCompasso;
   patPintaRisco();
 }
 function patLimpaLuz(){
@@ -4360,7 +4377,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-01g';
+const APP_VERSION='2026-09-01h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
