@@ -222,6 +222,10 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
 .q-btn{position:relative}
 .q-btn::after{content:'';position:absolute;top:-11px;bottom:-11px;left:-10px;right:-10px}
 .q-btn.q-mark::after{top:-7px;bottom:-7px;left:-4px;right:-4px}
+/* A group's head is spread apart — label at one end, control at the other — so
+   a mark dropped in it flew to the far side and read as belonging to nothing.
+   It stays with the letters it answers for. */
+.head>.q-mark{margin-right:auto}
 .mode-head{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-bottom:8px}
 .mode-head .section-label{margin-bottom:0}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
@@ -258,7 +262,12 @@ details.sec[open]>summary{color:var(--text2);border-bottom:1px solid var(--borde
 details.sec.pinned>summary{cursor:default;pointer-events:none}
 details.sec.pinned>summary::after{display:none}
 /* and in Metro it says nothing the screen does not already say, so it goes */
-#metro-section.pinned>summary{display:none}
+/* Pinned already takes the arrow and the tap away, leaving a plain title. It
+   used to be hidden outright, on the grounds that Metro is nothing but the
+   metronome and does not need saying — but with the guide reached from the
+   panels, the one mode that IS the metronome was the one with nowhere to ask
+   about it, and its card began abruptly on Tempo. */
+#metro-section.pinned>summary{color:var(--text3)}
 /* the tempo and the bar sit in the middle of what is left, with More at the
    foot of it: the auto margins take the free space above and below equally */
 .scroll.centred{display:flex;flex-direction:column}
@@ -394,7 +403,7 @@ details.sec.pinned>summary::after{display:none}
 .pat-head[aria-expanded="true"]::after{transform:rotate(-135deg) translate(-2px,-2px)}
 .pat-head:focus-visible{outline:2px solid var(--text3);outline-offset:3px;border-radius:4px}
 .pat-sum{font-size:11px;font-style:italic;color:var(--text3);margin-left:8px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
 .pat-head[aria-expanded="true"] .pat-sum{display:none}
 
 /* Under an accompaniment the circles still show the beat but no longer take a
@@ -4191,7 +4200,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02c';
+const APP_VERSION='2026-09-02d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
