@@ -260,6 +260,11 @@ details.sec[open]>summary{color:var(--text2);border-bottom:1px solid var(--borde
    leave nothing at all. It is held open there and its summary stops being a
    control: no chevron, no pointer, nothing to press. */
 details.sec.pinned>summary{cursor:default;pointer-events:none}
+/* — except the mark on it. The whole line refuses taps so the panel cannot be
+   folded away in Metro, and that refusal swallowed the one thing on the line
+   that is meant to be tapped. A script's click ignores pointer-events, which is
+   why every test of mine passed and a finger found nothing. */
+details.sec.pinned>summary>.q-mark{pointer-events:auto;cursor:pointer}
 details.sec.pinned>summary::after{display:none}
 /* and in Metro it says nothing the screen does not already say, so it goes */
 /* Pinned already takes the arrow and the tap away, leaving a plain title. It
@@ -4200,7 +4205,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02d';
+const APP_VERSION='2026-09-02e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
