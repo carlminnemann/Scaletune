@@ -647,5 +647,9 @@
  "h.ex.move.k": "Eine Übung verschieben",
  "h.ex.move": "Das ⇢ nimmt sie in die Hand. Geh in den gewünschten Ordner und tippe <em>Hier ablegen</em>. Zwei Tipps und kein Ziehen — das Einzige, was mit einem Finger geht.",
  "h.ex.del.k": "Löschen",
- "h.ex.del": "Das ✕ löscht eine Übung. Ein Ordner geht nur leer — nimm erst heraus, was darin liegt, oder verschieb es."
+ "h.ex.del": "Das ✕ löscht eine Übung. Ein Ordner geht nur leer — nimm erst heraus, was darin liegt, oder verschieb es.",
+ "list.link": "Übungsliste",
+ "list.one": "Eine Liste",
+ "list.each": "Eine je Panel",
+ "h.s.link": "<em>Eine Liste</em> heißt, beide Panels teilen dieselbe Rotation — was eine Rotation aus Leitern und Akkorden braucht; <em>Eine je Panel</em> gibt jedem seine eigene. So oder so bleibt der Lauf in dem Panel, aus dem du gestartet bist, und nimmt alles von dort — Tempo, Oktaven, Quartenzirkel — und ein Akkord aus der Liste klingt als Arpeggio, ohne Tonleiter zu verlassen."
 }

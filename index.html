@@ -1069,6 +1069,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 </details>
 
 <div class="mode-row two" id="listmode-row" style="display:none"></div>
+<!-- One rotation or two: the study list is the one thing that is made out of
+     both panels, so it is the one thing that can be shared between them. -->
+<div class="head" id="listlink-row" style="display:none;margin-top:var(--s2)">
+  <span class="section-label" data-t="list.link">Study list</span>
+  <span class="btn-wrap seg" id="listlink-seg" data-cols="fixed"></span></div>
 
 <!-- ============ DRONE ============ -->
 <!-- The tuner. Its own mode because it is the only thing that listens rather
@@ -1618,6 +1623,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="h.s.families">One opens at a time, and a closed one still says what is chosen inside it.</dd>
     <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="h.s.single">Single works on one scale or chord; Study list takes several in turn, one per pass.</dd>
     <dt data-t="the-study-list">The study list</dt><dd data-t="h.s.list">Scales chosen in Scale and chords chosen in Arpeggio join the same rotation. A tap adds, so the same thing can be in twice. In the list, ✕ takes one out and tapping one picks it up — tap where it should go.</dd>
+    <dt data-t="list.link">Study list</dt><dd data-t="h.s.link"><em>One list</em> is the two panels sharing one rotation, which is what a rotation made of scales and chords needs; <em>One per panel</em> gives each its own. Either way the run stays in the panel you started it from and takes everything from there — its tempo, its octaves, its cycle of fourths — and a chord in the list plays as an arpeggio without leaving Scale.</dd>
     <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="h.s.each">The mark before a name is that item's own direction; tap it to change it. A faint dot means it follows Direction like everything else.</dd>
     <dt data-t="clear-6">Clear</dt><dd data-t="h.s.clear">Empties the selection.</dd>
   </dl></div>
@@ -2175,6 +2181,10 @@ let state={
      was no way to ask for it. Each item says which it is, and what is playing
      follows the item rather than the panel you happen to be looking at. */
   practice:{rootMove:'stay',repeat:'loop',modesTour:'back',useList:false,list:[],
+    /* One rotation across Scale and Arpeggio, which is what a rotation made of
+       scales AND chords needs. Not part of any mode's bundle: it says how the
+       two modes relate, so it cannot belong to either of them. */
+    listLinked:true,
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
@@ -4237,7 +4247,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02h';
+const APP_VERSION='2026-09-02i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4498,11 +4508,59 @@ function buildPitchLists(){
 }
 
 /* ---------- practice progressions ---------- */
-function activeList(){return state.practice.list;}
+/* Scale and Arpeggio are one machine with two note sources, and the rotation is
+   the one thing made out of both panels: pick scales in one, chords in the
+   other, and "the dorian, then a minor seventh on the same root" is a single
+   exercise. So the list can be shared — and while it is, it lives here rather
+   than in either mode's own bundle.
+
+   The run itself never leaves the mode you started it in: a chord in the list
+   plays as an arpeggio inside Scale, at Scale's tempo, over Scale's octaves.
+   That is why the list can be shared without anything else having to be. */
+let listaComum=[];      // the one rotation, while they are linked
+let usoComum=false;     // and whether it is switched on
+function listLinked(){return state.practice.listLinked!==false;}
+function activeList(){return listLinked()?listaComum:state.practice.list;}
+function setActiveList(a){if(listLinked())listaComum=a;else state.practice.list=a;}
 function useListOn(){
-  return (state.mode==='scale'||state.mode==='arpeggio')&&state.practice.useList;
+  return (state.mode==='scale'||state.mode==='arpeggio')&&
+         (listLinked()?usoComum:state.practice.useList);
 }
-function setUseList(v){state.practice.useList=v;}
+function setUseList(v){if(listLinked())usoComum=v;else state.practice.useList=v;}
+/* Saving an exercise and keeping a mode both read state.practice, so the live
+   list is written back into it before either happens. */
+function sincronizaLista(){
+  if(!listLinked())return;
+  state.practice.list=clonar(listaComum);
+  state.practice.useList=usoComum;
+}
+function setListLinked(v){
+  if(listLinked()===v)return;
+  if(v){    // what you are looking at becomes the shared one
+    listaComum=clonar(state.practice.list||[]);
+    usoComum=!!state.practice.useList;
+  } else {  // and it stays with the panel you are in
+    state.practice.list=clonar(listaComum);
+    state.practice.useList=usoComum;
+  }
+  state.practice.listLinked=v;
+  buildListLinkRow();renderPitchPickers();refreshSequence();
+  updateRotationPanel();refreshSectionSummaries();restartIfPlaying();
+}
+function buildListLinkRow(){
+  const row=document.getElementById('listlink-row');
+  const seg=document.getElementById('listlink-seg');
+  if(!row||!seg)return;
+  row.style.display=useListOn()?'':'none';
+  seg.innerHTML='';
+  [[true,tr('list.one','One list')],[false,tr('list.each','One per panel')]].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(listLinked()===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>setListLinked(v);
+    seg.appendChild(b);
+  });
+}
 // Scale or chord: the item's own kind while a rotation is running, and the mode
 // you are in otherwise.
 function playingKind(){
@@ -4949,6 +5007,7 @@ const SO_DO_METRO=['groove','sigBeforeGroove','kit','density','balladHat'];
 const SO_DO_TUNER=['tunerA4','tunerTemp','tunerKey'];
 const clonar=x=>JSON.parse(JSON.stringify(x));
 function metroSnapshot(){
+  sincronizaLista();
   const o={p:{}};
   METRO_MINE.forEach(k=>o[k]=state[k]);
   METRO_MINE_P.forEach(k=>o.p[k]=state.practice[k]);
@@ -5006,6 +5065,10 @@ function resetMode(){
   resetArmado=0;
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
   metroRestore(clonar(METRO_FRESH));
+  /* While the two panels share one rotation it does not live in the bundle that
+     was just put back — and clearing a mode has to clear what you can see. Only
+     from a panel that has a list: emptying it from Metro would be a surprise. */
+  if(listLinked()&&(state.mode==='scale'||state.mode==='arpeggio')){listaComum=[];usoComum=false;}
   // and what only this mode has, where this mode is the one that has it
   if(state.mode==='metro'&&METRO_FRESH_G){
     SO_DO_METRO.forEach(k=>state[k]=METRO_FRESH_G[k]);
@@ -5454,6 +5517,7 @@ function buildListModeRow(){
     };
     row.appendChild(b);
   });
+  buildListLinkRow();
 }
 
 function buildSubdivModeRow(){
@@ -6265,7 +6329,7 @@ function clearPitch(){
   /* The list holds both kinds now, so Clear in the Scales panel drops the scales
      from it and leaves the chords where they are. */
   const kind=state.mode==='arpeggio'?'chord':'scale';
-  state.practice.list=activeList().filter(x=>(x.kind||'scale')!==kind);
+  setActiveList(activeList().filter(x=>(x.kind||'scale')!==kind));
   if(!activeList().length)state.listKind=null;
   studyIdx=0;
   state.startDeg=0;
@@ -6928,6 +6992,7 @@ function exerciseStart(){
   return out;
 }
 function snapshotExercise(){
+  sincronizaLista();
   const out={};
   EX_KEYS.forEach(k=>{out[k]=state[k];});
   EX_DEEP.forEach(k=>{try{out[k]=JSON.parse(JSON.stringify(state[k]));}catch(e){}});
@@ -7045,7 +7110,8 @@ function applyExercise(x){
     state.practice.passUnit=oneOf(p.passUnit,['bar','beat'])||'bar';
   }
   state.listKind=null;studyIdx=0;subdivIdx=0;passesDone=0;
-  if(state.practice.list.length)applyListItem(state.practice.list[0]);
+  if(listLinked()){listaComum=clonar(state.practice.list||[]);usoComum=!!state.practice.useList;}
+  if(activeList().length)applyListItem(activeList()[0]);
   /* An exercise carries a whole mode, so what it carries becomes that mode's —
      otherwise the mode it lands in would hand back its own the moment anything
      redrew. */

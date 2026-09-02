@@ -647,5 +647,9 @@
  "h.ex.move.k": "Déplacer un exercice",
  "h.ex.move": "Le ⇢ le prend en main. Va jusqu'au dossier voulu et touche <em>Mets-le ici</em>. Deux touches et pas de glisser, seul geste qui marche au doigt.",
  "h.ex.del.k": "Supprimer",
- "h.ex.del": "La ✕ supprime un exercice. Un dossier ne part que vide — sors d'abord ce qu'il contient, ou déplace-le."
+ "h.ex.del": "La ✕ supprime un exercice. Un dossier ne part que vide — sors d'abord ce qu'il contient, ou déplace-le.",
+ "list.link": "Liste d'étude",
+ "list.one": "Une seule",
+ "list.each": "Une par panneau",
+ "h.s.link": "<em>Une seule</em>, c'est les deux panneaux qui partagent la même rotation — ce dont a besoin une rotation faite de gammes et d'accords ; <em>Une par panneau</em> en donne une à chacun. Dans les deux cas la course reste dans le panneau d'où tu es parti et prend tout de là — son tempo, ses octaves, son cycle des quartes — et un accord de la liste sonne en arpège sans quitter Gamme."
 }

@@ -647,5 +647,9 @@
  "h.ex.move.k": "Spostare un esercizio",
  "h.ex.move": "Il ⇢ lo prende in mano. Vai nella cartella che vuoi e tocca <em>Mettilo qui</em>. Due tocchi e niente trascinamento, che è l'unico modo che funziona con un dito.",
  "h.ex.del.k": "Cancellare",
- "h.ex.del": "La ✕ cancella un esercizio. Una cartella se ne va solo da vuota — togli prima quello che c'è dentro, o spostalo."
+ "h.ex.del": "La ✕ cancella un esercizio. Una cartella se ne va solo da vuota — togli prima quello che c'è dentro, o spostalo.",
+ "list.link": "Lista di studio",
+ "list.one": "Una sola",
+ "list.each": "Una per pannello",
+ "h.s.link": "<em>Una sola</em> è i due pannelli che condividono la stessa rotazione, che è ciò di cui ha bisogno una rotazione fatta di scale e accordi; <em>Una per pannello</em> ne dà una a ciascuno. In ogni caso la corsa resta nel pannello da cui sei partito e prende tutto da lì — il tempo, le ottave, il ciclo delle quarte — e un accordo della lista suona come arpeggio senza uscire da Scala."
 }

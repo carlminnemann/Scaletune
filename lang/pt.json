@@ -647,5 +647,9 @@
  "h.ex.move.k": "Mover um exercício",
  "h.ex.move": "O ⇢ pega nele. Anda até à pasta que queres e toca em <em>Pôr aqui</em>. Dois toques e sem arrastar, que é o único jeito que resulta com um dedo.",
  "h.ex.del.k": "Apagar",
- "h.ex.del": "O ✕ apaga um exercício. Uma pasta só se apaga vazia — tira primeiro o que está lá dentro, ou muda-o de sítio."
+ "h.ex.del": "O ✕ apaga um exercício. Uma pasta só se apaga vazia — tira primeiro o que está lá dentro, ou muda-o de sítio.",
+ "list.link": "Lista de estudo",
+ "list.one": "Uma só",
+ "list.each": "Uma por painel",
+ "h.s.link": "<em>Uma só</em> é os dois painéis a partilhar a mesma rotação, que é o que uma rotação feita de escalas e acordes precisa; <em>Uma por painel</em> dá a cada um a sua. Em qualquer dos casos a corrida fica no painel de onde arrancaste e tira tudo de lá — o andamento, as oitavas, o ciclo de quartas — e um acorde da lista toca como arpejo sem sair do Escala."
 }
