@@ -620,5 +620,24 @@
  "h.fr.oct": "Una nota que está dentro lleva un + y un − propios, y empieza en la octava 3 — una octava para cada una. Para eso sirven: un do grave y un sol agudo en la misma línea.",
  "h.fr.order.k": "El orden en que suenan",
  "h.fr.order": "De la más grave a la más aguda, no en el orden en que las tocaste — la octava que le des a cada nota decide dónde cae. Si la tónica es una de ellas, la línea parte de ahí y da la vuelta: tónica sol, con do, mi y sol elegidos, suena sol, do, mi, sol.",
- "h.fr.clear": "Vacía las notas elegidas y deja la tónica donde está."
+ "h.fr.clear": "Vacía las notas elegidas y deja la tónica donde está.",
+ "ex.newFolder": "＋ Carpeta",
+ "ex.folderNeedName": "Escribe primero el nombre de la carpeta.",
+ "ex.folderExists": "Ya hay una carpeta con ese nombre aquí.",
+ "ex.tooDeep": "Ya va bastante hondo.",
+ "ex.folderMade": "Creada «{n}». Lo que guardes ahora irá aquí.",
+ "ex.folderFull": "«{n}» todavía tiene cosas dentro.",
+ "ex.folderGone": "Borrada «{n}».",
+ "ex.folderEmpty": "vacía",
+ "ex.folderCount": {
+  "one": "{n} carpeta",
+  "other": "{n} carpetas"
+ },
+ "ex.openFolder": "Abrir {n}",
+ "ex.moveName": "Mover {n}",
+ "ex.moving": "Moviendo «{n}» — ve hasta la carpeta",
+ "ex.dropHere": "Ponlo aquí",
+ "ex.cancel": "✕ Déjalo",
+ "ex.moved": "«{n}» está ahora en {p}.",
+ "ex.savingIn": "Lo que guardes irá a {p}."
 }

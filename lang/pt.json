@@ -620,5 +620,24 @@
  "h.fr.oct": "Uma nota que esteja dentro traz um + e um − só dela, e começa na oitava 3 — uma oitava para cada. É para isso que servem: um dó grave e um sol agudo na mesma linha.",
  "h.fr.order.k": "A ordem em que tocam",
  "h.fr.order": "Da mais grave para a mais aguda, e não pela ordem em que lhes tocaste — a oitava que deres a cada nota é que decide onde ela cai. Se a tónica for uma delas, a linha parte dali e dá a volta: tónica sol, com dó, mi e sol escolhidos, toca sol, dó, mi, sol.",
- "h.fr.clear": "Esvazia as notas escolhidas e deixa a tónica onde está."
+ "h.fr.clear": "Esvazia as notas escolhidas e deixa a tónica onde está.",
+ "ex.newFolder": "＋ Pasta",
+ "ex.folderNeedName": "Escreve primeiro o nome da pasta.",
+ "ex.folderExists": "Já há uma pasta com esse nome aqui.",
+ "ex.tooDeep": "Já vai fundo que chegue.",
+ "ex.folderMade": "Criei «{n}». O que guardares agora vai para aqui.",
+ "ex.folderFull": "«{n}» ainda tem coisas lá dentro.",
+ "ex.folderGone": "Apaguei «{n}».",
+ "ex.folderEmpty": "vazia",
+ "ex.folderCount": {
+  "one": "{n} pasta",
+  "other": "{n} pastas"
+ },
+ "ex.openFolder": "Abrir {n}",
+ "ex.moveName": "Mover {n}",
+ "ex.moving": "A mover «{n}» — vai até à pasta",
+ "ex.dropHere": "Pôr aqui",
+ "ex.cancel": "✕ Deixa estar",
+ "ex.moved": "«{n}» está agora em {p}.",
+ "ex.savingIn": "O que guardares vai para {p}."
 }

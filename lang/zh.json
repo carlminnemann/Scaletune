@@ -605,5 +605,24 @@
  "h.fr.oct": "选中的音各自带一个 + 和 −，从第 3 八度开始——每个音一个八度。它们正是为此而设：同一条线里可以有低音的 Do 和高音的 Sol。",
  "h.fr.order.k": "播放的顺序",
  "h.fr.order": "由低到高，而不是你点它们的先后——每个音落在哪里，由你给它的八度决定。如果主音也在其中，这条线从主音起、绕一圈：主音选 Sol，选了 Do、Mi、Sol，就奏 Sol、Do、Mi、Sol。",
- "h.fr.clear": "清空已选的音，主音留在原处。"
+ "h.fr.clear": "清空已选的音，主音留在原处。",
+ "ex.newFolder": "＋ 文件夹",
+ "ex.folderNeedName": "先给文件夹取个名字。",
+ "ex.folderExists": "这里已经有同名的文件夹了。",
+ "ex.tooDeep": "已经够深了。",
+ "ex.folderMade": "已建立「{n}」。现在保存的会放进这里。",
+ "ex.folderFull": "「{n}」里还有东西。",
+ "ex.folderGone": "已删除「{n}」。",
+ "ex.folderEmpty": "空的",
+ "ex.folderCount": {
+  "one": "{n} 个文件夹",
+  "other": "{n} 个文件夹"
+ },
+ "ex.openFolder": "打开 {n}",
+ "ex.moveName": "移动 {n}",
+ "ex.moving": "正在移动「{n}」——走到文件夹里",
+ "ex.dropHere": "放到这里",
+ "ex.cancel": "✕ 算了",
+ "ex.moved": "「{n}」现在在 {p}。",
+ "ex.savingIn": "保存的会放进 {p}。"
 }

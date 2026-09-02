@@ -620,5 +620,24 @@
  "h.fr.oct": "Ein aufgenommener Ton hat ein eigenes + und −, und beginnt in Oktave 3 — je eine Oktave pro Ton. Genau dafür sind sie da: ein tiefes C und ein hohes G in derselben Linie.",
  "h.fr.order.k": "Die Reihenfolge",
  "h.fr.order": "Von tief nach hoch, nicht in der Reihenfolge des Antippens — die Oktave, die du einem Ton gibst, entscheidet, wo er fällt. Ist der Grundton dabei, beginnt die Linie dort und läuft herum: Grundton G, mit C, E und G gewählt, ergibt G, C, E, G.",
- "h.fr.clear": "Leert die gewählten Töne und lässt den Grundton stehen."
+ "h.fr.clear": "Leert die gewählten Töne und lässt den Grundton stehen.",
+ "ex.newFolder": "＋ Ordner",
+ "ex.folderNeedName": "Gib dem Ordner zuerst einen Namen.",
+ "ex.folderExists": "Hier gibt es schon einen Ordner mit dem Namen.",
+ "ex.tooDeep": "Tief genug.",
+ "ex.folderMade": "„{n}\" angelegt. Was du jetzt speicherst, kommt hier hinein.",
+ "ex.folderFull": "In „{n}\" steht noch etwas.",
+ "ex.folderGone": "„{n}\" gelöscht.",
+ "ex.folderEmpty": "leer",
+ "ex.folderCount": {
+  "one": "{n} Ordner",
+  "other": "{n} Ordner"
+ },
+ "ex.openFolder": "{n} öffnen",
+ "ex.moveName": "{n} verschieben",
+ "ex.moving": "„{n}\" wird verschoben — geh in den Ordner",
+ "ex.dropHere": "Hier ablegen",
+ "ex.cancel": "✕ Lassen",
+ "ex.moved": "„{n}\" liegt jetzt in {p}.",
+ "ex.savingIn": "Was du speicherst, kommt nach {p}."
 }

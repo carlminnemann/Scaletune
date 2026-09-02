@@ -620,5 +620,24 @@
  "h.fr.oct": "Une note retenue porte son propre + et −, et part de l'octave 3 — une octave chacune. C'est à cela qu'ils servent : un do grave et un sol aigu dans la même ligne.",
  "h.fr.order.k": "L'ordre où elles sonnent",
  "h.fr.order": "De la plus grave à la plus aiguë, et non dans l'ordre où tu les as touchées — c'est l'octave donnée à chacune qui décide où elle tombe. Si la tonique en fait partie, la ligne part de là et fait le tour : tonique sol, avec do, mi et sol pris, donne sol, do, mi, sol.",
- "h.fr.clear": "Vide les notes prises et laisse la tonique où elle est."
+ "h.fr.clear": "Vide les notes prises et laisse la tonique où elle est.",
+ "ex.newFolder": "＋ Dossier",
+ "ex.folderNeedName": "Nomme d'abord le dossier.",
+ "ex.folderExists": "Il y a déjà un dossier de ce nom ici.",
+ "ex.tooDeep": "C'est déjà assez profond.",
+ "ex.folderMade": "« {n} » créé. Ce que tu enregistres maintenant y va.",
+ "ex.folderFull": "« {n} » contient encore des choses.",
+ "ex.folderGone": "« {n} » supprimé.",
+ "ex.folderEmpty": "vide",
+ "ex.folderCount": {
+  "one": "{n} dossier",
+  "other": "{n} dossiers"
+ },
+ "ex.openFolder": "Ouvrir {n}",
+ "ex.moveName": "Déplacer {n}",
+ "ex.moving": "Déplacement de « {n} » — va jusqu'au dossier",
+ "ex.dropHere": "Mets-le ici",
+ "ex.cancel": "✕ Laisse",
+ "ex.moved": "« {n} » est maintenant dans {p}.",
+ "ex.savingIn": "Ce que tu enregistres ira dans {p}."
 }

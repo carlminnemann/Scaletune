@@ -723,13 +723,31 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
   border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text);
   font-family:inherit}
 .ex-name:focus{outline:none;border-color:var(--blue)}
-.ex-new{display:flex;align-items:stretch;gap:8px}
+.ex-new{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.ex-new .ex-name{flex:1 1 140px}
 .ex-new .ex-save{flex:0 0 auto;width:auto;min-width:0;padding:0 14px}
 /* A saved exercise is a wide button with the cross at its right end: the button
    is the whole row so it is easy to hit, and the cross has its own box beside
    it so deleting is never a mis-tap of opening. A column of its own rather than
    the button grid the rest of the app uses — those size themselves to their
    shortest label, and a name like "Monday, altered scales" is not a label. */
+/* The trail of folders you are standing in. Small and quiet: it says where a
+   save will land, which is the only question it has to answer. */
+.ex-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:var(--s3);font-size:11px}
+.ex-crumbs:empty{display:none}
+.ex-crumb{border:none;background:none;padding:2px 0;font:inherit;color:var(--text3);
+  cursor:pointer;text-decoration:underline;text-underline-offset:2px;touch-action:manipulation}
+.ex-crumb.here{color:var(--text2);text-decoration:none;cursor:default;font-weight:600}
+.ex-crumb-sep{color:var(--text3);opacity:.7}
+/* A folder is a row like an exercise, told apart by the mark at its left and by
+   what its second line says. */
+.ex-row .pick-btn.ex-fold{border-color:var(--border3)}
+.ex-fold-name{display:flex;align-items:center;gap:7px}
+.ex-mark{font-size:12px;opacity:.75}
+.ex-row .pick-btn.ex-move{flex:0 0 34px;width:34px;min-width:34px;padding:0;
+  align-items:center;justify-content:center;text-align:center}
+.ex-moving{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:var(--s3);
+  font-size:11px;color:var(--text2);font-style:italic}
 .ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--s4)}
 .ex-list:empty{display:none}
 .ex-row{display:flex;align-items:stretch;gap:6px}
@@ -1037,11 +1055,14 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
 <details class="sec" id="sec-exercises" style="display:none">
   <summary><span data-t="sec.exercises">Exercises</span><span class="sec-sum" id="sum-exercises"></span></summary>
   <div class="sec-body">
+    <div class="ex-crumbs" id="ex-crumbs"></div>
     <div class="ex-list" id="ex-list"></div>
+    <div class="ex-moving" id="ex-moving" style="display:none"></div>
     <div class="ex-new">
       <input class="ex-name" id="ex-name" type="text" maxlength="40"
              autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="pick-btn ex-save" id="ex-save" onclick="saveExercise()"></button>
+      <button class="pick-btn ex-save" id="ex-newfolder" onclick="newFolder()"></button>
     </div>
     <div class="info-line" id="ex-info"></div>
   </div>
@@ -2110,7 +2131,9 @@ let state={
      is the thing you ask for — opening the app already drifting means a phrase
      that does not divide the bar quietly stops landing where you expect, and
      that has to be a choice rather than a surprise. */
-  alignPasses:true,clickFollowsFigure:true,
+  /* The click marks the beat and the notes carry the figure. Following the
+     figure is still there, one tap away; it is no longer what you start with. */
+  alignPasses:true,clickFollowsFigure:false,
   // Polyrhythm: two independent layers over one shared cycle. The tempo sets
   // layer A's pulse, so at 120 with A=4 the cycle is two seconds and B fits its
   // own count into exactly that.
@@ -4210,7 +4233,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02f';
+const APP_VERSION='2026-09-02g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7027,12 +7050,115 @@ function applyExercise(x){
   return true;
 }
 
+/* ---------- folders ----------
+   A term's worth of exercises is a drawer you have to dig through, and the app
+   is opened between one student and the next. So: folders, as deep as you like.
+
+   They are kept beside the exercises rather than derived from them, because a
+   folder has to exist before there is anything in it — you make it, then you
+   save into it. An exercise carries the path it sits in, and one that carries
+   none sits at the top, which is where everything saved until now is.
+
+   Where you are standing is not remembered between launches; you always open at
+   the top, as with everything else. */
+let exFolders=[];        // each an array of names: ['Lessons','Monday']
+let exPath=[];           // the folder you are standing in
+let exMoving=null;       // the exercise in hand, while it is being moved
+const mesmoCaminho=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
+const dentroDe=(p,base)=>p.length>=base.length&&base.every((v,i)=>p[i]===v);
+const caminhoDe=e=>Array.isArray(e&&e.f)?e.f:[];
+function readFolders(){
+  try{
+    const raw=localStorage.getItem('scaletune-ex-folders');
+    const a=raw?JSON.parse(raw):[];
+    exFolders=Array.isArray(a)?a.filter(p=>Array.isArray(p)&&p.length&&p.length<=8&&
+      p.every(n=>typeof n==='string'&&n.trim())).slice(0,200):[];
+  }catch(e){exFolders=[];}
+  /* An exercise sitting in a folder that is not on the list would be
+     unreachable — nothing would draw the way in to it. Every path an exercise
+     names is a folder, and so is every folder above it. */
+  exercises.forEach(e=>{
+    const p=caminhoDe(e);
+    for(let i=1;i<=p.length;i++){
+      const sub=p.slice(0,i);
+      if(!exFolders.some(f=>mesmoCaminho(f,sub)))exFolders.push(sub);
+    }
+  });
+}
+function writeFolders(){
+  try{localStorage.setItem('scaletune-ex-folders',JSON.stringify(exFolders));return true;}
+  catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
+}
+// the folders directly inside a path, by name, in the order they were made
+function pastasEm(p){
+  return exFolders.filter(f=>f.length===p.length+1&&dentroDe(f,p)).map(f=>f[f.length-1]);
+}
+// how much is under a folder, at any depth: what it is worth opening for
+function contaSob(p){
+  return exercises.filter(e=>dentroDe(caminhoDe(e),p)).length;
+}
+function subPastas(p){return exFolders.filter(f=>f.length>p.length&&dentroDe(f,p)).length;}
+function exGo(p){exPath=p.slice();buildExercises();}
+function newFolder(){
+  const field=document.getElementById('ex-name');
+  const nome=(field.value||'').trim().slice(0,40);
+  if(!nome){field.focus();setStatus(tr('ex.folderNeedName','Name the folder first.'));return;}
+  if(exPath.length>=8){setStatus(tr('ex.tooDeep','That is deep enough.'));return;}
+  const caminho=exPath.concat([nome]);
+  if(exFolders.some(f=>mesmoCaminho(f,caminho))||
+     pastasEm(exPath).some(n=>n.toLowerCase()===nome.toLowerCase())){
+    setStatus(tr('ex.folderExists','There is already a folder called that here.'));
+    setTimeout(()=>setStatus(''),2200);return;
+  }
+  exFolders.push(caminho);
+  if(!writeFolders())return;
+  field.value='';field.blur();
+  exGo(caminho);          // you made it to put something in it
+  setStatus(tr('ex.folderMade','Made "{n}". What you save now goes in here.',{n:nome}));
+  setTimeout(()=>setStatus(''),2600);
+}
+/* A folder is deleted only when it is empty. Emptying it first is one more
+   step; taking a term's work with one tap is not a step you can undo. */
+function deleteFolder(nome){
+  const caminho=exPath.concat([nome]);
+  if(contaSob(caminho)||subPastas(caminho)){
+    setStatus(tr('ex.folderFull','"{n}" still has things in it.',{n:nome}));
+    setTimeout(()=>setStatus(''),2600);return;
+  }
+  exFolders=exFolders.filter(f=>!mesmoCaminho(f,caminho));
+  writeFolders();buildExercises();
+  setStatus(tr('ex.folderGone','Deleted "{n}".',{n:nome}));
+  setTimeout(()=>setStatus(''),1800);
+}
+/* Moving one: pick it up here, walk to where it belongs, put it down. The same
+   two taps and no dragging that the study list uses, for the same reason. */
+function moveStart(i){exMoving=exercises[i]||null;buildExercises();}
+function moveCancel(){exMoving=null;buildExercises();}
+function moveHere(){
+  if(!exMoving)return;
+  const nome=exMoving.n;
+  // a name is only itself within one folder, so a clash is a replacement
+  const at=exercises.findIndex(e=>e!==exMoving&&mesmoCaminho(caminhoDe(e),exPath)&&
+                                  e.n.toLowerCase()===nome.toLowerCase());
+  if(at>=0)exercises.splice(at,1);
+  exMoving.f=exPath.slice();
+  exMoving=null;
+  writeExercises();buildExercises();
+  setStatus(tr('ex.moved','"{n}" is now in {p}.',{n:nome,p:ondeEstou()}));
+  setTimeout(()=>setStatus(''),2200);
+}
+function ondeEstou(){return exPath.length?exPath.join(' / '):tr('sec.exercises','Exercises');}
+
 function readExercises(){
   try{
     const raw=localStorage.getItem('scaletune-exercises');
     const a=raw?JSON.parse(raw):[];
     exercises=Array.isArray(a)?a.filter(e=>e&&typeof e.n==='string'&&e.s).slice(0,EX_MAX):[];
   }catch(e){exercises=[];}
+  // an exercise saved before there were folders has no path, and the top is
+  // exactly where it was
+  exercises.forEach(e=>{if(!Array.isArray(e.f))e.f=[];});
+  readFolders();
 }
 function writeExercises(){
   try{localStorage.setItem('scaletune-exercises',JSON.stringify(exercises));return true;}
@@ -7044,7 +7170,8 @@ function saveExercise(){
   const field=document.getElementById('ex-name');
   const name=(field.value||'').trim().slice(0,40);
   if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
-  const at=exercises.findIndex(e=>e.n.toLowerCase()===name.toLowerCase());
+  const at=exercises.findIndex(e=>e.n.toLowerCase()===name.toLowerCase()&&
+                                  mesmoCaminho(caminhoDe(e),exPath));
   /* Full means full. Truncating the list would have thrown away the oldest one
      to make room for this one, without saying so — losing work quietly is worse
      than refusing to take it. */
@@ -7053,7 +7180,7 @@ function saveExercise(){
     setTimeout(()=>setStatus(''),3000);
     return;
   }
-  const entry={n:name,v:1,s:snapshotExercise()};
+  const entry={n:name,v:1,f:exPath.slice(),s:snapshotExercise()};
   if(at>=0)exercises[at]=entry; else exercises.unshift(entry);
   if(!writeExercises())return;
   field.blur();
@@ -7080,32 +7207,113 @@ function deleteExercise(i){
 function buildExercises(){
   const list=document.getElementById('ex-list');
   if(!list)return;
+  // a folder can be deleted from under your feet by nothing else than this, but
+  // a stale path would leave you standing in a room that is gone
+  while(exPath.length&&!exFolders.some(f=>mesmoCaminho(f,exPath)))exPath.pop();
+  const trilho=document.getElementById('ex-crumbs');
+  if(trilho){
+    trilho.innerHTML='';
+    if(exPath.length){
+      const passo=(nome,ate,aqui)=>{
+        const b=document.createElement('button');
+        b.className='ex-crumb'+(aqui?' here':'');b.type='button';b.textContent=nome;
+        if(!aqui)b.onclick=()=>exGo(ate);
+        trilho.appendChild(b);
+      };
+      passo(tr('sec.exercises','Exercises'),[],false);
+      exPath.forEach((n,i)=>{
+        const sep=document.createElement('span');sep.className='ex-crumb-sep';sep.textContent='›';
+        trilho.appendChild(sep);
+        passo(n,exPath.slice(0,i+1),i===exPath.length-1);
+      });
+    }
+  }
   list.innerHTML='';
+  // folders first, and each says what it is worth opening for
+  pastasEm(exPath).forEach(nome=>{
+    const caminho=exPath.concat([nome]);
+    const row=document.createElement('div');row.className='ex-row';
+    const b=document.createElement('button');
+    b.className='pick-btn ex-fold';
+    const n=document.createElement('span');n.className='ex-fold-name';
+    const m=document.createElement('span');m.className='ex-mark';m.textContent='▸';
+    const t=document.createElement('span');t.textContent=nome;
+    n.appendChild(m);n.appendChild(t);
+    const sub=document.createElement('span');sub.className='ex-sub';
+    const dentro=contaSob(caminho),subs=subPastas(caminho);
+    sub.textContent=dentro||subs
+      ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:dentro})+
+        (subs?' · '+tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:subs}):'')
+      : tr('ex.folderEmpty','empty');
+    b.appendChild(n);b.appendChild(sub);
+    b.setAttribute('aria-label',tr('ex.openFolder','Open {n}',{n:nome}));
+    b.onclick=()=>exGo(caminho);
+    const d=document.createElement('button');
+    d.className='pick-btn ex-del';d.textContent='✕';
+    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:nome}));
+    d.onclick=()=>deleteFolder(nome);
+    row.appendChild(b);row.appendChild(d);
+    list.appendChild(row);
+  });
   exercises.forEach((e,i)=>{
+    if(!mesmoCaminho(caminhoDe(e),exPath))return;
     const row=document.createElement('div');row.className='ex-row';
     const b=document.createElement('button');
     b.className='pick-btn';b.textContent=e.n;
     b.title=tr('ex.loadHint','Set everything up as it was saved');
     b.onclick=()=>loadExercise(i);
+    const mv=document.createElement('button');
+    mv.className='pick-btn ex-move';mv.textContent='⇢';
+    mv.setAttribute('aria-label',tr('ex.moveName','Move {n}',{n:e.n}));
+    mv.onclick=()=>moveStart(i);
     const d=document.createElement('button');
     d.className='pick-btn ex-del';d.textContent='✕';
     d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:e.n}));
     d.onclick=()=>deleteExercise(i);
-    row.appendChild(b);row.appendChild(d);
+    row.appendChild(b);row.appendChild(mv);row.appendChild(d);
     list.appendChild(row);
   });
+  // what is in hand, and the two things you can do with it
+  const mov=document.getElementById('ex-moving');
+  if(mov){
+    mov.innerHTML='';
+    if(exMoving){
+      mov.style.display='';
+      const diz=document.createElement('span');
+      diz.textContent=tr('ex.moving','Moving "{n}" — walk to a folder',{n:exMoving.n});
+      // where it already is, there is nothing to put down
+      const jaAqui=mesmoCaminho(caminhoDe(exMoving),exPath);
+      const aqui=document.createElement('button');
+      aqui.className='clear-btn';aqui.type='button';aqui.style.marginTop='0';
+      aqui.style.color='var(--text2)';aqui.style.borderColor='var(--border3)';
+      aqui.textContent=tr('ex.dropHere','Put it here');
+      aqui.onclick=moveHere;
+      if(jaAqui)aqui.style.display='none';
+      const nao=document.createElement('button');
+      nao.className='clear-btn';nao.type='button';nao.style.marginTop='0';
+      nao.textContent=tr('ex.cancel','✕ Cancel');
+      nao.onclick=moveCancel;
+      mov.appendChild(diz);mov.appendChild(aqui);mov.appendChild(nao);
+    } else mov.style.display='none';
+  }
   const f=document.getElementById('ex-name');
   if(f)f.placeholder=tr('ex.placeholder','Name this exercise');
   const sv=document.getElementById('ex-save');
   if(sv)sv.textContent=tr('ex.save','Save');
+  const nf=document.getElementById('ex-newfolder');
+  if(nf)nf.textContent=tr('ex.newFolder','＋ Folder');
   const info=document.getElementById('ex-info');
-  if(info)info.textContent=exercises.length
+  if(info)info.textContent=(exPath.length
+    ? tr('ex.savingIn','Saving puts it in {p}.',{p:ondeEstou()})+' '
+    : '')+(exercises.length
     ? tr('ex.info','Saving under a name you already have replaces it. An exercise carries the practice, not the volume or the theme.')
-    : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.');
+    : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.'));
   const sum=document.getElementById('sum-exercises');
+  const pastas=exFolders.length;
   if(sum)sum.textContent='· '+(exercises.length
-    ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})
-    : tr('ex.none','none yet'));
+    ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})+
+      (pastas?' · '+tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas}):'')
+    : (pastas?tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas}):tr('ex.none','none yet')));
 }
 
 /* ---------- patterns you have named ----------
