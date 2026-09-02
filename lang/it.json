@@ -560,7 +560,7 @@
  "h.t.clear.k": "Azzera questo modo",
  "h.t.clear": "Torna a equabile e 440 in due tocchi.",
  "h.s.families": "Se ne apre una alla volta, e una chiusa dice comunque cosa è scelto dentro.",
- "h.s.saved": "Prepara l'app come vuoi studiare, dalle un nome, ed è lì la prossima volta. Un nome è suo dentro una cartella: salvarci sopra lo sostituisce.",
+ "h.s.saved": "Prepara l'app come vuoi studiare, dalle un nome, ed è lì la prossima volta. Un nome è suo dentro una cartella, e salvarci sopra chiede prima — due tocchi, o niente.",
  "h.s.single": "Singolo lavora su una scala o un accordo; Lista di studio ne prende diversi a turno, uno per giro.",
  "h.s.list": "Le scale scelte in Scala e gli accordi scelti in Arpeggio entrano nella stessa rotazione. Ogni tocco aggiunge, quindi la stessa cosa può starci due volte. Nella lista la ✕ toglie, e toccarne uno lo prende in mano — tocca dove deve andare.",
  "h.s.each": "Il segno davanti a un nome è la direzione di quell'elemento; toccalo per cambiarla. Un punto tenue vuol dire che segue Direzione, come tutto il resto.",
@@ -652,5 +652,7 @@
  "h.s.link": "<em>Solo scale</em> tiene la rotazione dentro il pannello in cui sei — scale in Scala, accordi in Arpeggio. <em>Raggruppa</em> li mette nella stessa rotazione, che è ciò che serve a «il dorico e poi un minore settima sulla stessa tonica». In ogni caso la corsa resta nel pannello da cui sei partito e prende tutto da lì — il tempo, le ottave, il ciclo delle quarte — e un accordo della lista suona come arpeggio senza uscire da Scala.",
  "list.onlyScales": "Solo scale",
  "list.onlyChords": "Solo arpeggi",
- "list.group": "Raggruppa"
+ "list.group": "Raggruppa",
+ "ex.askReplace": "«{n}» c'è già. Salva di nuovo per scriverci sopra.",
+ "ex.replaceQ": "Sostituire?"
 }

@@ -560,7 +560,7 @@
  "h.t.clear.k": "Limpar este modo",
  "h.t.clear": "Volta à igual e a 440 em dois toques.",
  "h.s.families": "Abre uma de cada vez, e uma caixa fechada continua a dizer o que está escolhido lá dentro.",
- "h.s.saved": "Prepara a app como queres praticar, dá-lhe um nome, e está lá na próxima vez que a abrires. Um nome só é dele dentro de uma pasta: guardar por cima substitui.",
+ "h.s.saved": "Prepara a app como queres praticar, dá-lhe um nome, e está lá na próxima vez que a abrires. Um nome só é dele dentro de uma pasta, e guardar por cima pergunta primeiro — dois toques, ou nada feito.",
  "h.s.single": "Único trabalha uma escala ou um acorde; Lista de estudo leva vários à vez, um por passagem.",
  "h.s.list": "As escalas escolhidas em Escala e os acordes escolhidos em Arpejo entram na mesma rotação. Cada toque acrescenta, por isso a mesma coisa pode lá estar duas vezes. Na lista, o ✕ tira, e tocar num pega nele — toca onde ele deve ficar.",
  "h.s.each": "A marca antes de um nome é o sentido daquele item; toca nela para a mudares. Um ponto esbatido quer dizer que segue o Sentido, como tudo o resto.",
@@ -652,5 +652,7 @@
  "h.s.link": "<em>Só escalas</em> mantém a rotação dentro do painel onde estás — escalas no Escala, acordes no Arpejo. <em>Agrupar</em> junta os dois na mesma rotação, que é o que «o dórico e depois um menor sétima na mesma tónica» precisa. Em qualquer dos casos a corrida fica no painel de onde arrancaste e tira tudo de lá — o andamento, as oitavas, o ciclo de quartas — e um acorde da lista toca como arpejo sem sair do Escala.",
  "list.onlyScales": "Só escalas",
  "list.onlyChords": "Só arpejos",
- "list.group": "Agrupar"
+ "list.group": "Agrupar",
+ "ex.askReplace": "«{n}» já está aqui. Guarda outra vez para escreveres por cima.",
+ "ex.replaceQ": "Substituir?"
 }

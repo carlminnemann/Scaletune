@@ -207,6 +207,9 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
    that empties everything. Armed, it stops being written in the colour and
    starts wearing it — the same fill as Stop, for the same reason. */
 .theme-btn.armed{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
+/* A Save that is about to write over something wears the same colour as the ✕
+   that is about to empty something: this tap is the one that cannot be undone. */
+.pick-btn.armed{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 .theme-btn{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .q-btn{flex:0 0 auto;width:17px;height:17px;padding:0;border:1px solid var(--qbd);border-radius:50%;
   background:transparent;color:var(--qink);font-size:11px;font-weight:700;line-height:1;cursor:pointer;
@@ -1595,7 +1598,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </dl></div>
 
   <div class="help-sec" id="help-exercises"><h3 data-t="saved-exercises">Saved exercises</h3><dl>
-    <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. A name is its own within one folder: saving over it replaces it.</dd>
+    <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. A name is its own within one folder, and saving over one asks first — twice, or not at all.</dd>
     <dt data-t="h.ex.fold.k">Folders</dt><dd data-t="h.ex.fold"><em>＋ Folder</em> makes one from the name in the field and steps into it. What you save from then on goes where you are standing, and the line under the list says so. A folder inside a folder is made the same way: go in, and make the next one there.</dd>
     <dt data-t="h.ex.walk.k">Getting about</dt><dd data-t="h.ex.walk">Tap a folder to go in. The trail above the list — <em>Exercises › Lessons › João</em> — takes you back to any step of it. A folder says how much is under it, at any depth.</dd>
     <dt data-t="h.ex.move.k">Moving one</dt><dd data-t="h.ex.move">The ⇢ picks an exercise up. Walk to the folder you want and tap <em>Put it here</em>. Two taps and no dragging, which is the only kind that works with a finger.</dd>
@@ -4247,7 +4250,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02j';
+const APP_VERSION='2026-09-02k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7259,6 +7262,21 @@ function writeExercises(){
 }
 /* The name is the identity: saving over a name you already have replaces it,
    which is how you correct an exercise without collecting near-duplicates. */
+/* Saving over a name used to replace it there and then, and there is no way
+   back from that — the old one is gone. Worse, opening an exercise leaves its
+   name in the field, so the next Save was aimed at it without anyone saying so.
+   Two things: replacing is asked for, in the same two-tap shape the ✕ uses; and
+   a save lets go of the name, so the button cannot be pressed twice by mistake
+   at something you did not mean to hit. */
+let saveArmado=0,saveArmadoNome='';
+function saveArmadoPara(nome){
+  return saveArmado&&Date.now()<saveArmado&&saveArmadoNome===nome.toLowerCase();
+}
+function desarmaGuardar(){
+  if(!saveArmado)return;
+  saveArmado=0;saveArmadoNome='';
+  buildExercises();buildPatternList();
+}
 function saveExercise(){
   const field=document.getElementById('ex-name');
   const name=(field.value||'').trim().slice(0,40);
@@ -7273,10 +7291,18 @@ function saveExercise(){
     setTimeout(()=>setStatus(''),3000);
     return;
   }
+  if(at>=0&&!saveArmadoPara(name)){
+    saveArmado=Date.now()+5000;saveArmadoNome=name.toLowerCase();
+    buildExercises();
+    setStatus(tr('ex.askReplace','"{n}" is already here. Save again to write over it.',{n:name}));
+    setTimeout(()=>{if(saveArmado&&Date.now()>=saveArmado){desarmaGuardar();setStatus('');}},5100);
+    return;
+  }
+  saveArmado=0;saveArmadoNome='';
   const entry={n:name,v:1,f:exPath.slice(),s:snapshotExercise()};
   if(at>=0)exercises[at]=entry; else exercises.unshift(entry);
   if(!writeExercises())return;
-  field.blur();
+  field.value='';field.blur();
   buildExercises();
   setStatus(at>=0?tr('ex.replaced','Replaced "{n}".',{n:name})
                  :tr('ex.saved','Saved as "{n}".',{n:name}));
@@ -7392,7 +7418,11 @@ function buildExercises(){
   const f=document.getElementById('ex-name');
   if(f)f.placeholder=tr('ex.placeholder','Name this exercise');
   const sv=document.getElementById('ex-save');
-  if(sv)sv.textContent=tr('ex.save','Save');
+  if(sv){
+    const perg=saveArmado&&Date.now()<saveArmado;
+    sv.textContent=perg?tr('ex.replaceQ','Replace?'):tr('ex.save','Save');
+    sv.classList.toggle('armed',!!perg);
+  }
   const nf=document.getElementById('ex-newfolder');
   if(nf)nf.textContent=tr('ex.newFolder','＋ Folder');
   const info=document.getElementById('ex-info');
@@ -7446,9 +7476,17 @@ function savePatternAs(){
     setTimeout(()=>setStatus(''),3000);
     return;
   }
+  if(at>=0&&!saveArmadoPara(name)){
+    saveArmado=Date.now()+5000;saveArmadoNome=name.toLowerCase();
+    buildPatternList();
+    setStatus(tr('ex.askReplace','"{n}" is already here. Save again to write over it.',{n:name}));
+    setTimeout(()=>{if(saveArmado&&Date.now()>=saveArmado){desarmaGuardar();setStatus('');}},5100);
+    return;
+  }
+  saveArmado=0;saveArmadoNome='';
   if(at>=0)patterns[at]=entry; else patterns.unshift(entry);
   if(!writePatterns())return;
-  field.blur();buildPatternList();
+  field.value='';field.blur();buildPatternList();
   setStatus(at>=0?tr('ex.replaced','Replaced "{n}".',{n:name})
                  :tr('ex.saved','Saved as "{n}".',{n:name}));
   setTimeout(()=>setStatus(''),2000);
@@ -7507,7 +7545,11 @@ function buildPatternList(){
   const f=document.getElementById('pat-name');
   if(f)f.placeholder=tr('pat.namePlaceholder','Name this pattern');
   const sv=document.getElementById('pat-save');
-  if(sv)sv.textContent=tr('ex.save','Save');
+  if(sv){
+    const perg=saveArmado&&Date.now()<saveArmado;
+    sv.textContent=perg?tr('ex.replaceQ','Replace?'):tr('ex.save','Save');
+    sv.classList.toggle('armed',!!perg);
+  }
   const info=document.getElementById('pat-mine-info');
   if(info)info.textContent=patterns.length
     ? tr('pat.mineInfo','Taking one loads it into the pattern below. What you write after that changes the pattern, not the saved copy, until you save over the name again.')
@@ -9068,6 +9110,12 @@ setMode(state.mode);
 /* Every dropdown in the app becomes a wheel. They are all in the markup from
    the start, so one pass here catches them all; what fills them with options
    happens later and does not care. */
+/* Changing the name is changing the target, so the question that was asked
+   about the old one no longer stands. */
+['ex-name','pat-name'].forEach(id=>{
+  const f=document.getElementById(id);
+  if(f)f.addEventListener('input',desarmaGuardar);
+});
 montaRoladores();
 resetLabel();
 // A wheel over a range input silently changes its value — that once moved

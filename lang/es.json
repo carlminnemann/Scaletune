@@ -560,7 +560,7 @@
  "h.t.clear.k": "Borrar este modo",
  "h.t.clear": "Vuelve a la igual y a 440 en dos toques.",
  "h.s.families": "Se abre una cada vez, y una caja cerrada sigue diciendo lo que hay elegido dentro.",
- "h.s.saved": "Prepara la app como quieres practicar, ponle un nombre, y estará ahí la próxima vez. Un nombre es suyo dentro de una carpeta: guardar encima lo sustituye.",
+ "h.s.saved": "Prepara la app como quieres practicar, ponle un nombre, y estará ahí la próxima vez. Un nombre es suyo dentro de una carpeta, y guardar encima pregunta antes — dos toques, o nada.",
  "h.s.single": "Única trabaja una escala o un acorde; Lista de estudio lleva varios por turno, uno por pasada.",
  "h.s.list": "Las escalas elegidas en Escala y los acordes elegidos en Arpegio entran en la misma rotación. Cada toque añade, así que lo mismo puede estar dos veces. En la lista, la ✕ quita, y tocar uno lo coge — toca donde debe ir.",
  "h.s.each": "La marca delante de un nombre es el sentido de ese elemento; tócala para cambiarla. Un punto tenue quiere decir que sigue a Sentido, como todo lo demás.",
@@ -652,5 +652,7 @@
  "h.s.link": "<em>Solo escalas</em> mantiene la rotación dentro del panel en que estás — escalas en Escala, acordes en Arpegio. <em>Agrupar</em> los junta en una sola rotación, que es lo que necesita «el dórico y luego un menor séptima sobre la misma tónica». En cualquier caso la carrera se queda en el panel desde donde arrancaste y lo toma todo de ahí — el tempo, las octavas, el ciclo de cuartas — y un acorde de la lista suena como arpegio sin salir de Escala.",
  "list.onlyScales": "Solo escalas",
  "list.onlyChords": "Solo arpegios",
- "list.group": "Agrupar"
+ "list.group": "Agrupar",
+ "ex.askReplace": "«{n}» ya está aquí. Guarda otra vez para escribir encima.",
+ "ex.replaceQ": "¿Sustituir?"
 }

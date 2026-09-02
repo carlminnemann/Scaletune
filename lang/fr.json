@@ -560,7 +560,7 @@
  "h.t.clear.k": "Vider ce mode",
  "h.t.clear": "Retour à égal et 440 en deux appuis.",
  "h.s.families": "Une seule s'ouvre à la fois, et une boîte fermée dit toujours ce qui est choisi dedans.",
- "h.s.saved": "Règle l'app comme tu veux travailler, donne-lui un nom, et elle est là la prochaine fois. Un nom n'est le sien que dans un dossier : enregistrer par-dessus le remplace.",
+ "h.s.saved": "Règle l'app comme tu veux travailler, donne-lui un nom, et elle est là la prochaine fois. Un nom n'est le sien que dans un dossier, et enregistrer par-dessus demande d'abord — deux touches, ou rien.",
  "h.s.single": "Seule travaille une gamme ou un accord ; Liste d'étude en prend plusieurs à tour de rôle, un par tour.",
  "h.s.list": "Les gammes choisies dans Gamme et les accords choisis dans Arpège entrent dans la même rotation. Chaque appui ajoute, donc la même chose peut y être deux fois. Dans la liste, la ✕ retire, et toucher un élément le prend en main — touche là où il doit aller.",
  "h.s.each": "La marque devant un nom est le sens de cet élément ; touche-la pour la changer. Un point pâle veut dire qu'il suit Sens, comme tout le reste.",
@@ -652,5 +652,7 @@
  "h.s.link": "<em>Gammes seules</em> garde la rotation dans le panneau où tu es — gammes dans Gamme, accords dans Arpège. <em>Grouper</em> les met dans une même rotation, ce qu'il faut pour « le dorien, puis un mineur septième sur la même tonique ». Dans les deux cas la course reste dans le panneau d'où tu es parti et prend tout de là — son tempo, ses octaves, son cycle des quartes — et un accord de la liste sonne en arpège sans quitter Gamme.",
  "list.onlyScales": "Gammes seules",
  "list.onlyChords": "Arpèges seuls",
- "list.group": "Grouper"
+ "list.group": "Grouper",
+ "ex.askReplace": "« {n} » est déjà là. Enregistre encore pour écrire par-dessus.",
+ "ex.replaceQ": "Remplacer ?"
 }

@@ -560,7 +560,7 @@
  "h.t.clear.k": "Diesen Modus leeren",
  "h.t.clear": "Mit zwei Tipps zurück auf gleichstufig und 440.",
  "h.s.families": "Es öffnet sich eine nach der anderen, und eine geschlossene sagt weiter, was darin gewählt ist.",
- "h.s.saved": "Stell die App so ein, wie du üben willst, gib ihr einen Namen, und sie ist beim nächsten Öffnen da. Ein Name gehört ihr nur innerhalb eines Ordners: darüber speichern ersetzt sie.",
+ "h.s.saved": "Stell die App so ein, wie du üben willst, gib ihr einen Namen, und sie ist beim nächsten Öffnen da. Ein Name gehört ihr nur innerhalb eines Ordners, und darüber speichern fragt erst — zweimal tippen, oder gar nicht.",
  "h.s.single": "Einzeln arbeitet an einer Tonleiter oder einem Akkord; Übungsliste nimmt mehrere der Reihe nach, eines pro Durchgang.",
  "h.s.list": "In Tonleiter gewählte Leitern und in Arpeggio gewählte Akkorde kommen in dieselbe Rotation. Jedes Tippen fügt hinzu, dasselbe kann also zweimal drin sein. In der Liste nimmt das ✕ eines heraus, und ein Tipp hebt eines auf — tippe dorthin, wo es hin soll.",
  "h.s.each": "Das Zeichen vor einem Namen ist die Richtung dieses Eintrags; tippe darauf, um sie zu ändern. Ein blasser Punkt heißt, er folgt der Richtung wie alles andere.",
@@ -652,5 +652,7 @@
  "h.s.link": "<em>Nur Leitern</em> hält die Rotation in dem Panel, in dem du bist — Leitern in Tonleiter, Akkorde in Arpeggio. <em>Zusammen</em> legt beide in eine Rotation, was „der Dorische und dann ein Moll-Septakkord auf demselben Grundton\" braucht. So oder so bleibt der Lauf in dem Panel, aus dem du gestartet bist, und nimmt alles von dort — Tempo, Oktaven, Quartenzirkel — und ein Akkord aus der Liste klingt als Arpeggio, ohne Tonleiter zu verlassen.",
  "list.onlyScales": "Nur Leitern",
  "list.onlyChords": "Nur Arpeggien",
- "list.group": "Zusammen"
+ "list.group": "Zusammen",
+ "ex.askReplace": "„{n}\" ist schon da. Noch einmal speichern, um darüberzuschreiben.",
+ "ex.replaceQ": "Ersetzen?"
 }
