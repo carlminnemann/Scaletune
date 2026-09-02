@@ -214,6 +214,7 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
 /* Switched on, the mark stops being written in the ink and starts wearing it —
    the same move the armed ✕ makes. */
 .q-btn.on{background:var(--qink);color:var(--bg);border-color:var(--qink)}
+.theme-btn.on{background:var(--qink);color:var(--bg);border-color:var(--qink)}
 /* A 17px circle is a 17px target, and a finger is not. The circle stays the
    size it looks, and the tap area grows around it — wide beside the word Mode,
    where there is nothing else to hit, and only into its own gap on a panel
@@ -989,15 +990,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   <span></span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
   <span class="head-btns">
+    <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
+            data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
     <button class="theme-btn" id="settings-btn" onclick="openSettings()" aria-label="Settings">⚙</button>
   </span>
 </div>
 
-<div class="mode-head">
-  <span class="section-label" data-t="mode">Mode</span>
-  <button class="q-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
-          data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
-</div>
+<div class="mode-head"><span class="section-label" data-t="mode">Mode</span></div>
 <div class="mode-row">
   <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')" data-t="drone">Drone</button>
   <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')" data-t="scale">Scale</button>
@@ -1605,6 +1604,9 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="advance-every-2">Advance Every</dt><dd data-t="h.x.advance">With the metronome alone, what counts as a pass: so many bars, or so many beats.</dd>
     <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="h.x.tempochange">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it every round or every so many minutes; <em>Ramp</em> slides it to the tempo you name. Start always begins again from your own tempo.</dd>
     <dt data-t="h.x.gap.k">Silences</dt><dd data-t="h.x.gap">The metronome drops out for a stretch of beats and comes back in time, so you keep it going yourself. Three levels, reached over the minutes you give it; <em>Keep the one</em> leaves beat one sounding. In Metro and Drone.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-poly"><h3 data-t="polyrhythm">Polyrhythm</h3><dl>
     <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="h.x.poly">Two pulses at once. The cycle shown is how long until they meet again.</dd>
     <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
   </dl></div>
@@ -1615,7 +1617,13 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="kit-2">Kit</dt><dd data-t="h.x.kit"><em>Recorded</em> is a real kit, warm and big; <em>Machine</em> is dry and tight and cuts through a small speaker. Switch while it plays.</dd>
     <dt data-t="density-2">Density</dt><dd data-t="h.x.density">How full a style plays. A pattern of your own is left exactly as you made it.</dd>
     <dt data-t="mixer-2">Mixer</dt><dd data-t="h.x.mixer">A level for each drum. The faders a style does not use are faded out. <em>Level again</em> puts them all back.</dd>
-    <dt data-t="pattern-2">Pattern</dt><dd data-t="h.x.pattern">Write your own: six voices down the side and the bar across. <em>Level</em> says how hard a tap writes — tapping the same cell again clears it. <em>Time</em> is what you write on, sixteenths or triplets, and both can live in the same pattern. <em>Loop</em> is how many bars go round. It can all be written while it plays, and it sounds under <em>Accompaniment → Custom</em>. Save it under <em>My patterns</em> and it is there next time.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-pattern"><h3 data-t="pattern">Pattern</h3><dl>
+    <dt data-t="h.pt.write.k">Writing it</dt><dd data-t="h.pt.write">Six voices down the side and the bar across — the bar you chose, so three beats gives you three to write in. <em>Level</em> says how hard a tap writes, and tapping the same cell again clears it.</dd>
+    <dt data-t="pat.which">Time</dt><dd data-t="h.pt.time">What you are writing on, sixteenths or triplets. Both can live in the same pattern, and one choice is also the one that sounds.</dd>
+    <dt data-t="h.pt.loop.k">Loop</dt><dd data-t="h.pt.loop">How many bars go round, up to four, with a tab for each. <em>Clear bar</em> empties the one you are on; <em>Copy into this bar</em> takes any other bar and puts it here.</dd>
+    <dt data-t="h.pt.save.k">Keeping one</dt><dd data-t="h.pt.save">Name it under <em>My patterns</em> and it is there next time. It plays under <em>Accompaniment → Custom</em>, and all of it can be written while it plays.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-phrasing"><h3 data-t="phrasing">Phrasing</h3><dl>
@@ -4183,7 +4191,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02b';
+const APP_VERSION='2026-09-02c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8313,12 +8321,15 @@ const HELP_FOR={
    as any panel above. The Tuner has no panel at all, so its mark rides the one
    head it does have. */
 const HELP_INLINE={
+  // the modes themselves, which no panel below could speak for
+  '.mode-head .section-label':'help-modes',
   /* Metro holds the metronome open with no summary of its own, so without this
      the four plainest entries in the guide had no mark anywhere in the one mode
      that is nothing but the metronome. */
   '#tempo-block .section-label':'help-metro',
+  '#poly-block .section-label':'help-poly',
   '#groove-block .section-label':'help-acc',
-  '#pat-head .section-label':'help-acc',
+  '#pat-head .section-label':'help-pattern',
   '#mix-head .section-label':'help-acc',
   '#subdiv-head .section-label':'help-metro',
   '#tuner-section .panel:not(.tuner-panel) .head .group-label':'help-tuner',
@@ -8342,26 +8353,38 @@ function heVisivel(el){
   if(!el)return false;
   return el.checkVisibility?el.checkVisibility():!!el.offsetParent;
 }
+/* One mark per page, and no page marked twice. Three marks in the accompaniment
+   that all opened the same six entries read as three broken buttons rather than
+   as one answer — so a page that already has a mark on the screen does not get
+   another, and the panel that owns it wins over the group inside it. */
 function paintHelpMarks(){
   const sw=document.getElementById('help-toggle');
   if(sw)sw.classList.toggle('on',helpMarks);
   document.querySelectorAll('.q-mark').forEach(b=>b.remove());
   if(!helpMarks)return;
+  const feitas=new Set();
   for(const painel in HELP_FOR){
     const d=document.getElementById(painel);
     if(!heVisivel(d))continue;
     const s=d.querySelector(':scope>summary');
-    // Metro holds its metronome panel open with no summary at all; the mark for
-    // it rides on More, which opens the same entry
+    // Metro holds its metronome panel open with no summary at all; there the
+    // mark for it rides on Tempo, the first thing inside it
     if(!heVisivel(s))continue;
+    const sec=HELP_FOR[painel];
+    if(feitas.has(sec))continue;
     const t=s.querySelector('span[data-t]')||s.firstElementChild;
-    if(t)t.insertAdjacentElement('afterend',helpMark(HELP_FOR[painel],t.textContent));
+    if(!t)continue;
+    feitas.add(sec);
+    t.insertAdjacentElement('afterend',helpMark(sec,t.textContent));
   }
   for(const sel in HELP_INLINE){
     const el=document.querySelector(sel);
     if(!heVisivel(el))continue;
+    const sec=HELP_INLINE[sel];
+    if(feitas.has(sec))continue;
+    feitas.add(sec);
     const nome=sel.indexOf('#tuner')===0?tr('tuner','Tuner'):el.textContent;
-    el.insertAdjacentElement('afterend',helpMark(HELP_INLINE[sel],nome));
+    el.insertAdjacentElement('afterend',helpMark(sec,nome));
   }
 }
 /* One section, or all of them. Asked for a panel, the guide is that panel: the

@@ -588,7 +588,6 @@
  "h.x.kit": "<em>Enregistrée</em> est une vraie batterie, chaude et large ; <em>Machine</em> est sèche et nette et passe dans un petit haut-parleur. Change pendant que ça joue.",
  "h.x.mixer": "Un niveau pour chaque fût. Les curseurs qu'un style n'utilise pas sont estompés. <em>Remettre les niveaux</em> les replace tous.",
  "h.x.density": "À quel point un style est rempli. Un motif à toi reste exactement comme tu l'as fait.",
- "h.x.pattern": "Écris le tien : six voix sur le côté et la mesure en longueur. <em>Intensité</em> dit avec quelle force chaque appui écrit — toucher à nouveau la même case l'efface. <em>Temps</em> est ce sur quoi tu écris, doubles ou triolets, et les deux peuvent cohabiter dans le même motif. <em>Répète</em> est le nombre de mesures qui tournent. Tout peut s'écrire pendant que ça joue, et ça sonne dans <em>Accompagnement → Le mien</em>. Enregistre-le dans <em>Mes motifs</em> et il est là la prochaine fois.",
  "h.x.poly": "Deux pulsations à la fois. Le cycle indiqué est le temps qu'elles mettent à se retrouver.",
  "h.f.len": "Une note à chaque subdivision, une par temps, ou une par mesure.",
  "h.f.align": "Recommencer à chaque tour met la première note sur le premier temps, à chaque fois. Laisser filer laisse une phrase qui ne tombe pas dans la mesure tourner contre la pulsation.",
@@ -606,5 +605,12 @@
  "aria.helpMarks": "Afficher un ? sur chaque panneau",
  "aria.helpFor": "Ce que fait {what}",
  "h.s.saved.k": "Garder une préparation",
- "h.run.k": "Pendant la marche"
+ "h.run.k": "Pendant la marche",
+ "h.pt.write.k": "Écrire",
+ "h.pt.write": "Six voix sur le côté et la mesure en longueur — la mesure que tu as choisie, donc trois temps t'en donnent trois à remplir. <em>Intensité</em> dit avec quelle force chaque appui écrit, et retoucher la même case l'efface.",
+ "h.pt.time": "Ce sur quoi tu écris, doubles ou triolets. Les deux peuvent cohabiter dans le même motif, et le choix est aussi celui qui sonne.",
+ "h.pt.loop.k": "Répète",
+ "h.pt.loop": "Combien de mesures tournent, jusqu'à quatre, avec un onglet pour chacune. <em>Vider la mesure</em> vide celle où tu es ; <em>Copier dans cette mesure</em> y amène n'importe quelle autre.",
+ "h.pt.save.k": "En garder un",
+ "h.pt.save": "Donne-lui un nom dans <em>Mes motifs</em> et il est là la prochaine fois. Il sonne dans <em>Accompagnement → Le mien</em>, et tout peut s'écrire pendant que ça joue."
 }

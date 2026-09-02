@@ -588,7 +588,6 @@
  "h.x.kit": "<em>Aufgenommen</em> ist ein echtes Schlagzeug, warm und groß; <em>Maschine</em> ist trocken und knapp und kommt durch einen kleinen Lautsprecher. Wechsle, während es läuft.",
  "h.x.mixer": "Ein Pegel für jede Trommel. Die Regler, die ein Stil nicht braucht, sind ausgeblasst. <em>Pegel zurück</em> stellt alle wieder her.",
  "h.x.density": "Wie voll ein Stil spielt. Ein eigenes Muster bleibt genau so, wie du es gemacht hast.",
- "h.x.pattern": "Schreib dein eigenes: sechs Stimmen an der Seite, der Takt in der Breite. <em>Stärke</em> sagt, wie hart ein Tipp schreibt — dieselbe Zelle noch einmal antippen löscht sie. <em>Zeit</em> ist das, worauf du schreibst, Sechzehntel oder Triolen, und beide können im selben Muster stehen. <em>Wiederholt</em> ist, wie viele Takte umlaufen. Alles lässt sich schreiben, während es spielt, und es klingt unter <em>Begleitung → Mein</em>. Speichere es unter <em>Meine Muster</em>, dann ist es nächstes Mal da.",
  "h.x.poly": "Zwei Pulse zugleich. Der angezeigte Zyklus ist, wie lange es dauert, bis sie sich wieder treffen.",
  "h.f.len": "Ein Ton auf jeder Unterteilung, einer pro Schlag, oder einer pro Takt.",
  "h.f.align": "Jede Runde neu beginnen legt den ersten Ton immer auf die Eins. Treiben lassen lässt eine Phrase, die nicht in den Takt passt, gegen den Puls wandern.",
@@ -606,5 +605,12 @@
  "aria.helpMarks": "Ein ? auf jedem Panel zeigen",
  "aria.helpFor": "Was {what} tut",
  "h.s.saved.k": "Eine Einrichtung behalten",
- "h.run.k": "Während es läuft"
+ "h.run.k": "Während es läuft",
+ "h.pt.write.k": "Schreiben",
+ "h.pt.write": "Sechs Stimmen an der Seite, der Takt in der Breite — der Takt, den du gewählt hast, drei Schläge geben dir also drei zum Schreiben. <em>Stärke</em> sagt, wie hart ein Tipp schreibt, und dieselbe Zelle noch einmal antippen löscht sie.",
+ "h.pt.time": "Das, worauf du schreibst: Sechzehntel oder Triolen. Beide können im selben Muster stehen, und die Wahl ist zugleich die, die klingt.",
+ "h.pt.loop.k": "Wiederholt",
+ "h.pt.loop": "Wie viele Takte umlaufen, bis zu vier, mit einem Reiter für jeden. <em>Takt leeren</em> leert den, in dem du bist; <em>In diesen Takt kopieren</em> holt jeden anderen hierher.",
+ "h.pt.save.k": "Eines behalten",
+ "h.pt.save": "Gib ihm unter <em>Meine Muster</em> einen Namen, dann ist es nächstes Mal da. Es klingt unter <em>Begleitung → Mein</em>, und alles lässt sich schreiben, während es spielt."
 }

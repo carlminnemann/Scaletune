@@ -588,7 +588,6 @@
  "h.x.kit": "<em>Registrata</em> è una batteria vera, calda e grande; <em>Macchina</em> è asciutta e precisa e passa in un altoparlante piccolo. Cambia mentre suona.",
  "h.x.mixer": "Un livello per ogni pezzo. I cursori che uno stile non usa restano sbiaditi. <em>Rimetti i livelli</em> li riporta tutti a posto.",
  "h.x.density": "Quanto è pieno uno stile. Un pattern tuo resta esattamente come l'hai fatto.",
- "h.x.pattern": "Scrivi il tuo: sei voci di lato e la battuta per lungo. <em>Intensità</em> dice con che forza scrive ogni tocco — toccare di nuovo la stessa cella la cancella. <em>Tempo</em> è ciò su cui scrivi, semicrome o terzine, e i due possono convivere nello stesso pattern. <em>Ripete</em> è quante battute girano. Si può scrivere tutto mentre suona, e suona in <em>Accompagnamento → Mio</em>. Salvalo in <em>I miei pattern</em> e la prossima volta è lì.",
  "h.x.poly": "Due pulsazioni insieme. Il ciclo indicato è quanto ci mettono a ritrovarsi.",
  "h.f.len": "Una nota su ogni suddivisione, una per movimento, o una per battuta.",
  "h.f.align": "Ricomincia a ogni giro mette la prima nota sul primo movimento, sempre. Lascia scorrere lascia che una frase che non entra nella battuta giri contro la pulsazione.",
@@ -606,5 +605,12 @@
  "aria.helpMarks": "Mostra un ? su ogni pannello",
  "aria.helpFor": "Cosa fa {what}",
  "h.s.saved.k": "Salvare una preparazione",
- "h.run.k": "Mentre va"
+ "h.run.k": "Mentre va",
+ "h.pt.write.k": "Scrivere",
+ "h.pt.write": "Sei voci di lato e la battuta per lungo — la battuta che hai scelto, quindi tre movimenti te ne danno tre da scrivere. <em>Intensità</em> dice con che forza scrive ogni tocco, e toccare di nuovo la stessa cella la cancella.",
+ "h.pt.time": "Ciò su cui stai scrivendo, semicrome o terzine. I due possono convivere nello stesso pattern, e la scelta è anche quella che suona.",
+ "h.pt.loop.k": "Ripete",
+ "h.pt.loop": "Quante battute girano, fino a quattro, con una linguetta per ciascuna. <em>Azzera la battuta</em> svuota quella in cui sei; <em>Copia in questa battuta</em> ci porta qualsiasi altra.",
+ "h.pt.save.k": "Salvarne uno",
+ "h.pt.save": "Dagli un nome in <em>I miei pattern</em> ed è lì la prossima volta. Suona in <em>Accompagnamento → Mio</em>, e si può scrivere tutto mentre suona."
 }

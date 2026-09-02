@@ -588,7 +588,6 @@
  "h.x.kit": "<em>Grabada</em> es una batería de verdad, cálida y grande; <em>Máquina</em> es seca y precisa y pasa por un altavoz pequeño. Cambia mientras suena.",
  "h.x.mixer": "Un nivel para cada pieza. Los deslizadores que el estilo no usa quedan atenuados. <em>Reponer niveles</em> los devuelve todos.",
  "h.x.density": "Cuán lleno toca un estilo. Un patrón tuyo queda exactamente como lo hiciste.",
- "h.x.pattern": "Escribe el tuyo: seis voces al lado y el compás a lo largo. <em>Intensidad</em> dice con qué fuerza escribe cada toque — tocar otra vez la misma celda la borra. <em>Tiempo</em> es aquello sobre lo que escribes, semicorcheas o tresillos, y los dos pueden convivir en el mismo patrón. <em>Repite</em> es cuántos compases dan la vuelta. Todo se puede escribir mientras suena, y suena en <em>Acompañamiento → Mío</em>. Guárdalo en <em>Mis patrones</em> y estará ahí la próxima vez.",
  "h.x.poly": "Dos pulsos a la vez. El ciclo indicado es lo que tardan en volver a encontrarse.",
  "h.f.len": "Una nota en cada subdivisión, una por tiempo, o una por compás.",
  "h.f.align": "Reiniciar en cada vuelta pone la primera nota en el primer tiempo, siempre. Dejar correr deja que una frase que no cabe en el compás gire contra el pulso.",
@@ -606,5 +605,12 @@
  "aria.helpMarks": "Mostrar una ? en cada panel",
  "aria.helpFor": "Qué hace {what}",
  "h.s.saved.k": "Guardar una preparación",
- "h.run.k": "Mientras corre"
+ "h.run.k": "Mientras corre",
+ "h.pt.write.k": "Escribir",
+ "h.pt.write": "Seis voces al lado y el compás a lo largo — el compás que elegiste, así que tres tiempos te dan tres para escribir. <em>Intensidad</em> dice con qué fuerza escribe cada toque, y tocar otra vez la misma celda la borra.",
+ "h.pt.time": "Aquello sobre lo que escribes, semicorcheas o tresillos. Los dos pueden convivir en el mismo patrón, y la elección es también la que suena.",
+ "h.pt.loop.k": "Repite",
+ "h.pt.loop": "Cuántos compases dan la vuelta, hasta cuatro, con una pestaña para cada uno. <em>Borrar el compás</em> vacía el que tienes; <em>Copiar en este compás</em> trae aquí cualquier otro.",
+ "h.pt.save.k": "Guardar uno",
+ "h.pt.save": "Ponle nombre en <em>Mis patrones</em> y estará ahí la próxima vez. Suena en <em>Acompañamiento → Mío</em>, y todo se puede escribir mientras suena."
 }

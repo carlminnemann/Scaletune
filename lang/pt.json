@@ -588,7 +588,6 @@
  "h.x.kit": "<em>Gravada</em> é uma bateria a sério, quente e grande; <em>Máquina</em> é seca e certeira e passa num altifalante pequeno. Troca enquanto está a tocar.",
  "h.x.mixer": "Um nível para cada peça. Os cursores que o estilo não usa ficam esbatidos. <em>Repor níveis</em> põe todos no sítio.",
  "h.x.density": "Quão cheio toca um estilo. Um padrão teu fica exatamente como o fizeste.",
- "h.x.pattern": "Escreve o teu: seis vozes ao lado e o compasso ao comprido. <em>Intensidade</em> diz com que força escreve cada toque — tocar outra vez na mesma célula apaga-a. <em>Tempo</em> é aquilo em que escreves, semicolcheias ou tercinas, e os dois podem viver no mesmo padrão. <em>Repete</em> é quantos compassos dão a volta. Pode ser tudo escrito enquanto toca, e soa em <em>Acompanhamento → Meu</em>. Guarda-o em <em>Os meus padrões</em> e fica lá para a próxima.",
  "h.x.poly": "Dois pulsos ao mesmo tempo. O ciclo indicado é o tempo que levam a voltar a encontrar-se.",
  "h.f.len": "Uma nota em cada subdivisão, uma por tempo, ou uma por compasso.",
  "h.f.align": "Recomeçar a cada volta põe a primeira nota no primeiro tempo, sempre. Deixar andar deixa uma frase que não cabe no compasso rodar contra o pulso.",
@@ -606,5 +605,12 @@
  "aria.helpMarks": "Mostrar um ? em cada painel",
  "aria.helpFor": "O que faz {what}",
  "h.s.saved.k": "Guardar uma preparação",
- "h.run.k": "Enquanto corre"
+ "h.run.k": "Enquanto corre",
+ "h.pt.write.k": "Escrever",
+ "h.pt.write": "Seis vozes ao lado e o compasso ao comprido — o compasso que escolheste, por isso três tempos dão-te três para escrever. <em>Intensidade</em> diz com que força escreve cada toque, e tocar outra vez na mesma célula apaga-a.",
+ "h.pt.time": "Aquilo em que estás a escrever, semicolcheias ou tercinas. Os dois podem viver no mesmo padrão, e a escolha é também a que toca.",
+ "h.pt.loop.k": "Repete",
+ "h.pt.loop": "Quantos compassos dão a volta, até quatro, com um separador para cada. <em>Limpar o compasso</em> esvazia aquele em que estás; <em>Copiar para este compasso</em> traz para aqui qualquer outro.",
+ "h.pt.save.k": "Guardar um",
+ "h.pt.save": "Dá-lhe um nome em <em>Os meus padrões</em> e fica lá para a próxima. Toca em <em>Acompanhamento → Meu</em>, e pode ser tudo escrito enquanto toca."
 }
