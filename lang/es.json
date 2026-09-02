@@ -647,7 +647,7 @@
  "h.ex.move.k": "Mover un ejercicio",
  "h.ex.move": "El ⇢ lo coge. Ve hasta la carpeta que quieras y toca <em>Ponlo aquí</em>. Dos toques y sin arrastrar, que es lo único que funciona con un dedo.",
  "h.ex.del.k": "Borrar",
- "h.ex.del": "El <em>✕ Borrar</em> encima de la lista abre las cruces, y mientras están abiertas un toque en una borra esa fila — para que borrar sea algo a lo que fuiste, no algo que un pulgar hace de paso. Se cierra solo al salir. Una carpeta solo se borra vacía.",
+ "h.ex.del": "El <em>✕ Seleccionar</em> encima de la lista abre las cruces, y mientras están abiertas un toque en una borra esa fila — para que borrar sea algo a lo que fuiste, no algo que un pulgar hace de paso. Se cierra solo al salir. Una carpeta solo se borra vacía.",
  "list.link": "Lista de estudio",
  "h.s.link": "<em>Solo escalas</em> mantiene la rotación dentro del panel en que estás — escalas en Escala, acordes en Arpegio. <em>Agrupar</em> los junta en una sola rotación, que es lo que necesita «el dórico y luego un menor séptima sobre la misma tónica». En cualquier caso la carrera se queda en el panel desde donde arrancaste y lo toma todo de ahí — el tempo, las octavas, el ciclo de cuartas — y un acorde de la lista suena como arpegio sin salir de Escala.",
  "list.onlyScales": "Solo escalas",
@@ -655,6 +655,6 @@
  "list.group": "Agrupar",
  "ex.askReplace": "«{n}» ya está aquí. Guarda otra vez para escribir encima.",
  "ex.replaceQ": "¿Sustituir?",
- "ex.pickToDelete": "✕ Borrar",
+ "ex.pickToDelete": "✕ Seleccionar",
  "ex.doneDeleting": "Listo"
 }
