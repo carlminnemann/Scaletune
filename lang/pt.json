@@ -612,5 +612,13 @@
  "h.pt.loop.k": "Repete",
  "h.pt.loop": "Quantos compassos dão a volta, até quatro, com um separador para cada. <em>Limpar o compasso</em> esvazia aquele em que estás; <em>Copiar para este compasso</em> traz para aqui qualquer outro.",
  "h.pt.save.k": "Guardar um",
- "h.pt.save": "Dá-lhe um nome em <em>Os meus padrões</em> e fica lá para a próxima. Toca em <em>Acompanhamento → Meu</em>, e pode ser tudo escrito enquanto toca."
+ "h.pt.save": "Dá-lhe um nome em <em>Os meus padrões</em> e fica lá para a próxima. Toca em <em>Acompanhamento → Meu</em>, e pode ser tudo escrito enquanto toca.",
+ "h.fr.tonic": "As doze notas aparecem a partir dela, e ela fica marcada. Escolher outra tónica esvazia o que estava escolhido: é um começo novo, não uma transposição.",
+ "h.fr.pick.k": "Escolher as notas",
+ "h.fr.pick": "Toca numa nota para a pôr ou tirar. Usa as que quiseres, de uma a doze — não têm de formar escala nenhuma.",
+ "h.fr.oct.k": "A oitava de cada uma",
+ "h.fr.oct": "Uma nota que esteja dentro traz um + e um − só dela, e começa na oitava 3 — uma oitava para cada. É para isso que servem: um dó grave e um sol agudo na mesma linha.",
+ "h.fr.order.k": "A ordem em que tocam",
+ "h.fr.order": "Da mais grave para a mais aguda, e não pela ordem em que lhes tocaste — a oitava que deres a cada nota é que decide onde ela cai. Se a tónica for uma delas, a linha parte dali e dá a volta: tónica sol, com dó, mi e sol escolhidos, toca sol, dó, mi, sol.",
+ "h.fr.clear": "Esvazia as notas escolhidas e deixa a tónica onde está."
 }

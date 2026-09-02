@@ -612,5 +612,13 @@
  "h.pt.loop.k": "Répète",
  "h.pt.loop": "Combien de mesures tournent, jusqu'à quatre, avec un onglet pour chacune. <em>Vider la mesure</em> vide celle où tu es ; <em>Copier dans cette mesure</em> y amène n'importe quelle autre.",
  "h.pt.save.k": "En garder un",
- "h.pt.save": "Donne-lui un nom dans <em>Mes motifs</em> et il est là la prochaine fois. Il sonne dans <em>Accompagnement → Le mien</em>, et tout peut s'écrire pendant que ça joue."
+ "h.pt.save": "Donne-lui un nom dans <em>Mes motifs</em> et il est là la prochaine fois. Il sonne dans <em>Accompagnement → Le mien</em>, et tout peut s'écrire pendant que ça joue.",
+ "h.fr.tonic": "Les douze notes sont rangées à partir d'elle, et elle porte sa marque. Choisir une autre tonique vide ce que tu avais pris : c'est un nouveau départ, pas une transposition.",
+ "h.fr.pick.k": "Choisir les notes",
+ "h.fr.pick": "Touche une note pour la mettre ou l'enlever. Prends-en autant que tu veux, de une à douze — elles n'ont à former aucune gamme.",
+ "h.fr.oct.k": "L'octave de chacune",
+ "h.fr.oct": "Une note retenue porte son propre + et −, et part de l'octave 3 — une octave chacune. C'est à cela qu'ils servent : un do grave et un sol aigu dans la même ligne.",
+ "h.fr.order.k": "L'ordre où elles sonnent",
+ "h.fr.order": "De la plus grave à la plus aiguë, et non dans l'ordre où tu les as touchées — c'est l'octave donnée à chacune qui décide où elle tombe. Si la tonique en fait partie, la ligne part de là et fait le tour : tonique sol, avec do, mi et sol pris, donne sol, do, mi, sol.",
+ "h.fr.clear": "Vide les notes prises et laisse la tonique où elle est."
 }

@@ -612,5 +612,13 @@
  "h.pt.loop.k": "Wiederholt",
  "h.pt.loop": "Wie viele Takte umlaufen, bis zu vier, mit einem Reiter für jeden. <em>Takt leeren</em> leert den, in dem du bist; <em>In diesen Takt kopieren</em> holt jeden anderen hierher.",
  "h.pt.save.k": "Eines behalten",
- "h.pt.save": "Gib ihm unter <em>Meine Muster</em> einen Namen, dann ist es nächstes Mal da. Es klingt unter <em>Begleitung → Mein</em>, und alles lässt sich schreiben, während es spielt."
+ "h.pt.save": "Gib ihm unter <em>Meine Muster</em> einen Namen, dann ist es nächstes Mal da. Es klingt unter <em>Begleitung → Mein</em>, und alles lässt sich schreiben, während es spielt.",
+ "h.fr.tonic": "Die zwölf Töne stehen von ihm aus gerechnet da, und er trägt sein eigenes Zeichen. Ein anderer Grundton leert das Gewählte: ein neuer Anfang, keine Transposition.",
+ "h.fr.pick.k": "Töne wählen",
+ "h.fr.pick": "Tippe einen Ton an, um ihn hinein- oder herauszunehmen. Nimm so viele du willst, von einem bis zwölf — sie müssen keine Leiter ergeben.",
+ "h.fr.oct.k": "Die Oktave jedes Tons",
+ "h.fr.oct": "Ein aufgenommener Ton hat ein eigenes + und −, und beginnt in Oktave 3 — je eine Oktave pro Ton. Genau dafür sind sie da: ein tiefes C und ein hohes G in derselben Linie.",
+ "h.fr.order.k": "Die Reihenfolge",
+ "h.fr.order": "Von tief nach hoch, nicht in der Reihenfolge des Antippens — die Oktave, die du einem Ton gibst, entscheidet, wo er fällt. Ist der Grundton dabei, beginnt die Linie dort und läuft herum: Grundton G, mit C, E und G gewählt, ergibt G, C, E, G.",
+ "h.fr.clear": "Leert die gewählten Töne und lässt den Grundton stehen."
 }

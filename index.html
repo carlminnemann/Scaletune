@@ -1580,11 +1580,16 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="h.t.clear.k">Clear this mode</dt><dd data-t="h.t.clear">Back to equal and 440 in two taps.</dd>
   </dl></div>
 
-  <div class="help-sec" id="help-root"><h3 data-t="root">Root</h3><dl>
-    <dt data-t="the-twelve-notes">The twelve notes</dt><dd data-t="the-key-everything-else-is">The key everything else is built from.</dd>
+  <div class="help-sec" id="help-free"><h3 data-t="sec.notes">Notes</h3><dl>
+    <dt data-t="sec.root">Root</dt><dd data-t="h.fr.tonic">The twelve notes are laid out starting from it, and it wears a badge of its own. Choosing another root empties what you had picked: it is a fresh start, not a transposition.</dd>
+    <dt data-t="h.fr.pick.k">Picking them</dt><dd data-t="h.fr.pick">Tap a note to put it in or take it out. Use as many as you like, from one to twelve — they do not have to make a scale, and there is nothing to say they should.</dd>
+    <dt data-t="h.fr.oct.k">The octave of each one</dt><dd data-t="h.fr.oct">A note that is in carries a + and a − of its own, and starts at octave 3 — one octave each. A low C and a high G in the same line is what they are for.</dd>
+    <dt data-t="h.fr.order.k">The order they play in</dt><dd data-t="h.fr.order">Lowest to highest, not the order you tapped them — the octave you give a note is what decides where it falls. If the root is one of them the line starts there and comes round: root G with C, E and G picked plays G, C, E, G.</dd>
+    <dt data-t="clear-6">Clear</dt><dd data-t="h.fr.clear">Empties the picked notes and leaves the root where it is.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-scales"><h3 data-t="scales-and-chords">Scales and chords</h3><dl>
+    <dt data-t="the-twelve-notes">The twelve notes</dt><dd data-t="the-key-everything-else-is">The key everything else is built from.</dd>
     <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="h.s.families">One opens at a time, and a closed one still says what is chosen inside it.</dd>
     <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="h.s.single">Single works on one scale or chord; Study list takes several in turn, one per pass.</dd>
     <dt data-t="the-study-list">The study list</dt><dd data-t="h.s.list">Scales chosen in Scale and chords chosen in Arpeggio join the same rotation. A tap adds, so the same thing can be in twice. In the list, ✕ takes one out and tapping one picks it up — tap where it should go.</dd>
@@ -4205,7 +4210,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02e';
+const APP_VERSION='2026-09-02f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8326,7 +8331,7 @@ function buildTunerControls(){
 const HELP_FOR={
   'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
-  'sec-freenotes':'help-root','sec-freerange':'help-range',
+  'sec-freenotes':'help-free','sec-freerange':'help-range',
   'metro-section':'help-metro','metro-more':'help-metro-run',
   'sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
 };

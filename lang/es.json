@@ -612,5 +612,13 @@
  "h.pt.loop.k": "Repite",
  "h.pt.loop": "Cuántos compases dan la vuelta, hasta cuatro, con una pestaña para cada uno. <em>Borrar el compás</em> vacía el que tienes; <em>Copiar en este compás</em> trae aquí cualquier otro.",
  "h.pt.save.k": "Guardar uno",
- "h.pt.save": "Ponle nombre en <em>Mis patrones</em> y estará ahí la próxima vez. Suena en <em>Acompañamiento → Mío</em>, y todo se puede escribir mientras suena."
+ "h.pt.save": "Ponle nombre en <em>Mis patrones</em> y estará ahí la próxima vez. Suena en <em>Acompañamiento → Mío</em>, y todo se puede escribir mientras suena.",
+ "h.fr.tonic": "Las doce notas aparecen a partir de ella, y queda marcada. Elegir otra tónica vacía lo que tenías: es un comienzo nuevo, no una transposición.",
+ "h.fr.pick.k": "Elegir las notas",
+ "h.fr.pick": "Toca una nota para ponerla o quitarla. Usa las que quieras, de una a doce — no tienen que formar ninguna escala.",
+ "h.fr.oct.k": "La octava de cada una",
+ "h.fr.oct": "Una nota que está dentro lleva un + y un − propios, y empieza en la octava 3 — una octava para cada una. Para eso sirven: un do grave y un sol agudo en la misma línea.",
+ "h.fr.order.k": "El orden en que suenan",
+ "h.fr.order": "De la más grave a la más aguda, no en el orden en que las tocaste — la octava que le des a cada nota decide dónde cae. Si la tónica es una de ellas, la línea parte de ahí y da la vuelta: tónica sol, con do, mi y sol elegidos, suena sol, do, mi, sol.",
+ "h.fr.clear": "Vacía las notas elegidas y deja la tónica donde está."
 }

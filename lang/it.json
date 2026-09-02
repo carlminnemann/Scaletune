@@ -612,5 +612,13 @@
  "h.pt.loop.k": "Ripete",
  "h.pt.loop": "Quante battute girano, fino a quattro, con una linguetta per ciascuna. <em>Azzera la battuta</em> svuota quella in cui sei; <em>Copia in questa battuta</em> ci porta qualsiasi altra.",
  "h.pt.save.k": "Salvarne uno",
- "h.pt.save": "Dagli un nome in <em>I miei pattern</em> ed è lì la prossima volta. Suona in <em>Accompagnamento → Mio</em>, e si può scrivere tutto mentre suona."
+ "h.pt.save": "Dagli un nome in <em>I miei pattern</em> ed è lì la prossima volta. Suona in <em>Accompagnamento → Mio</em>, e si può scrivere tutto mentre suona.",
+ "h.fr.tonic": "Le dodici note partono da lei, che resta segnata. Scegliere un'altra tonica svuota quello che avevi scelto: è un nuovo inizio, non una trasposizione.",
+ "h.fr.pick.k": "Scegliere le note",
+ "h.fr.pick": "Tocca una nota per metterla o toglierla. Usane quante vuoi, da una a dodici — non devono formare nessuna scala.",
+ "h.fr.oct.k": "L'ottava di ciascuna",
+ "h.fr.oct": "Una nota inserita porta un + e un − suoi, e parte dall'ottava 3 — un'ottava ciascuna. Servono a questo: un do grave e un sol acuto nella stessa linea.",
+ "h.fr.order.k": "L'ordine in cui suonano",
+ "h.fr.order": "Dalla più grave alla più acuta, non nell'ordine in cui le hai toccate — è l'ottava che dai a ciascuna a decidere dove cade. Se la tonica è fra loro, la linea parte da lì e fa il giro: tonica sol, con do, mi e sol scelti, suona sol, do, mi, sol.",
+ "h.fr.clear": "Svuota le note scelte e lascia la tonica dov'è."
 }
