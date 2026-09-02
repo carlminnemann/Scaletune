@@ -1590,7 +1590,11 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </dl></div>
 
   <div class="help-sec" id="help-exercises"><h3 data-t="saved-exercises">Saved exercises</h3><dl>
-    <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. The same name replaces; the ✕ removes.</dd>
+    <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. A name is its own within one folder: saving over it replaces it.</dd>
+    <dt data-t="h.ex.fold.k">Folders</dt><dd data-t="h.ex.fold"><em>＋ Folder</em> makes one from the name in the field and steps into it. What you save from then on goes where you are standing, and the line under the list says so. A folder inside a folder is made the same way: go in, and make the next one there.</dd>
+    <dt data-t="h.ex.walk.k">Getting about</dt><dd data-t="h.ex.walk">Tap a folder to go in. The trail above the list — <em>Exercises › Lessons › João</em> — takes you back to any step of it. A folder says how much is under it, at any depth.</dd>
+    <dt data-t="h.ex.move.k">Moving one</dt><dd data-t="h.ex.move">The ⇢ picks an exercise up. Walk to the folder you want and tap <em>Put it here</em>. Two taps and no dragging, which is the only kind that works with a finger.</dd>
+    <dt data-t="h.ex.del.k">Deleting</dt><dd data-t="h.ex.del">The ✕ removes an exercise. A folder goes only when it is empty — take what is inside out first, or move it.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-tuner"><h3 data-t="tuner-3">Tuner</h3><dl>
@@ -4233,7 +4237,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02g';
+const APP_VERSION='2026-09-02h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the

@@ -560,7 +560,7 @@
  "h.t.clear.k": "Vider ce mode",
  "h.t.clear": "Retour à égal et 440 en deux appuis.",
  "h.s.families": "Une seule s'ouvre à la fois, et une boîte fermée dit toujours ce qui est choisi dedans.",
- "h.s.saved": "Règle l'app comme tu veux travailler, donne-lui un nom, et elle est là la prochaine fois. Le même nom remplace ; la ✕ efface.",
+ "h.s.saved": "Règle l'app comme tu veux travailler, donne-lui un nom, et elle est là la prochaine fois. Un nom n'est le sien que dans un dossier : enregistrer par-dessus le remplace.",
  "h.s.single": "Seule travaille une gamme ou un accord ; Liste d'étude en prend plusieurs à tour de rôle, un par tour.",
  "h.s.list": "Les gammes choisies dans Gamme et les accords choisis dans Arpège entrent dans la même rotation. Chaque appui ajoute, donc la même chose peut y être deux fois. Dans la liste, la ✕ retire, et toucher un élément le prend en main — touche là où il doit aller.",
  "h.s.each": "La marque devant un nom est le sens de cet élément ; touche-la pour la changer. Un point pâle veut dire qu'il suit Sens, comme tout le reste.",
@@ -639,5 +639,13 @@
  "ex.dropHere": "Mets-le ici",
  "ex.cancel": "✕ Laisse",
  "ex.moved": "« {n} » est maintenant dans {p}.",
- "ex.savingIn": "Ce que tu enregistres ira dans {p}."
+ "ex.savingIn": "Ce que tu enregistres ira dans {p}.",
+ "h.ex.fold.k": "Dossiers",
+ "h.ex.fold": "<em>＋ Dossier</em> en crée un avec le nom qui est dans le champ et y entre. À partir de là, ce que tu enregistres va où tu te trouves — et la ligne sous la liste le dit. Un dossier dans un dossier se fait pareil : entre dans le premier et crée le suivant là.",
+ "h.ex.walk.k": "Se déplacer",
+ "h.ex.walk": "Touche un dossier pour y entrer. Le chemin au-dessus de la liste — <em>Exercices › Cours › João</em> — te ramène à n'importe quelle étape. Chaque dossier dit combien il contient, à n'importe quelle profondeur.",
+ "h.ex.move.k": "Déplacer un exercice",
+ "h.ex.move": "Le ⇢ le prend en main. Va jusqu'au dossier voulu et touche <em>Mets-le ici</em>. Deux touches et pas de glisser, seul geste qui marche au doigt.",
+ "h.ex.del.k": "Supprimer",
+ "h.ex.del": "La ✕ supprime un exercice. Un dossier ne part que vide — sors d'abord ce qu'il contient, ou déplace-le."
 }

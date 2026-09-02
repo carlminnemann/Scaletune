@@ -560,7 +560,7 @@
  "h.t.clear.k": "Limpar este modo",
  "h.t.clear": "Volta à igual e a 440 em dois toques.",
  "h.s.families": "Abre uma de cada vez, e uma caixa fechada continua a dizer o que está escolhido lá dentro.",
- "h.s.saved": "Prepara a app como queres praticar, dá-lhe um nome, e está lá na próxima vez que a abrires. O mesmo nome substitui; o ✕ apaga.",
+ "h.s.saved": "Prepara a app como queres praticar, dá-lhe um nome, e está lá na próxima vez que a abrires. Um nome só é dele dentro de uma pasta: guardar por cima substitui.",
  "h.s.single": "Único trabalha uma escala ou um acorde; Lista de estudo leva vários à vez, um por passagem.",
  "h.s.list": "As escalas escolhidas em Escala e os acordes escolhidos em Arpejo entram na mesma rotação. Cada toque acrescenta, por isso a mesma coisa pode lá estar duas vezes. Na lista, o ✕ tira, e tocar num pega nele — toca onde ele deve ficar.",
  "h.s.each": "A marca antes de um nome é o sentido daquele item; toca nela para a mudares. Um ponto esbatido quer dizer que segue o Sentido, como tudo o resto.",
@@ -639,5 +639,13 @@
  "ex.dropHere": "Pôr aqui",
  "ex.cancel": "✕ Deixa estar",
  "ex.moved": "«{n}» está agora em {p}.",
- "ex.savingIn": "O que guardares vai para {p}."
+ "ex.savingIn": "O que guardares vai para {p}.",
+ "h.ex.fold.k": "Pastas",
+ "h.ex.fold": "O <em>＋ Pasta</em> cria uma com o nome que estiver no campo e entra nela. Daí em diante, o que guardares vai para onde estás — e a linha por baixo da lista di-lo. Uma pasta dentro de outra faz-se do mesmo modo: entra na primeira e cria lá a seguinte.",
+ "h.ex.walk.k": "Andar entre elas",
+ "h.ex.walk": "Toca numa pasta para entrar. O trilho por cima da lista — <em>Exercícios › Aulas › João</em> — leva-te de volta a qualquer ponto. Cada pasta diz quanto tem lá dentro, a qualquer profundidade.",
+ "h.ex.move.k": "Mover um exercício",
+ "h.ex.move": "O ⇢ pega nele. Anda até à pasta que queres e toca em <em>Pôr aqui</em>. Dois toques e sem arrastar, que é o único jeito que resulta com um dedo.",
+ "h.ex.del.k": "Apagar",
+ "h.ex.del": "O ✕ apaga um exercício. Uma pasta só se apaga vazia — tira primeiro o que está lá dentro, ou muda-o de sítio."
 }

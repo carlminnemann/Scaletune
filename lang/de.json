@@ -560,7 +560,7 @@
  "h.t.clear.k": "Diesen Modus leeren",
  "h.t.clear": "Mit zwei Tipps zurück auf gleichstufig und 440.",
  "h.s.families": "Es öffnet sich eine nach der anderen, und eine geschlossene sagt weiter, was darin gewählt ist.",
- "h.s.saved": "Stell die App so ein, wie du üben willst, gib ihr einen Namen, und sie ist beim nächsten Öffnen da. Derselbe Name ersetzt; das ✕ löscht.",
+ "h.s.saved": "Stell die App so ein, wie du üben willst, gib ihr einen Namen, und sie ist beim nächsten Öffnen da. Ein Name gehört ihr nur innerhalb eines Ordners: darüber speichern ersetzt sie.",
  "h.s.single": "Einzeln arbeitet an einer Tonleiter oder einem Akkord; Übungsliste nimmt mehrere der Reihe nach, eines pro Durchgang.",
  "h.s.list": "In Tonleiter gewählte Leitern und in Arpeggio gewählte Akkorde kommen in dieselbe Rotation. Jedes Tippen fügt hinzu, dasselbe kann also zweimal drin sein. In der Liste nimmt das ✕ eines heraus, und ein Tipp hebt eines auf — tippe dorthin, wo es hin soll.",
  "h.s.each": "Das Zeichen vor einem Namen ist die Richtung dieses Eintrags; tippe darauf, um sie zu ändern. Ein blasser Punkt heißt, er folgt der Richtung wie alles andere.",
@@ -639,5 +639,13 @@
  "ex.dropHere": "Hier ablegen",
  "ex.cancel": "✕ Lassen",
  "ex.moved": "„{n}\" liegt jetzt in {p}.",
- "ex.savingIn": "Was du speicherst, kommt nach {p}."
+ "ex.savingIn": "Was du speicherst, kommt nach {p}.",
+ "h.ex.fold.k": "Ordner",
+ "h.ex.fold": "<em>＋ Ordner</em> legt einen mit dem Namen aus dem Feld an und geht hinein. Von da an kommt alles Gespeicherte dorthin, wo du stehst — die Zeile unter der Liste sagt es. Ein Ordner im Ordner entsteht genauso: geh hinein und lege dort den nächsten an.",
+ "h.ex.walk.k": "Sich bewegen",
+ "h.ex.walk": "Tippe einen Ordner an, um hineinzugehen. Die Spur über der Liste — <em>Übungen › Unterricht › João</em> — bringt dich zu jeder Stelle zurück. Jeder Ordner sagt, wie viel in ihm steckt, in jeder Tiefe.",
+ "h.ex.move.k": "Eine Übung verschieben",
+ "h.ex.move": "Das ⇢ nimmt sie in die Hand. Geh in den gewünschten Ordner und tippe <em>Hier ablegen</em>. Zwei Tipps und kein Ziehen — das Einzige, was mit einem Finger geht.",
+ "h.ex.del.k": "Löschen",
+ "h.ex.del": "Das ✕ löscht eine Übung. Ein Ordner geht nur leer — nimm erst heraus, was darin liegt, oder verschieb es."
 }

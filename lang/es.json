@@ -560,7 +560,7 @@
  "h.t.clear.k": "Borrar este modo",
  "h.t.clear": "Vuelve a la igual y a 440 en dos toques.",
  "h.s.families": "Se abre una cada vez, y una caja cerrada sigue diciendo lo que hay elegido dentro.",
- "h.s.saved": "Prepara la app como quieres practicar, ponle un nombre, y estará ahí la próxima vez que la abras. El mismo nombre sustituye; la ✕ borra.",
+ "h.s.saved": "Prepara la app como quieres practicar, ponle un nombre, y estará ahí la próxima vez. Un nombre es suyo dentro de una carpeta: guardar encima lo sustituye.",
  "h.s.single": "Única trabaja una escala o un acorde; Lista de estudio lleva varios por turno, uno por pasada.",
  "h.s.list": "Las escalas elegidas en Escala y los acordes elegidos en Arpegio entran en la misma rotación. Cada toque añade, así que lo mismo puede estar dos veces. En la lista, la ✕ quita, y tocar uno lo coge — toca donde debe ir.",
  "h.s.each": "La marca delante de un nombre es el sentido de ese elemento; tócala para cambiarla. Un punto tenue quiere decir que sigue a Sentido, como todo lo demás.",
@@ -639,5 +639,13 @@
  "ex.dropHere": "Ponlo aquí",
  "ex.cancel": "✕ Déjalo",
  "ex.moved": "«{n}» está ahora en {p}.",
- "ex.savingIn": "Lo que guardes irá a {p}."
+ "ex.savingIn": "Lo que guardes irá a {p}.",
+ "h.ex.fold.k": "Carpetas",
+ "h.ex.fold": "<em>＋ Carpeta</em> crea una con el nombre del campo y entra en ella. Desde ahí, lo que guardes va donde estás — y la línea bajo la lista lo dice. Una carpeta dentro de otra se hace igual: entra en la primera y crea allí la siguiente.",
+ "h.ex.walk.k": "Moverse entre ellas",
+ "h.ex.walk": "Toca una carpeta para entrar. El rastro sobre la lista — <em>Ejercicios › Clases › João</em> — te lleva de vuelta a cualquier punto. Cada carpeta dice cuánto hay dentro, a cualquier profundidad.",
+ "h.ex.move.k": "Mover un ejercicio",
+ "h.ex.move": "El ⇢ lo coge. Ve hasta la carpeta que quieras y toca <em>Ponlo aquí</em>. Dos toques y sin arrastrar, que es lo único que funciona con un dedo.",
+ "h.ex.del.k": "Borrar",
+ "h.ex.del": "La ✕ borra un ejercicio. Una carpeta solo se borra vacía — saca antes lo que hay dentro, o muévelo."
 }

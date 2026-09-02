@@ -560,7 +560,7 @@
  "h.t.clear.k": "Azzera questo modo",
  "h.t.clear": "Torna a equabile e 440 in due tocchi.",
  "h.s.families": "Se ne apre una alla volta, e una chiusa dice comunque cosa è scelto dentro.",
- "h.s.saved": "Prepara l'app come vuoi studiare, dalle un nome, ed è lì la prossima volta che la apri. Lo stesso nome sostituisce; la ✕ toglie.",
+ "h.s.saved": "Prepara l'app come vuoi studiare, dalle un nome, ed è lì la prossima volta. Un nome è suo dentro una cartella: salvarci sopra lo sostituisce.",
  "h.s.single": "Singolo lavora su una scala o un accordo; Lista di studio ne prende diversi a turno, uno per giro.",
  "h.s.list": "Le scale scelte in Scala e gli accordi scelti in Arpeggio entrano nella stessa rotazione. Ogni tocco aggiunge, quindi la stessa cosa può starci due volte. Nella lista la ✕ toglie, e toccarne uno lo prende in mano — tocca dove deve andare.",
  "h.s.each": "Il segno davanti a un nome è la direzione di quell'elemento; toccalo per cambiarla. Un punto tenue vuol dire che segue Direzione, come tutto il resto.",
@@ -639,5 +639,13 @@
  "ex.dropHere": "Mettilo qui",
  "ex.cancel": "✕ Lascia stare",
  "ex.moved": "«{n}» ora è in {p}.",
- "ex.savingIn": "Quello che salvi finisce in {p}."
+ "ex.savingIn": "Quello che salvi finisce in {p}.",
+ "h.ex.fold.k": "Cartelle",
+ "h.ex.fold": "<em>＋ Cartella</em> ne crea una col nome che è nel campo e ci entra. Da lì in poi quello che salvi va dove sei — e la riga sotto l'elenco lo dice. Una cartella dentro un'altra si fa allo stesso modo: entra nella prima e crea lì la successiva.",
+ "h.ex.walk.k": "Muoversi",
+ "h.ex.walk": "Tocca una cartella per entrarci. La traccia sopra l'elenco — <em>Esercizi › Lezioni › João</em> — ti riporta a qualsiasi punto. Ogni cartella dice quanto contiene, a qualsiasi profondità.",
+ "h.ex.move.k": "Spostare un esercizio",
+ "h.ex.move": "Il ⇢ lo prende in mano. Vai nella cartella che vuoi e tocca <em>Mettilo qui</em>. Due tocchi e niente trascinamento, che è l'unico modo che funziona con un dito.",
+ "h.ex.del.k": "Cancellare",
+ "h.ex.del": "La ✕ cancella un esercizio. Una cartella se ne va solo da vuota — togli prima quello che c'è dentro, o spostalo."
 }
