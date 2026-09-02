@@ -649,7 +649,8 @@
  "h.ex.del.k": "Supprimer",
  "h.ex.del": "La ✕ supprime un exercice. Un dossier ne part que vide — sors d'abord ce qu'il contient, ou déplace-le.",
  "list.link": "Liste d'étude",
- "list.one": "Une seule",
- "list.each": "Une par panneau",
- "h.s.link": "<em>Une seule</em>, c'est les deux panneaux qui partagent la même rotation — ce dont a besoin une rotation faite de gammes et d'accords ; <em>Une par panneau</em> en donne une à chacun. Dans les deux cas la course reste dans le panneau d'où tu es parti et prend tout de là — son tempo, ses octaves, son cycle des quartes — et un accord de la liste sonne en arpège sans quitter Gamme."
+ "h.s.link": "<em>Gammes seules</em> garde la rotation dans le panneau où tu es — gammes dans Gamme, accords dans Arpège. <em>Grouper</em> les met dans une même rotation, ce qu'il faut pour « le dorien, puis un mineur septième sur la même tonique ». Dans les deux cas la course reste dans le panneau d'où tu es parti et prend tout de là — son tempo, ses octaves, son cycle des quartes — et un accord de la liste sonne en arpège sans quitter Gamme.",
+ "list.onlyScales": "Gammes seules",
+ "list.onlyChords": "Arpèges seuls",
+ "list.group": "Grouper"
 }

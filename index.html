@@ -1623,7 +1623,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="the-family-boxes">The family boxes</dt><dd data-t="h.s.families">One opens at a time, and a closed one still says what is chosen inside it.</dd>
     <dt data-t="single-or-study-list">Single or Study list</dt><dd data-t="h.s.single">Single works on one scale or chord; Study list takes several in turn, one per pass.</dd>
     <dt data-t="the-study-list">The study list</dt><dd data-t="h.s.list">Scales chosen in Scale and chords chosen in Arpeggio join the same rotation. A tap adds, so the same thing can be in twice. In the list, ✕ takes one out and tapping one picks it up — tap where it should go.</dd>
-    <dt data-t="list.link">Study list</dt><dd data-t="h.s.link"><em>One list</em> is the two panels sharing one rotation, which is what a rotation made of scales and chords needs; <em>One per panel</em> gives each its own. Either way the run stays in the panel you started it from and takes everything from there — its tempo, its octaves, its cycle of fourths — and a chord in the list plays as an arpeggio without leaving Scale.</dd>
+    <dt data-t="list.link">Study list</dt><dd data-t="h.s.link"><em>Scales only</em> keeps the rotation to the one you are in — scales in Scale, chords in Arpeggio. <em>Group</em> puts them in one rotation, which is what "the dorian, then a minor seventh on the same root" needs. Either way the run stays in the panel you started it from and takes everything from there — its tempo, its octaves, its cycle of fourths — and a chord in the list plays as an arpeggio without leaving Scale.</dd>
     <dt data-t="each-item-its-own-way">Each item, its own way</dt><dd data-t="h.s.each">The mark before a name is that item's own direction; tap it to change it. A faint dot means it follows Direction like everything else.</dd>
     <dt data-t="clear-6">Clear</dt><dd data-t="h.s.clear">Empties the selection.</dd>
   </dl></div>
@@ -4247,7 +4247,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02i';
+const APP_VERSION='2026-09-02j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4536,14 +4536,31 @@ function sincronizaLista(){
 }
 function setListLinked(v){
   if(listLinked()===v)return;
-  if(v){    // what you are looking at becomes the shared one
-    listaComum=clonar(state.practice.list||[]);
+  if(v){
+    /* Grouping is the exact inverse of splitting: it takes both halves back —
+       what is in this panel and what is waiting in the other — rather than only
+       what happens to be on the screen. Yours first, then the other's. */
+    const modoOutro=state.mode==='arpeggio'?'scale':'arpeggio';
+    const outra=(metroPerMode[modoOutro]&&metroPerMode[modoOutro].p.list)||[];
+    listaComum=clonar((state.practice.list||[]).concat(outra));
     usoComum=!!state.practice.useList;
-  } else {  // and it stays with the panel you are in
-    state.practice.list=clonar(listaComum);
+  } else {
+    /* Ungrouping sends each item back to the panel it was picked in: the scales
+       to Scale, the chords to Arpeggio. Nothing is lost and nothing is out of
+       place — "Scales only" holding a chord would be a button lying about what
+       it just did. */
+    const meu=state.mode==='arpeggio'?'chord':'scale';
+    const outro=meu==='chord'?'scale':'chord';
+    const modoOutro=meu==='chord'?'scale':'arpeggio';
+    state.practice.list=clonar(listaComum.filter(x=>(x.kind||'scale')===meu));
     state.practice.useList=usoComum;
+    if(!metroPerMode[modoOutro])metroPerMode[modoOutro]=clonar(METRO_FRESH);
+    metroPerMode[modoOutro].p.list=clonar(listaComum.filter(x=>(x.kind||'scale')===outro));
+    metroPerMode[modoOutro].p.useList=usoComum;
   }
+  studyIdx=0;
   state.practice.listLinked=v;
+  if(activeList().length)applyListItem(activeList()[0]);
   buildListLinkRow();renderPitchPickers();refreshSequence();
   updateRotationPanel();refreshSectionSummaries();restartIfPlaying();
 }
@@ -4553,7 +4570,13 @@ function buildListLinkRow(){
   if(!row||!seg)return;
   row.style.display=useListOn()?'':'none';
   seg.innerHTML='';
-  [[true,tr('list.one','One list')],[false,tr('list.each','One per panel')]].forEach(([v,label])=>{
+  /* The choice names what it is rather than the box it lives in: in Scale the
+     list holds scales and in Arpeggio it holds chords, so unlinked it is
+     literally "scales only". Panel would have been a third word for the same
+     six things, and mode already belongs to the modes of a scale. */
+  const so=state.mode==='arpeggio'?tr('list.onlyChords','Arpeggios only')
+                                  :tr('list.onlyScales','Scales only');
+  [[false,so],[true,tr('list.group','Group')]].forEach(([v,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(listLinked()===v?' active':'');
     b.textContent=label;

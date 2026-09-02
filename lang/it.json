@@ -649,7 +649,8 @@
  "h.ex.del.k": "Cancellare",
  "h.ex.del": "La ✕ cancella un esercizio. Una cartella se ne va solo da vuota — togli prima quello che c'è dentro, o spostalo.",
  "list.link": "Lista di studio",
- "list.one": "Una sola",
- "list.each": "Una per pannello",
- "h.s.link": "<em>Una sola</em> è i due pannelli che condividono la stessa rotazione, che è ciò di cui ha bisogno una rotazione fatta di scale e accordi; <em>Una per pannello</em> ne dà una a ciascuno. In ogni caso la corsa resta nel pannello da cui sei partito e prende tutto da lì — il tempo, le ottave, il ciclo delle quarte — e un accordo della lista suona come arpeggio senza uscire da Scala."
+ "h.s.link": "<em>Solo scale</em> tiene la rotazione dentro il pannello in cui sei — scale in Scala, accordi in Arpeggio. <em>Raggruppa</em> li mette nella stessa rotazione, che è ciò che serve a «il dorico e poi un minore settima sulla stessa tonica». In ogni caso la corsa resta nel pannello da cui sei partito e prende tutto da lì — il tempo, le ottave, il ciclo delle quarte — e un accordo della lista suona come arpeggio senza uscire da Scala.",
+ "list.onlyScales": "Solo scale",
+ "list.onlyChords": "Solo arpeggi",
+ "list.group": "Raggruppa"
 }

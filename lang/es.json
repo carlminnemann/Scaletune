@@ -649,7 +649,8 @@
  "h.ex.del.k": "Borrar",
  "h.ex.del": "La ✕ borra un ejercicio. Una carpeta solo se borra vacía — saca antes lo que hay dentro, o muévelo.",
  "list.link": "Lista de estudio",
- "list.one": "Una sola",
- "list.each": "Una por panel",
- "h.s.link": "<em>Una sola</em> es que los dos paneles comparten la misma rotación, que es lo que necesita una rotación hecha de escalas y acordes; <em>Una por panel</em> le da a cada uno la suya. En cualquier caso la carrera se queda en el panel desde donde arrancaste y lo toma todo de ahí — el tempo, las octavas, el ciclo de cuartas — y un acorde de la lista suena como arpegio sin salir de Escala."
+ "h.s.link": "<em>Solo escalas</em> mantiene la rotación dentro del panel en que estás — escalas en Escala, acordes en Arpegio. <em>Agrupar</em> los junta en una sola rotación, que es lo que necesita «el dórico y luego un menor séptima sobre la misma tónica». En cualquier caso la carrera se queda en el panel desde donde arrancaste y lo toma todo de ahí — el tempo, las octavas, el ciclo de cuartas — y un acorde de la lista suena como arpegio sin salir de Escala.",
+ "list.onlyScales": "Solo escalas",
+ "list.onlyChords": "Solo arpegios",
+ "list.group": "Agrupar"
 }
