@@ -1598,19 +1598,24 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="bar-2">Bar</dt><dd data-t="h.x.bar">How many beats it counts. Tap a circle to cycle it: accented, plain, silent.</dd>
     <dt data-t="subdivision-2">Subdivision</dt><dd data-t="h.x.subdiv">What each beat is divided into. Swing splits it two to one. <em>Sequence</em> takes the figures you pick in turn, one per pass.</dd>
     <dt data-t="click-3">Click</dt><dd data-t="h.x.click">Follow figure clicks every subdivision; Beats clicks the beats only.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-metro-run"><h3 data-t="h.run.k">While it runs</h3><dl>
     <dt data-t="count-in-2">Count In</dt><dd data-t="h.x.count">Bars of click before the notes come in, ending on a downbeat. <em>Count again on</em> says when it comes back.</dd>
     <dt data-t="advance-every-2">Advance Every</dt><dd data-t="h.x.advance">With the metronome alone, what counts as a pass: so many bars, or so many beats.</dd>
     <dt data-t="tempo-change-2">Tempo Change</dt><dd data-t="h.x.tempochange">The tempo moving on its own. <em>Up</em> and <em>Down</em> step it every round or every so many minutes; <em>Ramp</em> slides it to the tempo you name. Start always begins again from your own tempo.</dd>
     <dt data-t="h.x.gap.k">Silences</dt><dd data-t="h.x.gap">The metronome drops out for a stretch of beats and comes back in time, so you keep it going yourself. Three levels, reached over the minutes you give it; <em>Keep the one</em> leaves beat one sounding. In Metro and Drone.</dd>
-    <dt data-t="h.x.clear.k">Clear this mode</dt><dd data-t="h.x.clear">Puts that mode back to how the app opens. Every mode is separate, so clearing one leaves the others alone.</dd>
+    <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="h.x.poly">Two pulses at once. The cycle shown is how long until they meet again.</dd>
+    <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-acc"><h3 data-t="accompaniment">Accompaniment</h3><dl>
     <dt data-t="where-the-accompaniment-lives">Where the accompaniment lives</dt><dd data-t="h.x.where">In Metro, and only there. In the other modes the metronome clicks and nothing more.</dd>
     <dt data-t="accompaniment-2">Accompaniment</dt><dd data-t="h.x.acc">A groove instead of the click: Rock, Pop, Funk, R&amp;B, Bossa, Jazz Swing, or a Ballad on brushes. Each is a bar that repeats, with no fills — something to play over rather than to listen to. The count-in still clicks.</dd>
     <dt data-t="kit-2">Kit</dt><dd data-t="h.x.kit"><em>Recorded</em> is a real kit, warm and big; <em>Machine</em> is dry and tight and cuts through a small speaker. Switch while it plays.</dd>
-    <dt data-t="mixer-2">Mixer</dt><dd data-t="h.x.mixer">A level for each drum. The faders a style does not use are faded out. <em>Level again</em> puts them all back.</dd>
     <dt data-t="density-2">Density</dt><dd data-t="h.x.density">How full a style plays. A pattern of your own is left exactly as you made it.</dd>
+    <dt data-t="mixer-2">Mixer</dt><dd data-t="h.x.mixer">A level for each drum. The faders a style does not use are faded out. <em>Level again</em> puts them all back.</dd>
     <dt data-t="pattern-2">Pattern</dt><dd data-t="h.x.pattern">Write your own: six voices down the side and the bar across. <em>Level</em> says how hard a tap writes — tapping the same cell again clears it. <em>Time</em> is what you write on, sixteenths or triplets, and both can live in the same pattern. <em>Loop</em> is how many bars go round. It can all be written while it plays, and it sounds under <em>Accompaniment → Custom</em>. Save it under <em>My patterns</em> and it is there next time.</dd>
-    <dt data-t="polyrhythm-2">Polyrhythm</dt><dd data-t="h.x.poly">Two pulses at once. The cycle shown is how long until they meet again.</dd>
-    <dt data-t="notes-follow-2">Notes follow</dt><dd data-t="under-a-polyrhythm-which-of">Under a polyrhythm, which of the two layers the notes ride.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-phrasing"><h3 data-t="phrasing">Phrasing</h3><dl>
@@ -1630,6 +1635,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </dl></div>
 
   <div class="help-sec" id="help-transport"><h3 data-t="playing">Playing</h3><dl>
+    <dt data-t="h.x.clear.k">Clear this mode</dt><dd data-t="h.x.clear">Puts that mode back to how the app opens. Every mode is separate, so clearing one leaves the others alone.</dd>
     <dt data-t="start">Start</dt><dd data-t="h.g.start">Or the space bar, unless you are typing in a field.</dd>
     <dt data-t="offline">Offline</dt><dd data-t="h.g.offline">Once opened, the app runs with no network at all. Add it to your home screen and it behaves as an app.</dd>
   </dl></div>
@@ -4177,7 +4183,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02a';
+const APP_VERSION='2026-09-02b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8299,8 +8305,23 @@ const HELP_FOR={
   'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
   'sec-freenotes':'help-root','sec-freerange':'help-range',
-  'metro-section':'help-metro','metro-more':'help-metro',
+  'metro-section':'help-metro','metro-more':'help-metro-run',
   'sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
+};
+/* And the folds inside the metronome, which are panels in everything but the
+   name — the accompaniment, the pattern and the mixer between them hold as much
+   as any panel above. The Tuner has no panel at all, so its mark rides the one
+   head it does have. */
+const HELP_INLINE={
+  /* Metro holds the metronome open with no summary of its own, so without this
+     the four plainest entries in the guide had no mark anywhere in the one mode
+     that is nothing but the metronome. */
+  '#tempo-block .section-label':'help-metro',
+  '#groove-block .section-label':'help-acc',
+  '#pat-head .section-label':'help-acc',
+  '#mix-head .section-label':'help-acc',
+  '#subdiv-head .section-label':'help-metro',
+  '#tuner-section .panel:not(.tuner-panel) .head .group-label':'help-tuner',
 };
 let helpMarks=false;
 function toggleHelpMarks(){helpMarks=!helpMarks;paintHelpMarks();}
@@ -8313,6 +8334,14 @@ function helpMark(secao,nome){
   b.onclick=e=>{e.preventDefault();e.stopPropagation();openHelp(secao);};
   return b;
 }
+/* A closed <details> keeps its contents laid out, so offsetParent alone said
+   yes to marks nobody can see or reach — inside the metronome while it is
+   folded away. checkVisibility answers the question that was being asked; where
+   it is missing, the old test stands and the extra marks are hidden anyway. */
+function heVisivel(el){
+  if(!el)return false;
+  return el.checkVisibility?el.checkVisibility():!!el.offsetParent;
+}
 function paintHelpMarks(){
   const sw=document.getElementById('help-toggle');
   if(sw)sw.classList.toggle('on',helpMarks);
@@ -8320,18 +8349,20 @@ function paintHelpMarks(){
   if(!helpMarks)return;
   for(const painel in HELP_FOR){
     const d=document.getElementById(painel);
-    if(!d||!d.offsetParent)continue;
+    if(!heVisivel(d))continue;
     const s=d.querySelector(':scope>summary');
     // Metro holds its metronome panel open with no summary at all; the mark for
     // it rides on More, which opens the same entry
-    if(!s||!s.offsetParent)continue;
+    if(!heVisivel(s))continue;
     const t=s.querySelector('span[data-t]')||s.firstElementChild;
     if(t)t.insertAdjacentElement('afterend',helpMark(HELP_FOR[painel],t.textContent));
   }
-  /* The Tuner is the one mode with no panel to put a mark on, so it goes on the
-     head of the one panel it does have. */
-  const tp=document.querySelector('#tuner-section .panel:not(.tuner-panel) .head .group-label');
-  if(tp&&tp.offsetParent)tp.insertAdjacentElement('afterend',helpMark('help-tuner',tr('tuner','Tuner')));
+  for(const sel in HELP_INLINE){
+    const el=document.querySelector(sel);
+    if(!heVisivel(el))continue;
+    const nome=sel.indexOf('#tuner')===0?tr('tuner','Tuner'):el.textContent;
+    el.insertAdjacentElement('afterend',helpMark(HELP_INLINE[sel],nome));
+  }
 }
 /* One section, or all of them. Asked for a panel, the guide is that panel: the
    title of the whole thing goes, since the section's own heading is the title
@@ -8364,6 +8395,11 @@ function closeHelp(){
   document.body.style.overflow='';
 }
 function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o.hidden;}
+/* Opening a panel brings its own marks into view — the tempo and the
+   accompaniment live inside one. toggle does not bubble, hence the capture. */
+document.addEventListener('toggle',e=>{
+  if(helpMarks&&e.target&&e.target.tagName==='DETAILS')paintHelpMarks();
+},true);
 (function(){
   document.addEventListener('keydown',e=>{
     if(e.key!=='Escape')return;

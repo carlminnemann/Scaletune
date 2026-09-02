@@ -590,5 +590,6 @@
  "h.all": "查看完整说明",
  "aria.helpMarks": "在每个面板上显示 ?",
  "aria.helpFor": "{what} 的说明",
- "h.s.saved.k": "保存一套设置"
+ "h.s.saved.k": "保存一套设置",
+ "h.run.k": "运行当中"
 }

@@ -605,5 +605,6 @@
  "h.all": "Ver la guía entera",
  "aria.helpMarks": "Mostrar una ? en cada panel",
  "aria.helpFor": "Qué hace {what}",
- "h.s.saved.k": "Guardar una preparación"
+ "h.s.saved.k": "Guardar una preparación",
+ "h.run.k": "Mientras corre"
 }
