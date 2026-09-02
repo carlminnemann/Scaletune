@@ -456,7 +456,7 @@
  "sec.exercises": "Exercices",
  "ex.save": "Enregistrer",
  "ex.placeholder": "Donne un nom à cet exercice",
- "ex.info": "Enregistrer sous un nom que tu as déjà le remplace. Un exercice emporte la pratique, pas le volume ni le thème.",
+ "ex.info": "Enregistrer sous un nom que tu as déjà demande d'abord. Un exercice porte le travail, pas le volume ni le thème.",
  "ex.infoEmpty": "Règle l’app comme tu veux travailler, donne-lui un nom, et elle sera là la prochaine fois.",
  "ex.count": {
   "one": "{n} enregistré",
@@ -647,12 +647,14 @@
  "h.ex.move.k": "Déplacer un exercice",
  "h.ex.move": "Le ⇢ le prend en main. Va jusqu'au dossier voulu et touche <em>Mets-le ici</em>. Deux touches et pas de glisser, seul geste qui marche au doigt.",
  "h.ex.del.k": "Supprimer",
- "h.ex.del": "La ✕ supprime un exercice. Un dossier ne part que vide — sors d'abord ce qu'il contient, ou déplace-le.",
+ "h.ex.del": "Le <em>✕ Supprimer</em> au-dessus de la liste ouvre les croix, et tant qu'elles sont ouvertes une touche sur l'une supprime cette ligne — pour que supprimer soit une chose que tu es allé faire, pas une chose qu'un pouce fait au passage. Il se referme quand tu sors. Un dossier ne part que vide.",
  "list.link": "Liste d'étude",
  "h.s.link": "<em>Gammes seules</em> garde la rotation dans le panneau où tu es — gammes dans Gamme, accords dans Arpège. <em>Grouper</em> les met dans une même rotation, ce qu'il faut pour « le dorien, puis un mineur septième sur la même tonique ». Dans les deux cas la course reste dans le panneau d'où tu es parti et prend tout de là — son tempo, ses octaves, son cycle des quartes — et un accord de la liste sonne en arpège sans quitter Gamme.",
  "list.onlyScales": "Gammes seules",
  "list.onlyChords": "Arpèges seuls",
  "list.group": "Grouper",
  "ex.askReplace": "« {n} » est déjà là. Enregistre encore pour écrire par-dessus.",
- "ex.replaceQ": "Remplacer ?"
+ "ex.replaceQ": "Remplacer ?",
+ "ex.pickToDelete": "✕ Supprimer",
+ "ex.doneDeleting": "Terminé"
 }

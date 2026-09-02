@@ -456,7 +456,7 @@
  "sec.exercises": "Exercícios",
  "ex.save": "Guardar",
  "ex.placeholder": "Dá um nome a este exercício",
- "ex.info": "Guardar com um nome que já tenhas substitui-o. Um exercício leva a prática, não o volume nem o tema.",
+ "ex.info": "Guardar com um nome que já tenhas pergunta primeiro. Um exercício leva a prática, não o volume nem o tema.",
  "ex.infoEmpty": "Põe a app como queres estudar, dá-lhe um nome, e fica aqui para a próxima.",
  "ex.count": {
   "one": "{n} guardado",
@@ -647,12 +647,14 @@
  "h.ex.move.k": "Mover um exercício",
  "h.ex.move": "O ⇢ pega nele. Anda até à pasta que queres e toca em <em>Pôr aqui</em>. Dois toques e sem arrastar, que é o único jeito que resulta com um dedo.",
  "h.ex.del.k": "Apagar",
- "h.ex.del": "O ✕ apaga um exercício. Uma pasta só se apaga vazia — tira primeiro o que está lá dentro, ou muda-o de sítio.",
+ "h.ex.del": "O <em>✕ Apagar</em> por cima da lista abre as cruzes, e enquanto estão abertas um toque numa delas apaga essa linha — para apagar ser coisa que foste ali fazer, não coisa que um polegar faz de passagem. Fecha-se sozinho quando sais. Uma pasta só se apaga vazia.",
  "list.link": "Lista de estudo",
  "h.s.link": "<em>Só escalas</em> mantém a rotação dentro do painel onde estás — escalas no Escala, acordes no Arpejo. <em>Agrupar</em> junta os dois na mesma rotação, que é o que «o dórico e depois um menor sétima na mesma tónica» precisa. Em qualquer dos casos a corrida fica no painel de onde arrancaste e tira tudo de lá — o andamento, as oitavas, o ciclo de quartas — e um acorde da lista toca como arpejo sem sair do Escala.",
  "list.onlyScales": "Só escalas",
  "list.onlyChords": "Só arpejos",
  "list.group": "Agrupar",
  "ex.askReplace": "«{n}» já está aqui. Guarda outra vez para escreveres por cima.",
- "ex.replaceQ": "Substituir?"
+ "ex.replaceQ": "Substituir?",
+ "ex.pickToDelete": "✕ Apagar",
+ "ex.doneDeleting": "Pronto"
 }

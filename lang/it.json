@@ -456,7 +456,7 @@
  "sec.exercises": "Esercizi",
  "ex.save": "Salva",
  "ex.placeholder": "Dai un nome a questo esercizio",
- "ex.info": "Salvare con un nome che hai già lo sostituisce. Un esercizio porta con sé la pratica, non il volume né il tema.",
+ "ex.info": "Salvare con un nome che hai già chiede prima. Un esercizio porta la pratica, non il volume né il tema.",
  "ex.infoEmpty": "Imposta l’app come vuoi studiare, dalle un nome, e sarà qui la prossima volta.",
  "ex.count": {
   "one": "{n} salvato",
@@ -647,12 +647,14 @@
  "h.ex.move.k": "Spostare un esercizio",
  "h.ex.move": "Il ⇢ lo prende in mano. Vai nella cartella che vuoi e tocca <em>Mettilo qui</em>. Due tocchi e niente trascinamento, che è l'unico modo che funziona con un dito.",
  "h.ex.del.k": "Cancellare",
- "h.ex.del": "La ✕ cancella un esercizio. Una cartella se ne va solo da vuota — togli prima quello che c'è dentro, o spostalo.",
+ "h.ex.del": "Il <em>✕ Cancellare</em> sopra l'elenco apre le crocette, e finché sono aperte un tocco su una cancella quella riga — così cancellare è una cosa che sei andato a fare, non una che un pollice fa di passaggio. Si chiude da solo quando esci. Una cartella se ne va solo da vuota.",
  "list.link": "Lista di studio",
  "h.s.link": "<em>Solo scale</em> tiene la rotazione dentro il pannello in cui sei — scale in Scala, accordi in Arpeggio. <em>Raggruppa</em> li mette nella stessa rotazione, che è ciò che serve a «il dorico e poi un minore settima sulla stessa tonica». In ogni caso la corsa resta nel pannello da cui sei partito e prende tutto da lì — il tempo, le ottave, il ciclo delle quarte — e un accordo della lista suona come arpeggio senza uscire da Scala.",
  "list.onlyScales": "Solo scale",
  "list.onlyChords": "Solo arpeggi",
  "list.group": "Raggruppa",
  "ex.askReplace": "«{n}» c'è già. Salva di nuovo per scriverci sopra.",
- "ex.replaceQ": "Sostituire?"
+ "ex.replaceQ": "Sostituire?",
+ "ex.pickToDelete": "✕ Cancellare",
+ "ex.doneDeleting": "Fatto"
 }

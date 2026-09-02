@@ -456,7 +456,7 @@
  "sec.exercises": "Ejercicios",
  "ex.save": "Guardar",
  "ex.placeholder": "Ponle un nombre a este ejercicio",
- "ex.info": "Guardar con un nombre que ya tengas lo sustituye. Un ejercicio lleva la práctica, no el volumen ni el tema.",
+ "ex.info": "Guardar con un nombre que ya tengas pregunta antes. Un ejercicio lleva la práctica, no el volumen ni el tema.",
  "ex.infoEmpty": "Deja la app como quieres estudiar, ponle un nombre, y aquí estará la próxima vez.",
  "ex.count": {
   "one": "{n} guardado",
@@ -647,12 +647,14 @@
  "h.ex.move.k": "Mover un ejercicio",
  "h.ex.move": "El ⇢ lo coge. Ve hasta la carpeta que quieras y toca <em>Ponlo aquí</em>. Dos toques y sin arrastrar, que es lo único que funciona con un dedo.",
  "h.ex.del.k": "Borrar",
- "h.ex.del": "La ✕ borra un ejercicio. Una carpeta solo se borra vacía — saca antes lo que hay dentro, o muévelo.",
+ "h.ex.del": "El <em>✕ Borrar</em> encima de la lista abre las cruces, y mientras están abiertas un toque en una borra esa fila — para que borrar sea algo a lo que fuiste, no algo que un pulgar hace de paso. Se cierra solo al salir. Una carpeta solo se borra vacía.",
  "list.link": "Lista de estudio",
  "h.s.link": "<em>Solo escalas</em> mantiene la rotación dentro del panel en que estás — escalas en Escala, acordes en Arpegio. <em>Agrupar</em> los junta en una sola rotación, que es lo que necesita «el dórico y luego un menor séptima sobre la misma tónica». En cualquier caso la carrera se queda en el panel desde donde arrancaste y lo toma todo de ahí — el tempo, las octavas, el ciclo de cuartas — y un acorde de la lista suena como arpegio sin salir de Escala.",
  "list.onlyScales": "Solo escalas",
  "list.onlyChords": "Solo arpegios",
  "list.group": "Agrupar",
  "ex.askReplace": "«{n}» ya está aquí. Guarda otra vez para escribir encima.",
- "ex.replaceQ": "¿Sustituir?"
+ "ex.replaceQ": "¿Sustituir?",
+ "ex.pickToDelete": "✕ Borrar",
+ "ex.doneDeleting": "Listo"
 }

@@ -742,6 +742,12 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
   cursor:pointer;text-decoration:underline;text-underline-offset:2px;touch-action:manipulation}
 .ex-crumb.here{color:var(--text2);text-decoration:none;cursor:default;font-weight:600}
 .ex-crumb-sep{color:var(--text3);opacity:.7}
+/* Deleting is a thing you go and do, not a thing that is always within reach of
+   a thumb. This opens the crosses and says so while they are open. */
+.ex-del-mode{margin-left:auto;flex:0 0 auto;font-size:11px;line-height:1;padding:4px 8px;
+  border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text3);
+  cursor:pointer;font-family:inherit;touch-action:manipulation}
+.ex-del-mode.on{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 /* A folder is a row like an exercise, told apart by the mark at its left and by
    what its second line says. */
 .ex-row .pick-btn.ex-fold{border-color:var(--border3)}
@@ -1351,7 +1357,8 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
            loads it into the pattern you are editing and switches the
            accompaniment to Custom, which is where it plays. -->
       <div class="head" style="margin-top:var(--s3);margin-bottom:var(--s2)">
-        <span class="section-label" data-t="pat.mine">My patterns</span></div>
+        <span class="section-label" data-t="pat.mine">My patterns</span>
+        <span id="pat-del-mode"></span></div>
       <div class="ex-list" id="pat-list"></div>
       <div class="ex-new" style="margin-bottom:var(--s2)">
         <input class="ex-name" id="pat-name" type="text" maxlength="40"
@@ -1602,7 +1609,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
     <dt data-t="h.ex.fold.k">Folders</dt><dd data-t="h.ex.fold"><em>＋ Folder</em> makes one from the name in the field and steps into it. What you save from then on goes where you are standing, and the line under the list says so. A folder inside a folder is made the same way: go in, and make the next one there.</dd>
     <dt data-t="h.ex.walk.k">Getting about</dt><dd data-t="h.ex.walk">Tap a folder to go in. The trail above the list — <em>Exercises › Lessons › João</em> — takes you back to any step of it. A folder says how much is under it, at any depth.</dd>
     <dt data-t="h.ex.move.k">Moving one</dt><dd data-t="h.ex.move">The ⇢ picks an exercise up. Walk to the folder you want and tap <em>Put it here</em>. Two taps and no dragging, which is the only kind that works with a finger.</dd>
-    <dt data-t="h.ex.del.k">Deleting</dt><dd data-t="h.ex.del">The ✕ removes an exercise. A folder goes only when it is empty — take what is inside out first, or move it.</dd>
+    <dt data-t="h.ex.del.k">Deleting</dt><dd data-t="h.ex.del"><em>✕ Delete</em> above the list opens the crosses, and while they are open a tap on one removes that row — so a delete is something you went there to do, not something a thumb can do in passing. It closes itself when you leave. A folder goes only when it is empty.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-tuner"><h3 data-t="tuner-3">Tuner</h3><dl>
@@ -4250,7 +4257,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02k';
+const APP_VERSION='2026-09-02l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4382,6 +4389,8 @@ function setMode(m){
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
   if(isTuner)buildTunerControls();
+  // the crosses do not follow you into another mode
+  if(apagaEx||apagaPat){apagaEx=false;apagaPat=false;buildExercises();buildPatternList();}
   /* Last, not with the rest: half these panels are shown or hidden after
      updateSupersededControls has run, so marks painted there missed whichever
      ones had not appeared yet — Practice Progressions and Phrasing had none on
@@ -7157,6 +7166,18 @@ function applyExercise(x){
 
    Where you are standing is not remembered between launches; you always open at
    the top, as with everything else. */
+/* The cross beside a name is one slip of a thumb from a term's work, and it
+   does not ask. So it is not there until you say that deleting is what you came
+   to do — and while it is on, the switch wears the colour, because a list whose
+   rows delete is not the list you were reading a moment ago. */
+let apagaEx=false,apagaPat=false;
+function botaoApagar(ligado,acender){
+  const b=document.createElement('button');
+  b.type='button';b.className='ex-del-mode'+(ligado?' on':'');
+  b.textContent=ligado?tr('ex.doneDeleting','Done'):tr('ex.pickToDelete','✕ Delete');
+  b.onclick=acender;
+  return b;
+}
 let exFolders=[];        // each an array of names: ['Lessons','Monday']
 let exPath=[];           // the folder you are standing in
 let exMoving=null;       // the exercise in hand, while it is being moved
@@ -7332,19 +7353,22 @@ function buildExercises(){
   const trilho=document.getElementById('ex-crumbs');
   if(trilho){
     trilho.innerHTML='';
-    if(exPath.length){
+    if(exPath.length||pastasEm(exPath).length||exercises.some(e=>mesmoCaminho(caminhoDe(e),exPath))){
       const passo=(nome,ate,aqui)=>{
         const b=document.createElement('button');
         b.className='ex-crumb'+(aqui?' here':'');b.type='button';b.textContent=nome;
         if(!aqui)b.onclick=()=>exGo(ate);
         trilho.appendChild(b);
       };
-      passo(tr('sec.exercises','Exercises'),[],false);
-      exPath.forEach((n,i)=>{
-        const sep=document.createElement('span');sep.className='ex-crumb-sep';sep.textContent='›';
-        trilho.appendChild(sep);
-        passo(n,exPath.slice(0,i+1),i===exPath.length-1);
-      });
+      if(exPath.length){
+        passo(tr('sec.exercises','Exercises'),[],false);
+        exPath.forEach((n,i)=>{
+          const sep=document.createElement('span');sep.className='ex-crumb-sep';sep.textContent='›';
+          trilho.appendChild(sep);
+          passo(n,exPath.slice(0,i+1),i===exPath.length-1);
+        });
+      }
+      trilho.appendChild(botaoApagar(apagaEx,()=>{apagaEx=!apagaEx;buildExercises();}));
     }
   }
   list.innerHTML='';
@@ -7367,11 +7391,14 @@ function buildExercises(){
     b.appendChild(n);b.appendChild(sub);
     b.setAttribute('aria-label',tr('ex.openFolder','Open {n}',{n:nome}));
     b.onclick=()=>exGo(caminho);
-    const d=document.createElement('button');
-    d.className='pick-btn ex-del';d.textContent='✕';
-    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:nome}));
-    d.onclick=()=>deleteFolder(nome);
-    row.appendChild(b);row.appendChild(d);
+    row.appendChild(b);
+    if(apagaEx){
+      const d=document.createElement('button');
+      d.className='pick-btn ex-del';d.textContent='✕';
+      d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:nome}));
+      d.onclick=()=>deleteFolder(nome);
+      row.appendChild(d);
+    }
     list.appendChild(row);
   });
   exercises.forEach((e,i)=>{
@@ -7385,11 +7412,14 @@ function buildExercises(){
     mv.className='pick-btn ex-move';mv.textContent='⇢';
     mv.setAttribute('aria-label',tr('ex.moveName','Move {n}',{n:e.n}));
     mv.onclick=()=>moveStart(i);
-    const d=document.createElement('button');
-    d.className='pick-btn ex-del';d.textContent='✕';
-    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:e.n}));
-    d.onclick=()=>deleteExercise(i);
-    row.appendChild(b);row.appendChild(mv);row.appendChild(d);
+    row.appendChild(b);row.appendChild(mv);
+    if(apagaEx){
+      const d=document.createElement('button');
+      d.className='pick-btn ex-del';d.textContent='✕';
+      d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:e.n}));
+      d.onclick=()=>deleteExercise(i);
+      row.appendChild(d);
+    }
     list.appendChild(row);
   });
   // what is in hand, and the two things you can do with it
@@ -7429,7 +7459,7 @@ function buildExercises(){
   if(info)info.textContent=(exPath.length
     ? tr('ex.savingIn','Saving puts it in {p}.',{p:ondeEstou()})+' '
     : '')+(exercises.length
-    ? tr('ex.info','Saving under a name you already have replaces it. An exercise carries the practice, not the volume or the theme.')
+    ? tr('ex.info','Saving under a name you already have asks first. An exercise carries the practice, not the volume or the theme.')
     : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.'));
   const sum=document.getElementById('sum-exercises');
   const pastas=exFolders.length;
@@ -7535,13 +7565,21 @@ function buildPatternList(){
         tr('fig.compound','Compound')+' '+conta(x.h12,x.b12);
     b.appendChild(sub);
     b.onclick=()=>loadPatternNamed(i);
-    const d=document.createElement('button');
-    d.className='pick-btn ex-del';d.textContent='✕';
-    d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:x.n}));
-    d.onclick=()=>deletePatternNamed(i);
-    row.appendChild(b);row.appendChild(d);
+    row.appendChild(b);
+    if(apagaPat){
+      const d=document.createElement('button');
+      d.className='pick-btn ex-del';d.textContent='✕';
+      d.setAttribute('aria-label',tr('ex.deleteName','Delete {n}',{n:x.n}));
+      d.onclick=()=>deletePatternNamed(i);
+      row.appendChild(d);
+    }
     list.appendChild(row);
   });
+  const dm=document.getElementById('pat-del-mode');
+  if(dm){
+    dm.innerHTML='';
+    if(patterns.length)dm.appendChild(botaoApagar(apagaPat,()=>{apagaPat=!apagaPat;buildPatternList();}));
+  }
   const f=document.getElementById('pat-name');
   if(f)f.placeholder=tr('pat.namePlaceholder','Name this pattern');
   const sv=document.getElementById('pat-save');
@@ -8784,6 +8822,8 @@ function helpOpen(){const o=document.getElementById('help-overlay');return o&&!o
    accompaniment live inside one. toggle does not bubble, hence the capture. */
 document.addEventListener('toggle',e=>{
   if(helpMarks&&e.target&&e.target.tagName==='DETAILS')paintHelpMarks();
+  // and a panel folded away closes the deleting it was opened for
+  if(e.target&&e.target.id==='sec-exercises'&&!e.target.open&&apagaEx){apagaEx=false;buildExercises();}
 },true);
 (function(){
   document.addEventListener('keydown',e=>{
