@@ -1605,6 +1605,7 @@ input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-acti
   </dl></div>
 
   <div class="help-sec" id="help-exercises"><h3 data-t="saved-exercises">Saved exercises</h3><dl>
+    <dt data-t="h.ex.perMode.k">A drawer for each mode</dt><dd data-t="h.ex.perMode">What you save in a mode is what that mode shows, folders and all. Preparing a term of lessons fills this up, and the two scales you wrote in Free should not be at the bottom of everything you have ever saved. A rotation of scales and chords saved in Scale is a Scale exercise; Arpeggio does not show it.</dd>
     <dt data-t="h.s.saved.k">Keeping a setup</dt><dd data-t="h.s.saved">Set the app up the way you want to practise, give it a name, and it is there next time you open it. A name is its own within one folder, and saving over one asks first — twice, or not at all.</dd>
     <dt data-t="h.ex.fold.k">Folders</dt><dd data-t="h.ex.fold"><em>＋ Folder</em> makes one from the name in the field and steps into it. What you save from then on goes where you are standing, and the line under the list says so. A folder inside a folder is made the same way: go in, and make the next one there.</dd>
     <dt data-t="h.ex.walk.k">Getting about</dt><dd data-t="h.ex.walk">Tap a folder to go in. The trail above the list — <em>Exercises › Lessons › João</em> — takes you back to any step of it. A folder says how much is under it, at any depth.</dd>
@@ -4257,7 +4258,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02m';
+const APP_VERSION='2026-09-02n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4389,8 +4390,11 @@ function setMode(m){
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
   if(isTuner)buildTunerControls();
-  // the crosses do not follow you into another mode
-  if(apagaEx||apagaPat){apagaEx=false;apagaPat=false;buildExercises();buildPatternList();}
+  // the crosses do not follow you into another mode, and neither does the
+  // folder you were standing in — it belongs to the drawer you came from
+  exPath=[];exMoving=null;
+  if(apagaEx||apagaPat){apagaEx=false;apagaPat=false;}
+  buildExercises();buildPatternList();
   /* Last, not with the rest: half these panels are shown or hidden after
      updateSupersededControls has run, so marks painted there missed whichever
      ones had not appeared yet — Practice Progressions and Phrasing had none on
@@ -7181,27 +7185,65 @@ function botaoApagar(ligado,acender){
   b.onclick=acender;
   return b;
 }
-let exFolders=[];        // each an array of names: ['Lessons','Monday']
+/* A drawer for each mode. Preparing a term's work fills this up, and hunting
+   through everything you have ever saved to find the two scales you wrote in
+   Free is not looking for an exercise — it is looking for a needle. What you
+   saved in a mode is what that mode shows, and the folders go with it: shared
+   folders would only move the same pile one level up.
+
+   An exercise already carries the mode it was saved from, so nothing had to be
+   written into the file for this; the folders now say which drawer they are in.
+   A grouped rotation saved in Scale is a Scale exercise, and stays out of
+   Arpeggio's drawer. */
+let exFolders={};        // mode -> paths, each an array of names
 let exPath=[];           // the folder you are standing in
 let exMoving=null;       // the exercise in hand, while it is being moved
 const mesmoCaminho=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
 const dentroDe=(p,base)=>p.length>=base.length&&base.every((v,i)=>p[i]===v);
 const caminhoDe=e=>Array.isArray(e&&e.f)?e.f:[];
+const EX_MODOS=['drone','scale','arpeggio','free','metro','tuner'];
+const modoDe=e=>{const m=e&&e.s&&e.s.mode;return EX_MODOS.indexOf(m)>=0?m:'scale';};
+function pastasDoModo(){return exFolders[state.mode]||(exFolders[state.mode]=[]);}
+function exercisesDoModo(){return exercises.filter(e=>modoDe(e)===state.mode);}
 function readFolders(){
+  const bom=p=>Array.isArray(p)&&p.length&&p.length<=8&&p.every(n=>typeof n==='string'&&n.trim());
+  exFolders={};
   try{
     const raw=localStorage.getItem('scaletune-ex-folders');
-    const a=raw?JSON.parse(raw):[];
-    exFolders=Array.isArray(a)?a.filter(p=>Array.isArray(p)&&p.length&&p.length<=8&&
-      p.every(n=>typeof n==='string'&&n.trim())).slice(0,200):[];
-  }catch(e){exFolders=[];}
-  /* An exercise sitting in a folder that is not on the list would be
+    const a=raw?JSON.parse(raw):null;
+    if(Array.isArray(a)){
+      /* The shape from before the drawers were split. A folder that holds
+         something goes to the drawers of what it holds; an empty one has no way
+         of saying where it belongs, so it is offered in all of them rather than
+         quietly dropped. */
+      a.filter(bom).slice(0,200).forEach(p=>{
+        const donos=[...new Set(exercises.filter(e=>dentroDe(caminhoDe(e),p)).map(modoDe))];
+        (donos.length?donos:EX_MODOS).forEach(m=>{
+          const lista=exFolders[m]=exFolders[m]||[];
+          /* Every folder above it as well: a subfolder whose parent is missing
+             from this drawer cannot be walked to, and would sit in the store
+             for ever without ever being drawn. */
+          for(let i=1;i<=p.length;i++){
+            const sub=p.slice(0,i);
+            if(!lista.some(f=>mesmoCaminho(f,sub)))lista.push(sub);
+          }
+        });
+      });
+    } else if(a&&typeof a==='object'){
+      EX_MODOS.forEach(m=>{
+        exFolders[m]=Array.isArray(a[m])?a[m].filter(bom).slice(0,200):[];
+      });
+    }
+  }catch(e){exFolders={};}
+  /* An exercise sitting in a folder that is not on its drawer's list would be
      unreachable — nothing would draw the way in to it. Every path an exercise
      names is a folder, and so is every folder above it. */
   exercises.forEach(e=>{
-    const p=caminhoDe(e);
+    const m=modoDe(e),p=caminhoDe(e);
+    const lista=exFolders[m]=exFolders[m]||[];
     for(let i=1;i<=p.length;i++){
       const sub=p.slice(0,i);
-      if(!exFolders.some(f=>mesmoCaminho(f,sub)))exFolders.push(sub);
+      if(!lista.some(f=>mesmoCaminho(f,sub)))lista.push(sub);
     }
   });
 }
@@ -7211,13 +7253,13 @@ function writeFolders(){
 }
 // the folders directly inside a path, by name, in the order they were made
 function pastasEm(p){
-  return exFolders.filter(f=>f.length===p.length+1&&dentroDe(f,p)).map(f=>f[f.length-1]);
+  return pastasDoModo().filter(f=>f.length===p.length+1&&dentroDe(f,p)).map(f=>f[f.length-1]);
 }
 // how much is under a folder, at any depth: what it is worth opening for
 function contaSob(p){
-  return exercises.filter(e=>dentroDe(caminhoDe(e),p)).length;
+  return exercisesDoModo().filter(e=>dentroDe(caminhoDe(e),p)).length;
 }
-function subPastas(p){return exFolders.filter(f=>f.length>p.length&&dentroDe(f,p)).length;}
+function subPastas(p){return pastasDoModo().filter(f=>f.length>p.length&&dentroDe(f,p)).length;}
 function exGo(p){exPath=p.slice();buildExercises();}
 function newFolder(){
   const field=document.getElementById('ex-name');
@@ -7225,12 +7267,12 @@ function newFolder(){
   if(!nome){field.focus();setStatus(tr('ex.folderNeedName','Name the folder first.'));return;}
   if(exPath.length>=8){setStatus(tr('ex.tooDeep','That is deep enough.'));return;}
   const caminho=exPath.concat([nome]);
-  if(exFolders.some(f=>mesmoCaminho(f,caminho))||
+  if(pastasDoModo().some(f=>mesmoCaminho(f,caminho))||
      pastasEm(exPath).some(n=>n.toLowerCase()===nome.toLowerCase())){
     setStatus(tr('ex.folderExists','There is already a folder called that here.'));
     setTimeout(()=>setStatus(''),2200);return;
   }
-  exFolders.push(caminho);
+  pastasDoModo().push(caminho);
   if(!writeFolders())return;
   field.value='';field.blur();
   exGo(caminho);          // you made it to put something in it
@@ -7245,7 +7287,7 @@ function deleteFolder(nome){
     setStatus(tr('ex.folderFull','"{n}" still has things in it.',{n:nome}));
     setTimeout(()=>setStatus(''),2600);return;
   }
-  exFolders=exFolders.filter(f=>!mesmoCaminho(f,caminho));
+  exFolders[state.mode]=pastasDoModo().filter(f=>!mesmoCaminho(f,caminho));
   writeFolders();buildExercises();
   setStatus(tr('ex.folderGone','Deleted "{n}".',{n:nome}));
   setTimeout(()=>setStatus(''),1800);
@@ -7258,7 +7300,8 @@ function moveHere(){
   if(!exMoving)return;
   const nome=exMoving.n;
   // a name is only itself within one folder, so a clash is a replacement
-  const at=exercises.findIndex(e=>e!==exMoving&&mesmoCaminho(caminhoDe(e),exPath)&&
+  const at=exercises.findIndex(e=>e!==exMoving&&modoDe(e)===state.mode&&
+                                  mesmoCaminho(caminhoDe(e),exPath)&&
                                   e.n.toLowerCase()===nome.toLowerCase());
   if(at>=0)exercises.splice(at,1);
   exMoving.f=exPath.slice();
@@ -7306,6 +7349,7 @@ function saveExercise(){
   const name=(field.value||'').trim().slice(0,40);
   if(!name){field.focus();setStatus(tr('ex.needName','Give it a name first.'));return;}
   const at=exercises.findIndex(e=>e.n.toLowerCase()===name.toLowerCase()&&
+                                  modoDe(e)===state.mode&&
                                   mesmoCaminho(caminhoDe(e),exPath));
   /* Full means full. Truncating the list would have thrown away the oldest one
      to make room for this one, without saying so — losing work quietly is worse
@@ -7352,11 +7396,11 @@ function buildExercises(){
   if(!list)return;
   // a folder can be deleted from under your feet by nothing else than this, but
   // a stale path would leave you standing in a room that is gone
-  while(exPath.length&&!exFolders.some(f=>mesmoCaminho(f,exPath)))exPath.pop();
+  while(exPath.length&&!pastasDoModo().some(f=>mesmoCaminho(f,exPath)))exPath.pop();
   const trilho=document.getElementById('ex-crumbs');
   if(trilho){
     trilho.innerHTML='';
-    if(exPath.length||pastasEm(exPath).length||exercises.some(e=>mesmoCaminho(caminhoDe(e),exPath))){
+    if(exPath.length||pastasEm(exPath).length||exercisesDoModo().some(e=>mesmoCaminho(caminhoDe(e),exPath))){
       const passo=(nome,ate,aqui)=>{
         const b=document.createElement('button');
         b.className='ex-crumb'+(aqui?' here':'');b.type='button';b.textContent=nome;
@@ -7405,7 +7449,7 @@ function buildExercises(){
     list.appendChild(row);
   });
   exercises.forEach((e,i)=>{
-    if(!mesmoCaminho(caminhoDe(e),exPath))return;
+    if(modoDe(e)!==state.mode||!mesmoCaminho(caminhoDe(e),exPath))return;
     const row=document.createElement('div');row.className='ex-row';
     const b=document.createElement('button');
     b.className='pick-btn';b.textContent=e.n;
@@ -7458,16 +7502,17 @@ function buildExercises(){
   }
   const nf=document.getElementById('ex-newfolder');
   if(nf)nf.textContent=tr('ex.newFolder','＋ Folder');
+  const meus=exercisesDoModo().length;
+  const pastas=pastasDoModo().length;
   const info=document.getElementById('ex-info');
   if(info)info.textContent=(exPath.length
     ? tr('ex.savingIn','Saving puts it in {p}.',{p:ondeEstou()})+' '
-    : '')+(exercises.length
+    : '')+(meus
     ? tr('ex.info','Saving under a name you already have asks first. An exercise carries the practice, not the volume or the theme.')
     : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.'));
   const sum=document.getElementById('sum-exercises');
-  const pastas=exFolders.length;
-  if(sum)sum.textContent='· '+(exercises.length
-    ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})+
+  if(sum)sum.textContent='· '+(meus
+    ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:meus})+
       (pastas?' · '+tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas}):'')
     : (pastas?tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas}):tr('ex.none','none yet')));
 }
@@ -8031,10 +8076,17 @@ const SECTIONS=[
      const t=TIMBRES.find(x=>x.k===state.timbre);
      return timbreLabel(state.timbre)+' · '+Math.round(state.volume*100)+'%';
    }},
+  /* This drawer is the mode's, so the line on its lid counts what is in this
+     one — the other modes' work is not what you are looking at. */
   {id:'sec-exercises',sum:'sum-exercises',
-   text:()=>exercises.length
-     ? tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:exercises.length})
-     : tr('ex.none','none yet')},
+   text:()=>{
+     const meus=exercisesDoModo().length,pastas=pastasDoModo().length;
+     if(!meus)return pastas
+       ? tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas})
+       : tr('ex.none','none yet');
+     return tr('ex.count',{one:'{n} saved',other:'{n} saved'},{n:meus})+
+       (pastas?' · '+tr('ex.folderCount',{one:'{n} folder',other:'{n} folders'},{n:pastas}):'');
+   }},
   {id:'sec-progress', sum:'sum-progress',
    text:()=>{
      const b=[];

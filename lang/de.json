@@ -656,5 +656,7 @@
  "ex.askReplace": "„{n}\" ist schon da. Noch einmal speichern, um darüberzuschreiben.",
  "ex.replaceQ": "Ersetzen?",
  "ex.pickToDelete": "✕ Auswählen",
- "ex.doneDeleting": "Fertig"
+ "ex.doneDeleting": "Fertig",
+ "h.ex.perMode.k": "Eine Schublade je Modus",
+ "h.ex.perMode": "Was du in einem Modus speicherst, zeigt dieser Modus — mitsamt seinen Ordnern. Ein Trimester Unterricht vorzubereiten füllt das hier, und die zwei Leitern, die du in Frei geschrieben hast, sollen nicht ganz unten in allem liegen, was du je gespeichert hast. Eine Rotation aus Leitern und Akkorden, in Tonleiter gespeichert, ist eine Tonleiter-Übung; Arpeggio zeigt sie nicht."
 }

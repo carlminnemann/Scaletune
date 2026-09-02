@@ -656,5 +656,7 @@
  "ex.askReplace": "«{n}» c'è già. Salva di nuovo per scriverci sopra.",
  "ex.replaceQ": "Sostituire?",
  "ex.pickToDelete": "✕ Selezionare",
- "ex.doneDeleting": "Fatto"
+ "ex.doneDeleting": "Fatto",
+ "h.ex.perMode.k": "Un cassetto per modo",
+ "h.ex.perMode": "Quello che salvi in un modo è quello che quel modo mostra, cartelle comprese. Preparare un trimestre di lezioni riempie tutto questo, e le due scale scritte in Libero non devono stare in fondo a tutto ciò che hai mai salvato. Una rotazione di scale e accordi salvata in Scala è un esercizio di Scala; Arpeggio non la mostra."
 }

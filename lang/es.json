@@ -656,5 +656,7 @@
  "ex.askReplace": "«{n}» ya está aquí. Guarda otra vez para escribir encima.",
  "ex.replaceQ": "¿Sustituir?",
  "ex.pickToDelete": "✕ Seleccionar",
- "ex.doneDeleting": "Listo"
+ "ex.doneDeleting": "Listo",
+ "h.ex.perMode.k": "Un cajón por modo",
+ "h.ex.perMode": "Lo que guardas en un modo es lo que ese modo muestra, con carpetas y todo. Preparar un trimestre de clases llena esto, y las dos escalas que escribiste en Libre no deben estar al fondo de todo lo que has guardado. Una rotación de escalas y acordes guardada en Escala es un ejercicio de Escala; Arpegio no la muestra."
 }
