@@ -80,6 +80,7 @@
      than as a warning. Red is the transport's and the accents', and a ? is
      never the loudest thing on a screen. */
   --qink:#ffffff;--qbd:#6a6a6a;
+  --fader:#e8e8ec;      /* the part of a fader that is filled in */
   --r:8px;
   /* One spacing scale and one control height. There were fifteen different
      vertical gaps and eleven different control heights before this; that is
@@ -115,6 +116,7 @@
      chip is. */
   --stop:#7d443d;--stop-bg:#9c5a52;--stop-fg:#faf0ee;
   --qink:#000000;--qbd:#8d846c;
+  --fader:#5f5a4c;      /* on paper the ink is dark, or the fill vanishes */
   /* Darker than --stop: that tone was made to carry white on a fill, and
      as ink on the paper it measured 4.43:1, just under the readable
      minimum. At this shade it is 4.87:1. */
@@ -812,7 +814,30 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 /* touch-action:pan-y lets a vertical swipe scroll the page instead of dragging the slider */
 /* min-width:0 lets the slider shrink as a flex item; without it a range input
    refuses to go below its intrinsic width and pushes the row off a 320px screen */
-input[type=range]{accent-color:var(--blue);cursor:pointer;height:20px;touch-action:pan-y;min-width:0}
+/* The faders were the browser's own: a thick track and an egg on top of it,
+   which is the one thing on the screen that looks like nothing else here. A
+   hairline track, and a handle shaped like the buttons above it — same
+   rounding, same border, same fill — so a fader reads as part of the app.
+
+   The filled part is painted rather than inherited: styling the track at all
+   takes accent-color's fill away in WebKit, and Firefox paints its own through
+   ::-moz-range-progress. Both read --f, which is the value in per cent. */
+input[type=range]{-webkit-appearance:none;appearance:none;background:none;
+  cursor:pointer;height:22px;touch-action:pan-y;min-width:0;--f:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;
+  background:linear-gradient(to right,var(--fader) 0 calc(var(--f)*1%),var(--border2) calc(var(--f)*1%) 100%)}
+input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:var(--border2)}
+input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:var(--fader)}
+/* Wider than tall and squared off at the corners: a cap, the shape of the
+   buttons, rather than a bead on a string. */
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:22px;height:14px;margin-top:-5.5px;border-radius:5px;
+  background:var(--bg2);border:1px solid var(--border3);box-sizing:border-box}
+input[type=range]::-moz-range-thumb{width:22px;height:14px;border-radius:5px;
+  background:var(--bg2);border:1px solid var(--border3);box-sizing:border-box}
+input[type=range]:focus-visible{outline:2px solid var(--text3);outline-offset:3px}
+input[type=range]:active::-webkit-slider-thumb{background:var(--bg3);border-color:var(--text3)}
+input[type=range]:active::-moz-range-thumb{background:var(--bg3);border-color:var(--text3)}
 @media(max-width:360px){
   .control-row{gap:8px}
   .control-row label{min-width:66px}
@@ -4258,7 +4283,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02n';
+const APP_VERSION='2026-09-02o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7086,7 +7111,11 @@ function applyExercise(x){
   state.clickFollowsFigure=x.clickFollowsFigure!==false;
   set('countBars',num(x.countBars,0,COUNT_MAX));
   set('countWhen',oneOf(x.countWhen,['off','round','key','change']));
-  set('groove',oneOf(x.groove,Object.keys(GROOVES)));
+  /* Click and Custom are what the accompaniment can be as much as any written
+     style is, and neither is in the table of styles — so an exercise saved with
+     a pattern of your own came back with the plain click and the pattern
+     sitting there unplayed, and one saved on the click set nothing at all. */
+  set('groove',oneOf(x.groove,['click','custom'].concat(Object.keys(GROOVES))));
   set('kit',oneOf(x.kit,['recorded','machine']));
   set('density',oneOf(x.density,['light','normal','busy']));
   state.balladHat=!!x.balladHat;
@@ -7957,6 +7986,7 @@ function updateSupersededControls(){
   /* Which panels are on the screen has just been decided, and the marks sit on
      the panels — so this is where they are put back. */
   paintHelpMarks();
+  pintaFaders();      // a fader drawn again, or moved by anything but a hand
 }
 
 /* With notes playing, every beat is plain: an accent imposes a bar on someone
@@ -9213,6 +9243,19 @@ setMode(state.mode);
 });
 montaRoladores();
 resetLabel();
+/* How full each fader is, in per cent, for the track to paint itself with.
+   Delegated rather than wired one by one: the mixer builds its own and the
+   metronome moves between panels, so anything that asks for one gets it. */
+function pintaFader(el){
+  if(!el||el.type!=='range')return;
+  const lo=parseFloat(el.min)||0,hi=parseFloat(el.max);
+  const alto=isFinite(hi)?hi:100;
+  const v=parseFloat(el.value);
+  const p=alto>lo?Math.max(0,Math.min(100,(v-lo)/(alto-lo)*100)):0;
+  el.style.setProperty('--f',p.toFixed(2));
+}
+function pintaFaders(){document.querySelectorAll('input[type=range]').forEach(pintaFader);}
+document.addEventListener('input',e=>{if(e.target&&e.target.type==='range')pintaFader(e.target);},true);
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
 document.querySelectorAll('input[type=range]').forEach(el=>{
