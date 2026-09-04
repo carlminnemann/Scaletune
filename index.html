@@ -4286,7 +4286,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02p';
+const APP_VERSION='2026-09-02q';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5170,6 +5170,11 @@ function redrawMetro(){
   const d=document.getElementById('bpm-display');if(d)d.value=state.bpm;
   const sl=document.getElementById('bpm-slider');if(sl)sl.value=state.bpm;
   const cv=document.getElementById('click-vol');if(cv)cv.value=state.clickVol;
+  /* The volume is nobody's but the slider's — nothing else writes it, so it
+     cannot drift. It is put back with the others anyway: a fader that has to be
+     trusted to be the only writer is one bug away from lying. */
+  const vs=document.getElementById('vol-slider');if(vs)vs.value=state.volume;
+  const vo=document.getElementById('vol-out');if(vo)vo.textContent=Math.round(state.volume*100)+'%';
   const cvo=document.getElementById('click-vol-out');
   if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
   renderSigFields();buildBeats();buildPolyBeats();renderPolyBeats();
@@ -7179,6 +7184,12 @@ function applyExercise(x){
     state.practice.rampFrom=null;
     const pc=num(p.passCount,1,PASS_MAX); if(pc)state.practice.passCount=pc;
     state.practice.passUnit=oneOf(p.passUnit,['bar','beat'])||'bar';
+    /* The silences were being written into every saved exercise and read back
+       out of none of them: a whole field of the exercise saved and then
+       ignored on the way in. */
+    state.practice.gapMode=oneOf(p.gapMode,['off','light','normal','heavy'])||'off';
+    const gm=num(p.gapMinutes,0,60); if(gm!==null)state.practice.gapMinutes=gm;
+    state.practice.gapKeepOne=p.gapKeepOne!==false;
   }
   state.listKind=null;studyIdx=0;subdivIdx=0;passesDone=0;
   if(listLinked()){listaComum=clonar(state.practice.list||[]);usoComum=!!state.practice.useList;}
@@ -9108,6 +9119,14 @@ function rebuildEverything(){
   buildAlignRow();buildSpeedControls();buildGapRow();buildRootMoveRow();buildRepeatRow();
   buildExercises();resetLabel();
   renderPitchPickers();updateInfo();
+  /* The numbers you can read as well as the rows you can press. This rebuilt
+     every control that is drawn from scratch and none of the ones that are
+     written into a field — the tempo, the bar, the two volumes — so an exercise
+     opened into the mode you were already in played at 145 while the box said
+     60, and the next nudge of the slider took it back to what the box said.
+     redrawMetro is the one place that puts every metronome control back to what
+     the state says; a mode change was calling it and a loaded exercise was not. */
+  redrawMetro();
   refreshSectionSummaries();updateRotationPanel();updateDroneReadout();
   setMode(state.mode);
 }
