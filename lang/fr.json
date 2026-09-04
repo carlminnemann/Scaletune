@@ -456,7 +456,7 @@
  "sec.exercises": "Exercices",
  "ex.save": "Enregistrer",
  "ex.placeholder": "Donne un nom à cet exercice",
- "ex.info": "Enregistrer sous un nom que tu as déjà demande d'abord. Un exercice porte le travail, pas le volume ni le thème.",
+ "ex.info": "Enregistrer sous un nom que tu as déjà demande d'abord. Un exercice porte le travail et le volume du clic, pas le volume général ni le thème.",
  "ex.infoEmpty": "Règle l’app comme tu veux travailler, donne-lui un nom, et elle sera là la prochaine fois.",
  "ex.count": {
   "one": "{n} enregistré",

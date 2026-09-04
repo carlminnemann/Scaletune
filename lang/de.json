@@ -456,7 +456,7 @@
  "sec.exercises": "Übungen",
  "ex.save": "Sichern",
  "ex.placeholder": "Gib dieser Übung einen Namen",
- "ex.info": "Unter einem Namen zu speichern, den es schon gibt, fragt erst. Eine Übung trägt die Übung, nicht die Lautstärke oder das Thema.",
+ "ex.info": "Unter einem Namen zu speichern, den es schon gibt, fragt erst. Eine Übung trägt die Übung und die Lautstärke des Klicks, nicht die des Raums und nicht das Thema.",
  "ex.infoEmpty": "Stell die App so ein, wie du üben willst, gib ihr einen Namen — dann ist sie beim nächsten Mal hier.",
  "ex.count": {
   "one": "{n} gesichert",

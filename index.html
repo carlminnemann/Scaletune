@@ -4286,7 +4286,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02q';
+const APP_VERSION='2026-09-02r';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7029,7 +7029,7 @@ const EX_KEYS=[
   'mode','root','rootOct','rootOctWanted','scaleGroup','scaleName',
   'chordGroup','chordName','span','spanWanted','direction','startDeg',
   'seqPattern','arpTop','blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
-  'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv',
+  'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv','clickVol',
   'alignPasses','clickFollowsFigure','countBars','countWhen','groove','kit',
   'density','balladHat','metroInDrone','accentsTouched',
 ];
@@ -7112,6 +7112,10 @@ function applyExercise(x){
   set('droneTimbre',oneOf(x.droneTimbre,timbres));
   set('seqTimbre',oneOf(x.seqTimbre,timbres));
   set('bpm',num(x.bpm,BPM_MIN,BPM_MAX));
+  /* How loud the click is belongs to the exercise: a drone you tune against
+     wants it under the note, and a groove at 40 wants it up. The room's own
+     volume stays out — that is where you are, not what you are practising. */
+  set('clickVol',num(x.clickVol,0,1));
   set('sig',num(x.sig,1,16));
   set('noteLen',oneOf(x.noteLen,['sub','beat','bar']));
   set('subdiv',oneOf(x.subdiv,SUBDIVS.map(d=>d.k)));
@@ -7551,7 +7555,7 @@ function buildExercises(){
   if(info)info.textContent=(exPath.length
     ? tr('ex.savingIn','Saving puts it in {p}.',{p:ondeEstou()})+' '
     : '')+(meus
-    ? tr('ex.info','Saving under a name you already have asks first. An exercise carries the practice, not the volume or the theme.')
+    ? tr('ex.info','Saving under a name you already have asks first. An exercise carries the practice and how loud the click is, not the volume of the room or the theme.')
     : tr('ex.infoEmpty','Set the app up the way you want to practise, give it a name, and it will be here next time.'));
   const sum=document.getElementById('sum-exercises');
   if(sum)sum.textContent='· '+(meus

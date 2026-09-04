@@ -456,7 +456,7 @@
  "sec.exercises": "Ejercicios",
  "ex.save": "Guardar",
  "ex.placeholder": "Ponle un nombre a este ejercicio",
- "ex.info": "Guardar con un nombre que ya tengas pregunta antes. Un ejercicio lleva la práctica, no el volumen ni el tema.",
+ "ex.info": "Guardar con un nombre que ya tengas pregunta antes. Un ejercicio lleva la práctica y el volumen del clic, no el volumen general ni el tema.",
  "ex.infoEmpty": "Deja la app como quieres estudiar, ponle un nombre, y aquí estará la próxima vez.",
  "ex.count": {
   "one": "{n} guardado",

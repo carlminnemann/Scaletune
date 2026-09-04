@@ -456,7 +456,7 @@
  "sec.exercises": "Esercizi",
  "ex.save": "Salva",
  "ex.placeholder": "Dai un nome a questo esercizio",
- "ex.info": "Salvare con un nome che hai già chiede prima. Un esercizio porta la pratica, non il volume né il tema.",
+ "ex.info": "Salvare con un nome che hai già chiede prima. Un esercizio porta la pratica e il volume del click, non il volume generale né il tema.",
  "ex.infoEmpty": "Imposta l’app come vuoi studiare, dalle un nome, e sarà qui la prossima volta.",
  "ex.count": {
   "one": "{n} salvato",
