@@ -4286,7 +4286,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02r';
+const APP_VERSION='2026-09-02s';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4818,6 +4818,21 @@ function modesLift(){
    rotation with an odd number of items — three scales — hands each of them both
    directions over two rounds instead of resetting to the same one every time. */
 let passTick=0;
+/* The way up and the way back are one exercise, not two — so while Direction is
+   alternating them, the figure may not change between them. With a table of
+   time running, the two rotations were turning at the same speed: the figure
+   moved on every pass and so did the direction, and no figure was ever heard
+   both ways. The pair is closed first, and only then does anything outside it
+   move.
+
+   Only where there is a figure list to collide with. Over a rotation alone —
+   the cycle of fourths, a study list, the modes — taking one item up and the
+   next one down is the documented behaviour and what a progression usually
+   wants; the modes tour is built on it. */
+function alternationPending(){
+  return passesAlternate()&&!modesRunOn()&&
+         subdivListOn()&&subdivOrder().length>1&&(passTick%2)===1;
+}
 function alternatingDir(){
   const first=state.direction==='updown'?'up':'down';
   return (passTick%2)?(first==='up'?'down':'up'):first;
@@ -4985,6 +5000,9 @@ function roundPasses(){
   if(useListOn()&&activeList().length>1)n*=activeList().length;
   if(modesRunOn())n*=modesTour().length;
   else if(state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio'))n*=12;
+  /* Each figure is now heard twice — up and back down — so a round is twice as
+     long. Without this, Once would stop halfway through it. */
+  if(passesAlternate()&&!modesRunOn()&&subdivListOn()&&subdivOrder().length>1)n*=2;
   return n;
 }
 /* The drone is a note to hold for as long as you need it, so a round means
@@ -5209,6 +5227,8 @@ function advancePass(){
   roundsInFigure=0;
   passTick++;                    // one pass done, whichever way it went
   if(markPassDone())return false;
+  // the same figure, the other way round, before anything else moves
+  if(alternationPending())return false;
 
   // Then the outer loops: modes, then the figure, then the key.
   let wrapped=true,figureChanged=false;
