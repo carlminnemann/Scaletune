@@ -4293,7 +4293,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02t';
+const APP_VERSION='2026-09-02u';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4374,8 +4374,13 @@ function setMode(m){
   splitMetro(!isTuner);
   updateSupersededControls();      // the accompaniment is Metro's alone
   /* The panels close when the mode changes; the folds inside them are panels in
-     everything but name, so they close with them. */
-  ['pat-body','mix-body','subdiv-body'].forEach(id=>{
+     everything but name, so they close with them.
+
+     When the mode does NOT change, they must be left exactly as they are. This
+     ran every time, and setMode is the last thing a full redraw does — so undo
+     shut the pattern editor in your face while it was undoing what you were
+     looking at, and opening an exercise did the same. */
+  if(modeChanged)['pat-body','mix-body','subdiv-body'].forEach(id=>{
     const b=document.getElementById(id);
     if(b&&!b.hidden){
       b.hidden=true;
