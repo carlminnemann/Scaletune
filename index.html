@@ -220,6 +220,9 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
    the same move the armed ✕ makes. */
 .q-btn.on{background:var(--qink);color:var(--bg);border-color:var(--qink)}
 .theme-btn.on{background:var(--qink);color:var(--bg);border-color:var(--qink)}
+/* Nothing to undo yet: still there, so the header does not shuffle about, but
+   plainly not offering anything. */
+.theme-btn.empty{opacity:.35;pointer-events:none}
 /* A 17px circle is a 17px target, and a finger is not. The circle stays the
    size it looks, and the tap area grows around it — wide beside the word Mode,
    where there is nothing else to hit, and only into its own gap on a panel
@@ -1056,7 +1059,10 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 <body>
 <div class="container">
 <div class="header">
-  <span></span>
+  <span class="head-btns">
+    <button class="theme-btn" id="undo-btn" type="button" onclick="desfazer()"
+            data-ta="aria.undo" aria-label="Undo the last thing you did">↶</button>
+  </span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
   <span class="head-btns">
     <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
@@ -1732,6 +1738,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   </dl></div>
 
   <div class="help-sec" id="help-transport"><h3 data-t="playing">Playing</h3><dl>
+    <dt data-t="h.g.undo.k">Undo</dt><dd data-t="h.g.undo">The ↶ in the corner takes back the last thing you did, wherever you did it — a tempo, a note, a cell of a pattern, a deleted exercise. Press it again to keep going back, thirty steps deep. Opening a panel or pressing Start never costs a step. It stops the playing before it puts anything back, and it leaves the theme, the language and the note names alone.</dd>
     <dt data-t="h.x.clear.k">Clear this mode</dt><dd data-t="h.x.clear">Puts that mode back to how the app opens. Every mode is separate, so clearing one leaves the others alone.</dd>
     <dt data-t="start">Start</dt><dd data-t="h.g.start">Or the space bar, unless you are typing in a field.</dd>
     <dt data-t="offline">Offline</dt><dd data-t="h.g.offline">Once opened, the app runs with no network at all. Add it to your home screen and it behaves as an app.</dd>
@@ -4286,7 +4293,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02s';
+const APP_VERSION='2026-09-02t';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8822,6 +8829,94 @@ function buildTunerControls(){
     spreadPanelsSoon();
   }
 }
+/* ---------- undo ----------
+   One step back, wherever you were. Not built control by control — every button
+   would have to know how to undo itself, and the one that forgot would be the
+   one you needed. Instead: a photograph of everything before a tap, and a look
+   at it afterwards. If nothing moved, the photograph is thrown away, so opening
+   a panel or pressing Start never costs you a step.
+
+   What it holds is what the app is: the state, each mode's own bundle, the
+   shared rotation, and the three drawers — so undoing a deleted exercise
+   actually brings it back, and the drawer is written to disk again.
+
+   What it does not hold is how you are reading today: the theme, the language,
+   the note names. Those are the same things a saved exercise leaves alone, and
+   for the same reason.
+
+   Restoring stops the playing. Putting a different exercise under a scheduler
+   that is mid-bar is not something to be clever about. */
+const UNDO_MAX=30;
+let undoPilha=[],undoPend=null,undoRelogio=0;
+function undoFoto(){
+  return {s:JSON.stringify(state),
+          modos:JSON.stringify(metroPerMode),
+          lista:JSON.stringify({l:listaComum,u:usoComum}),
+          ex:JSON.stringify(exercises),
+          pastas:JSON.stringify(exFolders),
+          pats:JSON.stringify(patterns),
+          caminho:exPath.slice()};
+}
+const undoIguais=(a,b)=>a.s===b.s&&a.modos===b.modos&&a.lista===b.lista&&
+                        a.ex===b.ex&&a.pastas===b.pastas&&a.pats===b.pats;
+function undoFecha(){
+  if(!undoPend)return;
+  const agora=undoFoto();
+  if(!undoIguais(undoPend,agora)){
+    undoPilha.push(undoPend);
+    if(undoPilha.length>UNDO_MAX)undoPilha.shift();
+  }
+  undoPend=null;
+  pintaUndo();
+}
+function undoMarca(){
+  undoFecha();                       // the one before this settles first
+  undoPend=undoFoto();
+  clearTimeout(undoRelogio);
+  undoRelogio=setTimeout(undoFecha,300);
+}
+function pintaUndo(){
+  const b=document.getElementById('undo-btn');
+  if(b)b.classList.toggle('empty',!undoPilha.length);
+}
+function desfazer(){
+  undoFecha();
+  const f=undoPilha.pop();
+  if(!f){setStatus(tr('undo.none','Nothing to undo.'));setTimeout(()=>setStatus(''),1600);return;}
+  if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
+  const novo=JSON.parse(f.s);
+  Object.keys(state).forEach(k=>{if(!(k in novo))delete state[k];});
+  Object.assign(state,novo);
+  const modos=JSON.parse(f.modos);
+  Object.keys(metroPerMode).forEach(k=>delete metroPerMode[k]);
+  Object.assign(metroPerMode,modos);
+  const L=JSON.parse(f.lista);listaComum=L.l||[];usoComum=!!L.u;
+  exercises=JSON.parse(f.ex);exFolders=JSON.parse(f.pastas);patterns=JSON.parse(f.pats);
+  exPath=(f.caminho||[]).slice();exMoving=null;
+  writeExercises();writeFolders();writePatterns();
+  rebuildEverything();buildExercises();buildPatternList();updateRotationPanel();
+  pintaUndo();
+  setStatus(tr('undo.done','Undone. {n} left.',{n:undoPilha.length}));
+  setTimeout(()=>setStatus(''),1800);
+}
+/* Before the tap, not after: the handler runs between these two, and the
+   comparison at the end decides whether the tap was worth a step. The undo
+   button itself is left out, or undoing would file itself as a thing to undo. */
+document.addEventListener('pointerdown',e=>{
+  if(e.target&&e.target.closest&&e.target.closest('#undo-btn'))return;
+  undoMarca();
+},true);
+document.addEventListener('keydown',e=>{
+  const alvo=e.target,campo=alvo&&/^(input|textarea)$/i.test(alvo.tagName);
+  if((e.metaKey||e.ctrlKey)&&(e.key==='z'||e.key==='Z')){
+    if(campo&&alvo.type!=='range')return;    // let a text field undo its own typing
+    e.preventDefault();desfazer();return;
+  }
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(campo||alvo===document.body||(alvo&&alvo.getAttribute&&alvo.getAttribute('role')==='button')||
+     (alvo&&/^(button|select|summary)$/i.test(alvo.tagName)))undoMarca();
+},true);
+
 /* ---------- the guide ----------
    Asked for one panel at a time, rather than the whole guide with one part of
    it somewhere down the page. The map below ties a panel to its entry.
@@ -9287,6 +9382,7 @@ setMode(state.mode);
   const f=document.getElementById(id);
   if(f)f.addEventListener('input',desarmaGuardar);
 });
+pintaUndo();          // nothing to undo yet, and the button says so
 montaRoladores();
 resetLabel();
 /* How full each fader is, in per cent, for the track to paint itself with.

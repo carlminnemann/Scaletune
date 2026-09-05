@@ -658,5 +658,10 @@
  "ex.pickToDelete": "✕ Seleccionar",
  "ex.doneDeleting": "Listo",
  "h.ex.perMode.k": "Un cajón por modo",
- "h.ex.perMode": "Lo que guardas en un modo es lo que ese modo muestra, con carpetas y todo. Preparar un trimestre de clases llena esto, y las dos escalas que escribiste en Libre no deben estar al fondo de todo lo que has guardado. Una rotación de escalas y acordes guardada en Escala es un ejercicio de Escala; Arpegio no la muestra."
+ "h.ex.perMode": "Lo que guardas en un modo es lo que ese modo muestra, con carpetas y todo. Preparar un trimestre de clases llena esto, y las dos escalas que escribiste en Libre no deben estar al fondo de todo lo que has guardado. Una rotación de escalas y acordes guardada en Escala es un ejercicio de Escala; Arpegio no la muestra.",
+ "aria.undo": "Deshacer lo último que hiciste",
+ "undo.none": "No hay nada que deshacer.",
+ "undo.done": "Deshecho. Quedan {n} pasos atrás.",
+ "h.g.undo.k": "Deshacer",
+ "h.g.undo": "El ↶ de la esquina deshace lo último que hiciste, donde sea que lo hicieras — un tempo, una nota, una celda de un patrón, un ejercicio borrado. Púlsalo otra vez para seguir retrocediendo, hasta treinta pasos. Abrir un panel o pulsar Empezar nunca gasta un paso. Detiene lo que suena antes de reponer, y no toca el tema, el idioma ni los nombres de las notas."
 }

@@ -658,5 +658,10 @@
  "ex.pickToDelete": "✕ Sélectionner",
  "ex.doneDeleting": "Terminé",
  "h.ex.perMode.k": "Un tiroir par mode",
- "h.ex.perMode": "Ce que tu enregistres dans un mode est ce que ce mode montre, dossiers compris. Préparer un trimestre de cours remplit tout cela, et les deux gammes écrites dans Libre n'ont pas à se trouver au fond de tout ce que tu as enregistré. Une rotation de gammes et d'accords enregistrée dans Gamme est un exercice de Gamme ; Arpège ne la montre pas."
+ "h.ex.perMode": "Ce que tu enregistres dans un mode est ce que ce mode montre, dossiers compris. Préparer un trimestre de cours remplit tout cela, et les deux gammes écrites dans Libre n'ont pas à se trouver au fond de tout ce que tu as enregistré. Une rotation de gammes et d'accords enregistrée dans Gamme est un exercice de Gamme ; Arpège ne la montre pas.",
+ "aria.undo": "Annuler la dernière chose faite",
+ "undo.none": "Rien à annuler.",
+ "undo.done": "Annulé. Il reste {n} pas en arrière.",
+ "h.g.undo.k": "Annuler",
+ "h.g.undo": "Le ↶ dans le coin annule la dernière chose que tu as faite, où que ce soit — un tempo, une note, une case d'un motif, un exercice supprimé. Appuie encore pour continuer à revenir en arrière, jusqu'à trente pas. Ouvrir un panneau ou appuyer sur Démarrer ne coûte jamais un pas. Il arrête ce qui joue avant de remettre en place, et ne touche ni au thème, ni à la langue, ni aux noms des notes."
 }

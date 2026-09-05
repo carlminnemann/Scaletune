@@ -658,5 +658,10 @@
  "ex.pickToDelete": "✕ Selecionar",
  "ex.doneDeleting": "Pronto",
  "h.ex.perMode.k": "Uma gaveta por modo",
- "h.ex.perMode": "O que guardas num modo é o que esse modo mostra, com as pastas e tudo. Preparar um período de aulas enche isto, e as duas escalas que escreveste no Livre não devem estar no fundo de tudo o que alguma vez guardaste. Uma rotação de escalas e acordes guardada no Escala é um exercício do Escala; o Arpejo não a mostra."
+ "h.ex.perMode": "O que guardas num modo é o que esse modo mostra, com as pastas e tudo. Preparar um período de aulas enche isto, e as duas escalas que escreveste no Livre não devem estar no fundo de tudo o que alguma vez guardaste. Uma rotação de escalas e acordes guardada no Escala é um exercício do Escala; o Arpejo não a mostra.",
+ "aria.undo": "Desfazer a última coisa que fizeste",
+ "undo.none": "Não há nada para desfazer.",
+ "undo.done": "Desfeito. Ficam {n} passos atrás.",
+ "h.g.undo.k": "Desfazer",
+ "h.g.undo": "O ↶ no canto desfaz a última coisa que fizeste, onde quer que a tenhas feito — um andamento, uma nota, uma célula de um padrão, um exercício apagado. Carrega outra vez para continuares a recuar, até trinta passos. Abrir um painel ou carregar em Começar nunca gasta um passo. Pára o que está a tocar antes de repor, e não mexe no tema, na língua nem nos nomes das notas."
 }

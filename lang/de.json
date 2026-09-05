@@ -658,5 +658,10 @@
  "ex.pickToDelete": "✕ Auswählen",
  "ex.doneDeleting": "Fertig",
  "h.ex.perMode.k": "Eine Schublade je Modus",
- "h.ex.perMode": "Was du in einem Modus speicherst, zeigt dieser Modus — mitsamt seinen Ordnern. Ein Trimester Unterricht vorzubereiten füllt das hier, und die zwei Leitern, die du in Frei geschrieben hast, sollen nicht ganz unten in allem liegen, was du je gespeichert hast. Eine Rotation aus Leitern und Akkorden, in Tonleiter gespeichert, ist eine Tonleiter-Übung; Arpeggio zeigt sie nicht."
+ "h.ex.perMode": "Was du in einem Modus speicherst, zeigt dieser Modus — mitsamt seinen Ordnern. Ein Trimester Unterricht vorzubereiten füllt das hier, und die zwei Leitern, die du in Frei geschrieben hast, sollen nicht ganz unten in allem liegen, was du je gespeichert hast. Eine Rotation aus Leitern und Akkorden, in Tonleiter gespeichert, ist eine Tonleiter-Übung; Arpeggio zeigt sie nicht.",
+ "aria.undo": "Das Letzte rückgängig machen",
+ "undo.none": "Nichts rückgängig zu machen.",
+ "undo.done": "Rückgängig. Noch {n} Schritte zurück.",
+ "h.g.undo.k": "Rückgängig",
+ "h.g.undo": "Das ↶ in der Ecke nimmt das Letzte zurück, was du getan hast, egal wo — ein Tempo, einen Ton, eine Zelle eines Musters, eine gelöschte Übung. Nochmals drücken geht weiter zurück, bis zu dreißig Schritte. Ein Panel zu öffnen oder Start zu drücken kostet nie einen Schritt. Es hält an, bevor es etwas zurücksetzt, und lässt Thema, Sprache und Tonnamen unberührt."
 }
