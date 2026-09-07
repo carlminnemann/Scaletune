@@ -4293,7 +4293,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-02u';
+const APP_VERSION='2026-09-02v';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4841,10 +4841,11 @@ let passTick=0;
    the cycle of fourths, a study list, the modes — taking one item up and the
    next one down is the documented behaviour and what a progression usually
    wants; the modes tour is built on it. */
-function alternationPending(){
+function alternationHolds(tick){
   return passesAlternate()&&!modesRunOn()&&
-         subdivListOn()&&subdivOrder().length>1&&(passTick%2)===1;
+         subdivListOn()&&subdivOrder().length>1&&(tick%2)===1;
 }
+function alternationPending(){return alternationHolds(passTick);}
 function alternatingDir(){
   const first=state.direction==='updown'?'up':'down';
   return (passTick%2)?(first==='up'?'down':'up'):first;
@@ -5239,15 +5240,19 @@ function advancePass(){
   roundsInFigure=0;
   passTick++;                    // one pass done, whichever way it went
   if(markPassDone())return false;
-  // the same figure, the other way round, before anything else moves
-  if(alternationPending())return false;
 
   // Then the outer loops: modes, then the figure, then the key.
   let wrapped=true,figureChanged=false;
+  /* The same figure, the other way round, before anything else moves. Holding
+     the rotations is all this does — the pass still has to be built, and an
+     earlier version returned here instead, which skipped the line being made
+     again: the direction changed and the notes did not, so a figure was heard
+     ascending twice. */
+  const segura=alternationPending();
   // Innermost of the outer loops is the rhythmic figure: one mode is taken
   // through the whole table of time before the next mode starts, and the key
   // only moves once every mode has been through every figure.
-  if(subdivListOn()&&subdivOrder().length>1){
+  if(!segura&&subdivListOn()&&subdivOrder().length>1){
     subdivIdx=(subdivIdx+1)%subdivOrder().length;
     wrapped=(subdivIdx===0);
     figureChanged=true;
@@ -5255,13 +5260,13 @@ function advancePass(){
   }
   const list=activeList();
   let itemChange=false,keyChange=false;
-  if(wrapped&&useListOn()&&list.length>1){
+  if(!segura&&wrapped&&useListOn()&&list.length>1){
     studyIdx=(studyIdx+1)%list.length;
     applyListItem(list[studyIdx]);
     wrapped=(studyIdx===0);
     itemChange=true;                       // a different mode or chord
   }
-  if(wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
+  if(!segura&&wrapped&&state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio')){
     state.root=NOTES[(NOTES.indexOf(state.root)+5)%12];   // up a perfect fourth
     keyChange=true;                        // a different key
   }
@@ -5270,7 +5275,7 @@ function advancePass(){
      above C in ionian, E a semitone above D in dorian — so the key never
      changes and the seven of them come back to where they began. Counted as a
      change of mode rather than of key, because that is what it is. */
-  if(wrapped&&modesRunOn()){
+  if(!segura&&wrapped&&modesRunOn()){
     const next=modesAt(modesStep+1);
     if(next){
       modesStep=(modesStep+1)%modesTour().length;
@@ -5312,7 +5317,13 @@ function rotationPreview(){
   const needed=state.alignPasses?1:alignmentRounds();
   const roundsLeft=Math.max(0,needed-roundsInFigure);
   let sIdx=studyIdx,dIdx=subdivIdx,root=state.root,moved=false,nextName=null;
-  if(roundsLeft<=1){                 // this pass finishes the drift, so things move
+  /* The pair holds everything: while the figure is still to be heard the other
+     way round, the next pass is this one mirrored and nothing rotates. It is
+     the parity AFTER the pass now running that decides it — asking about the
+     parity now says the opposite, and the line read "next: eighths" when the
+     next pass was the same figure coming back down. */
+  const segura=alternationHolds(passTick+1);
+  if(roundsLeft<=1&&!segura){        // this pass finishes the drift, so things move
     let wrapped=true;moved=true;
     if(figs&&figs.length>1){dIdx=(dIdx+1)%figs.length;wrapped=(dIdx===0);}
     if(wrapped&&useListOn()&&list.length>1){sIdx=(sIdx+1)%list.length;wrapped=(sIdx===0);}
