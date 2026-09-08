@@ -19,17 +19,32 @@
       padding:10px;border-radius:8px;font-size:13px;margin:10px 0}
   .err{color:#f88}
   .sec{margin-top:16px;border-top:1px solid #333;padding-top:10px}
+  #verdict{font-size:17px;line-height:1.4;margin:12px 0}
+  #verdict div{padding:10px 12px;border-radius:8px;margin:6px 0;
+               background:#1a2a1a;border:1px solid #3a5}
+  #verdict div.no{background:#2a1a1a;border-color:#a44}
+  iframe{width:100%;height:340px;border:1px solid #444;border-radius:8px;
+         background:#fff;margin-top:10px}
 </style>
 </head>
 <body>
-<h1>ScaleTune audio check</h1>
-<p>Tap each button in order and say which ones you hear.</p>
+<h1>ScaleTune — verificação</h1>
+<p>Os quatro primeiros fazem som. Os dois últimos não fazem som nenhum:
+abrem a app aqui dentro e carregam no Start por ti. A resposta aparece
+na caixa verde ou vermelha.</p>
 
 <button id="b1">1 — Web Audio beep (oscillator)</button>
 <button id="b2" class="alt">2 — &lt;audio&gt; element beep</button>
 <button id="b3">3 — Drum sample (decodeAudioData)</button>
 <button id="b4">4 — Strings sample (soundfont-player)</button>
-<button id="b5" class="alt">5 — Does the app's script survive here?</button>
+
+<div class="sec">
+  <button id="b5" class="alt">5 — Abrir a app aqui dentro</button>
+  <button id="b6" class="alt">6 — Carregar no Start da app</button>
+</div>
+
+<div id="verdict"></div>
+<div id="frame-slot"></div>
 
 <div class="sec">
   <button id="bcopy" class="alt">Copy this report</button>
@@ -48,6 +63,14 @@ function say(s, bad){
 }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function bad(s){ say('! ' + s); }
+
+/* The one line Carl has to read. Everything else in this page is for me. */
+function verdict(s, ok){
+  var d = document.createElement('div');
+  if (!ok) d.className = 'no';
+  d.textContent = s;
+  document.getElementById('verdict').appendChild(d);
+}
 
 window.onerror = function(m, f, l){ bad('window error: ' + m + ' @' + l); };
 window.addEventListener('unhandledrejection', function(e){
@@ -74,6 +97,25 @@ try {
     })['catch'](function(e){ say('service worker: ' + e.message); });
   }
 } catch (e) {}
+
+/* What the device is holding offline. An installed app opened with no network
+   — or with a worker that never updated — runs from this copy, so a version
+   here that is not the one on the server is itself the answer. */
+/* Late, because a worker installing right now is still filling its cache. */
+setTimeout(function(){
+  if (window.caches && caches.keys) {
+    caches.keys().then(function(names){
+      say('caches: ' + (names.length ? names.join(', ') : 'none'));
+      return caches.match('index.html', {ignoreSearch: true});
+    }).then(function(res){
+      if (!res) { say('no offline copy of the app held'); return; }
+      return res.text().then(function(t){
+        var m = /APP_VERSION\s*=\s*'([^']+)'/.exec(t);
+        say('offline copy holds: ' + (m ? m[1] : 'no version — not the app!'));
+      });
+    })['catch'](function(e){ say('caches: ' + e.message); });
+  }
+}, 2500);
 
 /* Which build of the app this device would actually get. */
 try {
@@ -209,25 +251,40 @@ document.getElementById('b4').onclick = function(){
 /* The app in a frame, same origin, so its errors and its globals can be read
    from here. A script that dies part way through leaves the names defined
    before the fault and nothing after it — which says where it died. */
+var appWin = null;                 // the app's own window, once test 5 has run
+var appErrors = [];
+function watchApp(w){
+  function note(m){ appErrors.push(m); bad('app error: ' + m); }
+  try {
+    w.onerror = function(m, file, l, c, err){
+      note(m + ' @line ' + l + (err && err.stack ? ' | ' + String(err.stack).split('\n')[0] : ''));
+    };
+    w.addEventListener('unhandledrejection', function(e){
+      note('rejection: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+    });
+  } catch (e) {}
+}
+
 document.getElementById('b5').onclick = function(){
   say('--- test 5: the app itself ---');
+  document.getElementById('frame-slot').innerHTML = '';
   var f = document.createElement('iframe');
-  f.style.cssText = 'width:320px;height:200px;border:1px solid #444;background:#fff';
   f.src = 'index.html?frame=' + Date.now();
-  document.body.appendChild(f);
-  try {
-    f.contentWindow.onerror = function(m, file, l){ bad('app error: ' + m + ' @line ' + l); };
-  } catch (e) {}
+  document.getElementById('frame-slot').appendChild(f);
+  try { watchApp(f.contentWindow); } catch (e) {}
   f.onload = function(){
     var w = f.contentWindow;
-    try { w.onerror = function(m, file, l){ bad('app error: ' + m + ' @line ' + l); }; } catch (e) {}
+    appWin = w;
+    watchApp(w);
+    /* A script that dies part way through leaves the names declared before the
+       fault and nothing after it, so probing in file order says where it died. */
     var probes = ['APP_VERSION', 'initAudio', 'loadSampler', 'togglePlay',
                   'pintaFaders', 'swallowsSpace'];
     var out = [], died = null;
     for (var i = 0; i < probes.length; i++) {
       var have = false;
-      /* `const` at the top level of a classic script is not a window property,
-         so asking the frame itself is the only way to see it. */
+      /* `let` and `const` at the top level of a classic script are not window
+         properties, so asking the frame itself is the only way to see them. */
       try {
         have = typeof w[probes[i]] !== 'undefined' ||
                w.eval('typeof ' + probes[i]) !== 'undefined';
@@ -236,10 +293,88 @@ document.getElementById('b5').onclick = function(){
       if (!have && died === null) died = probes[i];
     }
     say(out.join('\n'));
-    try { say('app version in the frame: ' + w.eval('typeof APP_VERSION!=="undefined"?APP_VERSION:"—"')); } catch (e) {}
-    if (died) bad('the app script stopped before ' + died + ' was defined');
-    else say('the whole app script ran to the end on this device');
+    var v = '—';
+    try { v = w.eval('typeof APP_VERSION!=="undefined"?APP_VERSION:"—"'); } catch (e) {}
+    say('app version in the frame: ' + v);
+    if (died) verdict('5 — a app parou a meio: falta "' + died + '". É aqui o problema.', false);
+    else verdict('5 — a app carregou inteira neste iPad (versão ' + v + '). Agora o 6.', true);
   };
+};
+
+/* Pressing Start from here, inside the same tap, and counting what the engine
+   actually schedules. Metro because it needs no samples: a click and nothing
+   else, so a silence here is the metronome itself. */
+document.getElementById('b6').onclick = function(){
+  say('--- test 6: Start inside the app ---');
+  var w = appWin;
+  if (!w) { verdict('6 — carrega primeiro no 5.', false); return; }
+  var clicks = 0, tones = 0;
+  function count(name, hit){
+    try {
+      var orig = w[name];
+      if (typeof orig !== 'function') { say(name + ' is not a global function in the frame'); return; }
+      w[name] = function(){ hit(); return orig.apply(this, arguments); };
+    } catch (e) { bad('could not wrap ' + name + ': ' + e.message); }
+  }
+  count('scheduleClick', function(){ clicks++; });
+  count('scheduleTone', function(){ tones++; });
+
+  function ask(what){ try { return w.eval(what); } catch (e) { return '?'; } }
+  function statusText(){
+    try { return w.document.getElementById('status-bar').textContent; } catch (e) { return ''; }
+  }
+  function ctxState(){ return ask('typeof audioCtx!=="undefined"&&audioCtx?audioCtx.state:"no context"'); }
+  function clock(){ var t = ask('typeof audioCtx!=="undefined"&&audioCtx?audioCtx.currentTime:0');
+                    return typeof t === 'number' ? t : 0; }
+
+  /* Two rounds: the metronome, which needs nothing but a click, and a scale,
+     which needs the samples. Whichever one is silent says where to look. */
+  function round(mode, prep, wait, done){
+    clicks = 0; tones = 0;
+    var t0 = clock();
+    try {
+      w.eval('setMode("' + mode + '")');
+      if (prep) w.eval(prep);
+      w.eval('togglePlay()');
+    }
+    catch (e) { bad('Start in ' + mode + ' threw: ' + e.message); }
+    setTimeout(function(){
+      var r = {mode: mode, clicks: clicks, tones: tones, ctx: ctxState(),
+               moved: clock() - t0, playing: ask('typeof state!=="undefined"?String(state.playing):"?"'),
+               status: statusText()};
+      say(mode + ': playing=' + r.playing + ' context=' + r.ctx +
+          ' clock+' + (r.moved || 0).toFixed(2) + 's clicks=' + r.clicks +
+          ' notes=' + r.tones + ' status="' + r.status + '"');
+      try { w.eval('if(state.playing)togglePlay()'); } catch (e) {}
+      done(r);
+    }, wait);
+  }
+
+  function judge(r, label){
+    if (r.ctx !== 'running')
+      return verdict(label + ' — o som ficou suspenso (contexto "' + r.ctx +
+                     '"). É o iOS a não deixar arrancar.', false);
+    if ((r.moved || 0) < 0.05)
+      return verdict(label + ' — o relógio do som não anda; o motor fica à espera.', false);
+    if (r.clicks + r.tones === 0)
+      return verdict(label + ' — o motor não marcou nada' +
+                     (r.status ? '. A app diz: "' + r.status + '"' : '.'), false);
+    verdict(label + ' — o motor marcou ' + r.clicks + ' cliques e ' + r.tones +
+            ' notas. Ouviste?', true);
+  }
+
+  /* A fresh app has no scale chosen — that is the rule — so the scale round
+     picks one the way the buttons do before pressing Start. */
+  var pickScale = 'state.scaleGroup="gregorian";' +
+                  'state.scaleName=Object.keys(SCALES.gregorian)[0];' +
+                  'refreshSequence();';
+  round('metro', '', 2500, function(a){
+    judge(a, '6 — metrónomo');
+    round('scale', pickScale, 6000, function(b){
+      judge(b, '6 — escala');
+      if (appErrors.length) verdict('Erro na app: ' + appErrors[0], false);
+    });
+  });
 };
 
 document.getElementById('bcopy').onclick = function(){
