@@ -41,6 +41,7 @@ na caixa verde ou vermelha.</p>
 <div class="sec">
   <button id="b5" class="alt">5 — Abrir a app aqui dentro</button>
   <button id="b6" class="alt">6 — Carregar no Start da app</button>
+  <button id="b7" class="alt">7 — Os quatro instrumentos</button>
 </div>
 
 <div id="verdict"></div>
@@ -98,6 +99,39 @@ try {
   }
 } catch (e) {}
 
+/* The four instruments are the heaviest thing the app carries, and the one
+   thing an install can quietly end up without: a cache that filled everything
+   except the samples looks exactly like samples that do not work. Each file is
+   read out of the cache and its size compared with what the server has. */
+var VOICES = [
+  ['vendor/soundfont-player.min.js', 22717],
+  ['vendor/strings-aac.js', 1546635],
+  ['vendor/piano-real-aac.js', 785538],
+  ['vendor/hammond-aac.js', 1372375],
+  ['vendor/rhodes-aac.js', 945674],
+  ['vendor/drums/kick.wav', 44144]
+];
+function samplesHeld(){
+  var missing = 0;
+  return VOICES.reduce(function(chain, v){
+    return chain.then(function(){
+      return caches.match(v[0], {ignoreSearch: true}).then(function(r){
+        if (!r) { missing++; bad('not in the cache: ' + v[0]); return; }
+        return r.arrayBuffer().then(function(a){
+          var ok = Math.abs(a.byteLength - v[1]) < 2048;
+          say((ok ? 'held  ' : 'WRONG SIZE ') + v[0] + '  ' + a.byteLength +
+              (ok ? '' : ' bytes, expected ' + v[1]));
+          if (!ok) missing++;
+        });
+      });
+    });
+  }, Promise.resolve()).then(function(){
+    verdict(missing
+      ? missing + ' ficheiro(s) de som em falta na cópia offline — é isso.'
+      : 'A cópia offline tem os quatro instrumentos completos.', !missing);
+  });
+}
+
 /* What the device is holding offline. An installed app opened with no network
    — or with a worker that never updated — runs from this copy, so a version
    here that is not the one on the server is itself the answer. */
@@ -112,6 +146,7 @@ setTimeout(function(){
       return res.text().then(function(t){
         var m = /APP_VERSION\s*=\s*'([^']+)'/.exec(t);
         say('offline copy holds: ' + (m ? m[1] : 'no version — not the app!'));
+        return samplesHeld();
       });
     })['catch'](function(e){ say('caches: ' + e.message); });
   }
@@ -375,6 +410,46 @@ document.getElementById('b6').onclick = function(){
       if (appErrors.length) verdict('Erro na app: ' + appErrors[0], false);
     });
   });
+};
+
+/* The four voices, loaded by the app's own loader inside the frame, one after
+   another. Which of them arrives — and what the app's status line says when one
+   does not — is the difference between a file that never came and a decoder
+   that refused it. */
+document.getElementById('b7').onclick = function(){
+  say('--- test 7: the four instruments ---');
+  var w = appWin;
+  if (!w) { verdict('7 — carrega primeiro no 5.', false); return; }
+  var voices = ['strings', 'piano-real', 'hammond', 'rhodes'], i = 0, failed = [];
+  try { w.eval('initAudio()'); } catch (e) { bad('initAudio threw: ' + e.message); }
+  function next(){
+    if (i >= voices.length) {
+      verdict(failed.length
+        ? '7 — não carregaram: ' + failed.join(', ')
+        : '7 — os quatro instrumentos carregaram neste aparelho.', !failed.length);
+      return;
+    }
+    var v = voices[i++], t0 = Date.now(), tries = 0;
+    try { w.eval('loadSampler("' + v + '")'); }
+    catch (e) { bad(v + ': loadSampler threw ' + e.message); failed.push(v); next(); return; }
+    var timer = setInterval(function(){
+      tries++;
+      var ready = false, status = '';
+      try {
+        ready = w.eval('samplerReady("' + v + '")') === true;
+        status = w.document.getElementById('status-bar').textContent;
+      } catch (e) {}
+      if (ready || tries > 60) {
+        clearInterval(timer);
+        say(v + ': ' + (ready ? 'ready in ' + (Date.now() - t0) + ' ms'
+                              : 'NOT ready after 15 s') +
+            (status ? '  — app says: "' + status + '"' : ''));
+        if (!ready) failed.push(v);
+        next();
+      }
+    }, 250);
+  }
+  next();
 };
 
 document.getElementById('bcopy').onclick = function(){
