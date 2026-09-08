@@ -234,8 +234,6 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
    a mark dropped in it flew to the far side and read as belonging to nothing.
    It stays with the letters it answers for. */
 .head>.q-mark{margin-right:auto}
-.mode-head{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-bottom:8px}
-.mode-head .section-label{margin-bottom:0}
 .section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
@@ -244,6 +242,65 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
 .mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1);margin-bottom:var(--s3);flex:0 0 auto}
 .mode-btn{min-width:0;height:44px;padding:0 4px;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);transition:all 0.15s;touch-action:manipulation}
 .mode-btn.active{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
+
+/* ---------- the six on their own ----------
+   The app opens on nothing but its name and the six ways of practising, each
+   one big enough to hit without looking. Everything else — the panels, the
+   Start button, the undo, the guide — belongs to a mode, and appears when you
+   are in one. The column is kept narrower than the screen on purpose: six bars
+   running edge to edge read as a list to scroll rather than a choice to make. */
+/* A plain block, not the three-column grid: with the side buttons gone the
+   name is the only grid item there is, and it would be laid into the first
+   column — which is the one that was made zero wide to give it the room. */
+/* The name takes its size from the narrower of the two dimensions: on a phone
+   held sideways there are 360 pixels of height for six buttons and a title, and
+   a title sized by width alone ate forty of them. */
+body.home .header{display:block;margin-bottom:clamp(12px,4vh,34px);
+  --wordmark:clamp(26px,min(8.5vw,7vh),42px)}
+body.home .head-btns{display:none}
+/* Nothing is chosen here yet. The mode the state happens to hold is not a
+   choice the player made on this screen, so it does not wear one. */
+body.home .mode-btn.active{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
+body.home .scroll,body.home .btn-row,
+body.home .current-note,body.home .current-freq{display:none}
+body.home .mode-row{grid-template-columns:1fr;grid-auto-rows:1fr;
+  gap:clamp(7px,1.9vh,15px);flex:1 1 auto;min-height:0;
+  width:min(88%,360px);margin:0 auto clamp(10px,2.5vh,22px)}
+body.home .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
+  font-size:clamp(14px,2.2vh,18px);border-radius:13px;padding:0 10px}
+/* The settings are read-once choices — the language, the theme, what the notes
+   are called — so on this screen they sit quietly at the foot rather than in
+   the corner beside the name. */
+.home-foot{flex:0 0 auto;display:flex;justify-content:center;padding-bottom:clamp(6px,2vh,18px)}
+body:not(.home) .home-foot{display:none}
+/* And in a mode, the name of the mode is the way back to the six. The row it
+   sits in is there so the guide's ? can stand beside it rather than inside a
+   button, which is neither valid markup nor clickable. */
+body.home .mode-bar{display:none}
+body:not(.home) .mode-row{display:none}
+/* Under 520px tall the app gives up its fixed frame and scrolls as a page —
+   that is the right answer for a mode, where there is more than a screenful.
+   The home screen is exactly one screenful by construction, so there it keeps
+   the frame and the six share the height. */
+@media(max-height:520px){
+  html:has(body.home),body.home{height:var(--app-h,100dvh);overflow:hidden}
+  body.home .container{height:100%;display:flex}
+}
+/* A phone on its side, or a small window: everything gives a little so the six
+   still fit without the screen scrolling. */
+@media(max-height:430px){
+  body.home .header{--wordmark:21px;margin-bottom:7px}
+  body.home .mode-row{gap:5px}
+  body.home .mode-btn{min-height:32px;font-size:13px;border-radius:10px}
+  .home-foot{padding-bottom:3px}
+  .home-foot .theme-btn{width:26px;height:26px;font-size:12px}
+}
+.mode-bar{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0 0 var(--s3)}
+.mode-back{display:flex;align-items:center;gap:7px;width:auto;
+  margin:0;padding:4px 2px;border:0;background:none;cursor:pointer;
+  color:var(--text2);font-size:15px;font-weight:500;touch-action:manipulation}
+.mode-back .chev{font-size:20px;line-height:1;color:var(--mode);margin-top:-2px}
+.mode-back:active{opacity:.6}
 
 .panel{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;margin-bottom:1.25rem}
 
@@ -1071,14 +1128,27 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   </span>
 </div>
 
-<div class="mode-head"><span class="section-label" data-t="mode">Mode</span></div>
 <div class="mode-row">
-  <button class="mode-btn active" id="btn-mode-drone" onclick="setMode('drone')" data-t="drone">Drone</button>
-  <button class="mode-btn" id="btn-mode-scale" onclick="setMode('scale')" data-t="scale">Scale</button>
-  <button class="mode-btn" id="btn-mode-arp" onclick="setMode('arpeggio')" data-t="arpeggio">Arpeggio</button>
-  <button class="mode-btn" id="btn-mode-free" onclick="setMode('free')" data-t="free">Free</button>
-  <button class="mode-btn" id="btn-mode-tuner" onclick="setMode('tuner')" data-t="tuner">Tuner</button>
-  <button class="mode-btn" id="btn-mode-metro" onclick="setMode('metro')" data-t="metro">♩ Metro</button>
+  <button class="mode-btn active" id="btn-mode-drone" onclick="entraModo('drone')" data-t="drone">Drone</button>
+  <button class="mode-btn" id="btn-mode-scale" onclick="entraModo('scale')" data-t="scale">Scale</button>
+  <button class="mode-btn" id="btn-mode-arp" onclick="entraModo('arpeggio')" data-t="arpeggio">Arpeggio</button>
+  <button class="mode-btn" id="btn-mode-free" onclick="entraModo('free')" data-t="free">Free</button>
+  <button class="mode-btn" id="btn-mode-tuner" onclick="entraModo('tuner')" data-t="tuner">Tuner</button>
+  <button class="mode-btn" id="btn-mode-metro" onclick="entraModo('metro')" data-t="metro">♩ Metro</button>
+</div>
+
+<!-- The way back to the six. It says which mode you are in, so it is a label as
+     much as a button, and it takes the place the row of modes had. -->
+<div class="mode-bar" id="mode-bar">
+  <button class="mode-back" id="mode-back" type="button" onclick="voltaHome()"
+          data-ta="aria.back" aria-label="Back to the modes">
+    <span class="chev" aria-hidden="true">‹</span><span id="mode-back-name"></span>
+  </button>
+</div>
+
+<div class="home-foot" id="home-foot">
+  <button class="theme-btn" id="home-settings" type="button" onclick="openSettings()"
+          data-ta="aria.settings" aria-label="Settings">⚙</button>
 </div>
 
 <!-- Everything that scrolls lives in here. The name, the two head buttons, the
@@ -4405,7 +4475,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-08d';
+const APP_VERSION='2026-09-09a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4439,6 +4509,48 @@ function setTimbre(t){
   buildTimbreRow();
   if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading)loadSampler(t);
   if(state.playing&&state.mode==='drone')startContinuous();
+}
+
+/* ---------- home, and one mode at a time ----------
+   The app opens on its name and the six ways of practising, and nothing else.
+   Everything the app can do belongs to one of the six, so until one is chosen
+   there is nothing true to show: no panels, no Start, no undo, no guide.
+
+   The cost is a tap: what used to be one tap from a running app is now two from
+   cold. What it buys is a screen you can read at arm's length, and panels that
+   no longer share the height with a grid of six buttons. Going back is one tap
+   on the name of the mode, which is why the name is a button.
+
+   Nothing here is remembered. Coming back to the six and going in again is the
+   same as opening the app — which is the rule the whole app is built on. */
+let emCasa=true;
+const MODE_BTN={drone:'btn-mode-drone',scale:'btn-mode-scale',arpeggio:'btn-mode-arp',
+                free:'btn-mode-free',metro:'btn-mode-metro',tuner:'btn-mode-tuner'};
+function modeLabel(m){
+  const b=document.getElementById(MODE_BTN[m]);
+  return b?b.textContent.trim():m;
+}
+function pintaCasa(){
+  document.body.classList.toggle('home',emCasa);
+  const n=document.getElementById('mode-back-name');
+  if(n)n.textContent=modeLabel(state.mode);
+  paintHelpMarks();      // the marks hang on panels, and the panels just moved
+  spreadPanelsSoon();
+}
+function entraModo(m){
+  emCasa=false;
+  setMode(m);
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+  pintaCasa();
+}
+/* Leaving a mode stops what it was playing. Start belongs to the mode, so a
+   drone left running would be a sound with nothing on the screen to stop it. */
+function voltaHome(){
+  if(state.playing)togglePlay();
+  stopTuner();
+  emCasa=true;
+  pintaCasa();
 }
 
 /* ---------- mode switching ---------- */
@@ -9252,7 +9364,7 @@ const HELP_FOR={
    head it does have. */
 const HELP_INLINE={
   // the modes themselves, which no panel below could speak for
-  '.mode-head .section-label':'help-modes',
+  '#mode-back':'help-modes',
   /* Metro holds the metronome open with no summary of its own, so without this
      the four plainest entries in the guide had no mark anywhere in the one mode
      that is nothing but the metronome. */
@@ -9370,6 +9482,37 @@ document.addEventListener('toggle',e=>{
   const ms=document.getElementById('metro-section');
   if(ms)ms.addEventListener('toggle',()=>{if(ms.classList.contains('pinned')&&!ms.open)ms.open=true;});
 })();
+
+/* ---------- one panel open at a time ----------
+   The complaint was never the number of settings; it was being able to have
+   all of them open at once, which turns a mode into a wall. Opening one closes
+   the one before it, so what is on the screen is the thing being worked on.
+
+   The pinned metronome is not one of them: in Metro it IS the mode, it cannot
+   be closed, and closing it to open Exercises would be closing the mode. The
+   families inside Scales already do this among themselves, one level down. */
+/* Some sections come in pairs — Scale's notes and Free's, Scale's range and
+   Free's — and opening one already opens its twin, so that switching mode does
+   not change the shape of the screen. Only one of a pair is ever on the screen.
+   Closing the twin here started a war between the two rules: this one shut it,
+   the mirror opened it again, and the two ran until the tab gave up. A pair
+   counts as the one panel it looks like. */
+const grupoDaSeccao=id=>{
+  const s=SECTIONS.find(x=>x.id===id);
+  return s?s.group:undefined;
+};
+document.addEventListener('toggle',e=>{
+  const d=e.target;
+  if(!d.open||!d.classList||!d.classList.contains('sec'))return;
+  if(d.classList.contains('pinned'))return;
+  const meu=grupoDaSeccao(d.id);
+  document.querySelectorAll('details.sec[open]').forEach(o=>{
+    if(o===d||o.classList.contains('pinned'))return;
+    if(meu&&grupoDaSeccao(o.id)===meu)return;
+    o.open=false;
+  });
+  spreadPanelsSoon();
+},true);
 
 // after the browser has laid the panel out, not before
 /* The note readout is part of the frame, so when it appears it takes its height
@@ -9875,6 +10018,8 @@ if('serviceWorker' in navigator){
 // A visible build stamp, so it is possible to tell at a glance which version a
 // device is actually running instead of guessing.
 document.getElementById('build-stamp').textContent='build '+APP_VERSION;
+// The app opens on the six, whatever mode the state happens to hold
+pintaCasa();
 fitWordmark();
 spreadPanelsSoon();
 // the name is set in a face that may not have arrived yet, and a fallback font

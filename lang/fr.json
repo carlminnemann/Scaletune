@@ -678,5 +678,7 @@
  "h.r.turn": "Une ligne qui monte et redescend tourne deux fois : en haut, et en bas où le tour suivant commence. <em>Deux fois</em> refait sonner ces deux notes, pour que chaque demi-tour ait son temps. La toute première note ne sonne qu’une fois — rien n’a encore tourné — et une série qui s’arrête finit sur une seule note.",
  "h.r.updown": "Seulement avec quelque chose en rotation. <em>Alterner</em> prend l'un en montant et le suivant en descendant ; <em>Chacun monte et descend</em> termine l'un — aller et retour — avant que la rotation n'avance.",
  "h.x.clicksound": "<em>Bois</em> est le clic doux et reste celui de départ. <em>Numérique</em> est le même temps avec une arête dure, pour jouer par-dessus quelque chose de fort.",
- "h.x.panelclear": "Celui au bas d'un panneau remet ce panneau seul et laisse le reste en place. Deux touches, comme tout ce qui enlève quelque chose ici."
+ "h.x.panelclear": "Celui au bas d'un panneau remet ce panneau seul et laisse le reste en place. Deux touches, comme tout ce qui enlève quelque chose ici.",
+ "aria.back": "Retour aux modes",
+ "aria.settings": "Réglages"
 }

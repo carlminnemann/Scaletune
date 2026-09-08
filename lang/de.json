@@ -678,5 +678,7 @@
  "h.r.turn": "Eine Linie, die hinauf und zurück geht, wendet zweimal: oben, und unten, wo die nächste Runde beginnt. <em>Zweimal</em> lässt beide Töne noch einmal klingen, damit jede Wende einen Schlag bekommt. Der allererste Ton klingt einmal — gewendet hat noch nichts — und ein Lauf, der aufhört, endet auf einem Ton.",
  "h.r.updown": "Nur wenn etwas rotiert. <em>Abwechselnd</em> nimmt eines hinauf und das nächste hinunter; <em>Jedes auf und ab</em> bringt eines zu Ende — hinauf und zurück — bevor die Rotation weitergeht.",
  "h.x.clicksound": "<em>Holz</em> ist der weiche Klick und bleibt der Anfang. <em>Digital</em> ist derselbe Schlag mit harter Kante, zum Spielen über etwas Lautem.",
- "h.x.panelclear": "Der am Fuß eines Feldes setzt nur dieses Feld zurück und lässt alles andere stehen. Zwei Tipps, wie alles hier, was etwas wegnimmt."
+ "h.x.panelclear": "Der am Fuß eines Feldes setzt nur dieses Feld zurück und lässt alles andere stehen. Zwei Tipps, wie alles hier, was etwas wegnimmt.",
+ "aria.back": "Zurück zu den Modi",
+ "aria.settings": "Einstellungen"
 }

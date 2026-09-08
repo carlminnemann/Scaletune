@@ -678,5 +678,7 @@
  "h.r.turn": "Una linea che sale e scende gira due volte: in alto, e in basso dove comincia il giro successivo. <em>Due volte</em> risuona entrambe quelle note, così ogni giro ha il suo movimento. La primissima nota suona una volta sola — non ha ancora girato nulla — e una corsa che si ferma finisce su una nota sola.",
  "h.r.updown": "Solo con qualcosa in rotazione. <em>Alternare</em> porta una su e la prossima giù; <em>Ognuna sale e scende</em> finisce una — su e giù — prima che la rotazione avanzi.",
  "h.x.clicksound": "<em>Legno</em> è il click morbido e resta quello di partenza. <em>Digitale</em> è lo stesso battito con un bordo duro, per suonarci sopra qualcosa di forte.",
- "h.x.panelclear": "Quello in fondo a un pannello rimette a posto solo quel pannello e lascia stare il resto. Due tocchi, come tutto ciò che qui toglie qualcosa."
+ "h.x.panelclear": "Quello in fondo a un pannello rimette a posto solo quel pannello e lascia stare il resto. Due tocchi, come tutto ciò che qui toglie qualcosa.",
+ "aria.back": "Torna ai modi",
+ "aria.settings": "Impostazioni"
 }

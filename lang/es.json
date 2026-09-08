@@ -678,5 +678,7 @@
  "h.r.turn": "Una línea que sube y baja gira dos veces: arriba, y abajo donde empieza la vuelta siguiente. <em>Dos veces</em> repite esas dos notas, para que cada giro tenga su tiempo. La primera nota de todas suena una sola vez —aún no ha girado nada— y una serie que se detiene termina con una nota sola.",
  "h.r.updown": "Solo con algo en rotación. <em>Alternar</em> lleva uno arriba y el siguiente abajo; <em>Sube y baja cada uno</em> termina uno —subiendo y bajando— antes de que la rotación avance.",
  "h.x.clicksound": "<em>Madera</em> es el clic suave y sigue siendo el de partida. <em>Digital</em> es el mismo pulso con un filo duro, para tocar sobre algo fuerte.",
- "h.x.panelclear": "El del pie de un panel repone solo ese panel y deja lo demás como está. Dos toques, como todo lo que aquí quita algo."
+ "h.x.panelclear": "El del pie de un panel repone solo ese panel y deja lo demás como está. Dos toques, como todo lo que aquí quita algo.",
+ "aria.back": "Volver a los modos",
+ "aria.settings": "Ajustes"
 }
