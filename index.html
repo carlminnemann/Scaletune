@@ -1706,7 +1706,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <dt data-t="octaves-3">Octaves</dt><dd data-t="h.r.oct">How far the line reaches.</dd>
     <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
     <dt data-t="direction-2">Direction</dt><dd data-t="h.r.dir">Up, down, or up and back down. Where something changes between passes, up and back means the passes take turns instead: this one up, the next one down.</dd>
-    <dt data-t="turn.note">Turning note</dt><dd data-t="h.r.turn">Up and back turns on one note. <em>Twice</em> sounds that note again before the way down, so the turn itself gets a beat.</dd>
+    <dt data-t="turn.note">Turning note</dt><dd data-t="h.r.turn">A line that goes up and back turns twice: at the top, and at the bottom where the next round begins. <em>Twice</em> sounds both of those notes again, so each turn gets a beat. A run that stops still ends on one note.</dd>
     <dt data-t="updown.means">Up-Down means</dt><dd data-t="h.r.updown">Only with something in rotation. <em>Alternate</em> takes one item up and the next one down; <em>Each both ways</em> finishes an item — up and back down — before the rotation moves.</dd>
     <dt data-t="start-on-2">Start On</dt><dd data-t="h.r.start">Which degree of the scale the line starts from. On a chord it is the inversion.</dd>
     <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="h.r.pattern">A shape walked from every degree instead of straight up: <em>thirds</em> plays 1–3, then 2–4, then 3–5, and <em>1 3 5</em> the arpeggio standing on each degree. <em>Free</em> is a shape of your own — tap the degrees in the order you want them. The line underneath spells out what it does in your key.</dd>
@@ -3797,7 +3797,14 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
   /* The note the run turns on, sounded a second time before it sets off back.
      It is one note and not one shape: what is being practised is the turn, and
      a shape repeated at the top is a different exercise — it would also run
-     past the octave the shape already turned inside. */
+     past the octave the shape already turned inside.
+
+     Both ends, not only the far one. A line that goes up and back down turns
+     twice: at the top, and again at the bottom where it starts the next round —
+     and that second turn is the seam between one pass and the next, so the pair
+     is written at the head of the pass. Played round, the two are the same
+     figure: ...F E D | C C D E... The first note of the very first pass is
+     doubled too, which is the same two notes you hear at every seam after it. */
   const turnNote=k=>{if(state.repeatTurn)out.push(at(startIdx+k));};
   /* A run that comes back where it started stops one degree short of it, so that
      looping does not sound the note twice at the seam — the next round begins on
@@ -3835,13 +3842,13 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      which is how thirds are written. */
   if(turns&&direction==='up'){climb(0,top-1,1);return closeAt(top);}
   if(turns&&direction==='down'){climb(top,1,-1);return closeAt(0);}
-  if(turns&&direction==='downup'){climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
-  if(turns&&direction==='updown'){climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
+  if(turns&&direction==='downup'){turnNote(top);climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
+  if(turns&&direction==='updown'){turnNote(0);climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
   /* There and back. The degree at each end starts a shape once — going up it is
      the one that turns the shape over, and the far end does the same on the way
      back, so nothing is played twice at the join. */
-  if(direction==='updown'){climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
-  if(direction==='downup'){climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
+  if(direction==='updown'){turnNote(0);climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
+  if(direction==='downup'){turnNote(top);climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
   climb(0,top,1);
   return closeModes(startIdx+top);
 }
@@ -4393,7 +4400,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-08b';
+const APP_VERSION='2026-09-08c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the

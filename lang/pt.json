@@ -675,7 +675,7 @@
  "click.digital": "Digital",
  "clear.sure": "✕ Toca outra vez",
  "clear.accents": "✕ Limpar acentos",
- "h.r.turn": "Sobe e desce dá a volta numa nota. <em>Duas vezes</em> toca essa nota outra vez antes de descer, para a volta ficar com um tempo.",
+ "h.r.turn": "Uma linha que sobe e desce dá duas voltas: em cima, e em baixo onde a próxima ronda começa. <em>Duas vezes</em> toca outra vez as duas notas, para cada volta ter o seu tempo. Uma corrida que pára acaba na nota uma só vez.",
  "h.r.updown": "Só com algo em rotação. <em>Alternar</em> faz um a subir e o seguinte a descer; <em>Sobe e desce cada um</em> acaba um — a subir e a descer — antes de a rotação mudar.",
  "h.x.clicksound": "<em>Madeira</em> é o click suave e continua a ser o de partida. <em>Digital</em> é o mesmo tempo com um bordo duro, para tocar por cima de algo alto.",
  "h.x.panelclear": "O que está no fim de um painel repõe só esse painel e deixa o resto onde está. Dois toques, como tudo aqui que tira alguma coisa."
