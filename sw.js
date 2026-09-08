@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-v238';
+const CACHE = 'scaletune-v239';
 const ASSETS = [
   './',
   './index.html',
@@ -101,14 +101,22 @@ self.addEventListener('fetch', e => {
     // host serves the page with max-age=600, so without this a device could be
     // handed a ten-minute-old build even though the worker asked the network —
     // which reads exactly like the app not having been updated.
+    /* Only the app's own page is stored as the offline page. Any other HTML on
+       this origin — the audio check, say — is a document too, and storing it
+       under './index.html' would hand back the diagnostic page the next time
+       the app was opened without a network. */
+    const p = new URL(req.url).pathname;
+    const isApp = /\/(index\.html)?$/.test(p);
     e.respondWith(
       fetch(req, { cache: 'reload' })
         .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          if (isApp) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          }
           return res;
         })
-        .catch(() => caches.match('./index.html', { ignoreSearch: true }))
+        .catch(() => caches.match(isApp ? './index.html' : req, { ignoreSearch: true }))
     );
     return;
   }
