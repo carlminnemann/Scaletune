@@ -663,5 +663,20 @@
  "undo.none": "Nichts rückgängig zu machen.",
  "undo.done": "Rückgängig. Noch {n} Schritte zurück.",
  "h.g.undo.k": "Rückgängig",
- "h.g.undo": "Das ↶ in der Ecke nimmt das Letzte zurück, was du getan hast, egal wo — ein Tempo, einen Ton, eine Zelle eines Musters, eine gelöschte Übung. Nochmals drücken geht weiter zurück, bis zu dreißig Schritte. Ein Panel zu öffnen oder Start zu drücken kostet nie einen Schritt. Es hält an, bevor es etwas zurücksetzt, und lässt Thema, Sprache und Tonnamen unberührt."
+ "h.g.undo": "Das ↶ in der Ecke nimmt das Letzte zurück, was du getan hast, egal wo — ein Tempo, einen Ton, eine Zelle eines Musters, eine gelöschte Übung. Nochmals drücken geht weiter zurück, bis zu dreißig Schritte. Ein Panel zu öffnen oder Start zu drücken kostet nie einen Schritt. Es hält an, bevor es etwas zurücksetzt, und lässt Thema, Sprache und Tonnamen unberührt.",
+ "turn.note": "Wendeton",
+ "turn.once": "Einmal",
+ "turn.twice": "Zweimal",
+ "updown.means": "Auf-Ab heißt",
+ "updown.alternate": "Abwechselnd",
+ "updown.each": "Jedes auf und ab",
+ "click.sound": "Klang",
+ "click.wood": "Holz",
+ "click.digital": "Digital",
+ "clear.sure": "✕ Nochmal tippen",
+ "clear.accents": "✕ Akzente löschen",
+ "h.r.turn": "Auf und ab wendet auf einem Ton. <em>Zweimal</em> lässt diesen Ton vor dem Rückweg noch einmal klingen, damit die Wende einen Schlag bekommt.",
+ "h.r.updown": "Nur wenn etwas rotiert. <em>Abwechselnd</em> nimmt eines hinauf und das nächste hinunter; <em>Jedes auf und ab</em> bringt eines zu Ende — hinauf und zurück — bevor die Rotation weitergeht.",
+ "h.x.clicksound": "<em>Holz</em> ist der weiche Klick und bleibt der Anfang. <em>Digital</em> ist derselbe Schlag mit harter Kante, zum Spielen über etwas Lautem.",
+ "h.x.panelclear": "Der am Fuß eines Feldes setzt nur dieses Feld zurück und lässt alles andere stehen. Zwei Tipps, wie alles hier, was etwas wegnimmt."
 }

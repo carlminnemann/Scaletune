@@ -663,5 +663,20 @@
  "undo.none": "Rien à annuler.",
  "undo.done": "Annulé. Il reste {n} pas en arrière.",
  "h.g.undo.k": "Annuler",
- "h.g.undo": "Le ↶ dans le coin annule la dernière chose que tu as faite, où que ce soit — un tempo, une note, une case d'un motif, un exercice supprimé. Appuie encore pour continuer à revenir en arrière, jusqu'à trente pas. Ouvrir un panneau ou appuyer sur Démarrer ne coûte jamais un pas. Il arrête ce qui joue avant de remettre en place, et ne touche ni au thème, ni à la langue, ni aux noms des notes."
+ "h.g.undo": "Le ↶ dans le coin annule la dernière chose que tu as faite, où que ce soit — un tempo, une note, une case d'un motif, un exercice supprimé. Appuie encore pour continuer à revenir en arrière, jusqu'à trente pas. Ouvrir un panneau ou appuyer sur Démarrer ne coûte jamais un pas. Il arrête ce qui joue avant de remettre en place, et ne touche ni au thème, ni à la langue, ni aux noms des notes.",
+ "turn.note": "Note du demi-tour",
+ "turn.once": "Une fois",
+ "turn.twice": "Deux fois",
+ "updown.means": "Monte-descend veut dire",
+ "updown.alternate": "Alterner",
+ "updown.each": "Chacun monte et descend",
+ "click.sound": "Son",
+ "click.wood": "Bois",
+ "click.digital": "Numérique",
+ "clear.sure": "✕ Touchez encore",
+ "clear.accents": "✕ Effacer les accents",
+ "h.r.turn": "Monte et descend tourne sur une note. <em>Deux fois</em> refait sonner cette note avant la descente, pour que le demi-tour ait son temps.",
+ "h.r.updown": "Seulement avec quelque chose en rotation. <em>Alterner</em> prend l'un en montant et le suivant en descendant ; <em>Chacun monte et descend</em> termine l'un — aller et retour — avant que la rotation n'avance.",
+ "h.x.clicksound": "<em>Bois</em> est le clic doux et reste celui de départ. <em>Numérique</em> est le même temps avec une arête dure, pour jouer par-dessus quelque chose de fort.",
+ "h.x.panelclear": "Celui au bas d'un panneau remet ce panneau seul et laisse le reste en place. Deux touches, comme tout ce qui enlève quelque chose ici."
 }

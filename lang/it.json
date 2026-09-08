@@ -663,5 +663,20 @@
  "undo.none": "Non c'è niente da annullare.",
  "undo.done": "Annullato. Restano {n} passi indietro.",
  "h.g.undo.k": "Annulla",
- "h.g.undo": "Il ↶ nell'angolo annulla l'ultima cosa che hai fatto, ovunque l'abbia fatta — un tempo, una nota, una cella di un pattern, un esercizio cancellato. Premilo ancora per continuare a tornare indietro, fino a trenta passi. Aprire un pannello o premere Avvia non costa mai un passo. Ferma quello che suona prima di rimettere a posto, e non tocca il tema, la lingua né i nomi delle note."
+ "h.g.undo": "Il ↶ nell'angolo annulla l'ultima cosa che hai fatto, ovunque l'abbia fatta — un tempo, una nota, una cella di un pattern, un esercizio cancellato. Premilo ancora per continuare a tornare indietro, fino a trenta passi. Aprire un pannello o premere Avvia non costa mai un passo. Ferma quello che suona prima di rimettere a posto, e non tocca il tema, la lingua né i nomi delle note.",
+ "turn.note": "Nota del giro",
+ "turn.once": "Una volta",
+ "turn.twice": "Due volte",
+ "updown.means": "Sale-scende significa",
+ "updown.alternate": "Alternare",
+ "updown.each": "Ognuna sale e scende",
+ "click.sound": "Suono",
+ "click.wood": "Legno",
+ "click.digital": "Digitale",
+ "clear.sure": "✕ Tocca di nuovo",
+ "clear.accents": "✕ Cancella accenti",
+ "h.r.turn": "Sale e scende gira su una nota. <em>Due volte</em> suona quella nota di nuovo prima della discesa, così il giro ha il suo movimento.",
+ "h.r.updown": "Solo con qualcosa in rotazione. <em>Alternare</em> porta una su e la prossima giù; <em>Ognuna sale e scende</em> finisce una — su e giù — prima che la rotazione avanzi.",
+ "h.x.clicksound": "<em>Legno</em> è il click morbido e resta quello di partenza. <em>Digitale</em> è lo stesso battito con un bordo duro, per suonarci sopra qualcosa di forte.",
+ "h.x.panelclear": "Quello in fondo a un pannello rimette a posto solo quel pannello e lascia stare il resto. Due tocchi, come tutto ciò che qui toglie qualcosa."
 }

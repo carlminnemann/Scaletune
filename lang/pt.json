@@ -663,5 +663,20 @@
  "undo.none": "Não há nada para desfazer.",
  "undo.done": "Desfeito. Ficam {n} passos atrás.",
  "h.g.undo.k": "Desfazer",
- "h.g.undo": "O ↶ no canto desfaz a última coisa que fizeste, onde quer que a tenhas feito — um andamento, uma nota, uma célula de um padrão, um exercício apagado. Carrega outra vez para continuares a recuar, até trinta passos. Abrir um painel ou carregar em Começar nunca gasta um passo. Pára o que está a tocar antes de repor, e não mexe no tema, na língua nem nos nomes das notas."
+ "h.g.undo": "O ↶ no canto desfaz a última coisa que fizeste, onde quer que a tenhas feito — um andamento, uma nota, uma célula de um padrão, um exercício apagado. Carrega outra vez para continuares a recuar, até trinta passos. Abrir um painel ou carregar em Começar nunca gasta um passo. Pára o que está a tocar antes de repor, e não mexe no tema, na língua nem nos nomes das notas.",
+ "turn.note": "Nota da volta",
+ "turn.once": "Uma vez",
+ "turn.twice": "Duas vezes",
+ "updown.means": "Sobe-desce significa",
+ "updown.alternate": "Alternar",
+ "updown.each": "Sobe e desce cada um",
+ "click.sound": "Som",
+ "click.wood": "Madeira",
+ "click.digital": "Digital",
+ "clear.sure": "✕ Toca outra vez",
+ "clear.accents": "✕ Limpar acentos",
+ "h.r.turn": "Sobe e desce dá a volta numa nota. <em>Duas vezes</em> toca essa nota outra vez antes de descer, para a volta ficar com um tempo.",
+ "h.r.updown": "Só com algo em rotação. <em>Alternar</em> faz um a subir e o seguinte a descer; <em>Sobe e desce cada um</em> acaba um — a subir e a descer — antes de a rotação mudar.",
+ "h.x.clicksound": "<em>Madeira</em> é o click suave e continua a ser o de partida. <em>Digital</em> é o mesmo tempo com um bordo duro, para tocar por cima de algo alto.",
+ "h.x.panelclear": "O que está no fim de um painel repõe só esse painel e deixa o resto onde está. Dois toques, como tudo aqui que tira alguma coisa."
 }

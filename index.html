@@ -1237,6 +1237,15 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <div class="head" id="arptop-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
         <span class="group-label" data-t="arp.top">Top note</span>
         <span class="btn-wrap seg" id="arptop-row" data-cols="fixed"></span></div>
+      <!-- both of these are about what Up-Down means, so they only exist while
+           the direction turns; updateSupersededControls decides -->
+      <div class="head" id="turn-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="turn.note">Turning note</span>
+        <span class="btn-wrap seg" id="turn-row" data-cols="fixed"></span></div>
+      <div class="head" id="bothways-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="updown.means">Up-Down means</span>
+        <span class="btn-wrap seg" id="bothways-row" data-cols="fixed"></span></div>
+      <button class="clear-btn panel-clear" data-panel="range" onclick="limpaPainel('range')">✕ Clear</button>
     </div>
   </details>
 
@@ -1266,6 +1275,10 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <div class="btn-wrap" id="free-span-row"></div>
       <div class="group-label" data-t="direction">Direction</div>
       <div class="btn-wrap" id="free-dir-row"></div>
+      <div class="head" id="free-turn-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="turn.note">Turning note</span>
+        <span class="btn-wrap seg" id="free-turn-row" data-cols="fixed"></span></div>
+      <button class="clear-btn panel-clear" data-panel="freerange" onclick="limpaPainel('freerange')">✕ Clear</button>
     </div>
   </details>
 </div>
@@ -1302,6 +1315,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
         <span class="btn-wrap seg" id="repeat-row" data-cols="fixed"></span></div>
       </div>
       <div class="info-line" id="practice-info"></div>
+      <button class="clear-btn panel-clear" data-panel="progress" onclick="limpaPainel('progress')">✕ Clear</button>
     </div>
   </details>
 <hr class="divider" id="metro-divider" style="display:none">
@@ -1348,6 +1362,12 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <input type="range" id="click-vol" min="0" max="1" step="0.05" value="0.7" oninput="updateClickVol(this.value)">
       <span class="val" id="click-vol-out">70%</span>
     </div>
+    <!-- which click, on the same line as its level: both are about the sound
+         of the beat rather than about the beat -->
+    <div class="head" style="margin-top:var(--s3);margin-bottom:0">
+      <span class="section-label" data-t="click.sound">Sound</span>
+      <span class="btn-wrap seg" id="clicksound-row" data-cols="fixed"></span></div>
+    <button class="clear-btn panel-clear" data-panel="tempo" onclick="limpaPainel('tempo')">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="sig-block">
@@ -1373,6 +1393,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <span class="section-label" data-t="hi-hat-on-2-amp">Hi-hat on 2 &amp; 4</span>
       <span class="btn-wrap seg" id="hat-row" data-cols="fixed"></span></div>
     <div class="info-line" id="groove-info" style="display:none"></div>
+    <button class="clear-btn panel-clear" data-panel="accomp" onclick="limpaPainel('accomp')">✕ Clear</button>
   </div>
 
   <!-- The pattern itself, writable. Six voices down the side, a bar across, and
@@ -1466,6 +1487,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <span class="step-unit" data-t="min">min</span>
     </div>
     <div class="info-line" id="speed-info"></div>
+    <button class="clear-btn panel-clear" data-panel="speed" onclick="limpaPainel('speed')">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="count-block">
@@ -1477,6 +1499,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="count-again-on">Count again on</span>
       <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
+    <button class="clear-btn panel-clear" data-panel="count" onclick="limpaPainel('count')">✕ Clear</button>
   </div>
 
   <!-- A fold like the pattern and the mixer: five figures and a direction on
@@ -1494,6 +1517,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       </span>
       <span class="btn-wrap seg" id="gap-one-row" data-cols="fixed"></span></div>
     <div class="info-line" id="gap-info"></div>
+    <button class="clear-btn panel-clear" data-panel="gap" onclick="limpaPainel('gap')">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="subdiv-block">
@@ -1511,6 +1535,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <div class="head" style="margin-bottom:0"><span class="section-label" data-t="click-2">Click</span>
         <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
       </div>
+      <button class="clear-btn panel-clear" data-panel="subdiv" onclick="limpaPainel('subdiv')">✕ Clear</button>
     </div>
   </div>
 
@@ -1539,8 +1564,11 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <div class="head" id="polynotes-block" style="margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="notes-follow">Notes follow</span>
       <span class="btn-wrap seg" id="polynotes-row" data-cols="fixed"></span></div>
-    <button class="clear-btn" onclick="clearPolyAccents()" data-t="clear-5">✕ Clear</button>
+    <!-- named, because it is not the only clear in this panel: it puts the two
+         rows of pulses back to plain and leaves the numbers alone -->
+    <button class="clear-btn" onclick="clearPolyAccents()" data-t="clear.accents">✕ Clear accents</button>
   </div>
+    <button class="clear-btn panel-clear" data-panel="poly" onclick="limpaPainel('poly')">✕ Clear</button>
   </div>
   </div>
 </details>
@@ -1568,6 +1596,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <div class="head"><span class="group-label" data-t="phrase-alignment">Phrase Alignment</span>
       <span class="btn-wrap seg" id="align-row" data-cols="fixed"></span></div>
     <div class="info-line" id="align-info"></div>
+    <button class="clear-btn panel-clear" data-panel="phrasing" onclick="limpaPainel('phrasing')">✕ Clear</button>
   </div>
 </details>
 
@@ -1677,6 +1706,8 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <dt data-t="octaves-3">Octaves</dt><dd data-t="h.r.oct">How far the line reaches.</dd>
     <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
     <dt data-t="direction-2">Direction</dt><dd data-t="h.r.dir">Up, down, or up and back down. Where something changes between passes, up and back means the passes take turns instead: this one up, the next one down.</dd>
+    <dt data-t="turn.note">Turning note</dt><dd data-t="h.r.turn">Up and back turns on one note. <em>Twice</em> sounds that note again before the way down, so the turn itself gets a beat.</dd>
+    <dt data-t="updown.means">Up-Down means</dt><dd data-t="h.r.updown">Only with something in rotation. <em>Alternate</em> takes one item up and the next one down; <em>Each both ways</em> finishes an item — up and back down — before the rotation moves.</dd>
     <dt data-t="start-on-2">Start On</dt><dd data-t="h.r.start">Which degree of the scale the line starts from. On a chord it is the inversion.</dd>
     <dt data-t="seq.pattern-2">Pattern</dt><dd data-t="h.r.pattern">A shape walked from every degree instead of straight up: <em>thirds</em> plays 1–3, then 2–4, then 3–5, and <em>1 3 5</em> the arpeggio standing on each degree. <em>Free</em> is a shape of your own — tap the degrees in the order you want them. The line underneath spells out what it does in your key.</dd>
   </dl></div>
@@ -1692,6 +1723,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <dt data-t="bar-2">Bar</dt><dd data-t="h.x.bar">How many beats it counts. Tap a circle to cycle it: accented, plain, silent.</dd>
     <dt data-t="subdivision-2">Subdivision</dt><dd data-t="h.x.subdiv">What each beat is divided into. Swing splits it two to one. <em>Sequence</em> takes the figures you pick in turn, one per pass.</dd>
     <dt data-t="click-3">Click</dt><dd data-t="h.x.click">Follow figure clicks every subdivision; Beats clicks the beats only.</dd>
+    <dt data-t="click.sound">Sound</dt><dd data-t="h.x.clicksound"><em>Wood</em> is the soft click and stays the one you start with. <em>Digital</em> is the same beat with a hard edge, for playing over something loud.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-metro-run"><h3 data-t="h.run.k">While it runs</h3><dl>
@@ -1740,6 +1772,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <div class="help-sec" id="help-transport"><h3 data-t="playing">Playing</h3><dl>
     <dt data-t="h.g.undo.k">Undo</dt><dd data-t="h.g.undo">The ↶ in the corner takes back the last thing you did, wherever you did it — a tempo, a note, a cell of a pattern, a deleted exercise. Press it again to keep going back, thirty steps deep. Opening a panel or pressing Start never costs a step. It stops the playing before it puts anything back, and it leaves the theme, the language and the note names alone.</dd>
     <dt data-t="h.x.clear.k">Clear this mode</dt><dd data-t="h.x.clear">Puts that mode back to how the app opens. Every mode is separate, so clearing one leaves the others alone.</dd>
+    <dt data-t="clear">✕ Clear</dt><dd data-t="h.x.panelclear">The one at the foot of a panel puts back that panel alone and leaves everything else where it is. Two taps, like everything here that takes something away.</dd>
     <dt data-t="start">Start</dt><dd data-t="h.g.start">Or the space bar, unless you are typing in a field.</dd>
     <dt data-t="offline">Offline</dt><dd data-t="h.g.offline">Once opened, the app runs with no network at all. Add it to your home screen and it behaves as an app.</dd>
   </dl></div>
@@ -2174,6 +2207,16 @@ let state={
      Bb C is the chord and the note it is built on, played again. Both are how
      people practise, so it is asked rather than decided. */
   arpTop:true,
+  /* Up and back turns on one note, and that note sounds once: C D E F G A B C
+     B A G... Sounding it twice puts a beat on the turn — which is how the turn
+     itself is practised, and how a lot of teachers write it out. Off, because
+     the line as written is what a scale is. */
+  repeatTurn:false,
+  /* What Up-Down means once something is rotating. Off: the rotation takes
+     turns — ionian up, dorian down, which is the older rule and what the modes
+     tour is built on. On: each item goes up and back down before the rotation
+     moves at all. */
+  bothWays:false,
   blueNotes:false,           // the added note in the two pentatonics
 
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
@@ -2182,6 +2225,11 @@ let state={
   timbre:'strings',droneTimbre:'strings',seqTimbre:'piano-real',volume:0.7,
   // per-beat click: 'low' (accent) | 'high' | 'off'; filled in by buildBeats
   bpm:60,sig:4,clickVol:0.7,noteLen:'sub',accents:[],accentsTouched:false,subdiv:1,
+  /* Which click. 'wood' is the one the app has always had — a decaying sine,
+     which sits under an instrument rather than on top of it. 'digital' is the
+     same pitches with their odd harmonics and a shorter decay: harder, and
+     audible next to a loud instrument, which a sine at the same level is not. */
+  clickSound:'wood',
   /* The base is that every round starts on beat one. Letting the phrase drift
      against the pulse is a real exercise and it is offered right there, but it
      is the thing you ask for — opening the app already drifting means a phrase
@@ -2218,7 +2266,14 @@ let state={
      They never cross: four sixteenths do not fit in three triplets, so anything
      that converted between them would be dropping a note and calling it a
      conversion. */
-  custom:{grid:16,b16:1,b12:1,h16:[],h12:[],pen:2},
+  /* pen is the level a tap writes with, and it opens on the loudest of the
+     three. It used to open on the middling one, and that is measurable: the
+     same rock beat written by hand rendered at peak 0.245 against the written
+     style's 0.439 — half the level, and reported as the pattern being quiet on
+     a tablet. Written at the top level it renders at 0.446, which is the style
+     to within a hair. Ghost notes are still a tap on the Level buttons away;
+     what changes is which one you get without asking. */
+  custom:{grid:16,b16:1,b12:1,h16:[],h12:[],pen:3},
   // In Drone the metronome is not the point, so there it is asked for
   metroInDrone:false,
   // Practice progressions: what changes each time the sequence comes round.
@@ -3131,6 +3186,22 @@ function accentFor(i){return state.accents[i]||'high';}
    the beat still reads as the beat. ('low' and 'high' name the accent level,
    not the pitch: 'low' is the accented beat, and it is the high click.) */
 const CLICK_TONE={low:{f:1400,g:1},high:{f:950,g:0.72},sub:{f:700,g:0.34}};
+/* The other click. A sine is a polite sound: against a loud instrument in a
+   room it is the first thing to go, and turning it up only makes a louder
+   polite sound. This one keeps the same three pitches and the same weights —
+   so the accent still reads as the accent — and changes what the sound is made
+   of: the odd harmonics of each pitch, and a decay short enough that what
+   reaches you is the edge rather than the tone. That edge is what cuts.
+
+   The pitches are also lifted a fifth, into the range a room does least to. */
+const CLICK_DIGITAL={low:{f:2100,g:1},high:{f:1430,g:0.72},sub:{f:1050,g:0.34}};
+const CLICK_VOICES=['wood','digital'];
+function clickVoice(){return state.clickSound==='digital'?'digital':'wood';}
+function clickTone(kind){
+  return (clickVoice()==='digital'?CLICK_DIGITAL:CLICK_TONE)[kind];
+}
+// how long the click rings; the hard one is deliberately shorter
+function clickDecay(){return clickVoice()==='digital'?0.006:0.01;}
 // The cross-rhythm sits below the main click and rings a little longer, so the
 // two layers separate by ear even when they land together on the downbeat. Each
 // layer keeps the accent above its own plain pulse.
@@ -3140,10 +3211,31 @@ const POLY_TONE={
 };
 
 
-function clickBuffer(f,decay){
+function clickBuffer(f,decay,hard){
   const sr=audioCtx.sampleRate;
   const buf=audioCtx.createBuffer(1,Math.floor(sr*Math.max(0.04,decay*3)),sr);
   const d=buf.getChannelData(0);
+  if(hard){
+    /* A square in all but name: the fundamental and its third and fifth
+       harmonics at a square's own weights. Written out rather than made with a
+       square oscillator because the buffer is what everything else here uses,
+       and because a square that starts at full amplitude clicks on its own
+       first sample — the sum of sines starts at zero.
+
+       Normalised to the peak it actually reaches, not to the sum of its own
+       weights: dividing by 1.53 when the waveform only reaches 1.07 made the
+       hard click quieter than the soft one, which is the opposite of what it
+       is for. Same peak as the sine, and the difference is all in what the
+       peak is made of. */
+    let peak=0;
+    for(let i=0;i<d.length;i++){
+      const t=2*Math.PI*f*i/sr;
+      d[i]=(Math.sin(t)+Math.sin(3*t)/3+Math.sin(5*t)/5)*Math.exp(-i/(sr*decay));
+      if(Math.abs(d[i])>peak)peak=Math.abs(d[i]);
+    }
+    if(peak>0)for(let i=0;i<d.length;i++)d[i]/=peak;
+    return buf;
+  }
   for(let i=0;i<d.length;i++) d[i]=Math.sin(2*Math.PI*f*i/sr)*Math.exp(-i/(sr*decay));
   return buf;
 }
@@ -3549,16 +3641,19 @@ function scheduleGrooveBeat(t0,beat){
 }
 
 function scheduleClick(time,kind){
-  const tone=CLICK_TONE[kind];
+  const tone=clickTone(kind);
   if(!tone)return;                       // 'off' — silent beat
-  playClickBuffer(clickBuffer(tone.f,0.01),time,clickGain()*tone.g);
+  const hard=clickVoice()==='digital';
+  playClickBuffer(clickBuffer(tone.f,clickDecay(),hard),time,clickGain()*tone.g);
 }
 
 function schedulePolyClick(time,kind,layer){
   const tone=(POLY_TONE[layer]||POLY_TONE.b)[kind];
   if(!tone)return;                                  // 'off' — silent pulse
   const vol=clickGain()*tone.g*(layer==='b'?state.polyVol:1);
-  playClickBuffer(clickBuffer(tone.f,tone.d),time,vol);
+  /* The two layers keep their own pitches and their own lengths — that is what
+     separates them by ear — and only the material changes with the choice. */
+  playClickBuffer(clickBuffer(tone.f,tone.d,clickVoice()==='digital'),time,vol);
 }
 
 function polyAccFor(layer,i){
@@ -3699,6 +3794,11 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      and Direction says which end you set off from rather than whether it comes
      back. Only a plain scale can run one way and leap back to start again. */
   const turns=steps.length>1;
+  /* The note the run turns on, sounded a second time before it sets off back.
+     It is one note and not one shape: what is being practised is the turn, and
+     a shape repeated at the top is a different exercise — it would also run
+     past the octave the shape already turned inside. */
+  const turnNote=k=>{if(state.repeatTurn)out.push(at(startIdx+k));};
   /* A run that comes back where it started stops one degree short of it, so that
      looping does not sound the note twice at the seam — the next round begins on
      it. A run that is about to END has no next round, and a scale that finishes
@@ -3735,13 +3835,13 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      which is how thirds are written. */
   if(turns&&direction==='up'){climb(0,top-1,1);return closeAt(top);}
   if(turns&&direction==='down'){climb(top,1,-1);return closeAt(0);}
-  if(turns&&direction==='downup'){climb(top,1,-1);climb(0,top-1,1);return close();}
-  if(turns&&direction==='updown'){climb(0,top-1,1);climb(top,1,-1);return close();}
+  if(turns&&direction==='downup'){climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
+  if(turns&&direction==='updown'){climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
   /* There and back. The degree at each end starts a shape once — going up it is
      the one that turns the shape over, and the far end does the same on the way
      back, so nothing is played twice at the join. */
-  if(direction==='updown'){climb(0,top-1,1);climb(top,1,-1);return close();}
-  if(direction==='downup'){climb(top,1,-1);climb(0,top-1,1);return close();}
+  if(direction==='updown'){climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
+  if(direction==='downup'){climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
   climb(0,top,1);
   return closeModes(startIdx+top);
 }
@@ -4293,7 +4393,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-08a';
+const APP_VERSION='2026-09-08b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4841,14 +4941,64 @@ let passTick=0;
    the cycle of fourths, a study list, the modes — taking one item up and the
    next one down is the documented behaviour and what a progression usually
    wants; the modes tour is built on it. */
+/* And where the player asked for it. "Each both ways" says the same thing
+   about the rotation itself: the item is not done until it has been heard up
+   and back down, so ionian goes both ways before dorian is reached at all.
+   Same hold, one level out — with a figure list running, the figures close
+   their own pair first and the item's pair closes around them. */
+function alternationDoubles(){
+  if(!passesAlternate()||modesRunOn())return false;
+  return (subdivListOn()&&subdivOrder().length>1)||!!state.bothWays;
+}
 function alternationHolds(tick){
-  return passesAlternate()&&!modesRunOn()&&
-         subdivListOn()&&subdivOrder().length>1&&(tick%2)===1;
+  return alternationDoubles()&&(tick%2)===1;
 }
 function alternationPending(){return alternationHolds(passTick);}
 function alternatingDir(){
   const first=state.direction==='updown'?'up':'down';
   return (passTick%2)?(first==='up'?'down':'up'):first;
+}
+/* Sounding the turn twice is a question only where there is a turn, and asking
+   it under Up alone would be asking about a note that is never reached twice.
+   The Free panel has its own direction and the same walk, so it asks too. */
+function turnsBothWays(dir){return dir==='updown'||dir==='downup';}
+function buildTurnRow(lineId,rowId,dirOf){
+  const line=document.getElementById(lineId);
+  if(!line)return;
+  const show=turnsBothWays(dirOf());
+  line.style.display=show?'':'none';
+  if(!show)return;
+  const row=document.getElementById(rowId);row.innerHTML='';
+  [[false,tr('turn.once','Once')],[true,tr('turn.twice','Twice')]].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(!!state.repeatTurn===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.repeatTurn=v;renderPitchPickers();buildFreeRangeRows();
+      refreshSequence();restartIfPlaying();};
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+/* And what Up-Down means to the rotation — which is a question only when there
+   IS a rotation to alternate. The modes tour answers it for itself: its
+   there-and-back is the run turning at the top, not each mode turning. */
+function buildBothWaysRow(){
+  const line=document.getElementById('bothways-line');
+  if(!line)return;
+  const show=passesAlternate()&&!modesRunOn();
+  line.style.display=show?'':'none';
+  if(!show)return;
+  const row=document.getElementById('bothways-row');row.innerHTML='';
+  [[false,tr('updown.alternate','Alternate')],[true,tr('updown.each','Each both ways')]]
+    .forEach(([v,label])=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(!!state.bothWays===v?' active':'');
+      b.textContent=label;
+      b.onclick=()=>{state.bothWays=v;resetRun();refreshSequence();
+        updateRotationPanel();renderPitchPickers();restartIfPlaying();};
+      row.appendChild(b);
+    });
+  gridify(row);
 }
 function modeRunDir(){
   if(!modesSnake())return state.direction;
@@ -5013,9 +5163,10 @@ function roundPasses(){
   if(useListOn()&&activeList().length>1)n*=activeList().length;
   if(modesRunOn())n*=modesTour().length;
   else if(state.practice.rootMove==='fourths'&&(state.mode==='scale'||state.mode==='arpeggio'))n*=12;
-  /* Each figure is now heard twice — up and back down — so a round is twice as
-     long. Without this, Once would stop halfway through it. */
-  if(passesAlternate()&&!modesRunOn()&&subdivListOn()&&subdivOrder().length>1)n*=2;
+  /* Whatever closes its pair before the rotation moves — each figure, or each
+     item of the rotation itself — is heard twice, up and back down, so a round
+     is twice as long. Without this, Once would stop halfway through it. */
+  if(alternationDoubles())n*=2;
   return n;
 }
 /* The drone is a note to hold for as long as you need it, so a round means
@@ -5082,10 +5233,11 @@ function endRunNow(){
    accompaniment, the kit, the mixer and the pattern, because they only exist in
    Metro. And what belongs to the person rather than the practice: the volume
    and what the notes are called. */
-const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol',
+const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol','clickSound',
   'clickFollowsFigure','alignPasses','countBars','countWhen','polyVol','metroInDrone',
   'root','rootOct','rootOctWanted','scaleGroup','scaleName','chordGroup','chordName',
-  'span','spanWanted','direction','startDeg','seqPattern','arpTop','blueNotes','listKind',
+  'span','spanWanted','direction','startDeg','seqPattern','arpTop','repeatTurn','bothWays',
+  'blueNotes','listKind',
   'freeRoot','freeSpan','freeSpanWanted','freeDirection'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
   'passCount','passUnit','useSubdivList','subdivDir',
@@ -5191,6 +5343,89 @@ function metroTake(mode){
   if(!metroPerMode[mode])metroPerMode[mode]=JSON.parse(JSON.stringify(METRO_FRESH));
   metroRestore(metroPerMode[mode]);
 }
+
+/* ---------- one panel at a time ----------
+   Clear this mode puts a whole mode back, which is the right size of hammer
+   once in a while and far too big for "I have moved the dropout about for ten
+   minutes and want it out of the way". A panel you can shape is a panel you
+   can get lost in, so each of them can be put back on its own, and nothing
+   outside it moves.
+
+   Each entry names the fields its panel owns and takes them from the snapshot
+   the app started with — the same one Clear this mode uses, so a panel cleared
+   here and a mode cleared there agree about what "how it opens" means. A panel
+   that grows a control grows its list here; a field in no list is in no clear,
+   which is the same bargain EX_KEYS makes for saved exercises. */
+const PANEL_CLEARS={
+  range:F=>['span','spanWanted','rootOct','rootOctWanted','startDeg','direction',
+            'arpTop','repeatTurn','bothWays'].forEach(k=>state[k]=F[k]),
+  freerange:F=>['freeSpan','freeSpanWanted','freeDirection','repeatTurn']
+            .forEach(k=>state[k]=F[k]),
+  progress:F=>{
+    state.seqPattern=F.seqPattern;
+    state.seqCustom=(F.seqCustom||[]).slice();
+    ['rootMove','repeat','modesTour'].forEach(k=>state.practice[k]=F.p[k]);
+  },
+  phrasing:F=>['noteLen','alignPasses'].forEach(k=>state[k]=F[k]),
+  tempo:F=>['bpm','clickVol','clickSound'].forEach(k=>state[k]=F[k]),
+  count:F=>['countBars','countWhen'].forEach(k=>state[k]=F[k]),
+  speed:F=>['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom']
+            .forEach(k=>state.practice[k]=F.p[k]),
+  gap:F=>['gapMode','gapMinutes','gapKeepOne'].forEach(k=>state.practice[k]=F.p[k]),
+  subdiv:F=>{
+    state.subdiv=F.subdiv;state.clickFollowsFigure=F.clickFollowsFigure;
+    state.practice.useSubdivList=F.p.useSubdivList;
+    state.practice.subdivDir=F.p.subdivDir;
+    state.practice.subdivList=(F.p.subdivList||[]).slice();
+    subdivIdx=0;
+  },
+  poly:F=>{state.poly=clonar(F.poly);state.polyVol=F.polyVol;},
+  /* The accompaniment goes back through setGroove rather than by assignment:
+     a written style holds the bar at four and hands it back on the way out,
+     and only that function knows what it was before. */
+  accomp:()=>{
+    if(!METRO_FRESH_G)return;
+    ['kit','density','balladHat'].forEach(k=>state[k]=METRO_FRESH_G[k]);
+    setGroove(METRO_FRESH_G.groove);
+  },
+};
+/* Which panel is waiting for its second tap, and when that offer runs out. One
+   at a time: arming a second button disarms the first, because two buttons
+   both saying "tap again" is a question about which one. */
+let panelArmado='',panelAte=0,panelRelogio=0;
+function panelLabel(b){
+  const armado=b.dataset.panel===panelArmado&&Date.now()<panelAte;
+  b.textContent=armado?tr('clear.sure','✕ Tap again'):tr('clear','✕ Clear');
+  b.classList.toggle('armed',armado);
+}
+function panelLabels(){document.querySelectorAll('.panel-clear').forEach(panelLabel);}
+function limpaPainel(id){
+  const fn=PANEL_CLEARS[id];
+  if(!fn)return;
+  if(panelArmado!==id||Date.now()>=panelAte){
+    panelArmado=id;panelAte=Date.now()+4000;
+    panelLabels();
+    clearTimeout(panelRelogio);
+    panelRelogio=setTimeout(()=>{panelArmado='';panelLabels();},4100);
+    return;
+  }
+  panelArmado='';clearTimeout(panelRelogio);
+  fn(METRO_FRESH||metroSnapshot());
+  metroKeep(state.mode);
+  /* The same tail Clear this mode runs. A panel clear touches fewer fields, not
+     fewer screens: the summary on a closed fold, the rotation preview and the
+     sequence itself all read from what has just changed. */
+  resetRun();
+  redrawMetro();
+  buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();
+  buildPatternEditor();updateSupersededControls();
+  buildFreeRangeRows();
+  refreshSequence();refreshSectionSummaries();
+  if(state.playing)restartIfPlaying();
+  panelLabels();
+  setStatus(tr('reset.done','Cleared.'));
+  setTimeout(()=>setStatus(''),1200);
+}
 /* Everything the metronome draws, drawn again — the whole of it changes at once
    when the mode does, so there is no point being clever about which parts. */
 function redrawMetro(){
@@ -5209,8 +5444,10 @@ function redrawMetro(){
   const cvo=document.getElementById('click-vol-out');
   if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
   renderSigFields();buildBeats();buildPolyBeats();renderPolyBeats();
+  buildClickSoundRow();
   buildNoteLenRow();buildSubdivRow();buildClickModeRow();buildAlignRow();
   buildSpeedControls();buildCountRow();buildGapRow();buildPassRow();buildMetroOnRow();
+  panelLabels();
   updateSupersededControls();
 }
 
@@ -5748,6 +5985,28 @@ function buildSubdivDirRow(){
     b.onclick=()=>{state.practice.subdivDir=d.k;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
     row.appendChild(b);
   });
+}
+
+/* Choosing it plays it, once, at the accent's pitch. A click is half a second
+   of decision and nobody should have to start the metronome to hear which one
+   they picked. */
+function buildClickSoundRow(){
+  const row=document.getElementById('clicksound-row');
+  if(!row)return;
+  row.innerHTML='';
+  [['wood',tr('click.wood','Wood')],['digital',tr('click.digital','Digital')]].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(clickVoice()===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{
+      state.clickSound=v;buildClickSoundRow();refreshSectionSummaries();
+      // after the resume, not before it: a click scheduled on a suspended
+      // context is a click nobody hears
+      if(!state.playing)initAudio().then(()=>scheduleClick(audioCtx.currentTime+0.02,'low'));
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
 }
 
 function buildClickModeRow(){
@@ -6412,6 +6671,8 @@ function renderPitchPickers(){
       gridify(row);
     }
   }
+  buildTurnRow('turn-line','turn-row',()=>state.direction);
+  buildBothWaysRow();
   const degLabel=document.getElementById('startdeg-label');
   if(degLabel)degLabel.textContent=(playingKind()==='chord')
     ? tr('sec.inversion','Inversion') : tr('start-on','Start On');
@@ -6507,6 +6768,7 @@ function buildFreeRangeRows(){
     b.onclick=()=>{state.freeDirection=d.k;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
     dirRow.appendChild(b);
   });
+  buildTurnRow('free-turn-line','free-turn-row',()=>state.freeDirection);
 }
 
 function renderFreeNote(n){
@@ -7071,8 +7333,9 @@ function patInfo(){
 const EX_KEYS=[
   'mode','root','rootOct','rootOctWanted','scaleGroup','scaleName',
   'chordGroup','chordName','span','spanWanted','direction','startDeg',
-  'seqPattern','arpTop','blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
-  'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv','clickVol',
+  'seqPattern','arpTop','repeatTurn','bothWays',
+  'blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
+  'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv','clickVol','clickSound',
   'alignPasses','clickFollowsFigure','countBars','countWhen','groove','kit',
   'density','balladHat','metroInDrone','accentsTouched',
 ];
@@ -7145,6 +7408,8 @@ function applyExercise(x){
   set('seqPattern',oneOf(x.seqPattern,SEQ_PATTERNS.map(p=>p.k)));
   state.blueNotes=!!x.blueNotes;
   state.arpTop=x.arpTop!==false;
+  state.repeatTurn=!!x.repeatTurn;
+  state.bothWays=!!x.bothWays;
   state.seqCustom=Array.isArray(x.seqCustom)
     ? x.seqCustom.filter(v=>Number.isInteger(v)&&v>=0&&v<24).slice(0,16) : [];
   set('freeRoot',oneOf(x.freeRoot,NOTES));
@@ -7159,6 +7424,7 @@ function applyExercise(x){
      wants it under the note, and a groove at 40 wants it up. The room's own
      volume stays out — that is where you are, not what you are practising. */
   set('clickVol',num(x.clickVol,0,1));
+  set('clickSound',oneOf(x.clickSound,CLICK_VOICES));
   set('sig',num(x.sig,1,16));
   set('noteLen',oneOf(x.noteLen,['sub','beat','bar']));
   set('subdiv',oneOf(x.subdiv,SUBDIVS.map(d=>d.k)));
@@ -8042,6 +8308,10 @@ function updateSupersededControls(){
     hint.textContent=styled?tr('beats.styled','the style plays the accents')
                            :tr('tap-a-beat-accent-it','tap a beat: accent it, then silence it');
   }
+  /* Whether the rotation has anything to alternate changes with the study
+     list, and the list is edited from a panel of its own — so the question is
+     asked again here, where every panel's visibility is decided. */
+  buildBothWaysRow();
   // and in Metro the pulses take the place the bar has just left
   splitMetro(state.mode!=='tuner');
   /* Which panels are on the screen has just been decided, and the marks sit on
