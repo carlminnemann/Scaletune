@@ -680,5 +680,6 @@
  "h.x.clicksound": "<em>Madera</em> es el clic suave y sigue siendo el de partida. <em>Digital</em> es el mismo pulso con un filo duro, para tocar sobre algo fuerte.",
  "h.x.panelclear": "El del pie de un panel repone solo ese panel y deja lo demás como está. Dos toques, como todo lo que aquí quita algo.",
  "aria.back": "Volver a los modos",
- "aria.settings": "Ajustes"
+ "aria.settings": "Ajustes",
+ "aria.folder": "Ejercicios guardados"
 }

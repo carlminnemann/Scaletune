@@ -665,5 +665,6 @@
  "h.x.clicksound": "<em>木质</em>是柔和的节拍声，仍是起点。<em>电子</em>是同一拍加上硬边缘，用来盖过响亮的乐器。",
  "h.x.panelclear": "面板底部的那个只还原该面板，其他都不动。要点两次，和这里所有会拿走东西的按钮一样。",
  "aria.back": "返回模式",
- "aria.settings": "设置"
+ "aria.settings": "设置",
+ "aria.folder": "已保存的练习"
 }

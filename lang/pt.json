@@ -680,5 +680,6 @@
  "h.x.clicksound": "<em>Madeira</em> é o click suave e continua a ser o de partida. <em>Digital</em> é o mesmo tempo com um bordo duro, para tocar por cima de algo alto.",
  "h.x.panelclear": "O que está no fim de um painel repõe só esse painel e deixa o resto onde está. Dois toques, como tudo aqui que tira alguma coisa.",
  "aria.back": "Voltar aos modos",
- "aria.settings": "Definições"
+ "aria.settings": "Definições",
+ "aria.folder": "Exercícios gravados"
 }

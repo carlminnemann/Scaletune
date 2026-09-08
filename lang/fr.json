@@ -680,5 +680,6 @@
  "h.x.clicksound": "<em>Bois</em> est le clic doux et reste celui de départ. <em>Numérique</em> est le même temps avec une arête dure, pour jouer par-dessus quelque chose de fort.",
  "h.x.panelclear": "Celui au bas d'un panneau remet ce panneau seul et laisse le reste en place. Deux touches, comme tout ce qui enlève quelque chose ici.",
  "aria.back": "Retour aux modes",
- "aria.settings": "Réglages"
+ "aria.settings": "Réglages",
+ "aria.folder": "Exercices enregistrés"
 }

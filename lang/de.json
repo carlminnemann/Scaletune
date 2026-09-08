@@ -680,5 +680,6 @@
  "h.x.clicksound": "<em>Holz</em> ist der weiche Klick und bleibt der Anfang. <em>Digital</em> ist derselbe Schlag mit harter Kante, zum Spielen über etwas Lautem.",
  "h.x.panelclear": "Der am Fuß eines Feldes setzt nur dieses Feld zurück und lässt alles andere stehen. Zwei Tipps, wie alles hier, was etwas wegnimmt.",
  "aria.back": "Zurück zu den Modi",
- "aria.settings": "Einstellungen"
+ "aria.settings": "Einstellungen",
+ "aria.folder": "Gespeicherte Übungen"
 }

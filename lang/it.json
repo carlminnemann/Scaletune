@@ -680,5 +680,6 @@
  "h.x.clicksound": "<em>Legno</em> è il click morbido e resta quello di partenza. <em>Digitale</em> è lo stesso battito con un bordo duro, per suonarci sopra qualcosa di forte.",
  "h.x.panelclear": "Quello in fondo a un pannello rimette a posto solo quel pannello e lascia stare il resto. Due tocchi, come tutto ciò che qui toglie qualcosa.",
  "aria.back": "Torna ai modi",
- "aria.settings": "Impostazioni"
+ "aria.settings": "Impostazioni",
+ "aria.folder": "Esercizi salvati"
 }

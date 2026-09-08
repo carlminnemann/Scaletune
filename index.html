@@ -271,7 +271,7 @@ body.home .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
 /* The settings are read-once choices — the language, the theme, what the notes
    are called — so on this screen they sit quietly at the foot rather than in
    the corner beside the name. */
-.home-foot{flex:0 0 auto;display:flex;justify-content:center;padding-bottom:clamp(6px,2vh,18px)}
+.home-foot{flex:0 0 auto;display:flex;justify-content:flex-end;padding:0 2px clamp(6px,2vh,18px)}
 body:not(.home) .home-foot{display:none}
 /* And in a mode, the name of the mode is the way back to the six. The row it
    sits in is there so the guide's ? can stand beside it rather than inside a
@@ -295,6 +295,34 @@ body:not(.home) .mode-row{display:none}
   .home-foot{padding-bottom:3px}
   .home-foot .theme-btn{width:26px;height:26px;font-size:12px}
 }
+/* The undo was a thin glyph in the app's quietest grey, and he could not read
+   it. It is the one control in the header that undoes work, so it is written in
+   the text colour at the size of a control rather than of a caption. */
+#undo-btn{font-size:19px;color:var(--text);font-weight:600}
+#folder-btn svg{width:19px;height:16px;fill:none;stroke:currentColor;
+  stroke-width:1.5;stroke-linejoin:round}
+/* Nothing saved and nothing to save it in: still there, so the header does not
+   shuffle about, but plainly offering nothing — the same way the undo says it. */
+#folder-btn.empty{opacity:.45}
+/* ---------- the drawer, on its own screen ----------
+   Opening it is going somewhere, not unfolding a panel: the mode's settings go
+   away, the drawer takes the screen, and the bar at the top says where you are
+   and takes you back. */
+body.pasta .scroll>*:not(#sec-exercises){display:none}
+body.pasta #sec-exercises{border:0;background:none;margin:0;overflow:visible}
+body.pasta #sec-exercises>summary{display:none}
+body.pasta #sec-exercises .sec-body{padding:0}
+body.pasta .btn-row,body.pasta .current-note,body.pasta .current-freq{display:none}
+/* On a screen of its own the drawer can be read at arm's length, like the six:
+   the rows and the two things you can do in it take the size they deserve. */
+body.pasta .ex-list{gap:9px;margin-bottom:var(--s5)}
+body.pasta .ex-row .pick-btn{min-height:50px;font-size:15px;border-radius:12px}
+body.pasta .ex-row .pick-btn.ex-del,body.pasta .ex-row .pick-btn.ex-move{flex:0 0 44px;width:44px;min-width:44px}
+body.pasta .ex-name{height:48px;font-size:15px;border-radius:12px}
+body.pasta .ex-new{gap:9px}
+body.pasta .ex-new .pick-btn{min-height:48px;font-size:15px;border-radius:12px;padding:0 18px}
+body.pasta #undo-btn{visibility:visible}
+body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .mode-bar{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0 0 var(--s3)}
 .mode-back{display:flex;align-items:center;gap:7px;width:auto;
   margin:0;padding:4px 2px;border:0;background:none;cursor:pointer;
@@ -306,17 +334,22 @@ body:not(.home) .mode-row{display:none}
 
 /* Collapsible sections, built on <details> so the browser handles the state
    and keyboard behaviour; the open/closed choice is remembered per section. */
-details.sec{border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);
-  margin-bottom:var(--s2);overflow:hidden}
+/* Inside a mode the panels answer to the same idea as the six modes do: a short
+   column of things to choose, each big enough to hit without looking, with room
+   between them. A closed panel is a row and not a caption — the title in the
+   size the mode buttons use, and what the panel holds written under it. */
+details.sec{border:1px solid var(--border2);border-radius:13px;background:var(--bg2);
+  margin-bottom:var(--s3);overflow:hidden}
 /* A header that opens something should not look like the panel it opens: the
    summaries carry a tint of their own, so the chevron is not the only sign that
    there is anything behind them. */
-details.sec>summary{list-style:none;cursor:pointer;padding:0.62rem 0.85rem;display:flex;align-items:center;gap:8px;
+details.sec>summary{list-style:none;cursor:pointer;padding:0.8rem 0.95rem;display:flex;
+  align-items:center;flex-wrap:wrap;gap:2px 9px;min-height:54px;
   background:var(--bg3);
-  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);
+  font-size:15px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text2);
   touch-action:manipulation;user-select:none;-webkit-user-select:none}
 details.sec>summary::-webkit-details-marker{display:none}
-details.sec>summary::after{content:'';margin-left:auto;width:7px;height:7px;flex:0 0 auto;
+details.sec>summary::after{content:'';margin-left:auto;order:2;width:8px;height:8px;flex:0 0 auto;
   border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);
   transform:rotate(45deg) translate(-2px,-2px);transition:transform 0.15s}
 details.sec[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
@@ -507,9 +540,12 @@ details.sec .sec-body{padding:1rem}
    here hid exactly the part that changes — "4 tempos por compasso · semínimas"
    ends where it matters — and a line that is one word too long for the screen
    is a fact about the language, not a reason to stop showing it. */
-details.sec .sec-sum{margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0;
-  color:var(--text3);font-style:italic;font-size:11px;
-  min-width:0;flex:1 1 auto;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+/* Under the title, on a line of its own: at the size the title now is, the two
+   side by side filled the row and the reading was what got squeezed. */
+details.sec .sec-sum{margin-left:0;font-weight:400;text-transform:none;letter-spacing:0;
+  color:var(--text3);font-style:italic;font-size:12px;
+  flex:0 0 100%;order:3;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+details.sec .sec-sum:empty{display:none}
 details.sec[open] .sec-sum{display:none}
 .group-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
 /* only the label that opens a panel loses its top margin — one inside a wrapper
@@ -1118,7 +1154,15 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 <div class="header">
   <span class="head-btns">
     <button class="theme-btn" id="undo-btn" type="button" onclick="desfazer()"
-            data-ta="aria.undo" aria-label="Undo the last thing you did">↶</button>
+            data-ta="aria.undo" aria-label="Undo the last thing you did">↺</button>
+    <!-- Where the saved exercises live. A drawer is not a setting of the mode,
+         so it stopped being a panel among the panels and became a place you go. -->
+    <button class="theme-btn" id="folder-btn" type="button" onclick="abrePasta()"
+            data-ta="aria.folder" aria-label="Saved exercises">
+      <svg viewBox="0 0 22 18" aria-hidden="true" focusable="false">
+        <path d="M2 3.6h6.2l1.7 2.2h10.1v9.6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4.6a1 1 0 0 1 1-1z"/>
+      </svg>
+    </button>
   </span>
   <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
   <span class="head-btns">
@@ -1234,7 +1278,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <span>several notes sound together</span>
   </div>
   <div class="note-grid free-grid" id="drone-grid"></div>
-  <button class="clear-btn" onclick="clearDrone()" style="margin-bottom:1.25rem" data-t="clear">✕ Clear</button>
+  <button class="clear-btn" id="drone-clear" onclick="clearDrone()" style="margin-bottom:1.25rem" data-t="clear">✕ Clear</button>
 </div>
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
@@ -1290,7 +1334,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       </div>
 
       <div class="info-line" id="pitch-info"></div>
-      <button class="clear-btn" onclick="clearPitch()" data-t="clear-2">✕ Clear</button>
+      <button class="clear-btn" id="pitch-clear" onclick="clearPitch()" data-t="clear-2">✕ Clear</button>
     </div>
   </details>
 
@@ -1335,7 +1379,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
         <span>+/− — octave</span>
       </div>
       <div class="note-grid free-grid" id="free-grid" style="margin-bottom:0"></div>
-      <button class="clear-btn" onclick="clearFree()" data-t="clear-3">✕ Clear</button>
+      <button class="clear-btn" id="free-clear" onclick="clearFree()" data-t="clear-3">✕ Clear</button>
     </div>
   </details>
   <details class="sec" id="sec-freerange">
@@ -1445,7 +1489,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
     <!-- where every other Clear in the app sits: under its panel, on the left -->
-    <button class="clear-btn" onclick="clearAccents()" data-t="clear-4">✕ Clear</button>
+    <button class="clear-btn" id="accents-clear" onclick="clearAccents()" data-t="clear-4">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="groove-block">
@@ -1636,7 +1680,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <span class="btn-wrap seg" id="polynotes-row" data-cols="fixed"></span></div>
     <!-- named, because it is not the only clear in this panel: it puts the two
          rows of pulses back to plain and leaves the numbers alone -->
-    <button class="clear-btn" onclick="clearPolyAccents()" data-t="clear.accents">✕ Clear accents</button>
+    <button class="clear-btn" id="polyacc-clear" onclick="clearPolyAccents()" data-t="clear.accents">✕ Clear accents</button>
   </div>
     <button class="clear-btn panel-clear" data-panel="poly" onclick="limpaPainel('poly')">✕ Clear</button>
   </div>
@@ -4475,7 +4519,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09a';
+const APP_VERSION='2026-09-09b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4532,13 +4576,26 @@ function modeLabel(m){
 }
 function pintaCasa(){
   document.body.classList.toggle('home',emCasa);
+  document.body.classList.toggle('pasta',pastaAberta&&!emCasa);
   const n=document.getElementById('mode-back-name');
-  if(n)n.textContent=modeLabel(state.mode);
+  /* The bar says where you are, and the arrow leaves it: in the drawer that is
+     the drawer, and leaving it puts you back in the mode. */
+  if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises'):modeLabel(state.mode);
+  const sec=document.getElementById('sec-exercises');
+  if(sec)sec.style.display=(pastaAberta&&state.mode!=='tuner')?'':'none';
+  const f=document.getElementById('folder-btn');
+  if(f){
+    // the tuner has no setup worth saving, so it has no drawer
+    f.style.display=(state.mode==='tuner')?'none':'';
+    f.classList.toggle('empty',exercisesDoModo().length===0&&pastasDoModo().length===0);
+  }
   paintHelpMarks();      // the marks hang on panels, and the panels just moved
+  refreshSectionSummaries();
   spreadPanelsSoon();
 }
 function entraModo(m){
   emCasa=false;
+  pastaAberta=false;
   setMode(m);
   const sc=document.getElementById('scroll-area');
   if(sc)sc.scrollTop=0;
@@ -4547,9 +4604,34 @@ function entraModo(m){
 /* Leaving a mode stops what it was playing. Start belongs to the mode, so a
    drone left running would be a sound with nothing on the screen to stop it. */
 function voltaHome(){
+  if(pastaAberta){fechaPasta();return;}
   if(state.playing)togglePlay();
   stopTuner();
   emCasa=true;
+  pintaCasa();
+}
+
+/* ---------- the drawer ----------
+   The saved exercises stopped being a panel among the panels: a drawer is not
+   a setting of the mode, it is where a session begins and ends. The folder in
+   the header takes you there, the whole screen is the drawer, and the bar at
+   the top brings you back to the mode you were in. */
+let pastaAberta=false;
+function abrePasta(){
+  if(emCasa)return;
+  if(state.playing)togglePlay();
+  pastaAberta=true;
+  const sec=document.getElementById('sec-exercises');
+  if(sec){sec.style.display='';sec.open=true;}
+  buildExercises();
+  pintaCasa();
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+}
+function fechaPasta(){
+  pastaAberta=false;
+  const sec=document.getElementById('sec-exercises');
+  if(sec)sec.open=false;
   pintaCasa();
 }
 
@@ -4580,7 +4662,9 @@ function setMode(m){
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('tuner-section').style.display=isTuner?'':'none';
   // the tuner has no setup to save, and nothing saved would mean anything in it
-  document.getElementById('sec-exercises').style.display=isTuner?'none':'';
+  // the drawer is a place you go to, not a panel in the mode: pintaCasa decides
+  document.getElementById('sec-exercises').style.display=
+    (isTuner||!pastaAberta)?'none':'';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   if(isDrone)setTimeout(fitNoteGrids,0);
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
@@ -5433,6 +5517,54 @@ function resetLabel(){
   b.textContent=armado?tr('reset.sure','✕ Tap again to clear this mode')
                       :tr('reset.all','✕ Clear this mode');
   b.classList.toggle('armed',!!armado);
+  b.style.display=(armado||modoMexido())?'':'none';
+}
+/* Whether this mode still stands where the app opened it. The whole bundle is
+   compared rather than a list of fields, because Clear this mode puts the whole
+   bundle back — and what only Metro and the Tuner have lives outside it. */
+function modoMexido(){
+  if(!METRO_FRESH)return false;
+  try{
+    if(!igual(metroSnapshot(),METRO_FRESH))return true;
+    if(state.mode==='metro'&&METRO_FRESH_G){
+      if(SO_DO_METRO.some(k=>!igual(state[k],METRO_FRESH_G[k])))return true;
+      if(!igual(state.mix,METRO_FRESH_G.mix))return true;
+      if(!igual(state.custom,METRO_FRESH_G.custom))return true;
+    }
+    if(state.mode==='tuner'&&TUNER_FRESH&&
+       SO_DO_TUNER.some(k=>!igual(state[k],TUNER_FRESH[k])))return true;
+    /* The shared study list is not in the bundle while the two panels are
+       grouped, and clearing the mode empties it — so it has to count. */
+    if(listLinked()&&(state.mode==='scale'||state.mode==='arpeggio')&&
+       (listaComum.length||usoComum))return true;
+  }catch(e){return true;}
+  return false;
+}
+/* The clears that empty something rather than put a panel back: they appear
+   when there is something in them to empty. Same rule as the panel clears, and
+   the same reason — a screen full of buttons that would do nothing reads as a
+   screen full of work waiting to be undone. */
+function pintaClears(){
+  const mostra=(id,cond)=>{
+    const b=document.getElementById(id);
+    if(b)b.style.display=(cond||b.classList.contains('armed'))?'':'none';
+  };
+  const acentosMexidos=(state.accents||[]).some((a,i)=>a!==defaultAccent(i));
+  const polyMexidos=(state.poly.accA||[]).some(a=>a!=='high')||
+                    (state.poly.accB||[]).some(a=>a!=='high');
+  const mixMexido=MIX_VOICES.some(([k])=>Math.abs((state.mix[k]||1)-1)>0.01);
+  mostra('drone-clear',Object.keys(state.droneSelected||{}).length>0);
+  mostra('pitch-clear',!!(state.scaleName||state.chordName)||activeList().length>0);
+  mostra('free-clear',Object.keys(state.freeSelected||{}).length>0);
+  mostra('seqcustom-clear',(state.seqCustom||[]).length>0);
+  /* Under a written style the accents are the pattern's, so the row is locked
+     and its clear would promise something it cannot do. */
+  mostra('accents-clear',acentosMexidos&&!(!state.poly.on&&grooveOn()));
+  mostra('polyacc-clear',polyMexidos);
+  mostra('mix-reset',mixMexido);
+  mostra('pat-clear',patHits().length>0);
+  panelLabels();
+  resetLabel();
 }
 function resetMode(){
   if(!(resetArmado&&Date.now()<resetArmado)){
@@ -5485,52 +5617,73 @@ function metroTake(mode){
    here and a mode cleared there agree about what "how it opens" means. A panel
    that grows a control grows its list here; a field in no list is in no clear,
    which is the same bargain EX_KEYS makes for saved exercises. */
-const PANEL_CLEARS={
-  range:F=>['span','spanWanted','rootOct','rootOctWanted','startDeg','direction',
-            'arpTop','repeatTurn','bothWays'].forEach(k=>state[k]=F[k]),
-  freerange:F=>['freeSpan','freeSpanWanted','freeDirection','repeatTurn']
-            .forEach(k=>state[k]=F[k]),
-  progress:F=>{
-    state.seqPattern=F.seqPattern;
-    state.seqCustom=(F.seqCustom||[]).slice();
-    ['rootMove','repeat','modesTour'].forEach(k=>state.practice[k]=F.p[k]);
-  },
-  phrasing:F=>['noteLen','alignPasses'].forEach(k=>state[k]=F[k]),
-  tempo:F=>['bpm','clickVol','clickSound'].forEach(k=>state[k]=F[k]),
-  count:F=>['countBars','countWhen'].forEach(k=>state[k]=F[k]),
-  speed:F=>['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom']
-            .forEach(k=>state.practice[k]=F.p[k]),
-  gap:F=>['gapMode','gapMinutes','gapKeepOne'].forEach(k=>state.practice[k]=F.p[k]),
-  subdiv:F=>{
-    state.subdiv=F.subdiv;state.clickFollowsFigure=F.clickFollowsFigure;
-    state.practice.useSubdivList=F.p.useSubdivList;
-    state.practice.subdivDir=F.p.subdivDir;
-    state.practice.subdivList=(F.p.subdivList||[]).slice();
-    subdivIdx=0;
-  },
-  poly:F=>{state.poly=clonar(F.poly);state.polyVol=F.polyVol;},
+/* Each panel is a list of the fields it owns: which part of the state comes
+   back when it is cleared, and — the same list read the other way — whether
+   anything in it has been touched at all. One list, two questions, so a clear
+   cannot put back a field its button never offered to. */
+const PANEL_FIELDS={
+  range:{s:['span','spanWanted','rootOct','rootOctWanted','startDeg','direction',
+            'arpTop','repeatTurn','bothWays']},
+  freerange:{s:['freeSpan','freeSpanWanted','freeDirection','repeatTurn']},
+  progress:{s:['seqPattern'],arr:['seqCustom'],p:['rootMove','repeat','modesTour']},
+  phrasing:{s:['noteLen','alignPasses']},
+  tempo:{s:['bpm','clickVol','clickSound']},
+  count:{s:['countBars','countWhen']},
+  speed:{p:['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom']},
+  gap:{p:['gapMode','gapMinutes','gapKeepOne']},
+  subdiv:{s:['subdiv','clickFollowsFigure'],p:['useSubdivList','subdivDir'],arrP:['subdivList']},
+  poly:{s:['polyVol'],obj:['poly']},
+  /* Metro's own, which live in the other fresh bundle: the accompaniment
+     exists in one mode, so clearing that mode has to clear it too. */
+  accomp:{g:['kit','density','balladHat','groove']},
+};
+const igual=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+/* Has anything in this panel been moved from where the app opens it? */
+function painelMexido(id){
+  const F=PANEL_FIELDS[id],fresh=METRO_FRESH;
+  if(!F||!fresh)return false;
+  if(F.s&&F.s.some(k=>!igual(state[k],fresh[k])))return true;
+  if(F.p&&F.p.some(k=>!igual(state.practice[k],fresh.p[k])))return true;
+  if(F.arr&&F.arr.some(k=>!igual(state[k]||[],fresh[k]||[])))return true;
+  if(F.arrP&&F.arrP.some(k=>!igual(state.practice[k]||[],fresh.p[k]||[])))return true;
+  if(F.obj&&F.obj.some(k=>!igual(state[k],fresh[k])))return true;
+  if(F.g&&METRO_FRESH_G&&F.g.some(k=>!igual(state[k],METRO_FRESH_G[k])))return true;
+  return false;
+}
+function limpaCampos(id){
+  const F=PANEL_FIELDS[id],fresh=METRO_FRESH;
+  if(!F||!fresh)return;
+  if(F.s)F.s.forEach(k=>state[k]=fresh[k]);
+  if(F.p)F.p.forEach(k=>state.practice[k]=fresh.p[k]);
+  if(F.arr)F.arr.forEach(k=>state[k]=(fresh[k]||[]).slice());
+  if(F.arrP)F.arrP.forEach(k=>state.practice[k]=(fresh.p[k]||[]).slice());
+  if(F.obj)F.obj.forEach(k=>state[k]=clonar(fresh[k]));
   /* The accompaniment goes back through setGroove rather than by assignment:
      a written style holds the bar at four and hands it back on the way out,
      and only that function knows what it was before. */
-  accomp:()=>{
-    if(!METRO_FRESH_G)return;
-    ['kit','density','balladHat'].forEach(k=>state[k]=METRO_FRESH_G[k]);
-    setGroove(METRO_FRESH_G.groove);
-  },
-};
+  if(F.g&&METRO_FRESH_G){
+    F.g.filter(k=>k!=='groove').forEach(k=>state[k]=METRO_FRESH_G[k]);
+    if(F.g.indexOf('groove')>=0)setGroove(METRO_FRESH_G.groove);
+  }
+  if(id==='subdiv')subdivIdx=0;
+}
 /* Which panel is waiting for its second tap, and when that offer runs out. One
    at a time: arming a second button disarms the first, because two buttons
    both saying "tap again" is a question about which one. */
 let panelArmado='',panelAte=0,panelRelogio=0;
 function panelLabel(b){
-  const armado=b.dataset.panel===panelArmado&&Date.now()<panelAte;
-  b.textContent=armado?tr('clear.sure','✕ Tap again'):tr('clear','✕ Clear');
+  const id=b.dataset.panel;
+  const armado=id===panelArmado&&Date.now()<panelAte;
+  b.textContent=armado?tr('clear.sure','\u2715 Tap again'):tr('clear','\u2715 Clear');
   b.classList.toggle('armed',armado);
+  /* A clear for something nobody has touched is a button that does nothing,
+     and eleven of them are what makes a screen look busy before any work has
+     been done on it. It appears when there is something to undo. */
+  b.style.display=(armado||painelMexido(id))?'':'none';
 }
 function panelLabels(){document.querySelectorAll('.panel-clear').forEach(panelLabel);}
 function limpaPainel(id){
-  const fn=PANEL_CLEARS[id];
-  if(!fn)return;
+  if(!PANEL_FIELDS[id])return;
   if(panelArmado!==id||Date.now()>=panelAte){
     panelArmado=id;panelAte=Date.now()+4000;
     panelLabels();
@@ -5539,7 +5692,7 @@ function limpaPainel(id){
     return;
   }
   panelArmado='';clearTimeout(panelRelogio);
-  fn(METRO_FRESH||metroSnapshot());
+  limpaCampos(id);
   metroKeep(state.mode);
   /* The same tail Clear this mode runs. A panel clear touches fewer fields, not
      fewer screens: the summary on a closed fold, the rotation preview and the
@@ -8435,9 +8588,8 @@ function updateSupersededControls(){
   const hint=document.querySelector('#sig-block .beats-hint');
   const polyHint=document.querySelector('#poly-controls .beats-hint');
   if(polyHint)polyHint.style.display='';
-  const clear=document.querySelector('#sig-block .clear-btn');
+
   if(beats){beats.style.display=on?'none':'';beats.classList.toggle('locked',styled);}
-  if(clear)clear.style.display=styled?'none':'';
   if(hint){
     hint.style.display=on?'none':'';
     /* The hint is written in the markup and also written here, so both have to
@@ -8630,6 +8782,9 @@ function refreshSectionSummaries(){
     const el=document.getElementById(s.sum);
     if(el)try{el.textContent='· '+s.text();}catch(e){el.textContent='';}
   });
+  /* Whatever changed a summary can have changed whether a clear has anything
+     to do, so the two are answered in the same breath. */
+  pintaClears();
 }
 
 /* How many columns a row of choices gets. Up to five items keep one row each,
