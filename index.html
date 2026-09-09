@@ -279,8 +279,13 @@ body.home #mode-row .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
 .home-foot{flex:0 0 auto;display:flex;justify-content:center;
   padding:0 0 clamp(6px,2vh,18px);width:min(88%,360px);margin:0 auto}
 .home-foot .theme-btn{width:100%;height:auto;min-height:clamp(34px,5.5vh,46px);
-  border-radius:13px;background:transparent;border-color:var(--border);
-  color:var(--text3);font-size:17px}
+  border-radius:13px;background:transparent;border-color:var(--border2);
+  color:var(--text);font-size:17px}
+/* Drawn, not typed: the ⚙ character renders as a blue emoji on some systems,
+   and an icon whose colour the platform chooses cannot follow the theme. This
+   one is written in the text colour — white on the dark, black on the light. */
+#home-settings svg{width:19px;height:19px;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linejoin:round;pointer-events:none}
 body:not(.home) .home-foot{display:none}
 /* And in a mode, the name of the mode is the way back to the six. The row it
    sits in is there so the guide's ? can stand beside it rather than inside a
@@ -290,7 +295,9 @@ body:not(.home) #mode-row{display:none}
 /* The settings are the home screen's. Inside a mode they are one tap away —
    the name of the mode at the top — and up there they were a third icon
    competing with the two that do belong to a mode. */
-body:not(.home) #settings-btn{display:none}
+/* The settings are the home screen's: inside a mode they are one tap away —
+   the name of the mode at the top — and up there they were a third icon
+   competing with the two that do belong to a mode. */
 /* Under 520px tall the app gives up its fixed frame and scrolls as a page —
    that is the right answer for a mode, where there is more than a screenful.
    The home screen is exactly one screenful by construction, so there it keeps
@@ -307,6 +314,7 @@ body:not(.home) #settings-btn{display:none}
   body.home #mode-row .mode-btn{min-height:32px;font-size:13px;border-radius:10px}
   .home-foot{padding-bottom:3px}
   .home-foot .theme-btn{min-height:26px;font-size:13px;border-radius:10px}
+  #home-settings svg{width:15px;height:15px}
 }
 /* The undo was a thin glyph in the app's quietest grey, and he could not read
    it. It is the one control in the header that undoes work, so it is written in
@@ -1183,7 +1191,6 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <span class="head-btns">
     <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
             data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
-    <button class="theme-btn" id="settings-btn" onclick="openSettings()" aria-label="Settings">⚙</button>
   </span>
 </div>
 
@@ -1207,7 +1214,12 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 
 <div class="home-foot" id="home-foot">
   <button class="theme-btn" id="home-settings" type="button" onclick="openSettings()"
-          data-ta="aria.settings" aria-label="Settings">⚙</button>
+          data-ta="aria.settings" aria-label="Settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="3.1"/>
+      <path d="M19.3 12c0-.5-.05-.98-.14-1.44l2-1.48-2-3.46-2.33.89a7.5 7.5 0 0 0-2.5-1.45L14.05 2.7h-4l-.28 2.36a7.5 7.5 0 0 0-2.5 1.45l-2.33-.89-2 3.46 2 1.48a7.6 7.6 0 0 0 0 2.88l-2 1.48 2 3.46 2.33-.89c.73.63 1.58 1.12 2.5 1.45l.28 2.36h4l.28-2.36a7.5 7.5 0 0 0 2.5-1.45l2.33.89 2-3.46-2-1.48c.09-.46.14-.94.14-1.44z"/>
+    </svg>
+  </button>
 </div>
 
 <!-- Everything that scrolls lives in here. The name, the two head buttons, the
@@ -4534,7 +4546,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09d';
+const APP_VERSION='2026-09-09e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
