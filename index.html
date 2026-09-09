@@ -4613,7 +4613,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09m';
+const APP_VERSION='2026-09-09n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7693,10 +7693,22 @@ function bringRevealed(){
      origin: chasing it drags the view to the top, which is what it did. */
   if(!el.getClientRects().length)return;
   const r=el.getBoundingClientRect(),v=sc.getBoundingClientRect();
-  if(r.top>=v.top-1&&r.bottom<=v.bottom+1)return;        // all of it is already there
+  /* What is actually on the screen, not what is laid out: on a phone the
+     browser's own bar sits over the foot of the page, so a panel can measure as
+     inside the scrolling area and still be half under the toolbar. */
+  const janela=window.visualViewport?window.visualViewport.height:window.innerHeight;
+  const fundo=Math.min(v.bottom,janela);
+  const alto=Math.max(80,fundo-v.top);
+  /* Opened, a panel goes to the middle of what can be seen — not merely inside
+     it. "Inside" left a panel sitting low on the screen whenever it happened to
+     open there, which reads as having to hunt for it; the middle is the same
+     place every time. A panel taller than the window cannot be centred, so it
+     goes to the top and continues below, which is the only sensible answer. */
+  const folga=alto-r.height;
+  const desvio=folga>0?(r.top-v.top)-folga/2:(r.top-v.top)-8;
   const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const top=Math.max(0,sc.scrollTop+(r.top-v.top)-8);
-  if(Math.abs(top-sc.scrollTop)<1)return;
+  const top=Math.max(0,sc.scrollTop+desvio);
+  if(Math.abs(top-sc.scrollTop)<12)return;   // already where it wants to be
   if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
   else sc.scrollTop=top;
 }
