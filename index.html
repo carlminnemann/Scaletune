@@ -4613,7 +4613,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09n';
+const APP_VERSION='2026-09-09o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7692,6 +7692,9 @@ function bringRevealed(){
      screen, and an element that is not laid out measures as a zero box at the
      origin: chasing it drags the view to the top, which is what it did. */
   if(!el.getClientRects().length)return;
+  /* Measured without whatever room the last reveal borrowed, or the borrowing
+     compounds. */
+  sc.style.paddingBottom='';
   const r=el.getBoundingClientRect(),v=sc.getBoundingClientRect();
   /* What is actually on the screen, not what is laid out: on a phone the
      browser's own bar sits over the foot of the page, so a panel can measure as
@@ -7708,9 +7711,33 @@ function bringRevealed(){
   const desvio=folga>0?(r.top-v.top)-folga/2:(r.top-v.top)-8;
   const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const top=Math.max(0,sc.scrollTop+desvio);
-  if(Math.abs(top-sc.scrollTop)<12)return;   // already where it wants to be
-  if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
-  else sc.scrollTop=top;
+  /* The panels at the foot of the list could not reach the middle: there is
+     nothing under them to scroll up into view, so the list stopped short and
+     they stayed low on the screen — which is where he was having to go looking
+     for them. The list is given exactly the room it is missing, no more, and it
+     is given back the moment a panel that does not need it is opened. */
+  const podeRolar=Math.max(0,sc.scrollHeight-sc.clientHeight);
+  if(top>podeRolar)sc.style.paddingBottom=(top-podeRolar)+'px';
+  if(Math.abs(top-sc.scrollTop)>=1){
+    if(sc.scrollTo)sc.scrollTo({top,behavior:smooth?'smooth':'auto'});
+    else sc.scrollTop=top;
+  }
+  /* And where the app has given up its frame — a short screen, where the page
+     itself is what scrolls — the list does not scroll at all and none of the
+     above moves anything. Whatever is left over is asked of the page. */
+  requestAnimationFrame(()=>{
+    if(revealFor!==el)return;
+    const rr=el.getBoundingClientRect();
+    const jan=window.visualViewport?window.visualViewport.height:window.innerHeight;
+    const sobra=jan-rr.height;
+    const querTop=sobra>0?sobra/2:8;
+    const delta=rr.top-querTop;
+    const doc=document.scrollingElement||document.documentElement;
+    if(Math.abs(delta)<12)return;
+    if(doc.scrollHeight<=jan+2)return;                 // the page cannot scroll
+    if(window.scrollBy)window.scrollBy({top:delta,behavior:smooth?'smooth':'auto'});
+    else doc.scrollTop+=delta;
+  });
 }
 
 /* Three groups fold inside the metronome — the pattern, the mixer and the
