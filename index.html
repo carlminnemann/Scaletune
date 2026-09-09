@@ -1506,13 +1506,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <!-- The bar length rides the label line, where every other group keeps its
          controls. Tap tempo sits against the number instead: it is a way of
          setting that number, so it belongs beside it and not up in the title. -->
-    <!-- The polyrhythm, one tap from the tempo it is set against. It lived in
-         More, which is where you look for something you already know is there;
-         this is how you find out it exists. On, everything works as it always
-         has — the block itself comes forward with its two numbers. -->
-    <div class="head"><span class="section-label" data-t="tempo">Tempo</span>
-      <button class="poly-switch" id="poly-switch" type="button" onclick="togglePoly()"
-              data-t="poly.short">Poly</button></div>
+    <div class="head"><span class="section-label" data-t="tempo">Tempo</span></div>
     <!-- Three across: the number you read, the button you hit, the bar length.
          The three are different kinds of thing and were sharing two lines. -->
     <div class="tempo-3">
@@ -1547,7 +1541,14 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   </div>
 
   <div class="mgroup" id="sig-block">
-    <div class="head" style="margin-bottom:var(--s2)" data-t="bar"><span class="section-label">Bar</span></div>
+    <!-- The polyrhythm sits with the bar it replaces: two pulses instead of
+         four beats is the same question the circles below it answer. Its own
+         panel appears when this is on, and is not there at all when it is off.
+         The label carries the key now — it was on the head, and translating a
+         head replaces everything inside it, this button included. -->
+    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label" data-t="bar">Bar</span>
+      <button class="poly-switch" id="poly-switch" type="button" onclick="togglePoly()"
+              data-t="poly.short">Poly</button></div>
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
     <!-- where every other Clear in the app sits: under its panel, on the left -->
@@ -2552,7 +2553,7 @@ let metroWasOpen=false;   // how the metronome panel stood before Metro pinned i
 /* The order the More panel is filled in. The mixer comes last, after the
    pattern: it balances whatever is playing, so it is the thing you reach for
    once the pattern is written rather than before. */
-const METRO_MORE=['count-block','gap-block','speed-block','subdiv-block','pass-block','poly-block',
+const METRO_MORE=['count-block','gap-block','speed-block','subdiv-block','pass-block',
                   'groove-block','pattern-block','mixer-block'];
 /* The split runs in every mode, not only Metro: the metronome opens on the
    tempo and the bar, and everything else it can do waits behind one more tap.
@@ -2568,17 +2569,19 @@ function splitMetro(active){
   const body=document.getElementById('metro-more-body');
   if(!more||!main||!body||!sec)return;
   const nest=state.mode!=='metro';
+  /* The polyrhythm is not one of these any more: it is reached by the switch
+     beside the bar, and its panel stands in the metronome itself — visible
+     when it is on, absent when it is off. It used to live in More and come
+     forward when switched on, which meant a panel that moved about on its own. */
   METRO_MORE.forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
-    /* Only a polyrhythm comes forward, because only a polyrhythm replaces the
-       bar: it changes what the pulse IS. A style changes what the pulse sounds
-       like and leaves the four beats where they were, so it stays where it
-       lives — a control that moves about on its own reads as a fault. */
-    const front=id==='poly-block'&&state.poly.on;
-    const host=front?main:body;
-    if(el.parentNode!==host)host.appendChild(el);
+    if(el.parentNode!==body)body.appendChild(el);
   });
+  /* And it belongs where it was written, in the metronome's own body, after
+     whatever More is doing with the rest. */
+  const pb=document.getElementById('poly-block');
+  if(pb&&pb.parentNode!==main)main.appendChild(pb);
   /* Nested, it is a fold inside a panel and has to look like one — and it must
      not answer to details.sec, which is how the layout counts what a card is. */
   more.className=nest?'mfold':'sec';
@@ -4588,7 +4591,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09h';
+const APP_VERSION='2026-09-09i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8679,6 +8682,10 @@ function updateSupersededControls(){
      table of figures that rotates them — change nothing anybody can hear. Only
      where the metronome is the thing playing: in the note modes the figure is
      what the notes are made of. */
+  /* Off, the polyrhythm has nothing to show and the switch beside the bar is
+     the whole of it. On, the panel is there with its two numbers. */
+  const pblock=document.getElementById('poly-block');
+  if(pblock)pblock.style.display=(on&&state.mode!=='tuner')?'':'none';
   const sob=on||(grooveOn()&&pulseOnly());
   const sb=document.getElementById('subdiv-block');
   if(sb)sb.style.display=sob?'none':'';
