@@ -260,13 +260,16 @@ body.home .header{display:block;margin-bottom:clamp(12px,4vh,34px);
 body.home .head-btns{display:none}
 /* Nothing is chosen here yet. The mode the state happens to hold is not a
    choice the player made on this screen, so it does not wear one. */
-body.home .mode-btn.active{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
+body.home #mode-row .mode-btn.active{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
 body.home .scroll,body.home .btn-row,
 body.home .current-note,body.home .current-freq{display:none}
-body.home .mode-row{grid-template-columns:1fr;grid-auto-rows:1fr;
+/* By id, not by class: Single / Study list borrows .mode-row to be shaped like
+   the modes, and hiding the class hid it too — which is how the study list
+   vanished from Scale and Arpeggio. */
+body.home #mode-row{grid-template-columns:1fr;grid-auto-rows:1fr;
   gap:clamp(7px,1.9vh,15px);flex:1 1 auto;min-height:0;
   width:min(88%,360px);margin:0 auto clamp(10px,2.5vh,22px)}
-body.home .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
+body.home #mode-row .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
   font-size:clamp(14px,2.2vh,18px);border-radius:13px;padding:0 10px}
 /* The settings are read-once choices — the language, the theme, what the notes
    are called — so on this screen they sit at the foot rather than in the corner
@@ -283,7 +286,11 @@ body:not(.home) .home-foot{display:none}
    sits in is there so the guide's ? can stand beside it rather than inside a
    button, which is neither valid markup nor clickable. */
 body.home .mode-bar{display:none}
-body:not(.home) .mode-row{display:none}
+body:not(.home) #mode-row{display:none}
+/* The settings are the home screen's. Inside a mode they are one tap away —
+   the name of the mode at the top — and up there they were a third icon
+   competing with the two that do belong to a mode. */
+body:not(.home) #settings-btn{display:none}
 /* Under 520px tall the app gives up its fixed frame and scrolls as a page —
    that is the right answer for a mode, where there is more than a screenful.
    The home screen is exactly one screenful by construction, so there it keeps
@@ -296,8 +303,8 @@ body:not(.home) .mode-row{display:none}
    still fit without the screen scrolling. */
 @media(max-height:430px){
   body.home .header{--wordmark:21px;margin-bottom:7px}
-  body.home .mode-row{gap:5px}
-  body.home .mode-btn{min-height:32px;font-size:13px;border-radius:10px}
+  body.home #mode-row{gap:5px}
+  body.home #mode-row .mode-btn{min-height:32px;font-size:13px;border-radius:10px}
   .home-foot{padding-bottom:3px}
   .home-foot .theme-btn{min-height:26px;font-size:13px;border-radius:10px}
 }
@@ -1180,7 +1187,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   </span>
 </div>
 
-<div class="mode-row">
+<div class="mode-row" id="mode-row">
   <button class="mode-btn active" id="btn-mode-drone" onclick="entraModo('drone')" data-t="drone">Drone</button>
   <button class="mode-btn" id="btn-mode-scale" onclick="entraModo('scale')" data-t="scale">Scale</button>
   <button class="mode-btn" id="btn-mode-arp" onclick="entraModo('arpeggio')" data-t="arpeggio">Arpeggio</button>
@@ -4527,7 +4534,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09c';
+const APP_VERSION='2026-09-09d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
