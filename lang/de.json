@@ -684,5 +684,6 @@
  "aria.folder": "Gespeicherte Übungen",
  "free.top.yes": "Oktave mitnehmen",
  "free.top.no": "Auf der letzten enden",
- "h.r.freetop": "In Frei, ob die Linie ihren ersten Ton eine Oktave höher noch einmal nimmt, bevor sie wendet — C E G, oder C E G C. Eine Tonleiter nimmt immer ihre Oktave; eine Handvoll selbst gewählter Töne ist keine Tonleiter."
+ "h.r.freetop": "In Frei, ob die Linie ihren ersten Ton eine Oktave höher noch einmal nimmt, bevor sie wendet — C E G, oder C E G C. Eine Tonleiter nimmt immer ihre Oktave; eine Handvoll selbst gewählter Töne ist keine Tonleiter.",
+ "poly.short": "Poly"
 }

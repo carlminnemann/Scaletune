@@ -684,5 +684,6 @@
  "aria.folder": "Ejercicios guardados",
  "free.top.yes": "Llevar la octava",
  "free.top.no": "Parar en la última",
- "h.r.freetop": "En Free, si la línea vuelve a tocar la primera nota una octava arriba antes de girar — do mi sol, o do mi sol do. Una escala siempre lleva su octava; un puñado de notas que elegiste no es una escala."
+ "h.r.freetop": "En Free, si la línea vuelve a tocar la primera nota una octava arriba antes de girar — do mi sol, o do mi sol do. Una escala siempre lleva su octava; un puñado de notas que elegiste no es una escala.",
+ "poly.short": "Poli"
 }
