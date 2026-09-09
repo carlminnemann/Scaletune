@@ -681,5 +681,8 @@
  "h.x.panelclear": "Der am Fuß eines Feldes setzt nur dieses Feld zurück und lässt alles andere stehen. Zwei Tipps, wie alles hier, was etwas wegnimmt.",
  "aria.back": "Zurück zu den Modi",
  "aria.settings": "Einstellungen",
- "aria.folder": "Gespeicherte Übungen"
+ "aria.folder": "Gespeicherte Übungen",
+ "free.top.yes": "Oktave mitnehmen",
+ "free.top.no": "Auf der letzten enden",
+ "h.r.freetop": "In Frei, ob die Linie ihren ersten Ton eine Oktave höher noch einmal nimmt, bevor sie wendet — C E G, oder C E G C. Eine Tonleiter nimmt immer ihre Oktave; eine Handvoll selbst gewählter Töne ist keine Tonleiter."
 }

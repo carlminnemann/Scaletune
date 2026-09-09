@@ -681,5 +681,8 @@
  "h.x.panelclear": "O que está no fim de um painel repõe só esse painel e deixa o resto onde está. Dois toques, como tudo aqui que tira alguma coisa.",
  "aria.back": "Voltar aos modos",
  "aria.settings": "Definições",
- "aria.folder": "Exercícios gravados"
+ "aria.folder": "Exercícios gravados",
+ "free.top.yes": "Levar a oitava",
+ "free.top.no": "Parar na última",
+ "h.r.freetop": "No Free, se a linha volta a tocar a primeira nota uma oitava acima antes de dar a volta — dó mi sol, ou dó mi sol dó. Uma escala leva sempre a sua oitava; um punhado de notas que escolheste não é uma escala."
 }

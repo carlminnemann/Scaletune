@@ -1416,6 +1416,9 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
       <div class="btn-wrap" id="free-span-row"></div>
       <div class="group-label" data-t="direction">Direction</div>
       <div class="btn-wrap" id="free-dir-row"></div>
+      <div class="head" id="free-top-line" style="margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="arp.top">Top note</span>
+        <span class="btn-wrap seg" id="free-top-row" data-cols="fixed"></span></div>
       <div class="head" id="free-turn-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
         <span class="group-label" data-t="turn.note">Turning note</span>
         <span class="btn-wrap seg" id="free-turn-row" data-cols="fixed"></span></div>
@@ -1847,6 +1850,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <dt data-t="octaves-3">Octaves</dt><dd data-t="h.r.oct">How far the line reaches.</dd>
     <dt data-t="start-octave-2">Start Octave</dt><dd data-t="where-the-line-begins">Where the line begins.</dd>
     <dt data-t="direction-2">Direction</dt><dd data-t="h.r.dir">Up, down, or up and back down. Where something changes between passes, up and back means the passes take turns instead: this one up, the next one down.</dd>
+    <dt data-t="arp.top">Top note</dt><dd data-t="h.r.freetop">In Free, whether the line takes its first note again an octave up before it turns back — C E G, or C E G C. A scale always takes its octave; a handful of notes you chose is not a scale.</dd>
     <dt data-t="turn.note">Turning note</dt><dd data-t="h.r.turn">A line that goes up and back turns twice: at the top, and at the bottom where the next round begins. <em>Twice</em> sounds both of those notes again, so each turn gets a beat. The first note of all is single — nothing has turned yet — and a run that stops ends on one note.</dd>
     <dt data-t="updown.means">Up-Down means</dt><dd data-t="h.r.updown">Only with something in rotation. <em>Alternate</em> takes one item up and the next one down; <em>Each both ways</em> finishes an item — up and back down — before the rotation moves.</dd>
     <dt data-t="start-on-2">Start On</dt><dd data-t="h.r.start">Which degree of the scale the line starts from. On a chord it is the inversion.</dd>
@@ -2361,6 +2365,12 @@ let state={
   blueNotes:false,           // the added note in the two pentatonics
 
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
+  /* Whether a free set of notes takes its first note again an octave up before
+     it turns back. C E G with it is C E G C; without it the line is the three
+     notes and nothing else. A scale always takes its octave — that is what an
+     octave of a scale is — but a handful of notes you chose is not a scale, and
+     three notes that end on a fourth C were never asked for. */
+  freeTop:true,
   // remembered separately per mode family: Drone can only use a sustaining
   // wave, the sequence modes default to the sampled piano
   timbre:'strings',droneTimbre:'strings',seqTimbre:'piano-real',volume:0.7,
@@ -4018,7 +4028,7 @@ function buildSequence(){
     // start on the chosen root when it is one of the picked notes
     const idx=(state.freeRoot in state.freeSelected)
       ?list.indexOf(semitone(state.freeRoot,state.freeSelected[state.freeRoot])):0;
-    return walk(list,Math.max(0,idx),state.freeSpan,true,state.freeDirection);
+    return walk(list,Math.max(0,idx),state.freeSpan,!!state.freeTop,state.freeDirection);
   }
   const degrees=activeDegrees();
   if(!degrees)return[];
@@ -4546,7 +4556,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09e';
+const APP_VERSION='2026-09-09f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5478,7 +5488,7 @@ const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol','cl
   'root','rootOct','rootOctWanted','scaleGroup','scaleName','chordGroup','chordName',
   'span','spanWanted','direction','startDeg','seqPattern','arpTop','repeatTurn','bothWays',
   'blueNotes','listKind',
-  'freeRoot','freeSpan','freeSpanWanted','freeDirection'];
+  'freeRoot','freeSpan','freeSpanWanted','freeDirection','freeTop'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
   'passCount','passUnit','useSubdivList','subdivDir',
   'rootMove','repeat','modesTour','useList',
@@ -5651,7 +5661,7 @@ function metroTake(mode){
 const PANEL_FIELDS={
   range:{s:['span','spanWanted','rootOct','rootOctWanted','startDeg','direction',
             'arpTop','repeatTurn','bothWays']},
-  freerange:{s:['freeSpan','freeSpanWanted','freeDirection','repeatTurn']},
+  freerange:{s:['freeSpan','freeSpanWanted','freeDirection','freeTop','repeatTurn']},
   progress:{s:['seqPattern'],arr:['seqCustom'],p:['rootMove','repeat','modesTour']},
   phrasing:{s:['noteLen','alignPasses']},
   tempo:{s:['bpm','clickVol','clickSound']},
@@ -7087,6 +7097,19 @@ function buildFreeRangeRows(){
     dirRow.appendChild(b);
   });
   buildTurnRow('free-turn-line','free-turn-row',()=>state.freeDirection);
+  const topRow=document.getElementById('free-top-row');
+  if(topRow){
+    topRow.innerHTML='';
+    [[true,tr('free.top.yes','Take the octave')],[false,tr('free.top.no','Stop on the last')]]
+      .forEach(([v,label])=>{
+        const b=document.createElement('button');
+        b.className='pick-btn'+(!!state.freeTop===v?' active':'');
+        b.textContent=label;
+        b.onclick=()=>{state.freeTop=v;buildFreeRangeRows();refreshSequence();restartIfPlaying();};
+        topRow.appendChild(b);
+      });
+    gridify(topRow);
+  }
 }
 
 function renderFreeNote(n){
@@ -7652,7 +7675,7 @@ const EX_KEYS=[
   'mode','root','rootOct','rootOctWanted','scaleGroup','scaleName',
   'chordGroup','chordName','span','spanWanted','direction','startDeg',
   'seqPattern','arpTop','repeatTurn','bothWays',
-  'blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection',
+  'blueNotes','freeRoot','freeSpan','freeSpanWanted','freeDirection','freeTop',
   'timbre','droneTimbre','seqTimbre','bpm','sig','noteLen','subdiv','clickVol','clickSound',
   'alignPasses','clickFollowsFigure','countBars','countWhen','groove','kit',
   'density','balladHat','metroInDrone','accentsTouched',
@@ -7733,6 +7756,7 @@ function applyExercise(x){
   set('freeRoot',oneOf(x.freeRoot,NOTES));
   set('freeSpan',num(x.freeSpan,1,4));set('freeSpanWanted',num(x.freeSpanWanted,1,4));
   set('freeDirection',oneOf(x.freeDirection,DIRECTIONS.map(d=>d.k)));
+  state.freeTop=x.freeTop!==false;
   const timbres=TIMBRES.map(t=>t.k);
   set('timbre',oneOf(x.timbre,timbres));
   set('droneTimbre',oneOf(x.droneTimbre,timbres));

@@ -681,5 +681,8 @@
  "h.x.panelclear": "Quello in fondo a un pannello rimette a posto solo quel pannello e lascia stare il resto. Due tocchi, come tutto ciò che qui toglie qualcosa.",
  "aria.back": "Torna ai modi",
  "aria.settings": "Impostazioni",
- "aria.folder": "Esercizi salvati"
+ "aria.folder": "Esercizi salvati",
+ "free.top.yes": "Prendere l'ottava",
+ "free.top.no": "Fermarsi sull'ultima",
+ "h.r.freetop": "In Free, se la linea risuona la prima nota un'ottava sopra prima di girare — do mi sol, oppure do mi sol do. Una scala prende sempre la sua ottava; una manciata di note scelte da te non è una scala."
 }
