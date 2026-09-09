@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- The app is written in seven languages and chooses between them itself. A
+     browser offering to translate it on top of that is offering to undo the
+     work: it would render note names, key names and the words of the guide
+     through a general-purpose translator, and it asked on every launch. -->
+<meta name="google" content="notranslate">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1192,6 +1197,13 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   try{t=localStorage.getItem('scaletune-theme');}catch(e){}
   if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
+  /* And the language, before anything is painted. The pack arrives after the
+     first paint, so the page said lang="en" while it was about to be read in
+     Portuguese — which is a browser's cue to offer a translation. */
+  try{
+    var l=localStorage.getItem('scaletune-lang');
+    if(l)document.documentElement.setAttribute('lang',l);
+  }catch(e){}
 })();
 </script>
 </head>
@@ -4591,7 +4603,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09i';
+const APP_VERSION='2026-09-09j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
