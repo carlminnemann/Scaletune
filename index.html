@@ -4012,6 +4012,13 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      transport starts, dropped the moment the line first comes round. */
   const turnNote=k=>{if(state.repeatTurn)out.push(at(startIdx+k));};
   const headTurn=k=>{if(!runFresh)turnNote(k);};
+  /* Where the two directions are two passes rather than one — each item heard
+     both ways — the turn falls between them: the first half ends on the note
+     the second half begins on, and the line sounds it twice however Turning
+     note was answered. So the second half starts a degree in, unless twice is
+     what was asked for. Only on a plain line: a shape's halves already end and
+     begin a degree apart, so there is nothing there to trim. */
+  const costuraDoPar=!turns&&alternationDoubles()&&(passTick%2)===1&&!state.repeatTurn;
   /* A run that comes back where it started stops one degree short of it, so that
      looping does not sound the note twice at the seam — the next round begins on
      it. A run that is about to END has no next round, and a scale that finishes
@@ -4040,7 +4047,7 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      the way a plain scale does — a shape stops on its own second note, which is
      no more an ending for thirds than the second degree is for a scale. */
   const closeAt=k=>{if(closesOnTonic()){out.push(at(startIdx+k));seqCloses=true;}return out;};
-  if(direction==='down'&&!turns){climb(top,0,-1);return closeModes(startIdx);}
+  if(direction==='down'&&!turns){climb(costuraDoPar?top-1:top,0,-1);return closeModes(startIdx);}
   /* A pattern turns at the end because a shape has nowhere to go past it — but
      turning and coming back are two different things, and only Up-Down and
      Down-Up asked for the second. Up runs the shape up and stops where the shape
@@ -4055,7 +4062,7 @@ function walk(baseAbs,startIdx,span,appendTop,direction){
      back, so nothing is played twice at the join. */
   if(direction==='updown'){headTurn(0);climb(0,top-1,1);turnNote(top);climb(top,1,-1);return close();}
   if(direction==='downup'){headTurn(top);climb(top,1,-1);turnNote(0);climb(0,top-1,1);return close();}
-  climb(0,top,1);
+  climb(costuraDoPar?1:0,top,1);
   return closeModes(startIdx+top);
 }
 
@@ -4606,7 +4613,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09l';
+const APP_VERSION='2026-09-09m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5080,7 +5087,19 @@ function markModesHome(){
   keyHome=(state.mode==='scale'||state.mode==='arpeggio')?state.root:null;
   modesStep=0;
 }
+/* The cycle of fourths walks the tonic through twelve keys, and Start means
+   start: stopping in E flat and pressing Start again begins in C, which is the
+   rule the modes tour has always had. Stopping puts it back there and then, so
+   the panel says which key the next run will be in. */
+function restartKeyRun(){
+  if(state.practice.rootMove!=='fourths')return;
+  if(!keyHome||state.root===keyHome)return;
+  state.root=keyHome;
+  state.startDeg=0;
+  renderPitchPickers();updateInfo();refreshSequence();updateRotationPanel();
+}
 function restartModesRun(){
+  restartKeyRun();
   if(!modesRunOn())return;
   modesStep=0;passTick=0;
   if(!modesHome||modesHome.group!==state.scaleGroup)return;
