@@ -168,25 +168,27 @@ html,body{height:var(--app-h,100dvh)}
    .header .theme-btn, because the plain .theme-btn rule comes later in the file
    and would otherwise win. */
 .header{display:grid;grid-template-columns:var(--headside) minmax(0,1fr) var(--headside);
-  align-items:center;gap:6px;margin-bottom:var(--s4);flex:0 0 auto;--headside:116px}
+  align-items:center;gap:6px;margin-bottom:var(--s4);flex:0 0 auto;--headside:86px}
+/* Two a side at most now, so each can be bigger than when there were three. */
+.header .theme-btn{width:38px;height:38px;font-size:16px}
 .header h1.wordmark{min-width:0;white-space:nowrap}
 @media(max-width:400px){
-  .header{--headside:104px}
-  .header .theme-btn{width:30px;height:30px;font-size:14px}
+  .header{--headside:78px}
+  .header .theme-btn{width:34px;height:34px;font-size:15px}
   .header{--wordmark:20px}
 }
 /* Below this the three buttons have to give the name room of its own, rather
    than the name giving way to them. */
 @media(max-width:365px){
-  .header{--headside:88px;gap:4px}
+  .header{--headside:72px;gap:4px}
   .head-btns{gap:4px}
-  .header .theme-btn{width:28px;height:28px;font-size:13px}
+  .header .theme-btn{width:32px;height:32px;font-size:14px}
 }
 /* The narrowest screen anyone actually carries is the folded Galaxy Fold. */
 @media(max-width:300px){
-  .header{--headside:76px}
+  .header{--headside:60px}
   .head-btns{gap:3px}
-  .header .theme-btn{width:24px;height:24px;font-size:12px}
+  .header .theme-btn{width:27px;height:27px;font-size:12px}
 }
 /* Lowercase runs smaller so the two capitals carry the name. */
 /* Optima on Apple devices; Android has nothing like it, so it falls back
@@ -319,8 +321,12 @@ body:not(.home) #mode-row{display:none}
 /* The undo was a thin glyph in the app's quietest grey, and he could not read
    it. It is the one control in the header that undoes work, so it is written in
    the text colour at the size of a control rather than of a caption. */
-#undo-btn{font-size:19px;color:var(--text);font-weight:600}
-#folder-btn svg{width:19px;height:16px;fill:none;stroke:currentColor;
+#undo-btn{font-size:21px;color:var(--text);font-weight:600}
+/* Nothing to undo yet. Still readable — he could not see it at the general
+   .35, and a control you cannot read is not saying "nothing to do", it is
+   saying nothing at all. */
+#undo-btn.empty{opacity:.5}
+#folder-btn svg{width:21px;height:18px;fill:none;stroke:currentColor;
   stroke-width:1.5;stroke-linejoin:round;pointer-events:none}
 /* An empty drawer says so quietly, and stays open to a finger — it is exactly
    where the first exercise gets saved. It borrowed the undo's "empty" class,
@@ -1175,9 +1181,16 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 <body>
 <div class="container">
 <div class="header">
+  <!-- One on each side of the name: what undoes work on the left, where a hand
+       goes back, and the drawer on the right with the guide it is next to. -->
   <span class="head-btns">
     <button class="theme-btn" id="undo-btn" type="button" onclick="desfazer()"
             data-ta="aria.undo" aria-label="Undo the last thing you did">↺</button>
+  </span>
+  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
+  <span class="head-btns">
+    <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
+            data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
     <!-- Where the saved exercises live. A drawer is not a setting of the mode,
          so it stopped being a panel among the panels and became a place you go. -->
     <button class="theme-btn" id="folder-btn" type="button" onclick="abrePasta()"
@@ -1186,11 +1199,6 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
         <path d="M2 3.6h6.2l1.7 2.2h10.1v9.6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4.6a1 1 0 0 1 1-1z"/>
       </svg>
     </button>
-  </span>
-  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
-  <span class="head-btns">
-    <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
-            data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
   </span>
 </div>
 
@@ -4556,7 +4564,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09f';
+const APP_VERSION='2026-09-09g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5562,7 +5570,12 @@ function resetLabel(){
 function modoMexido(){
   if(!METRO_FRESH)return false;
   try{
-    if(!igual(metroSnapshot(),METRO_FRESH))return true;
+    const agora=metroSnapshot(),fresco=clonar(METRO_FRESH);
+    /* Accents nobody has tapped are not a change: Metro accents its first beat
+       by itself, and the fresh bundle was taken in a mode that does not — which
+       had Clear this mode offering itself the moment Metro was opened. */
+    if(!state.accentsTouched){delete agora.accents;delete fresco.accents;}
+    if(!igual(agora,fresco))return true;
     if(state.mode==='metro'&&METRO_FRESH_G){
       if(SO_DO_METRO.some(k=>!igual(state[k],METRO_FRESH_G[k])))return true;
       if(!igual(state.mix,METRO_FRESH_G.mix))return true;
