@@ -4613,7 +4613,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09o';
+const APP_VERSION='2026-09-09p';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7675,11 +7675,20 @@ function revealPanel(el){
       sc0.addEventListener(ev,()=>{revealFor=null;},{passive:true}));
   }
   bringRevealed();
-  requestAnimationFrame(()=>requestAnimationFrame(bringRevealed));
+  // the frame callback would be read as "put it there now"
+  requestAnimationFrame(()=>requestAnimationFrame(()=>bringRevealed()));
   setTimeout(bringRevealed,180);
   setTimeout(bringRevealed,420);
+  /* Two more, later, and the last one lands rather than glides. A phone that is
+     still carrying momentum from the flick before the tap reports where the
+     list WAS, not where it is going to stop, so the aim taken at the tap can be
+     a long way out — and the panel ends up above the screen. These check after
+     everything has stopped moving, and the last one puts it in place outright:
+     being somewhere unexpected is worse than not being animated. */
+  setTimeout(bringRevealed,700);
+  setTimeout(()=>bringRevealed(true),1050);
 }
-function bringRevealed(){
+function bringRevealed(agora){
   const el=revealFor;
   if(!el)return;
   const now=(performance&&performance.now?performance.now():Date.now());
@@ -7709,7 +7718,7 @@ function bringRevealed(){
      goes to the top and continues below, which is the only sensible answer. */
   const folga=alto-r.height;
   const desvio=folga>0?(r.top-v.top)-folga/2:(r.top-v.top)-8;
-  const smooth=!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const smooth=!agora&&(!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const top=Math.max(0,sc.scrollTop+desvio);
   /* The panels at the foot of the list could not reach the middle: there is
      nothing under them to scroll up into view, so the list stopped short and
@@ -9096,7 +9105,14 @@ function shareOutRoom(){
   cards.forEach(c=>c.style.marginBottom='');
   // Metro centres itself instead; adding margins there would push it off centre
   centreMetro();
+  /* Putting the reader back where they were is right when the layout changed
+     under them, and wrong while a panel they just opened is on its way to the
+     middle: this pinned the list at whatever the smooth scroll had reached when
+     the margins were worked out, which left the panel halfway off the top. A
+     reveal in progress owns the scroll; this stands back and lets the aim at
+     the end of spreadPanels finish the job. */
   const keepPlace=()=>{
+    if(revealFor)return;
     const most=Math.max(0,sc.scrollHeight-sc.clientHeight);
     const want=Math.min(wasAt,most);
     if(Math.abs(sc.scrollTop-want)>0.5)sc.scrollTop=want;
