@@ -4603,7 +4603,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09j';
+const APP_VERSION='2026-09-09k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5254,12 +5254,23 @@ function alternatingDir(){
    it under Up alone would be asking about a note that is never reached twice.
    The Free panel has its own direction and the same walk, so it asks too. */
 function turnsBothWays(dir){return dir==='updown'||dir==='downup';}
+/* Both of these are asked wherever a summary is refreshed, which is after
+   every change anything makes — the cycle of fourths was chosen from a panel
+   that rebuilt neither of them, so the question appeared only at the next full
+   redraw, which for him was pressing Start. Rebuilding a row of buttons on
+   every pass of a running exercise would steal a tap from under a finger, so
+   each remembers what it last drew and does nothing when the answer has not
+   changed. */
+const rowAssinatura={};
 function buildTurnRow(lineId,rowId,dirOf){
   const line=document.getElementById(lineId);
   if(!line)return;
   const show=turnsBothWays(dirOf());
   line.style.display=show?'':'none';
   if(!show)return;
+  const sig=show+'|'+!!state.repeatTurn+'|'+LANG;
+  if(rowAssinatura[rowId]===sig)return;
+  rowAssinatura[rowId]=sig;
   const row=document.getElementById(rowId);row.innerHTML='';
   [[false,tr('turn.once','Once')],[true,tr('turn.twice','Twice')]].forEach(([v,label])=>{
     const b=document.createElement('button');
@@ -5280,6 +5291,9 @@ function buildBothWaysRow(){
   const show=passesAlternate()&&!modesRunOn();
   line.style.display=show?'':'none';
   if(!show)return;
+  const sig=show+'|'+!!state.bothWays+'|'+LANG;
+  if(rowAssinatura['bothways-row']===sig)return;
+  rowAssinatura['bothways-row']=sig;
   const row=document.getElementById('bothways-row');row.innerHTML='';
   [[false,tr('updown.alternate','Alternate')],[true,tr('updown.each','Each both ways')]]
     .forEach(([v,label])=>{
@@ -8909,8 +8923,13 @@ function refreshSectionSummaries(){
     if(el)try{el.textContent='· '+s.text();}catch(e){el.textContent='';}
   });
   /* Whatever changed a summary can have changed whether a clear has anything
-     to do, so the two are answered in the same breath. */
+     to do — and whether there is now a rotation for Up-Down to alternate. All
+     of it is answered in the same breath, which is the only way these keep up
+     with every panel that can change them. */
   pintaClears();
+  buildBothWaysRow();
+  buildTurnRow('turn-line','turn-row',()=>state.direction);
+  buildTurnRow('free-turn-line','free-turn-row',()=>state.freeDirection);
 }
 
 /* How many columns a row of choices gets. Up to five items keep one row each,
